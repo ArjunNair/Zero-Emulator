@@ -1,0 +1,5 @@
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\Debug\ZiggySound.pdb
+G:\Projects\ziggy\Ziggy\ZiggySound\obj\Debug\ResolveAssemblyReference.cache
+G:\Projects\ziggy\Ziggy\ZiggySound\obj\Debug\ZiggySound.dll
+G:\Projects\ziggy\Ziggy\ZiggySound\obj\Debug\ZiggySound.pdb

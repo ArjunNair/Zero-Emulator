@@ -1,0 +1,7 @@
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\Debug\ZeroSound.Properties.Resources.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\Debug\ZeroSound.csproj.GenerateResource.Cache
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\Debug\ZeroSound.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\Debug\ZeroSound.pdb
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\bin\ZeroSound.dll.config
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\bin\ZeroSound.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\bin\ZeroSound.pdb

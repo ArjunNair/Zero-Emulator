@@ -1,0 +1,5 @@
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Peripherals\obj\Debug\Peripherals.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Peripherals\obj\Debug\Peripherals.pdb
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Peripherals\bin\Peripherals.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Peripherals\bin\Peripherals.pdb
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Peripherals\bin\zlib.net.dll

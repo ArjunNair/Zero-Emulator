@@ -1,0 +1,10 @@
+Ziggy Emulator ver 0.2.1
+---------------------------------
+Copyright © 2009-2010 Arjun Nair.
+All rights reserved.
+
+You may freely use and distribute this emulator for non-commercial use only. Period.
+
+And if you do agree to use it, you must also agree that you do so at your own risk. 
+
+Erm...that's it I suppose. Go on then.

@@ -1,0 +1,397 @@
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.config
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.manifest
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.application
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.pdb
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\af-ZA\Zero.resources.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\SlimDX.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZipForge.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\zlib.net.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZipForge.xml
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.pdb
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.pdb
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.config
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.manifest
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.application
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\af-ZA\Zero.resources.dll
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.dll
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\zlib.net.dll
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.dll
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.pdb
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.pdb
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.pdb
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+E:\Projects\Zero2\ZiggyWin\ZiggyWin\bin\x86\Release\ZipForge.xml
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.config
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.manifest
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.application
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.pdb
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\af-ZA\Zero.resources.dll
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\SlimDX.dll
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.dll
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\zlib.net.dll
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.dll
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.pdb
+F:\Projects\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.pdb
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+F:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickRemap.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.config
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.manifest
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.application
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.pdb
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\SlimDX.dll
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\zlib.net.dll
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.dll
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.pdb
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.pdb
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.dll
+C:\Users\Arjun\Documents\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickButtonMapper.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickButtonMapper.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickRemap.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.config
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.manifest
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.application
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.pdb
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\af-ZA\Zero.resources.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\SlimDX.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\zlib.net.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.pdb
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.pdb
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+C:\Documents and Settings\Administrator\Desktop\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickButtonMapper.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickRemap.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.config
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe.manifest
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.application
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.exe
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\Zero.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\SlimDX.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\zlib.net.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\ZeroSound.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\bin\x86\Release\Speccy.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickButtonMapper.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickRemap.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\Zero.exe.config
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\Zero.exe.manifest
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\Zero.application
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\Zero.exe
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\Zero.pdb
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\af-ZA\Zero.resources.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\SlimDX.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\Speccy.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\ZipForge.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\zlib.net.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\bin\ZeroSound.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\run\Zero.exe.config
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\run\Zero.exe.manifest
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\run\Zero.application
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\run\Zero.exe
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\run\Zero.pdb
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\run\af-ZA\Zero.resources.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\run\Zero.exe.config
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\run\Zero.exe.manifest
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\run\Zero.application
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\run\Zero.exe
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\run\Zero.pdb
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\run\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickButtonMapper.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickRemap.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\run\Zero.exe.config
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\run\Zero.exe.manifest
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\run\Zero.application
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\run\Zero.exe
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\run\Zero.pdb
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\run\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.SpectrumKeyboard.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.MemoryViewer.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Profiler.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Breakpoints.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Machine_State.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Registers.resources
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\GenerateResource-ResGen.read.1.tlog
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\GenerateResource-ResGen.write.1.tlog
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.CallStackViewer.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\run\Zero.exe.config
+C:\Users\Arjun\Documents\Speccy\Zero_Git\run\Zero.exe.manifest
+C:\Users\Arjun\Documents\Speccy\Zero_Git\run\Zero.application
+C:\Users\Arjun\Documents\Speccy\Zero_Git\run\Zero.exe
+C:\Users\Arjun\Documents\Speccy\Zero_Git\run\Zero.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_Git\run\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Breakpoints.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.CallStackViewer.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickButtonMapper.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickRemap.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZLibrary.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Machine_State.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PicturePreview.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Registers.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.MemoryViewer.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Profiler.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.SpectrumKeyboard.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csprojResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+C:\Users\Arjun\Documents\Speccy\ZeroForm\run\Zero.exe.config
+C:\Users\Arjun\Documents\Speccy\ZeroForm\run\Zero.exe.manifest
+C:\Users\Arjun\Documents\Speccy\ZeroForm\run\Zero.application
+C:\Users\Arjun\Documents\Speccy\ZeroForm\run\Zero.exe
+C:\Users\Arjun\Documents\Speccy\ZeroForm\run\Zero.pdb
+C:\Users\Arjun\Documents\Speccy\ZeroForm\run\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csprojResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Breakpoints.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.CallStackViewer.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.CodeProfiler.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickButtonMapper.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickRemap.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZLibrary.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Machine_State.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PicturePreview.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Registers.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.MemoryViewer.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Profiler.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.SpectrumKeyboard.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeInfo.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb

@@ -1,0 +1,12 @@
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\bin\x86\Release\ZeroFileAssociater.exe.config
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\bin\x86\Release\ZeroFileAssociater.exe
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\x86\Release\FileAssoc.Form1.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.Properties.Resources.resources
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.exe
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.csproj.GenerateResource.Cache
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\bin\x86\Release\ZeroFileAssociater.exe.config
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\bin\x86\Release\ZeroFileAssociater.exe
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\obj\x86\Release\FileAssoc.Form1.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.Properties.Resources.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.csproj.GenerateResource.Cache
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.exe

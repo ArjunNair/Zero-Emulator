@@ -1,0 +1,207 @@
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\x86\Debug\ZiggyWin.exe.config
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\x86\Debug\ZiggyWin.exe.manifest
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\x86\Debug\ZiggyWin.application
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\x86\Debug\ZiggyWin.exe
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\x86\Debug\ZiggyWin.pdb
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\x86\Debug\Speccy.dll
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\x86\Debug\ZiggySound.dll
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\x86\Debug\Speccy.pdb
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\x86\Debug\ZiggySound.pdb
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\Speccy.dll
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.dll
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\Speccy.pdb
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.pdb
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.AboutBox1.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Monitor.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Options.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.PokeMemory.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Properties.Resources.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZLibrary.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZRenderer.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.csproj.GenerateResource.Cache
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.exe.config
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.exe
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.pdb
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.exe
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.pdb
+E:\MyWorks\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.exe.config
+E:\MyWorks\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.exe
+E:\MyWorks\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.pdb
+E:\MyWorks\ZiggyWin\ZiggyWin\bin\Debug\Speccy.dll
+E:\MyWorks\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.dll
+E:\MyWorks\ZiggyWin\ZiggyWin\bin\Debug\Speccy.pdb
+E:\MyWorks\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.pdb
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.AboutBox1.resources
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.resources
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Monitor.resources
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Options.resources
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.PokeMemory.resources
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Properties.Resources.resources
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZLibrary.resources
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZRenderer.resources
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.csproj.GenerateResource.Cache
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.exe
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.pdb
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\zlib.net.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\Speccy.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\zlib.net.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\Speccy.pdb
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.pdb
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.AboutBox1.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Monitor.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Options.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.PokeMemory.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Properties.Resources.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZLibrary.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZRenderer.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.csproj.GenerateResource.Cache
+E:\MyWorks\ZiggyWin\ZiggyWin\bin\Debug\zlib.net.dll
+E:\MyWorks\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TapeDeck.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TapeDeck.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TapeDeck.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.exe.config
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.exe
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.pdb
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\Speccy.dll
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.dll
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\zlib.net.dll
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\Speccy.pdb
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.pdb
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.AboutBox1.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Monitor.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Options.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.PokeMemory.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Properties.Resources.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TapeDeck.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZLibrary.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZRenderer.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.csproj.GenerateResource.Cache
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.exe
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.pdb
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.LoadBinary.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.LoadBinary.resources
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.exe.manifest
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.application
+E:\Projects\ZiggyWin\ZiggyWin\bin\Debug\af-ZA\Ziggy.resources.dll
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ArchiveHandler.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Trainer_Wizard.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TrainerValueInput.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.af-ZA.resources
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Ziggy.resources.dll
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.TrustInfo.xml
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.exe.manifest
+E:\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.application
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ArchiveHandler.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Trainer_Wizard.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TrainerValueInput.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.af-ZA.resources
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.exe.manifest
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\Ziggy.application
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\af-ZA\Ziggy.resources.dll
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\ZipForge.dll
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\bin\Debug\ZipForge.xml
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Ziggy.resources.dll
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.TrustInfo.xml
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.exe.manifest
+G:\Projects\ziggy\ZiggyWin\ZiggyWin\obj\x86\Release\Ziggy.application
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\ZipForge.xml
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ArchiveHandler.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.LoadBinary.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Trainer_Wizard.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TrainerValueInput.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.af-ZA.resources
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\Zero.exe.config
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\Zero.exe.manifest
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\Zero.application
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\Zero.exe
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\Zero.pdb
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\bin\Debug\af-ZA\Zero.resources.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.AboutBox1.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ArchiveHandler.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.LoadBinary.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Monitor.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Options.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.PokeMemory.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Properties.Resources.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TapeDeck.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Trainer_Wizard.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TrainerValueInput.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZLibrary.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZRenderer.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.af-ZA.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.csproj.GenerateResource.Cache
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.exe.config
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.exe.manifest
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.application
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.exe
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.pdb
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\af-ZA\Zero.resources.dll
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Speccy.dll
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.dll
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\zlib.net.dll
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Speccy.pdb
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.pdb
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.exe
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Speccy.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\ZipForge.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.dll
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Infoseeker.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.CoverFlow.resources
+E:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.CoverFlowImage.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\zlib.net.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Speccy.pdb
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\ZipForge.xml
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\ZiggySound.pdb
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ResolveAssemblyReference.cache
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.AboutBox1.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ArchiveHandler.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.CoverFlow.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.CoverFlowImage.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Infoseeker.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.LoadBinary.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Monitor.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Options.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.PokeMemory.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Properties.Resources.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TapeDeck.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Trainer_Wizard.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.TrainerValueInput.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZLibrary.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.ZRenderer.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.Form1.af-ZA.resources
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\ZiggyWin.csproj.GenerateResource.Cache
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+G:\Projects\Zero\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.exe.config
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.exe.manifest
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.application
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\Zero.pdb
+G:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\af-ZA\Zero.resources.dll
+E:\Projects\Zero\ZiggyWin\ZiggyWin\bin\Debug\ZipForge.xml

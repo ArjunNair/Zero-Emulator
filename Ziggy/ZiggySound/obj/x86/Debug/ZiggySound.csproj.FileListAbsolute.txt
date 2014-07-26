@@ -1,0 +1,12 @@
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\x86\Debug\ZiggySound.dll
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\x86\Debug\ZiggySound.pdb
+G:\Projects\ziggy\Ziggy\ZiggySound\obj\x86\Debug\ResolveAssemblyReference.cache
+G:\Projects\ziggy\Ziggy\ZiggySound\obj\x86\Debug\ZiggySound.dll
+G:\Projects\ziggy\Ziggy\ZiggySound\obj\x86\Debug\ZiggySound.pdb
+E:\Projects\Ziggy\ZiggySound\bin\x86\Debug\ZiggySound.dll
+E:\Projects\Ziggy\ZiggySound\bin\x86\Debug\ZiggySound.pdb
+E:\Projects\Ziggy\ZiggySound\obj\x86\Debug\ResolveAssemblyReference.cache
+E:\Projects\Ziggy\ZiggySound\obj\x86\Debug\ZiggySound.dll
+E:\Projects\Ziggy\ZiggySound\obj\x86\Debug\ZiggySound.pdb
+E:\Projects\Ziggy\ZiggySound\bin\x86\Debug\ZiggySound.dll.config
+E:\Projects\Ziggy\ZiggySound\bin\x86\Debug\SlimDX.dll

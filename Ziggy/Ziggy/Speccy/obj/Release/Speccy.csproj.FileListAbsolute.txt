@@ -1,0 +1,14 @@
+G:\Projects\ziggy\Ziggy\Speccy\obj\Release\ResolveAssemblyReference.cache
+G:\Projects\ziggy\Ziggy\Speccy\bin\Release\Speccy.dll
+G:\Projects\ziggy\Ziggy\Speccy\bin\Release\Speccy.pdb
+G:\Projects\ziggy\Ziggy\Speccy\obj\Release\Speccy.dll
+G:\Projects\ziggy\Ziggy\Speccy\obj\Release\Speccy.pdb
+G:\Projects\ziggy\Ziggy\Speccy\bin\Debug\Speccy.dll
+G:\Projects\ziggy\Ziggy\Speccy\bin\Debug\Speccy.pdb
+G:\Projects\ziggy\Ziggy\Speccy\bin\Debug\ZiggySound.dll
+G:\Projects\ziggy\Ziggy\Speccy\bin\Debug\ZiggySound.pdb
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\Speccy\bin\Debug\Speccy.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\Speccy\bin\Debug\Speccy.pdb
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\Speccy\obj\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\Speccy\obj\Release\Speccy.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\Speccy\obj\Release\Speccy.pdb

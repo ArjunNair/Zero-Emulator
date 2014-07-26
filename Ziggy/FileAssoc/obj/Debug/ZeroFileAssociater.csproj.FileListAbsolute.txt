@@ -1,0 +1,8 @@
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\obj\Debug\FileAssoc.Form1.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\obj\Debug\ZeroFileAssociater.Properties.Resources.resources
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\obj\Debug\ZeroFileAssociater.csproj.GenerateResource.Cache
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\obj\Debug\ZeroFileAssociater.exe
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\obj\Debug\ZeroFileAssociater.pdb
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\bin\ZeroFileAssociater.exe.config
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\bin\ZeroFileAssociater.exe
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\FileAssoc\bin\ZeroFileAssociater.pdb

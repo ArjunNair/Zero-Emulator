@@ -1,0 +1,12 @@
+G:\Projects\ziggy\Ziggy\Ziggy\bin\Debug\Ziggy.exe
+G:\Projects\ziggy\Ziggy\Ziggy\bin\Debug\Ziggy.pdb
+G:\Projects\ziggy\Ziggy\Ziggy\obj\Debug\ResolveAssemblyReference.cache
+G:\Projects\ziggy\Ziggy\Ziggy\obj\Debug\Ziggy.exe
+G:\Projects\ziggy\Ziggy\Ziggy\obj\Debug\Ziggy.pdb
+G:\Projects\ziggy\Ziggy\Ziggy\bin\Debug\Speccy.dll
+G:\Projects\ziggy\Ziggy\Ziggy\bin\Debug\Speccy.pdb
+G:\Projects\ziggy\Ziggy\Ziggy\bin\Debug\ZiggySound.dll
+G:\Projects\ziggy\Ziggy\Ziggy\bin\Debug\ZiggySound.pdb
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\Ziggy\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\Ziggy\obj\Debug\Ziggy.exe
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\Ziggy\obj\Debug\Ziggy.pdb

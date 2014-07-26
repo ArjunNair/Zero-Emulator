@@ -1,0 +1,14 @@
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\obj\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\obj\Release\ZiggyWin.Form1.resources
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\obj\Release\ZiggyWin.Properties.Resources.resources
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\obj\Release\ZiggyWin.csproj.GenerateResource.Cache
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\bin\Release\ZiggyWin.exe
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\bin\Release\ZiggyWin.pdb
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\bin\Release\Speccy.dll
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\bin\Release\Speccy.pdb
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\obj\Release\ZiggyWin.exe
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\obj\Release\ZiggyWin.pdb
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\bin\Debug\ZiggyWin.exe
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\bin\Debug\ZiggyWin.pdb
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\bin\Debug\Speccy.dll
+C:\Documents and Settings\ARJUN NAIR\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggyWin\bin\Debug\Speccy.pdb

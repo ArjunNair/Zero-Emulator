@@ -1,0 +1,42 @@
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\x86\Debug\ZiggySound.dll
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\x86\Debug\ZiggySound.pdb
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\x86\Debug\irrKlang.NET2.0.dll
+E:\Projects\Ziggy\ZiggySound\obj\x86\Release\ResolveAssemblyReference.cache
+E:\Projects\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll
+E:\Projects\Ziggy\ZiggySound\bin\Debug\ZiggySound.pdb
+E:\Projects\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.dll
+E:\Projects\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.pdb
+E:\MyWorks\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll
+E:\MyWorks\Ziggy\ZiggySound\bin\Debug\ZiggySound.pdb
+E:\MyWorks\Ziggy\ZiggySound\obj\x86\Release\ResolveAssemblyReference.cache
+E:\MyWorks\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.dll
+E:\MyWorks\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.pdb
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\ZiggySound\bin\Debug\ZiggySound.pdb
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\ZiggySound\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.dll
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.pdb
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\Debug\ZiggySound.pdb
+G:\Projects\ziggy\Ziggy\ZiggySound\obj\x86\Release\ResolveAssemblyReference.cache
+G:\Projects\ziggy\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.dll
+G:\Projects\ziggy\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.pdb
+E:\Projects\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll.config
+E:\Projects\Ziggy\ZiggySound\bin\Debug\SlimDX.dll
+G:\Projects\ziggy\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll.config
+C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll.config
+E:\Projects\Zero\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll.config
+E:\Projects\Zero\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll
+E:\Projects\Zero\Ziggy\ZiggySound\bin\Debug\ZiggySound.pdb
+E:\Projects\Zero\Ziggy\ZiggySound\obj\x86\Release\ResolveAssemblyReference.cache
+E:\Projects\Zero\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.dll
+E:\Projects\Zero\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.pdb
+G:\Projects\Zero\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll.config
+G:\Projects\Zero\Ziggy\ZiggySound\bin\Debug\ZiggySound.dll
+G:\Projects\Zero\Ziggy\ZiggySound\bin\Debug\ZiggySound.pdb
+G:\Projects\Zero\Ziggy\ZiggySound\obj\x86\Release\ResolveAssemblyReference.cache
+G:\Projects\Zero\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.dll
+G:\Projects\Zero\Ziggy\ZiggySound\obj\x86\Release\ZiggySound.pdb
+G:\Projects\Zero\Ziggy\ZiggySound\bin\Debug\SlimDX.dll
+G:\Projects\Zero\Ziggy\ZiggySound\bin\Debug\SlimDX.pdb
+G:\Projects\Zero\Ziggy\ZiggySound\bin\Debug\SlimDX.xml

@@ -1,0 +1,98 @@
+G:\Projects\Zero\Ziggy\Speccy\obj\x86\Release\ResolveAssemblyReference.cache
+G:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\Speccy.dll.config
+G:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\Speccy.dll
+G:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\ZeroSound.dll
+G:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\zlib.net.dll
+G:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\SlimDX.dll
+G:\Projects\Zero\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+G:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\Speccy.pdb
+G:\Projects\Zero\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
+G:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\ZeroSound.pdb
+E:\Projects\Zero2\Ziggy\Speccy\bin\x86\Release\Speccy.dll.config
+E:\Projects\Zero2\Ziggy\Speccy\bin\x86\Release\Speccy.dll
+E:\Projects\Zero2\Ziggy\Speccy\bin\x86\Release\Speccy.pdb
+E:\Projects\Zero2\Ziggy\Speccy\bin\x86\Release\ZeroSound.dll
+E:\Projects\Zero2\Ziggy\Speccy\bin\x86\Release\zlib.net.dll
+E:\Projects\Zero2\Ziggy\Speccy\bin\x86\Release\ZeroSound.pdb
+E:\Projects\Zero2\Ziggy\Speccy\obj\x86\Release\ResolveAssemblyReference.cache
+E:\Projects\Zero2\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+E:\Projects\Zero2\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
+G:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\SlimDX.pdb
+G:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\SlimDX.xml
+F:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\Speccy.dll.config
+F:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\Speccy.dll
+F:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\Speccy.pdb
+F:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\ZeroSound.dll
+F:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\zlib.net.dll
+F:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\SlimDX.dll
+F:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\SlimDX.pdb
+F:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\SlimDX.xml
+F:\Projects\Zero\Ziggy\Speccy\bin\x86\Release\ZeroSound.pdb
+F:\Projects\Zero\Ziggy\Speccy\obj\x86\Release\ResolveAssemblyReference.cache
+F:\Projects\Zero\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+F:\Projects\Zero\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\bin\x86\Speccy.dll.config
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\bin\x86\Speccy.dll
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\bin\x86\Speccy.pdb
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\bin\x86\ZeroSound.dll
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\bin\x86\zlib.net.dll
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\bin\x86\SlimDX.dll
+C:\Users\Arjun\Documents\Zero\Ziggy\Speccy\bin\x86\ZeroSound.pdb
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\bin\x86\Speccy.dll.config
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\bin\x86\Speccy.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\bin\x86\Speccy.pdb
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\bin\x86\ZeroSound.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\bin\x86\zlib.net.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\bin\x86\ZeroSound.pdb
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
+C:\Documents and Settings\Administrator\Desktop\Zero\Ziggy\Speccy\bin\x86\SlimDX.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\bin\x86\Speccy.dll.config
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\bin\x86\Speccy.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\bin\x86\Speccy.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\bin\x86\ZeroSound.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\bin\x86\zlib.net.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\bin\x86\SlimDX.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\bin\x86\ZeroSound.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+C:\Users\Arjun\Documents\Speccy\Zero_July_7\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\Ziggy\Speccy\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\Ziggy\Speccy\bin\Speccy.dll.config
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\Ziggy\Speccy\bin\Speccy.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\Ziggy\Speccy\bin\Speccy.pdb
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\Ziggy\Speccy\bin\ZeroSound.dll
+C:\Documents and Settings\Administrator\Desktop\Speccy\Zero\zero\Ziggy\Speccy\bin\zlib.net.dll
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\Ziggy\Speccy\bin\Speccy.dll.config
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\Ziggy\Speccy\bin\Speccy.dll
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\Ziggy\Speccy\bin\Speccy.pdb
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\Ziggy\Speccy\bin\ZeroSound.dll
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\Ziggy\Speccy\bin\zlib.net.dll
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\Ziggy\Speccy\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
+C:\Users\Arjun\Documents\Speccy\zero_dec2012\Ziggy\Speccy\bin\SlimDX.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Speccy\bin\Speccy.dll.config
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Speccy\bin\Speccy.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Speccy\bin\Speccy.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Speccy\bin\Peripherals.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Speccy\bin\ZeroSound.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Speccy\bin\zlib.net.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Speccy\obj\x86\Release\Speccy.csprojResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\Speccy.dll.config
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\Speccy.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\Speccy.pdb
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\Peripherals.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\ZeroSound.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\zlib.net.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\obj\x86\Release\Speccy.csprojResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\obj\x86\Release\Speccy.dll
+C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\obj\x86\Release\Speccy.pdb

@@ -1,0 +1,525 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E2B90D77-77E9-43E4-99E8-4C89D7613837}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ZeroWin</RootNamespace>
+    <AssemblyName>Zero</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ManifestCertificateThumbprint>53667CC54C33AC4527E19EEA24F045740DB99D59</ManifestCertificateThumbprint>
+    <ManifestKeyFile>ZiggyWin_1_TemporaryKey.pfx</ManifestKeyFile>
+    <GenerateManifests>true</GenerateManifests>
+    <SignManifests>false</SignManifests>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <TargetZone>Custom</TargetZone>
+    <Win32Resource>C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\zeroIconResource.res</Win32Resource>
+    <SignAssembly>false</SignAssembly>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>14</ApplicationRevision>
+    <ApplicationVersion>0.4.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\run\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\run\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>..\..\run\</OutputPath>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <DebugSymbols>true</DebugSymbols>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="Microsoft.DirectX.Direct3D, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="Microsoft.DirectX.Direct3DX, Version=1.0.2910.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.Direct3DX.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.DirectX.DirectDraw, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="Microsoft.DirectX.DirectInput, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="Peripherals, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\run\Peripherals.dll</HintPath>
+    </Reference>
+    <Reference Include="Speccy, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\run\Speccy.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.XML" />
+    <Reference Include="ZipForge, Version=2.1.1.0, Culture=neutral, PublicKeyToken=3a6e82ca8e39718a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\run\ZipForge.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AboutBox1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutBox1.Designer.cs">
+      <DependentUpon>AboutBox1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ArchiveHandler.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ArchiveHandler.Designer.cs">
+      <DependentUpon>ArchiveHandler.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Breakpoints.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Breakpoints.Designer.cs">
+      <DependentUpon>Breakpoints.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CallStackViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CallStackViewer.Designer.cs">
+      <DependentUpon>CallStackViewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CodeProfiler.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CodeProfiler.Designer.cs">
+      <DependentUpon>CodeProfiler.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controller.cs" />
+    <Compile Include="CustomListbox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Library.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Library.Designer.cs">
+      <DependentUpon>Library.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Machine State.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Machine State.Designer.cs">
+      <DependentUpon>Machine State.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PicturePreview.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PicturePreview.Designer.cs">
+      <DependentUpon>PicturePreview.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Registers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Registers.Designer.cs">
+      <DependentUpon>Registers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MemoryViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MemoryViewer.Designer.cs">
+      <DependentUpon>MemoryViewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Profiler.Designer.cs">
+      <DependentUpon>Profiler.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\DefaultSettings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>DefaultSettings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Infoseeker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Infoseeker.Designer.cs">
+      <DependentUpon>Infoseeker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Infoviewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Infoviewer.Designer.cs">
+      <DependentUpon>Infoviewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="JoystickButtonMapper.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="JoystickButtonMapper.Designer.cs">
+      <DependentUpon>JoystickButtonMapper.cs</DependentUpon>
+    </Compile>
+    <Compile Include="JoystickRemap.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="JoystickRemap.Designer.cs">
+      <DependentUpon>JoystickRemap.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LoadBinary.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoadBinary.Designer.cs">
+      <DependentUpon>LoadBinary.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor.Designer.cs">
+      <DependentUpon>Monitor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Options.Designer.cs">
+      <DependentUpon>Options.cs</DependentUpon>
+    </Compile>
+    <Compile Include="pane.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="pane.Designer.cs">
+      <DependentUpon>pane.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PokeMemory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PokeMemory.Designer.cs">
+      <DependentUpon>PokeMemory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ScrollableLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ScrollableLabel.Designer.cs">
+      <DependentUpon>ScrollableLabel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings.cs" />
+    <Compile Include="SpectrumKeyboard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SpectrumKeyboard.Designer.cs">
+      <DependentUpon>SpectrumKeyboard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SQLHelper.cs" />
+    <Compile Include="TapeDeck.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TapeDeck.Designer.cs">
+      <DependentUpon>TapeDeck.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TapeInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TapeInfo.Designer.cs">
+      <DependentUpon>TapeInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TextOnImageControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TextOnImageControl.Designer.cs">
+      <DependentUpon>TextOnImageControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Trainer Wizard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Trainer Wizard.Designer.cs">
+      <DependentUpon>Trainer Wizard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TrainerValueInput.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TrainerValueInput.Designer.cs">
+      <DependentUpon>TrainerValueInput.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ZeroConfig.cs" />
+    <Compile Include="ZRenderer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ZRenderer.Designer.cs">
+      <DependentUpon>ZRenderer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PrecisionTimer.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AboutBox1.resx">
+      <DependentUpon>AboutBox1.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ArchiveHandler.resx">
+      <DependentUpon>ArchiveHandler.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Breakpoints.resx">
+      <DependentUpon>Breakpoints.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CallStackViewer.resx">
+      <DependentUpon>CallStackViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeProfiler.resx">
+      <DependentUpon>CodeProfiler.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form1.af-ZA.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Infoseeker.resx">
+      <DependentUpon>Infoseeker.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Infoviewer.resx">
+      <DependentUpon>Infoviewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="JoystickButtonMapper.resx">
+      <DependentUpon>JoystickButtonMapper.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="JoystickRemap.resx">
+      <DependentUpon>JoystickRemap.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Library.resx">
+      <DependentUpon>Library.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoadBinary.resx">
+      <DependentUpon>LoadBinary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Machine State.resx">
+      <DependentUpon>Machine State.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PicturePreview.resx">
+      <DependentUpon>PicturePreview.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Registers.resx">
+      <DependentUpon>Registers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MemoryViewer.resx">
+      <DependentUpon>MemoryViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor.resx">
+      <DependentUpon>Monitor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options.resx">
+      <DependentUpon>Options.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="pane.resx">
+      <DependentUpon>pane.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PokeMemory.resx">
+      <DependentUpon>PokeMemory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Profiler.resx">
+      <DependentUpon>Profiler.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SpectrumKeyboard.resx">
+      <DependentUpon>SpectrumKeyboard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TapeDeck.resx">
+      <DependentUpon>TapeDeck.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TapeInfo.resx">
+      <DependentUpon>TapeInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Trainer Wizard.resx">
+      <DependentUpon>Trainer Wizard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TrainerValueInput.resx">
+      <DependentUpon>TrainerValueInput.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ZRenderer.resx">
+      <DependentUpon>ZRenderer.cs</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="SlimDX.2.0.9.42">
+      <Visible>False</Visible>
+      <ProductName>SlimDX Runtime %28February 2010%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\app.manifest" />
+    <None Include="ZiggyWin_1_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\DefaultSettings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>DefaultSettings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Resources\Tape.png" />
+    <None Include="Resources\disk2.png" />
+    <None Include="Resources\download.png" />
+    <None Include="Resources\scanlines2.png" />
+    <None Include="Resources\zeroIndicators.png" />
+    <None Include="Resources\zeroSpeccyLogo.png" />
+    <None Include="Resources\newBaseIconGlow.png" />
+    <None Include="Resources\folder_Open_16xLG.png" />
+    <None Include="Resources\folder_Open_32xMD.png" />
+    <None Include="Resources\gear_16xLG.png" />
+    <None Include="Resources\save_16xLG.png" />
+    <None Include="Resources\StatusAnnotations_Pause_16xLG.png" />
+    <None Include="Resources\Symbols_Pause_16xLG.png" />
+    <None Include="Resources\StatusAnnotations_Play_16xLG.png" />
+    <None Include="Resources\Symbols_Play_16xLG.png" />
+    <None Include="Resources\Record_8791.png" />
+    <None Include="Resources\Binary_16xLG.png" />
+    <None Include="Resources\refresh_16xMD.png" />
+    <None Include="Resources\refresh_16xLG.png" />
+    <None Include="Resources\Symbols_Stop_16xLG.png" />
+    <None Include="Resources\library_16xLG.png" />
+    <None Include="Resources\magnifier_16xLG.png" />
+    <None Include="Resources\Symbols_Help_and_inclusive_16xLG.png" />
+    <None Include="Resources\DisassemblyWindow_6536.png" />
+    <None Include="Resources\DynamicHelp_5659.png" />
+    <None Include="Resources\F1Help_7644.png" />
+    <None Include="Resources\Symbols_Pause_32xLG.png" />
+    <None Include="Resources\Camera_16xLG.png" />
+    <None Include="Resources\MD-pause.png" />
+    <None Include="Resources\MD-next.png" />
+    <None Include="Resources\MD-play.png" />
+    <None Include="Resources\MD-previous.png" />
+    <None Include="Resources\MD-stop.png" />
+    <None Include="Resources\file-download.png" />
+    <None Include="Resources\MD-eject.png" />
+    <None Include="Resources\MD-cassette-tape.png" />
+    <None Include="Resources\MD-photo.png" />
+    <None Include="Resources\power-standby.png" />
+    <None Include="Resources\power-on-off.png" />
+    <None Include="Resources\wizard.png" />
+    <None Include="Resources\arrow-1-left.png" />
+    <None Include="Resources\arrow-1-right.png" />
+    <Content Include="Ziggy Emulator.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Service References\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

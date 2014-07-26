@@ -1,0 +1,6 @@
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Peripherals\bin\Peripherals.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Peripherals\bin\Peripherals.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Peripherals\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Peripherals\obj\Release\Peripherals.dll
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Peripherals\obj\Release\Peripherals.pdb
+C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\Peripherals\bin\zlib.net.dll
