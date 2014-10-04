@@ -4,7 +4,21 @@ What's New
 
 ver 0.6.2
 ---------------
++ Added shortcut keys for all major emulator functions
++ Added indicators to main window.
++ Added FPS and emulator state readout to status menu.
++ Added Most Recently Used (MRU/recent files) capability to main menu
++ Made the Monitor window completely resizable (polomint)
++ Made the Memory viewer resizable vertically (polomint)
++ Added shortcut keys for debugging in the Monitor (polomint)
 - Fixed sound being disabled after loading from tape (Russ Hoy)
+- Fixed Fast Loading, which was broken (didn't load some tapes) in 0.6.1
+- Fixed Pixel Smoothing option not reflecting currently in the Options window (Russ Hoy)
+- Fixed resetting to wrong machine after RZX playback (Russ Hoy)
+- Fixed a problem with Infoseek download not auto-loading selected tape. Plus some cross-thread exception. (Russ Hoy)
+- Fixed the issue with window not resizing correctly when switching between Pentagon and some other machine.
+
+Pending issue: Full screen toggle doesn't set emulator screen size correctly.
 
 
 Ver 0.6.1

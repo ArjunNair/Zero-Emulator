@@ -630,6 +630,7 @@ namespace ZeroWin
         private Vector3 videoLedPos = Vector3.Empty;
         private Vector3 playLedPos = Vector3.Empty;
         private Vector3 recordLedPos = Vector3.Empty;
+        private Vector3 spritePos = Vector3.Empty;
 
         //int screenWidth = 256 + 48 + 48;
         public int ScreenWidth {
@@ -719,13 +720,14 @@ namespace ZeroWin
         public bool InitDirectX(int width, int height, bool is16bit = false) {
             isSuspended = true;
             DestroyDX();
+
             displayRect = new Rectangle(0, 0, width, height);
             displayWidth = width;
             displayHeight = height;
             AdapterInformation adapterInfo = Manager.Adapters.Default;
 
             currentParams = new PresentParameters();
-            currentParams.BackBufferCount = 1;
+            currentParams.BackBufferCount = 2;
             currentParams.BackBufferWidth = width;
             currentParams.BackBufferHeight = height;
             currentParams.SwapEffect = SwapEffect.Discard;
@@ -746,8 +748,6 @@ namespace ZeroWin
             if (fullScreenMode) {
                 currentParams.DeviceWindow = this.Parent;
                 currentParams.BackBufferFormat = currentFormat;//(is16bit ? Format.R5G6B5 : Format.X8B8G8R8);
-                //currentParams.FullScreenRefreshRateInHz = Manager.Adapters[0].CurrentDisplayMode.RefreshRate;
-
             } else {
                 currentParams.DeviceWindow = this;
                 currentParams.BackBufferFormat = adapterInfo.CurrentDisplayMode.Format;
@@ -772,6 +772,28 @@ namespace ZeroWin
 
             float scaleX = ((float)displayWidth / (float)(ScreenWidth));
             float scaleY = ((float)displayHeight / (float)(ScreenHeight));
+
+            //Maintain 4:3 aspect ration when full screen
+            if (EnableFullScreen)
+            {
+                if (Screen.PrimaryScreen.Bounds.Height < Screen.PrimaryScreen.Bounds.Width)
+                {
+                    float aspectXScale = (Screen.PrimaryScreen.Bounds.Height * 4.0f) / (Screen.PrimaryScreen.Bounds.Width * 3.0f);
+                    scaleX = (scaleX * aspectXScale);
+                    int newWidth = (int)(displayWidth * aspectXScale);
+                    //displayRect = new Rectangle(0, 0, newWidth, displayHeight);
+                    spritePos = new Vector3(((displayWidth - newWidth)) / 4.0f, 0, 0); //TBD: Fix pos calc
+                }
+                else //Not tested!!!
+                {
+                    float aspectYScale = (Screen.PrimaryScreen.Bounds.Width * 3.0f) / (Screen.PrimaryScreen.Bounds.Height * 4.0f);
+                    scaleY = (scaleY * aspectYScale);
+                    int newHeight = (int)(displayHeight * aspectYScale);
+                    //displayRect = new Rectangle(0, 0, displayWidth, newHeight);
+                }
+            }
+            else
+                spritePos = Vector3.Empty;
 
             if (scaleX < 1.0f)
                 scaleX = 1.0f;
@@ -856,7 +878,7 @@ namespace ZeroWin
             }
             displaySurface.UnlockRectangle();
             if (fullScreenMode)
-                dxDevice.Clear(Microsoft.DirectX.Direct3D.ClearFlags.Target, Color.Blue, 1.0f, 0);
+                dxDevice.Clear(Microsoft.DirectX.Direct3D.ClearFlags.Target, Color.Black, 1.0f, 0);
 
             dxDevice.BeginScene();
 
@@ -867,10 +889,13 @@ namespace ZeroWin
                 dxDevice.SamplerState[0].MinFilter = TextureFilter.None;
                 dxDevice.SamplerState[0].MagFilter = TextureFilter.None;
             }
-
-            sprite.Draw(dxDisplay, displayRect, Vector3.Empty, Vector3.Empty, 16777215/*System.Drawing.Color.White*/);
+            dxDevice.SamplerState[0].AddressU = TextureAddress.Border;
+            dxDevice.SamplerState[0].AddressV = TextureAddress.Border;
+            sprite.Draw(dxDisplay, displayRect, Vector3.Empty, spritePos,  16777215/*System.Drawing.Color.White*/);
             sprite.End();
             interlaceSprite.Begin(SpriteFlags.AlphaBlend);
+
+            /*
             if (ziggyWin.config.ShowOnscreenIndicators) {
                 currentTime = PrecisionTimer.TimeInSeconds();
                 deltaTime = currentTime - ledBlinkTimer;
@@ -902,6 +927,7 @@ namespace ZeroWin
                     deltaTime = 0;
                 }
             }
+             * */
             if (showScanlines) {
                 dxDevice.SamplerState[0].AddressU = TextureAddress.Wrap;
                 dxDevice.SamplerState[0].AddressV = TextureAddress.Wrap;

@@ -23,7 +23,7 @@ namespace ZeroWin
         private string autoLoadFilePath = null;
 
         private delegate void UpdateLabelInfoCallback(Control lst, String _info);
-
+        private delegate void EnableDownloadButtonCallback(bool enable);
         private delegate void UpdateCheckBoxCallback(Control lst, String _info);
 
         public event FileDownloadHandler DownloadCompleteEvent;
@@ -114,6 +114,22 @@ namespace ZeroWin
             }
         }
 
+        private void EnableDownloadButton(bool enable)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.button1.InvokeRequired)
+            {
+                EnableDownloadButtonCallback d = new EnableDownloadButtonCallback(EnableDownloadButton);
+                this.Invoke(d, new object[] { enable });
+            }
+            else
+            {
+                this.button1.Enabled = enable;
+            }
+        }
+
         public Infoviewer() {
             InitializeComponent();
             // Set the default dialog font on each child control
@@ -137,6 +153,11 @@ namespace ZeroWin
             this.loadingScreen.Image = ZeroWin.Properties.Resources.NoImage;
             this.ingameScreen.Image = ZeroWin.Properties.Resources.NoImage;
             pictureBox1.Image = ZeroWin.Properties.Resources.NoImage;
+            autoLoadComboBox.Items.Clear();
+            autoLoadComboBox.Items.Add("None");
+            autoLoadComboBox.SelectedIndex = 0;
+            autoLoadComboBox.Enabled = false;
+            autoLoadFilePath = null;
             fileList.Clear();
             checkedListBox1.Items.Clear();
             filesToDownload = 0;
@@ -397,7 +418,7 @@ namespace ZeroWin
                     fileDownloadCount = 0;
                     toolStripStatusLabel1.Text = "Downloading complete.";
                     AutoLoadArgs arg = new AutoLoadArgs(autoLoadFilePath);
-                    button1.Enabled = true;
+                    EnableDownloadButton(true);
                     OnFileDownloadEvent(this, arg);
                 } else
                     toolStripStatusLabel1.Text = "Downloaded " + fileDownloadCount.ToString() + " of " + filesToDownload.ToString() + " files...";

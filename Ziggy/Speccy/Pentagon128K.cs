@@ -39,13 +39,13 @@ namespace Speccy
         //The display offset of the speccy screen wrt to emulator window in horizontal direction.
         //Useful for "centering" unorthodox screen dimensions like the Pentagon that has different left & right border width.
         public override int GetOriginOffsetX() {
-            return 0;// 32;
+            return  -32;
         }
 
         //The display offset of the speccy screen wrt to emulator window in vertical direction.
         //Useful for "centering" unorthodox screen dimensions like the Pentagon that has different top & bottom border height.
         public override int GetOriginOffsetY() {
-            return 0;// 8;
+            return  32;
         }
 
         public Pentagon128K(IntPtr handle, bool lateTimingModel)

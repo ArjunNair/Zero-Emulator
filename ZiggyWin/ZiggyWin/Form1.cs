@@ -1,4 +1,4 @@
-﻿//#define ENABLE_WM_EXCHANGE
+﻿#define ENABLE_WM_EXCHANGE
 
 using System;
 using System.Drawing;
@@ -41,6 +41,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         const int WM_USER = 0x8000;
         const int WM_KEYDOWN = 0x100;
         const int WM_KEYUP = 0x101;
+        const int WM_SYSCOMMAND = 0x0112;
+
+        IntPtr tempHandle;
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct EMU_STATE
@@ -91,14 +94,22 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         [System.Runtime.InteropServices.DllImport(@"pzxtools.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern System.IntPtr tap2pzx_buff(byte[] buff, uint buffSize, ref uint outSize);
 
+        enum EMULATOR_STATE
+        {
+            IDLE,
+            PAUSED,
+            RESET,
+            PLAYING_RZX,
+            RECORDING_RZX,
+        }
+
+        private EMULATOR_STATE state = EMULATOR_STATE.IDLE;
         private ZRenderer dxWindow;
         private Monitor debugger;
         private Options optionWindow;
         private AboutBox1 aboutWindow;
-
         private ZLibrary library;
         private TapeDeck tapeDeck;
-
         private LoadBinary loadBinaryDialog;
         private Trainer_Wizard trainerWiz;
         private Infoseeker infoseekWiz;
@@ -106,6 +117,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private PrecisionTimer timer = new PrecisionTimer();
         private ComponentAce.Compression.ZipForge.ZipForge archiver;
         private MouseController mouse = new MouseController();
+        private MRUManager mruManager;
 
         //The pentagon has a different screen size to other speccy's.
         //However, when rendering we will match the normal speccy dimensions by using the offsets below
@@ -129,6 +141,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private int joystick2MapIndex = 0;  //Maps to one of the JoysticksEmulated enum in speccy.cs
 
         public Speccy.zxmachine zx;
+        private MachineModel previousMachine = MachineModel._48k;
 
         private bool capsLockOn = false;
         private bool shiftIsPressed = false;
@@ -155,7 +168,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private int frameCount = 0;
         private double lastTime = 0;
         private double fpsFrame = 0;
+        private double averageFPS = 0;
 
+        private bool didPlayRZX = false;
         public bool invokeMonitor = false;
         public bool pauseEmulation = false;
         public bool tapeFastLoad = false;
@@ -235,7 +250,20 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 #if ENABLE_WM_EXCHANGE
         unsafe protected override void WndProc(ref Message message)
         {
-            if (message.Msg == WM_COPYDATA)
+            if (message.Msg == WM_SYSCOMMAND)
+            {
+                if (message.WParam == new IntPtr(0xF030)) // Maximize event - SC_MAXIMIZE from Winuser.h
+                {
+                    GoFullscreen(true);
+                    return;
+                }
+                else if (message.WParam == new IntPtr(0xF120))
+                {
+                    GoFullscreen(false);
+                    return;
+                }
+            }
+            else if (message.Msg == WM_COPYDATA)
             {
                 COPYDATASTRUCT data = (COPYDATASTRUCT)
                     message.GetLParam(typeof(COPYDATASTRUCT));
@@ -322,7 +350,33 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         }
 #endif
 
-        private void CloseInfoseekWiz(object sender, EventArgs e) {
+        //Delegate for MRUManager (Recent files)
+        private void MRUOpenFile_handler(object obj, EventArgs evt)
+        {
+            ToolStripItem item = (obj as ToolStripItem);
+            int index = (item.OwnerItem as ToolStripMenuItem).DropDownItems.IndexOf(item);
+            string fName = item.Text;
+            string fullFilePath = mruManager.GetFullFilePath(index);
+
+            if (!File.Exists(fullFilePath))
+            {
+                if (MessageBox.Show(string.Format("{0} doesn't exist. Remove from recent " +
+                 "files?", fName), "File not found",
+                 MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    this.mruManager.RemoveRecentFile(fullFilePath);
+                return;
+            }
+
+            zx.Pause();
+            dxWindow.Suspend();
+            LoadZXFile(fullFilePath);
+            dxWindow.Resume();
+            zx.Resume();
+            dxWindow.Focus();
+        }
+
+        private void CloseInfoseekWiz(object sender, EventArgs e)
+        {
             ((System.Timers.Timer)sender).Enabled = false;
             infoseekWiz.Hide();
             bool oldAutoLoadValue = tapeDeck.DoAutoTapeLoad;
@@ -331,27 +385,33 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             tapeDeck.DoAutoTapeLoad = oldAutoLoadValue;
         }
 
-        public void OnFileDownloadEvent(Object sender, AutoLoadArgs arg) {
-            if (!string.IsNullOrEmpty(arg.filePath)) {
-                if (MessageBox.Show("You've selected a file to auto-load on completion of download. Auto-load now?", "Auto Load", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK) {
+        public void OnFileDownloadEvent(Object sender, AutoLoadArgs arg)
+        {
+            if (!string.IsNullOrEmpty(arg.filePath))
+            {
+                if (MessageBox.Show("You've selected a file to auto-load on completion of download. Auto-load now?", "Auto Load", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
+                {
                     autoLoadFile = arg.filePath;
 
                     //  DispatcherTimer setup
 
                     System.Timers.Timer dispatcherTimer = new System.Timers.Timer();
                     dispatcherTimer.Elapsed += new System.Timers.ElapsedEventHandler(CloseInfoseekWiz);
-                    dispatcherTimer.Interval = 500;// new TimeSpan(0, 0, 1).Milliseconds;
+                    dispatcherTimer.Interval = 500;
                     dispatcherTimer.Enabled = true;
                     dispatcherTimer.SynchronizingObject = infoseekWiz;
                     dispatcherTimer.Start();
                 }
-            } else {
+            }
+            else
+            {
                 showDownloadIndicator = true;
                 downloadIndicatorTimeout = 5000;
             }
         }
 
-        public void DiskMotorEvent(Object sender, DiskEventArgs e) {
+        public void DiskMotorEvent(Object sender, DiskEventArgs e)
+        {
             int driveState = e.EventType;
             /*
             if ((driveState & 0x1) != 0)
@@ -374,14 +434,18 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             else
                 insertDiskDToolStripMenuItem.Text = "D: -- Empty --";
             */
-            if ((driveState & 0x10) == 0) {
+            if ((driveState & 0x10) == 0)
+            {
                 showDiskIndicator = false;
-            } else {
+            }
+            else
+            {
                 showDiskIndicator = true;
             }
         }
 
-        public Form1() {
+        public Form1()
+        {
             InitializeComponent();
             EjectA = new ToolStripMenuItem("Eject");
             this.EjectA.Click += new EventHandler(EjectA_Click);
@@ -401,7 +465,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             this.Load += new System.EventHandler(this.Form1_Load);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseMove);
-            
+
             SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
@@ -414,38 +478,45 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             this.Icon = ZeroWin.Properties.Resources.ZeroIcon;
         }
 
-        private void EjectD_Click(object sender, EventArgs e) {
+        private void EjectD_Click(object sender, EventArgs e)
+        {
             zx.DiskEject(3);
-            id.Text = "D: -- Empty --";
-            id.DropDownItems.Clear();
+            insertDiskDToolStripMenuItem.Text = "D: -- Empty --";
+            insertDiskDToolStripMenuItem.DropDownItems.Clear();
         }
 
-        private void EjectC_Click(object sender, EventArgs e) {
+        private void EjectC_Click(object sender, EventArgs e)
+        {
             zx.DiskEject(2);
-            ic.Text = "C: -- Empty --";
-            ic.DropDownItems.Clear();
+            insertDiskCToolStripMenuItem.Text = "C: -- Empty --";
+            insertDiskCToolStripMenuItem.DropDownItems.Clear();
         }
 
-        private void EjectB_Click(object sender, EventArgs e) {
+        private void EjectB_Click(object sender, EventArgs e)
+        {
             zx.DiskEject(1);
-            ib.Text = "B: -- Empty --";
-            ib.DropDownItems.Clear();
+            insertDiskBToolStripMenuItem.Text = "B: -- Empty --";
+            insertDiskBToolStripMenuItem.DropDownItems.Clear();
         }
 
-        private void EjectA_Click(object sender, EventArgs e) {
+        private void EjectA_Click(object sender, EventArgs e)
+        {
             zx.DiskEject(0);
-            ia.Text = "A: -- Empty --";
-            ia.DropDownItems.Clear();
+            insertDiskAToolStripMenuItem.Text = "A: -- Empty --";
+            insertDiskAToolStripMenuItem.DropDownItems.Clear();
         }
 
-        protected override void OnActivated(EventArgs e) {
+        protected override void OnActivated(EventArgs e)
+        {
             //pauseEmulation = false;
             base.OnActivated(e);
         }
 
-        protected override void OnDeactivate(EventArgs e) {
+        protected override void OnDeactivate(EventArgs e)
+        {
             if (config.PauseOnFocusLost)
-                if (!(AppHasFocus())) {
+                if (!(AppHasFocus()))
+                {
                     // pauseEmulation = true;
                 }
             base.OnDeactivate(e);
@@ -487,14 +558,17 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             public static extern short GetAsyncKeyState([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.I4)] int vkey);
         }
 
-        private bool AppStillIdle {
-            get {
+        private bool AppStillIdle
+        {
+            get
+            {
                 Native.Message msg;
                 return !Native.PeekMessage(out msg, IntPtr.Zero, 0, 0, 0);
             }
         }
 
-        public bool AppHasFocus() {
+        public bool AppHasFocus()
+        {
             if ((Native.GetForegroundWindow() == this.Handle) || (Native.GetForegroundWindow() == tapeDeck.Handle))
                 return true;
             else
@@ -504,16 +578,19 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return false;
         }
 
-        public void ForceScreenUpdate(bool doFullScreen = false) {
+        public void ForceScreenUpdate(bool doFullScreen = false)
+        {
             if (doFullScreen)
                 zx.UpdateScreenBuffer(zx.FrameLength);
             zx.needsPaint = true;
             System.Threading.Thread.Sleep(1);
         }
 
-        private int GetSpectrumModelIndex(string speccyModel) {
+        private int GetSpectrumModelIndex(string speccyModel)
+        {
             int modelIndex = 0;
-            switch (speccyModel) {
+            switch (speccyModel)
+            {
                 case ZX_SPECTRUM_48K:
                     modelIndex = 0;
                     break;
@@ -537,9 +614,12 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return modelIndex;
         }
 
-        private void HandleKey2Joy(int key, bool pressed) {
-            if (pressed) {
-                switch (key) {
+        private void HandleKey2Joy(int key, bool pressed)
+        {
+            if (pressed)
+            {
+                switch (key)
+                {
                     case ((int)keyCode.RIGHT):
                         if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.KEMPSTON)
                             zx.joystickState[config.Key2JoystickType] |= zxmachine.JOYSTICK_MOVE_RIGHT;
@@ -595,8 +675,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                             zx.keyBuffer[(int)keyCode._0] = true;
                         break;
                 }
-            } else {
-                switch (key) {
+            }
+            else
+            {
+                switch (key)
+                {
                     case ((int)keyCode.RIGHT):
                         if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.KEMPSTON)
                             zx.joystickState[config.Key2JoystickType] &= ~((int)(zxmachine.JOYSTICK_MOVE_RIGHT));
@@ -655,13 +738,18 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
-        private void HandleJoystick(JoystickController joystick, int joystickType) {
+        private void HandleJoystick(JoystickController joystick, int joystickType)
+        {
             byte[] buttons = joystick.state.GetButtons();
-            if (joystickType == (int)zxmachine.JoysticksEmulated.KEMPSTON) {
+            if (joystickType == (int)zxmachine.JoysticksEmulated.KEMPSTON)
+            {
                 byte bitf = 0;
-                if (joystick.state.X > 100) {
+                if (joystick.state.X > 100)
+                {
                     bitf |= zxmachine.JOYSTICK_MOVE_RIGHT;
-                } else if (joystick.state.X < -100) {
+                }
+                else if (joystick.state.X < -100)
+                {
                     bitf |= zxmachine.JOYSTICK_MOVE_LEFT;
                 }
 
@@ -674,21 +762,33 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     bitf |= zxmachine.JOYSTICK_BUTTON_1;
 
                 zx.joystickState[joystickType] = bitf;
-            } else if (joystickType == (int)zxmachine.JoysticksEmulated.SINCLAIR2) {
-                if (joystick.state.X > 100) {
+            }
+            else if (joystickType == (int)zxmachine.JoysticksEmulated.SINCLAIR2)
+            {
+                if (joystick.state.X > 100)
+                {
                     zx.keyBuffer[(int)keyCode._2] = true;
-                } else if (joystick.state.X < -100) {
+                }
+                else if (joystick.state.X < -100)
+                {
                     zx.keyBuffer[(int)keyCode._1] = true;
-                } else {
+                }
+                else
+                {
                     zx.keyBuffer[(int)keyCode._1] = false;
                     zx.keyBuffer[(int)keyCode._2] = false;
                 }
 
-                if (joystick.state.Y < -100) {
+                if (joystick.state.Y < -100)
+                {
                     zx.keyBuffer[(int)keyCode._4] = true;
-                } else if (joystick.state.Y > 100) {
+                }
+                else if (joystick.state.Y > 100)
+                {
                     zx.keyBuffer[(int)keyCode._3] = true;
-                } else {
+                }
+                else
+                {
                     zx.keyBuffer[(int)keyCode._3] = false;
                     zx.keyBuffer[(int)keyCode._4] = false;
                 }
@@ -697,21 +797,33 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     zx.keyBuffer[(int)keyCode._5] = true;
                 else
                     zx.keyBuffer[(int)keyCode._5] = false;
-            } else if (joystickType == (int)zxmachine.JoysticksEmulated.SINCLAIR1) {
-                if (joystick.state.X > 100) {
+            }
+            else if (joystickType == (int)zxmachine.JoysticksEmulated.SINCLAIR1)
+            {
+                if (joystick.state.X > 100)
+                {
                     zx.keyBuffer[(int)keyCode._7] = true;
-                } else if (joystick.state.X < -100) {
+                }
+                else if (joystick.state.X < -100)
+                {
                     zx.keyBuffer[(int)keyCode._6] = true;
-                } else {
+                }
+                else
+                {
                     zx.keyBuffer[(int)keyCode._6] = false;
                     zx.keyBuffer[(int)keyCode._7] = false;
                 }
 
-                if (joystick.state.Y < -100) {
+                if (joystick.state.Y < -100)
+                {
                     zx.keyBuffer[(int)keyCode._9] = true;
-                } else if (joystick.state.Y > 100) {
+                }
+                else if (joystick.state.Y > 100)
+                {
                     zx.keyBuffer[(int)keyCode._8] = true;
-                } else {
+                }
+                else
+                {
                     zx.keyBuffer[(int)keyCode._8] = false;
                     zx.keyBuffer[(int)keyCode._9] = false;
                 }
@@ -720,21 +832,33 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     zx.keyBuffer[(int)keyCode._0] = true;
                 else
                     zx.keyBuffer[(int)keyCode._0] = false;
-            } else if (joystickType == (int)zxmachine.JoysticksEmulated.CURSOR) {
-                if (joystick.state.X > 100) {
+            }
+            else if (joystickType == (int)zxmachine.JoysticksEmulated.CURSOR)
+            {
+                if (joystick.state.X > 100)
+                {
                     zx.keyBuffer[(int)keyCode._8] = true; ;
-                } else if (joystick.state.X < -100) {
+                }
+                else if (joystick.state.X < -100)
+                {
                     zx.keyBuffer[(int)keyCode._5] = true;
-                } else {
+                }
+                else
+                {
                     zx.keyBuffer[(int)keyCode._5] = false;
                     zx.keyBuffer[(int)keyCode._8] = false;
                 }
 
-                if (joystick.state.Y < -100) {
+                if (joystick.state.Y < -100)
+                {
                     zx.keyBuffer[(int)keyCode._7] = true;
-                } else if (joystick.state.Y > 100) {
+                }
+                else if (joystick.state.Y > 100)
+                {
                     zx.keyBuffer[(int)keyCode._6] = true;
-                } else {
+                }
+                else
+                {
                     zx.keyBuffer[(int)keyCode._7] = false;
                     zx.keyBuffer[(int)keyCode._6] = false;
                 }
@@ -758,29 +882,40 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }*/
         }
 
-        private void AutoTapeLoad() {
-            if (zx.model == MachineModel._plus3) {
-                if ((zx.PeekByteNoContend(SV_FLAGS) & 0x20) == 0) {
+        private void AutoTapeLoad()
+        {
+            if (zx.model == MachineModel._plus3)
+            {
+                if ((zx.PeekByteNoContend(SV_FLAGS) & 0x20) == 0)
+                {
                     zx.PokeByteNoContend(SV_LAST_K, AutoLoadTapePlus3Keys[autoTapeLoadCounter]);
                     zx.PokeByteNoContend(SV_FLAGS, zx.PeekByteNoContend(SV_FLAGS) | 0x20);
                     autoTapeLoadCounter++;
-                    if (autoTapeLoadCounter >= AutoLoadTapePlus3Keys.Length) {
+                    if (autoTapeLoadCounter >= AutoLoadTapePlus3Keys.Length)
+                    {
                         autoTapeLoadCounter = 0;
                         doAutoLoadTape = false;
                     }
                 }
-            } else if (zx.model == MachineModel._48k) {
-                if ((zx.PeekByteNoContend(SV_FLAGS) & 0x20) == 0) {
+            }
+            else if (zx.model == MachineModel._48k)
+            {
+                if ((zx.PeekByteNoContend(SV_FLAGS) & 0x20) == 0)
+                {
                     zx.PokeByteNoContend(SV_LAST_K, AutoLoadTape48Keys[autoTapeLoadCounter]);
                     zx.PokeByteNoContend(SV_FLAGS, zx.PeekByteNoContend(SV_FLAGS) | 0x20);
                     autoTapeLoadCounter++;
-                    if (autoTapeLoadCounter >= AutoLoadTape48Keys.Length) {
+                    if (autoTapeLoadCounter >= AutoLoadTape48Keys.Length)
+                    {
                         autoTapeLoadCounter = 0;
                         doAutoLoadTape = false;
                     }
                 }
-            } else {
-                if ((zx.PeekByteNoContend(SV_FLAGS) & 0x20) == 0) {
+            }
+            else
+            {
+                if ((zx.PeekByteNoContend(SV_FLAGS) & 0x20) == 0)
+                {
                     zx.PokeByteNoContend(SV_LAST_K, 13);
                     zx.PokeByteNoContend(SV_FLAGS, zx.PeekByteNoContend(SV_FLAGS) | 0x20);
                     doAutoLoadTape = false;
@@ -788,32 +923,45 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
-        public void AddKeywordToEditorBuffer(byte token) {
+        public void AddKeywordToEditorBuffer(byte token)
+        {
             zx.PokeByteNoContend(SV_LAST_K, token);
             zx.PokeByteNoContend(SV_FLAGS, zx.PeekByteNoContend(SV_FLAGS) | 0x20);
         }
 
-        public void OnApplicationIdle(object sender, EventArgs e) {
-            while (AppStillIdle && !pauseEmulation) {
+        public void OnApplicationIdle(object sender, EventArgs e)
+        {
+            while (AppStillIdle && !pauseEmulation)
+            {
                 TimeSpan elapsed = DateTime.Now - LastMouseMove;
-                if (config.FullScreen) {
-                    if (!CursorIsHidden && (elapsed.TotalSeconds >= TimeoutToHide.TotalSeconds)) {
+                if (config.FullScreen)
+                {
+                    if (!CursorIsHidden && (elapsed.TotalSeconds >= TimeoutToHide.TotalSeconds))
+                    {
                         Cursor.Hide();
                         CursorIsHidden = true;
                     }
                 }
 
                 lastTime = PrecisionTimer.TimeInMilliseconds();
+
                 if (zx.doRun)
                     zx.Run();
+
                 //Start the auto load process only if we aren't in the middle of a reset
-                if (doAutoLoadTape && zx.isResetOver) {
-                    AutoTapeLoad();
+                if (zx.isResetOver)
+                {
+                    state = EMULATOR_STATE.IDLE;
+
+                    if (doAutoLoadTape)
+                        AutoTapeLoad();
                 }
+
                 fpsFrame = PrecisionTimer.TimeInMilliseconds() - lastTime;// timer.DurationInMilliseconds;
                 frameCount++;
 
-                if (zx.HasKempstonMouse) {
+                if (zx.HasKempstonMouse)
+                {
                     mouse.UpdateMouse();
                     zx.MouseX += (byte)(mouse.MouseX / config.MouseSensitivity);
                     zx.MouseY -= (byte)(mouse.MouseY / config.MouseSensitivity);
@@ -824,57 +972,99 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         zx.MouseButton = (byte)(zx.MouseButton & (~0x1));
                 }
 
-                if (joystick1Index >= 0) {
+                if (joystick1Index >= 0)
+                {
                     joystick1.Update();
                     HandleJoystick(joystick1, joystick1MapIndex);
                 }
 
-                if (joystick2Index >= 0) {
+                if (joystick2Index >= 0)
+                {
                     joystick2.Update();
                     HandleJoystick(joystick2, joystick2MapIndex);
                 }
 
                 if (!config.EnableSound) //we'll try and synch to ~60Hz framerate (50Hz makes it run slightly slower than audio synch)
                 {
-                    if ((fpsFrame) < 19 && !((zx.tapeIsPlaying && tapeFastLoad))) {
+                    if ((fpsFrame) < 19 && !((zx.tapeIsPlaying && tapeFastLoad)))
+                    {
                         double sleepTime = ((19 - fpsFrame));
                         System.Threading.Thread.Sleep((int)sleepTime);
                     }
                 }
 
-                if (showDownloadIndicator) {
+                if (showDownloadIndicator)
+                {
                     downloadIndicatorTimeout--;
-                    if (downloadIndicatorTimeout <= 0) {
+
+                    if (downloadIndicatorTimeout <= 0)
+                    {
+                        fileDownloadStatusLabel.Enabled = false;
                         showDownloadIndicator = false;
                     }
+                    else
+                        fileDownloadStatusLabel.Enabled = true;
                 }
 
-#if ENABLE_WM_EXCHANGE
-                if (doSingleStep)
+                tapeStatusLabel.Enabled = showTapeIndicator;
+                diskStatusLable.Enabled = showDiskIndicator;
+                rzxPlaybackStatusLabel.Enabled = zx.isPlayingRZX;
+                rzxRecordStatusLabel.Enabled = zx.isRecordingRZX;
+
+                if (config.EnableSound)
+                    soundStatusLabel.Image = Properties.Resources.sound_high;
+                else
+                    soundStatusLabel.Image = Properties.Resources.sound_mute;
+
+                averageFPS += fpsFrame;
+
+                switch (state)
                 {
+                    case EMULATOR_STATE.IDLE:
+                        if (frameCount > 49)
+                        {
+                            averageFPS /= frameCount;
+                            int fps = (int)(1000 / averageFPS);
+                            statusLabelText.Text = "FPS: " + Math.Max(0, fps);
+                            frameCount = 0;
+                            averageFPS = 0;
+                        }
+                        break;
+                    case EMULATOR_STATE.PLAYING_RZX:
+                        statusLabelText.Text = "RZX Played: " + (zx.rzxFrameCount * 100 / zx.rzx.frames.Count) + "%";
+                        break;
+                    case EMULATOR_STATE.RECORDING_RZX:
+                        statusLabelText.Text = "Recording RZX ...";
+                        break;
                 }
-#endif
+               
+               
                 System.Threading.Thread.Sleep(1);
-                dxWindow.Invalidate();
+                //dxWindow.Invalidate();
             }
         }
 
-        public string GetConfigData(StreamReader sr, string section, string data) {
+        public string GetConfigData(StreamReader sr, string section, string data)
+        {
             String readStr = "dummy";
 
-            while (readStr != section) {
-                if (sr.EndOfStream == true) {
+            while (readStr != section)
+            {
+                if (sr.EndOfStream == true)
+                {
                     System.Windows.Forms.MessageBox.Show("Invalid config file!", "Config file error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
                     return "error";
                 }
                 readStr = sr.ReadLine();
             }
 
-            while (true) {
+            while (true)
+            {
                 readStr = sr.ReadLine();
                 if (readStr.IndexOf(data) >= 0)
                     break;
-                if (sr.EndOfStream == true) {
+                if (sr.EndOfStream == true)
+                {
                     System.Windows.Forms.MessageBox.Show("Invalid config file!", "Config file error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
                     return "error";
                 }
@@ -886,28 +1076,34 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return dataString;
         }
 
-        private bool LoadROM(String romName) {
+        private bool LoadROM(String romName)
+        {
             romName = "\\" + romName;
 
             //First try to load from the path saved in the config file
             romLoaded = zx.LoadROM(config.PathRoms, romName);
 
             //Next try the application startup path (useful if running off USB)
-            if (!romLoaded) {
+            if (!romLoaded)
+            {
                 romLoaded = zx.LoadROM(Application.StartupPath + "\\roms\\", romName);
 
                 //Aha! This worked so update the path in config file
                 if (romLoaded)
                     config.PathRoms = Application.StartupPath + "\\roms\\";
             }
-            while (!romLoaded) {
+            while (!romLoaded)
+            {
                 System.Windows.Forms.MessageBox.Show("Zero couldn't find a valid ROM file.\nSelect a folder to look for ROMs.",
                             "ROM file missing!", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
 
-                if (folderBrowserDialog1.ShowDialog() == DialogResult.OK) {
+                if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+                {
                     config.PathRoms = folderBrowserDialog1.SelectedPath;
                     romLoaded = zx.LoadROM(config.PathRoms, romName);
-                } else {
+                }
+                else
+                {
                     System.Windows.Forms.MessageBox.Show("Unfortunately, Zero cannot work without a valid ROM file.\nIt will now exit.",
                             "Unable to continue!", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
                     break;
@@ -917,7 +1113,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return romLoaded;
         }
 
-        protected override void OnKeyDown(KeyEventArgs keyEvent) {
+        protected override void OnKeyDown(KeyEventArgs keyEvent)
+        {
             shiftIsPressed = (((Native.GetAsyncKeyState(VK_LSHIFT) & 0x8000) | (Native.GetAsyncKeyState(VK_RSHIFT) & 0x8000)) != 0); //|| ((Native.GetAsyncKeyState(VK_RSHIFT) & 0x8000) != 0);// (keyEvent.KeyCode & Keys.Shift) != 0;
             ctrlIsPressed = (((keyEvent.Modifiers & Keys.Control) != 0)); //((Native.GetAsyncKeyState(VK_RSHIFT) & 0x8000) != 0) ||
             altIsPressed = (keyEvent.Modifiers & Keys.Alt) != 0;
@@ -930,7 +1127,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             zx.keyBuffer[(int)keyCode.CTRL] = ctrlIsPressed;
             zx.keyBuffer[(int)keyCode.ALT] = altIsPressed;
 
-            switch (keyEvent.KeyCode) {
+            switch (keyEvent.KeyCode)
+            {
                 case Keys.A:
                     zx.keyBuffer[(int)keyCode.A] = true;
                     break;
@@ -988,9 +1186,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     break;
 
                 case Keys.O:
-                    if (altIsPressed) {
+                    if (altIsPressed)
+                    {
                         fileButton_Click(this, null);
-                    } else
+                    }
+                    else
                         zx.keyBuffer[(int)keyCode.O] = true;
                     break;
 
@@ -1007,24 +1207,30 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     break;
 
                 case Keys.S:
-                    if (altIsPressed) {
+                    if (altIsPressed)
+                    {
                         saveSnapshotMenuItem_Click(this, null);
-                    } else
+                    }
+                    else
                         zx.keyBuffer[(int)keyCode.S] = true;
                     break;
 
                 case Keys.T:
-                    if (altIsPressed) {
-                        if (tapeDeck.TapeIsInserted) {
+                    if (altIsPressed)
+                    {
+                        if (tapeDeck.TapeIsInserted)
+                        {
                             saveFileDialog1.Title = "Save Tape";
                             saveFileDialog1.FileName = "";
                             saveFileDialog1.Filter = "PZX Tape|*.pzx";
 
-                            if (saveFileDialog1.ShowDialog() == DialogResult.OK) {
+                            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                            {
                                 tapeDeck.SavePZX(saveFileDialog1.FileName);
                             }
                         }
-                    } else
+                    }
+                    else
                         zx.keyBuffer[(int)keyCode.T] = true;
                     break;
 
@@ -1149,20 +1355,26 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 #region Convenience Key Press Emulation
 
                 case Keys.OemPeriod:
-                    if (ctrlIsPressed) {
+                    if (ctrlIsPressed)
+                    {
                         zx.keyBuffer[(int)keyCode.T] = true;
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
-                    } else {
+                    }
+                    else
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.keyBuffer[(int)keyCode.M] = true;
                     }
                     break;
 
                 case Keys.Oemcomma:
-                    if (ctrlIsPressed) {
+                    if (ctrlIsPressed)
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.keyBuffer[(int)keyCode.R] = true;
-                    } else {
+                    }
+                    else
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.keyBuffer[(int)keyCode.N] = true;
                     }
@@ -1174,7 +1386,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.keyBuffer[(int)keyCode.Z] = true;
                         zx.keyBuffer[(int)keyCode.SHIFT] = false; //confuses speccy otherwise!
-                    } else {
+                    }
+                    else
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.keyBuffer[(int)keyCode.O] = true;
                     }
@@ -1186,7 +1400,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.keyBuffer[(int)keyCode.P] = true;
                         zx.keyBuffer[(int)keyCode.SHIFT] = false; //confuses speccy otherwise!
-                    } else {
+                    }
+                    else
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.keyBuffer[(int)keyCode._7] = true;
                         zx.keyBuffer[(int)keyCode.SHIFT] = false; //confuses speccy otherwise!
@@ -1194,12 +1410,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     break;
 
                 case Keys.Oem4: //brace open
-                    if (ctrlIsPressed) {
+                    if (ctrlIsPressed)
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.PokeByteNoContend(23617, 1);
                         zx.keyBuffer[(int)keyCode.F] = true;
                         zx.keyBuffer[(int)keyCode.Y] = false;
-                    } else {
+                    }
+                    else
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.PokeByteNoContend(23617, 1);
                         zx.keyBuffer[(int)keyCode.Y] = true;
@@ -1208,12 +1427,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     break;
 
                 case Keys.Oem6: //brace close
-                    if (ctrlIsPressed) {
+                    if (ctrlIsPressed)
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.PokeByteNoContend(23617, 1);
                         zx.keyBuffer[(int)keyCode.G] = true;
                         zx.keyBuffer[(int)keyCode.U] = false;
-                    } else {
+                    }
+                    else
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.PokeByteNoContend(23617, 1);
                         zx.keyBuffer[(int)keyCode.U] = true;
@@ -1224,11 +1446,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 case Keys.OemMinus:
                     if (altIsPressed)
                         toolStripMenuItem1_Click(this, null);
-                    else {
-                        if (ctrlIsPressed) {
+                    else
+                    {
+                        if (ctrlIsPressed)
+                        {
                             zx.keyBuffer[(int)keyCode.CTRL] = true;
                             zx.keyBuffer[(int)keyCode._0] = true;
-                        } else {
+                        }
+                        else
+                        {
                             zx.keyBuffer[(int)keyCode.CTRL] = true;
                             zx.keyBuffer[(int)keyCode.J] = true;
                         }
@@ -1238,11 +1464,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 case Keys.Oemplus:
                     if (altIsPressed)
                         toolStripMenuItem5_Click_1(this, null);
-                    else {
-                        if (ctrlIsPressed) {
+                    else
+                    {
+                        if (ctrlIsPressed)
+                        {
                             zx.keyBuffer[(int)keyCode.CTRL] = true;
                             zx.keyBuffer[(int)keyCode.K] = true;
-                        } else {
+                        }
+                        else
+                        {
                             zx.keyBuffer[(int)keyCode.CTRL] = true;
                             zx.keyBuffer[(int)keyCode.L] = true;
                         }
@@ -1250,12 +1480,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     break;
 
                 case Keys.OemPipe:
-                    if (ctrlIsPressed) {
+                    if (ctrlIsPressed)
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.PokeByteNoContend(23617, 1);
                         zx.keyBuffer[(int)keyCode.S] = true;
                         zx.keyBuffer[(int)keyCode.D] = false;
-                    } else {
+                    }
+                    else
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                         zx.PokeByteNoContend(23617, 1);
                         zx.keyBuffer[(int)keyCode.D] = true;
@@ -1271,20 +1504,25 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                 #endregion Convenience Key Press Emulation
 
-                case Keys.F5:
-                    if (!altIsPressed) {
+               /* case Keys.F5:
+                    if (altIsPressed && shiftIsPressed)
                         screenshotMenuItem1_Click(this, null);
-                    }
-                    break;
 
+                    break;
+                */
                 case Keys.F6:
-                    if (altIsPressed) {
-                        if (zx.HasKempstonMouse) {
+                    if (altIsPressed)
+                    {
+                        if (zx.HasKempstonMouse)
+                        {
                             mouse.ReleaseMouse();
                             zx.HasKempstonMouse = false;
                         }
-                    } else {
-                        if (!zx.HasKempstonMouse) {
+                    }
+                    else
+                    {
+                        if (!zx.HasKempstonMouse)
+                        {
                             mouse.AcquireMouse(this);
                             zx.HasKempstonMouse = true;
                         }
@@ -1292,20 +1530,26 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     break;
 
                 case Keys.F7:
-                    if (zx.isRecordingRZX) {
-                        if (altIsPressed) {
+                    /*
+                    if (zx.isRecordingRZX)
+                    {
+                        if (altIsPressed)
+                        {
                             rollbackToolStripMenuItem_Click(this, null);
-                        } else {
+                        }
+                        else
+                        {
                             insertBookmarkToolStripMenuItem_Click(this, null);
                         }
                     }
                     break;
-
-                case Keys.Escape:
+                    */
+              /*  case Keys.Escape:
                     pauseEmulationESCToolStripMenuItem_Click(this, null);
                     break;
-
-                case Keys.ControlKey: {
+                    */
+                case Keys.ControlKey:
+                    {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
                     }
                     break;
@@ -1318,7 +1562,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                             zx.keyBuffer[(int)keyCode.CTRL] = true;
                             zx.keyBuffer[(int)keyCode.C] = true;
                             zx.keyBuffer[(int)keyCode.SHIFT] = false; //confuses speccy otherwise!
-                        } else {
+                        }
+                        else
+                        {
                             zx.keyBuffer[(int)keyCode.CTRL] = true;
                             zx.keyBuffer[(int)keyCode.V] = true;
                         }
@@ -1327,11 +1573,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
-        protected override void OnKeyUp(KeyEventArgs keyEvent) {
+        protected override void OnKeyUp(KeyEventArgs keyEvent)
+        {
             // if (ctrlIsPressed)
             //     zx.PokeByteNoContend(23617, 0);
 
-            switch (keyEvent.KeyCode) {
+            switch (keyEvent.KeyCode)
+            {
                 case Keys.A:
                     zx.keyBuffer[(int)keyCode.A] = false;
                     break;
@@ -1636,17 +1884,21 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             zx.keyBuffer[(int)keyCode.ALT] = altIsPressed;
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) {
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
             //base.OnPaintBackground(e);
         }
 
-        protected override void OnPaint(PaintEventArgs e) {
+        protected override void OnPaint(PaintEventArgs e)
+        {
             //dxWindow.Invalidate();
         }
 
-        private void ChangeZXPalette(string newPalette) {
+        private void ChangeZXPalette(string newPalette)
+        {
             config.PaletteMode = newPalette;
-            switch (config.PaletteMode) {
+            switch (config.PaletteMode)
+            {
                 case "Grayscale":
                     zx.ULAPlusEnabled = false;
                     zx.SetPalette(GrayPalette);
@@ -1673,9 +1925,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
-        protected override void OnFormClosing(FormClosingEventArgs e) {
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
             //Show the confirmation box only if it's not an invalid ROM exit event
-            if (config.ConfirmOnExit && romLoaded) {
+            if (config.ConfirmOnExit && romLoaded)
+            {
                 if (System.Windows.Forms.MessageBox.Show("Are you sure you want to exit?",
                            "Confirm Exit", System.Windows.Forms.MessageBoxButtons.YesNo,
                            System.Windows.Forms.MessageBoxIcon.Question) == DialogResult.No)
@@ -1685,17 +1939,20 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             base.OnFormClosing(e);
         }
 
-        protected override void OnClosed(EventArgs e) {
+        protected override void OnClosed(EventArgs e)
+        {
             if (config != null && config.RestoreLastStateOnStart)
                 zx.SaveSZX(Application.LocalUserAppDataPath + "//" + ZeroSessionSnapshotName);
 
             for (int f = 0; f < 4; f++)
-                if (diskArchivePath[f] != null) {
+                if (diskArchivePath[f] != null)
+                {
                     zx.DiskEject((byte)f);
                     File.Delete(diskArchivePath[f]);
                 }
 
-            if ((config != null) && (tapeDeck != null)) {
+            if ((config != null) && (tapeDeck != null))
+            {
                 config.TapeAutoStart = tapeDeck.DoTapeAutoStart;
                 config.TapeAutoLoad = tapeDeck.DoAutoTapeLoad;
                 config.TapeEdgeLoad = tapeDeck.DoTapeEdgeLoad;
@@ -1720,8 +1977,20 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             base.OnClosed(e);
         }
 
-        private void Form1_Load(object sender, System.EventArgs e) {
+        private void Form1_Load(object sender, System.EventArgs e)
+        {
             this.BringToFront();
+
+            //Setup MRU (Recent files)
+            this.mruManager = new MRUManager(
+                //the menu item that will contain the recent files
+                                this.recentFilesToolStripMenuItem,
+                //the name of your program
+                                "Zero",
+                //the funtion that will be called when a recent file gets clicked.
+                                this.MRUOpenFile_handler,
+                //an optional function to call when the user clears the list of recent items
+                                null);
 
             //Load configuration
             config.ApplicationPath = Application.StartupPath;
@@ -1731,46 +2000,51 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             recentFolder = config.PathGames;
 
             string[] commandLineArgs = Environment.GetCommandLineArgs();
-            if (commandLineArgs.Length > 1) {
+            if (commandLineArgs.Length > 1)
+            {
                 commandLineLaunch = true;
-                for (int f = 2; f < commandLineArgs.Length; f++) {
+                for (int f = 2; f < commandLineArgs.Length; f++)
+                {
                     string command = commandLineArgs[f];
-                    if (command.Contains("-fullscreen:")) 
+                    if (command.Contains("-fullscreen:"))
                         config.FullScreen = (command.Substring(12) == "on");
-                
-                    if (command.Contains("-model:")) {
+
+                    if (command.Contains("-model:"))
+                    {
                         string s = command.Substring(7);
                         if (s == "48k")
                             config.CurrentSpectrumModel = ZX_SPECTRUM_48K;
                         else
-                        if (s == "128k")
-                            config.CurrentSpectrumModel = ZX_SPECTRUM_128K;
-                        else
-                        if (s == "128ke")
-                            config.CurrentSpectrumModel = ZX_SPECTRUM_128KE;
-                        else
-                        if (s == "plus3")
-                            config.CurrentSpectrumModel = ZX_SPECTRUM_PLUS3;
-                        else
-                        if (s == "pentagon128k")
-                            config.CurrentSpectrumModel = ZX_SPECTRUM_128K;
+                            if (s == "128k")
+                                config.CurrentSpectrumModel = ZX_SPECTRUM_128K;
+                            else
+                                if (s == "128ke")
+                                    config.CurrentSpectrumModel = ZX_SPECTRUM_128KE;
+                                else
+                                    if (s == "plus3")
+                                        config.CurrentSpectrumModel = ZX_SPECTRUM_PLUS3;
+                                    else
+                                        if (s == "pentagon128k")
+                                            config.CurrentSpectrumModel = ZX_SPECTRUM_128K;
                     }
-                    if (command.Contains("-speed:")) {
+                    if (command.Contains("-speed:"))
+                    {
                         string s = command.Substring(7);
                         config.EmulationSpeed = Convert.ToInt32(s);
                         if (config.EmulationSpeed > 100)
                             config.EmulationSpeed = 99;
                     }
                     if (command.Contains("-renderer:"))
-                       config.UseDirectX = !(command.Substring(10) == "gdi");
-                   
+                        config.UseDirectX = !(command.Substring(10) == "gdi");
+
                     if (command.Contains("-smoothing:"))
-                         config.EnablePixelSmoothing = (command.Substring(11) == "on");
+                        config.EnablePixelSmoothing = (command.Substring(11) == "on");
 
                     if (command.Contains("-vsync:"))
                         config.EnableVSync = (command.Substring(7) == "on");
 
-                    if (command.Contains("-palette:")) {
+                    if (command.Contains("-palette:"))
+                    {
                         string s = command.Substring(9);
                         if (s == "ula+" || s == "ulaplus")
                             config.PaletteMode = "ULA Plus";
@@ -1781,20 +2055,22 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     }
                     if (command.Contains("-scanlines:"))
                         config.EnableInterlacedOverlay = (command.Substring(11) == "on");
-                          
+
                     if (command.Contains("-timing:"))
                         config.UseLateTimings = (command.Substring(8) == "late");
-                         
+
                     if (command.Contains("-visuals:"))
                         config.ShowOnscreenIndicators = (command.Substring(9) == "on");
 
-                    if (command.Contains("-windowsize:")) {
+                    if (command.Contains("-windowsize:"))
+                    {
                         string s = command.Substring(12);
                         int size = Convert.ToInt32(s);
                         if (size >= 100 && (size % 50 == 0))
                             config.WindowSize = size - 100;
                     }
-                    if (command.Contains("-bordersize:")) {
+                    if (command.Contains("-bordersize:"))
+                    {
                         string s = command.Substring(12);
                         if (s == "mini")
                             config.BorderSize = 48;
@@ -1807,14 +2083,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
 
             //Load the ROM
-            switch (config.CurrentSpectrumModel) {
+            switch (config.CurrentSpectrumModel)
+            {
                 case ZX_SPECTRUM_48K:
                     config.Model = MachineModel._48k;
                     zx = new zx48(this.Handle, config.UseLateTimings);
                     zx.Issue2Keyboard = config.UseIssue2Keyboard;
                     // zx.Reset();
-                    zx48ktoolStripMenuItem1.Checked = true;
-                    diskMenuItem3.Enabled = false;
+                    zxSpectrum48kToolStripMenuItem.Checked = true;
+                    disksMenuItem.Enabled = false;
                     romLoaded = LoadROM(config.Current48kROM);
                     break;
 
@@ -1823,8 +2100,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     zx = new zx128e(this.Handle, config.UseLateTimings);
                     zx.Issue2Keyboard = config.UseIssue2Keyboard;
                     //zx.Reset();
-                    zXSpectrumToolStripMenuItem.Checked = true;
-                    diskMenuItem3.Enabled = false;
+                    zxSpectrum128keToolStripMenuItem1.Checked = true;
+                    disksMenuItem.Enabled = false;
                     romLoaded = LoadROM(config.current128keRom);
                     break;
 
@@ -1832,8 +2109,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     config.Model = MachineModel._128k;
                     zx = new zx128(this.Handle, config.UseLateTimings);
                     //zx.Reset();
-                    zXSpectrum128KToolStripMenuItem.Checked = true;
-                    diskMenuItem3.Enabled = false;
+                    zxSpectrum128kToolStripMenuItem1.Checked = true;
+                    disksMenuItem.Enabled = false;
                     romLoaded = LoadROM(config.current128kRom);
                     break;
 
@@ -1841,27 +2118,28 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     config.Model = MachineModel._pentagon;
                     zx = new Pentagon128K(this.Handle, config.UseLateTimings);
                     //zx.Reset();
-                    pentagon128KToolStripMenuItem.Checked = true;
+                    pentagon128kToolStripMenuItem1.Checked = true;
                     romLoaded = LoadROM(config.currentPentagonRom);
-                    diskMenuItem3.Enabled = true;
-                    ic.Enabled = true;
-                    id.Enabled = true;
+                    disksMenuItem.Enabled = true;
+                    insertDiskCToolStripMenuItem.Enabled = true;
+                    insertDiskDToolStripMenuItem.Enabled = true;
                     break;
 
                 case ZX_SPECTRUM_PLUS3:
                     config.Model = MachineModel._plus3;
                     zx = new zxPlus3(this.Handle, config.UseLateTimings);
                     // zx.Reset();
-                    zxSpectrum3ToolStripMenuItem.Checked = true;
+                    zxSpectrum3ToolStripMenuItem1.Checked = true;
                     romLoaded = LoadROM(config.currentPlus3Rom);
-                    diskMenuItem3.Enabled = true;
-                    ic.Enabled = false;
-                    id.Enabled = false;
+                    disksMenuItem.Enabled = true;
+                    insertDiskCToolStripMenuItem.Enabled = false;
+                    insertDiskDToolStripMenuItem.Enabled = false;
                     break;
             }
 
             tapeDeck = new TapeDeck(this);
-            if (!romLoaded) {
+            if (!romLoaded)
+            {
                 this.Close();
                 return;
             }
@@ -1869,7 +2147,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             zx.SetEmulationSpeed(config.EmulationSpeed);
             zx.EnableAY(config.EnableAYFor48K);
             zx.SetStereoSound(config.StereoSoundOption);
-            
+
 
             tapeDeck.DoTapeAutoStart = config.TapeAutoStart;
             tapeDeck.DoAutoTapeLoad = config.TapeAutoLoad;
@@ -1877,14 +2155,17 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             tapeDeck.DoTapeAccelerateLoad = config.TapeAccelerateLoad;
 
             zx.DiskEvent += new DiskEventHandler(DiskMotorEvent);
-            try {
+            try
+            {
                 dxWindow = new ZRenderer(this, panel1.Width, panel1.Height);
-            } catch (System.TypeInitializationException dxex) {
+            }
+            catch (System.TypeInitializationException dxex)
+            {
                 MessageBox.Show(dxex.InnerException.Message, "Wrong DirectX version.", MessageBoxButtons.OK);
                 return;
             }
 
-            dxWindow.ContextMenuStrip = contextMenuStrip1;
+           // dxWindow.ContextMenuStrip = contextMenuStrip1;
             if (config.UseDirectX)
                 directXToolStripMenuItem_Click(this, null);
             else
@@ -1893,7 +2174,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             //dxWindow.Location = new Point(panel4.Width, panel2.Height);
             //dxWindow.SetSize(panel1.Width, panel1.Height);
             dxWindow.MouseMove += new MouseEventHandler(Form1_MouseMove);
-            dxWindow.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel3_MouseMove);
             this.Controls.Add(dxWindow);
             panel1.Enabled = false;
             panel1.Hide();
@@ -1904,12 +2184,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.PixelSmoothing = config.EnablePixelSmoothing;
             pixelToolStripMenuItem.Checked = config.EnablePixelSmoothing;
             dxWindow.EnableVsync = config.EnableVSync;
-            AdjustWindowSize();            
+            AdjustWindowSize();
 
             if (config.FullScreen)
                 GoFullscreen(true);
 
-            switch (config.PaletteMode) {
+            switch (config.PaletteMode)
+            {
                 case "Grayscale":
                     grayscaleToolStripMenuItem_Click_1(this, null);
                     break;
@@ -1924,54 +2205,68 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
             JoystickController.EnumerateJosticks();
             string[] joysticks = JoystickController.GetDeviceNames();
-           
-            for (int f = 0; f < joysticks.Length; f++){
-                if (string.IsNullOrEmpty(Properties.Settings.Default.joystick1) && Properties.Settings.Default.joystick1 == joysticks[f]) {
+
+            for (int f = 0; f < joysticks.Length; f++)
+            {
+                if (string.IsNullOrEmpty(Properties.Settings.Default.joystick1) && Properties.Settings.Default.joystick1 == joysticks[f])
+                {
                     joystick1.InitJoystick(this, f);
                     joystick1Index = f;
                 }
 
-                if (string.IsNullOrEmpty(Properties.Settings.Default.joystick2) && Properties.Settings.Default.joystick2 == joysticks[f]) {
+                if (string.IsNullOrEmpty(Properties.Settings.Default.joystick2) && Properties.Settings.Default.joystick2 == joysticks[f])
+                {
                     joystick2.InitJoystick(this, f);
                     joystick2Index = f;
                 }
             }
 
             //Any command line parameter will override the restore last state on start functionality
-            if (commandLineLaunch) {
+            if (commandLineLaunch)
+            {
                 LoadZXFile(commandLineArgs[1]);
-            } else if (config.RestoreLastStateOnStart) {
-                if (!LoadSZX(Application.LocalUserAppDataPath + "//" + ZeroSessionSnapshotName)) {
+            }
+            else if (config.RestoreLastStateOnStart)
+            {
+                if (!LoadSZX(Application.LocalUserAppDataPath + "//" + ZeroSessionSnapshotName))
+                {
                     MessageBox.Show("Unable to restore previous session!", "Session Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             zx.Start();
+
         }
 
-        private void Form_MouseDown(object sender, MouseEventArgs e) {
+        private void Form_MouseDown(object sender, MouseEventArgs e)
+        {
             mouseOrigin.X = e.X;
             mouseOrigin.Y = e.Y;
         }
 
-        private void Form_MouseMove(object sender, MouseEventArgs e) {
-            if (e.Button == MouseButtons.Left) {
+        private void Form_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
                 this.Top += e.Y - mouseOrigin.Y;
                 this.Left += e.X - mouseOrigin.X;
             }
         }
 
         //Load file
-        private void fileButton_Click(object sender, EventArgs e) {
+        private void fileButton_Click(object sender, EventArgs e)
+        {
             openFileMenuItem1_Click(sender, e);
         }
 
-        private void directXToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void directXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             //If directX isn't available, try initialising it one more time
             if (!dxWindow.DirectXReady)
                 dxWindow.InitDirectX(dxWindow.Width, dxWindow.Height);
 
             //If we have directX available to us, switch to it.
-            if (dxWindow.DirectXReady) {
+            if (dxWindow.DirectXReady)
+            {
                 dxWindow.EnableDirectX = true;
                 gDIToolStripMenuItem.Checked = false;
                 directXToolStripMenuItem.Checked = true;
@@ -1982,7 +2277,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     dxWindow.ShowScanlines = true;
                 else
                     dxWindow.ShowScanlines = false;
-            } else {
+            }
+            else
+            {
                 System.Windows.Forms.MessageBox.Show("Zero was unable to switch to DirectX mode.\nIt will now continue in GDI mode.",
                            "DirectX Error", System.Windows.Forms.MessageBoxButtons.OK,
                            System.Windows.Forms.MessageBoxIcon.Exclamation);
@@ -1993,7 +2290,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
-        private void gDIToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void gDIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             dxWindow.EnableDirectX = false;
             directXToolStripMenuItem.Checked = false;
             gDIToolStripMenuItem.Checked = true;
@@ -2002,40 +2300,47 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             interlaceToolStripMenuItem.Enabled = false;
         }
 
-        private void kToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void kToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             zx.Reset();
             dxWindow.Focus();
         }
 
-        private void kToolStripMenuItem1_Click(object sender, EventArgs e) {
+        private void kToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
             zXSpectrumToolStripMenuItem_Click(sender, e);
             dxWindow.Focus();
         }
 
-        private void kToolStripMenuItem2_Click(object sender, EventArgs e) {
+        private void kToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
             zXSpectrum128KToolStripMenuItem_Click(sender, e);
             dxWindow.Focus();
         }
 
-        private void panel1_MouseDown(object sender, MouseEventArgs e) {
+        private void panel1_MouseDown(object sender, MouseEventArgs e)
+        {
             //if (pauseEmulation)
             //    return;
-            Form_MouseDown(sender, e);
+            //Form_MouseDown(sender, e);
             //dxWindow.Focus();
         }
 
-        private void panel1_MouseMove(object sender, MouseEventArgs e) {
+        private void panel1_MouseMove(object sender, MouseEventArgs e)
+        {
             // if (pauseEmulation)
             //     return;
-            Form1_MouseMove(sender, e);
+            // Form1_MouseMove(sender, e);
             //dxWindow.Focus();
         }
 
-        private void panel1_MouseUp(object sender, MouseEventArgs e) {
+        private void panel1_MouseUp(object sender, MouseEventArgs e)
+        {
         }
 
         //100% window size
-        private void size100ToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void size100ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             if (config.FullScreen)
                 GoFullscreen(false);
 
@@ -2043,13 +2348,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             AdjustWindowSize();
         }
 
-        protected override bool ProcessDialogKey(Keys keyData) {
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
             return false;
         }
 
         protected override bool ProcessCmdKey(ref
               System.Windows.Forms.Message m,
-              System.Windows.Forms.Keys k) {
+              System.Windows.Forms.Keys k)
+        {
             // detect the pushing (Msg) of Enter Key (k)
 
             // then process the signal as usual
@@ -2057,8 +2364,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         }
 
         //Monitor
-        private void monitorButton_Click(object sender, EventArgs e) {
-            if (debugger == null || debugger.IsDisposed) {
+        private void monitorButton_Click(object sender, EventArgs e)
+        {
+            if (debugger == null || debugger.IsDisposed)
+            {
                 //zx.doRun = false;
                 debugger = new Monitor(this);
 
@@ -2067,7 +2376,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 //debugger.dbState = Monitor.MonitorState.STEPIN;
             }
 
-            if (!debugger.Visible) {
+            if (!debugger.Visible)
+            {
                 //zx.doRun = false;
                 //debugger.dbState = Monitor.MonitorState.STEPIN;
                 debugger.ReSyncWithZX();
@@ -2077,7 +2387,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         }
 
         //Normal palette
-        private void normalToolStripMenuItem_Click_1(object sender, EventArgs e) {
+        private void normalToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
             ChangeZXPalette("Normal");
             grayscaleToolStripMenuItem.Checked = false;
             normalToolStripMenuItem.Checked = true;
@@ -2086,7 +2397,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         }
 
         //Gray palette
-        private void grayscaleToolStripMenuItem_Click_1(object sender, EventArgs e) {
+        private void grayscaleToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
             ChangeZXPalette("Grayscale");
             normalToolStripMenuItem.Checked = false;
             grayscaleToolStripMenuItem.Checked = true;
@@ -2095,86 +2407,79 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         }
 
         //48k select
-        public void zx48ktoolStripMenuItem1_Click(object sender, EventArgs e) {
-            zx.Pause();
+        public void zx48ktoolStripMenuItem1_Click(object sender, EventArgs e)
+        {
             ChangeSpectrumModel(MachineModel._48k);
             config.CurrentSpectrumModel = ZX_SPECTRUM_48K;
-            zx48ktoolStripMenuItem1.Checked = true;
-            zXSpectrumToolStripMenuItem.Checked = false;
-            zXSpectrum128KToolStripMenuItem.Checked = false;
-            zxSpectrum3ToolStripMenuItem.Checked = false;
-            pentagon128KToolStripMenuItem.Checked = false;
-            showTapeIndicator = false;
-            dxWindow.Focus();
-            zx.Resume();
+            zxSpectrum48kToolStripMenuItem.Checked = true;
+            zxSpectrum128keToolStripMenuItem1.Checked = false;
+            zxSpectrum128kToolStripMenuItem1.Checked = false;
+            zxSpectrum3ToolStripMenuItem1.Checked = false;
+            pentagon128kToolStripMenuItem1.Checked = false;
         }
 
         //Spectrum 128Ke
-        public void zXSpectrumToolStripMenuItem_Click(object sender, EventArgs e) {
-            zx.Pause();
+        public void zXSpectrumToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             ChangeSpectrumModel(MachineModel._128ke);
             config.CurrentSpectrumModel = ZX_SPECTRUM_128KE;
-            zXSpectrumToolStripMenuItem.Checked = true;
-            zx48ktoolStripMenuItem1.Checked = false;
-            zXSpectrum128KToolStripMenuItem.Checked = false;
-            zxSpectrum3ToolStripMenuItem.Checked = false;
-            pentagon128KToolStripMenuItem.Checked = false;
-            showTapeIndicator = false;
-            dxWindow.Focus();
-            zx.Resume();
+            zxSpectrum128keToolStripMenuItem1.Checked = true;
+            zxSpectrum48kToolStripMenuItem.Checked = false;
+            zxSpectrum128kToolStripMenuItem1.Checked = false;
+            zxSpectrum3ToolStripMenuItem1.Checked = false;
+            pentagon128kToolStripMenuItem1.Checked = false;
         }
 
-        public void zXSpectrum128KToolStripMenuItem_Click(object sender, EventArgs e) {
-            zx.Pause();
+        public void zXSpectrum128KToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             ChangeSpectrumModel(MachineModel._128k);
             config.CurrentSpectrumModel = ZX_SPECTRUM_128K;
-            zx48ktoolStripMenuItem1.Checked = false;
-            zXSpectrum128KToolStripMenuItem.Checked = true;
-            zXSpectrumToolStripMenuItem.Checked = false;
-            zxSpectrum3ToolStripMenuItem.Checked = false;
-            pentagon128KToolStripMenuItem.Checked = false;
-            showTapeIndicator = false;
-            dxWindow.Focus();
-            zx.Resume();
+            zxSpectrum48kToolStripMenuItem.Checked = false;
+            zxSpectrum128kToolStripMenuItem1.Checked = true;
+            zxSpectrum128keToolStripMenuItem1.Checked = false;
+            zxSpectrum3ToolStripMenuItem1.Checked = false;
+            pentagon128kToolStripMenuItem1.Checked = false;
         }
 
-        private void zxSpectrum3ToolStripMenuItem_Click(object sender, EventArgs e) {
-            zx.Pause();
+        private void zxSpectrum3ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             ChangeSpectrumModel(MachineModel._plus3);
             config.CurrentSpectrumModel = ZX_SPECTRUM_PLUS3;
-            zx48ktoolStripMenuItem1.Checked = false;
-            zXSpectrum128KToolStripMenuItem.Checked = false;
-            zXSpectrumToolStripMenuItem.Checked = false;
-            zxSpectrum3ToolStripMenuItem.Checked = true;
-            pentagon128KToolStripMenuItem.Checked = false;
-            showTapeIndicator = false;
-            dxWindow.Focus();
-            zx.Resume();
+            zxSpectrum48kToolStripMenuItem.Checked = false;
+            zxSpectrum128kToolStripMenuItem1.Checked = false;
+            zxSpectrum128keToolStripMenuItem1.Checked = false;
+            zxSpectrum3ToolStripMenuItem1.Checked = true;
+            pentagon128kToolStripMenuItem1.Checked = false;
         }
 
-        private void pentagon128KToolStripMenuItem_Click(object sender, EventArgs e) {
-            zx.Pause();
+        private void pentagon128KToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             ChangeSpectrumModel(MachineModel._pentagon);
             config.CurrentSpectrumModel = ZX_SPECTRUM_PENTAGON_128K;
-            zx48ktoolStripMenuItem1.Checked = false;
-            zXSpectrum128KToolStripMenuItem.Checked = false;
-            zXSpectrumToolStripMenuItem.Checked = false;
-            zxSpectrum3ToolStripMenuItem.Checked = false;
-            pentagon128KToolStripMenuItem.Checked = true;
-            showTapeIndicator = false;
-            dxWindow.Focus();
-            zx.Resume();
+            zxSpectrum48kToolStripMenuItem.Checked = false;
+            zxSpectrum128kToolStripMenuItem1.Checked = false;
+            zxSpectrum128keToolStripMenuItem1.Checked = false;
+            zxSpectrum3ToolStripMenuItem1.Checked = false;
+            pentagon128kToolStripMenuItem1.Checked = true;
         }
 
-        private void ChangeSpectrumModel(MachineModel _model) {
+        private void ChangeSpectrumModel(MachineModel _model)
+        {
+            zx.Pause();
+
+            state = EMULATOR_STATE.RESET;
+            didPlayRZX = false;
             dxWindow.Suspend();
-            if (debugger != null) {
+
+            if (debugger != null)
+            {
                 debugger.DeRegisterAllEvents();
                 debugger.DeSyncWithZX();
             }
-            if (tapeDeck != null) {
+
+            if (tapeDeck != null)
                 tapeDeck.UnRegisterEventHooks();
-            }
+
             showDiskIndicator = false;
             zx.DiskEvent -= new DiskEventHandler(DiskMotorEvent);
             zx.Shutdown();
@@ -2183,7 +2488,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             config.Model = _model;
             Directory.SetCurrentDirectory(Application.StartupPath);
 
-            switch (config.Model) {
+            switch (config.Model)
+            {
                 case MachineModel._48k:
                     config.Model = MachineModel._48k;
                     zx = new zx48(this.Handle, config.UseLateTimings);
@@ -2223,26 +2529,19 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     insertDiskDToolStripMenuItem.Enabled = true;
                     break;
             }
-            if (!romLoaded) {
+
+            if (!romLoaded)
+            {
                 this.Close();
                 return;
             }
 
-            //Some models like the Pentagon don't have the same screen width as the normal speccy
-            //so we have to adjust the window size when switching to them and vice-versa
-            if ((zx.GetTotalScreenWidth() != dxWindow.ScreenWidth) || (zx.GetTotalScreenHeight() != dxWindow.ScreenHeight)) {
-                //if current model is pentagon then we have switched from a smaller screen size
-                if (zx.model == MachineModel._pentagon)
-                    AdjustRenderWindow(PENTAGON_WINDOW_OFFSET_X, PENTAGON_WINDOW_OFFSET_Y);
-                else //if we're switching to a smaller screen size from pentagon, negate the offsets
-                    AdjustRenderWindow(-PENTAGON_WINDOW_OFFSET_X, -PENTAGON_WINDOW_OFFSET_Y);
-            }
-            
             zx.SetSoundVolume(config.Volume / 100.0f);
             zx.SetEmulationSpeed(config.EmulationSpeed);
             zx.EnableAY(config.EnableAYFor48K);
             zx.SetStereoSound(config.StereoSoundOption);
             zx.Reset();
+
             if ((joystick2MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON) || (joystick1MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON))
                 zx.HasKempstonJoystick = true;
             else
@@ -2252,57 +2551,47 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             if (!config.EnableSound)
                 zx.MuteSound(true);
-            if (debugger != null) {
+
+            if (debugger != null)
+            {
                 debugger.ReRegisterAllEvents();
                 debugger.ReSyncWithZX();
-                //debugger.UpdateMachineInfo();
             }
 
-            if (tapeDeck != null) {
+            if (tapeDeck != null)
                 tapeDeck.RegisterEventHooks();
-            }
+           
             zx.DiskEvent += new DiskEventHandler(DiskMotorEvent);
 
             dxWindow.Resume();
-        }
-
-        private void panel2_MouseDown(object sender, MouseEventArgs e) {
-            // if (pauseEmulation)
-            //     return;
-            Form_MouseDown(sender, e);
             dxWindow.Focus();
-        }
-
-        private void panel2_MouseMove(object sender, MouseEventArgs e) {
-            // if (pauseEmulation)
-            //     return;
-            Form_MouseMove(sender, e);
-            //dxWindow.Focus();
-        }
-
-        private void panel4_MouseDown(object sender, MouseEventArgs e) {
-            // if (pauseEmulation)
-            //     return;
-            Form_MouseDown(sender, e);
-            //dxWindow.Focus();
-        }
-
-        private void panel4_MouseMove(object sender, MouseEventArgs e) {
-            // if (pauseEmulation)
-            //     return;
-            Form_MouseMove(sender, e);
-            //dxWindow.Focus();
+            zx.Resume();
+            showTapeIndicator = false;
+            //Some models like the Pentagon don't have the same screen width as the normal speccy
+            //so we have to adjust the window size when switching to them and vice-versa
+            if ((zx.GetTotalScreenWidth() != dxWindow.ScreenWidth) || (zx.GetTotalScreenHeight() != dxWindow.ScreenHeight))
+            {
+                //if current model is pentagon then we have switched from a smaller screen size
+                /*  if (zx.model == MachineModel._pentagon)
+                      AdjustRenderWindow(PENTAGON_WINDOW_OFFSET_X, PENTAGON_WINDOW_OFFSET_Y);
+                  else //if we're switching to a smaller screen size from pentagon, negate the offsets
+                      AdjustRenderWindow(-PENTAGON_WINDOW_OFFSET_X, -PENTAGON_WINDOW_OFFSET_Y); */
+                AdjustWindowSize();
+            }
+            //hardResetToolStripMenuItem1_Click(null, null);
         }
 
         //options button
-        private void optionsButton_Click(object sender, EventArgs e) {
+        private void optionsButton_Click(object sender, EventArgs e)
+        {
             if ((optionWindow == null) || (optionWindow.IsDisposed))
                 optionWindow = new Options(this);
             bool oldPause = pauseEmulation;
             pauseEmulation = true;
             zx.Pause();
             PreOptionsWindowShow();
-            if (optionWindow.ShowDialog(this) == DialogResult.OK) {
+            if (optionWindow.ShowDialog(this) == DialogResult.OK)
+            {
                 PostOptionsWindowShow();
             }
             pauseEmulation = oldPause;
@@ -2310,7 +2599,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.Focus();
         }
 
-        private void PreOptionsWindowShow() {
+        private void PreOptionsWindowShow()
+        {
             optionWindow.RomToUse48k = config.Current48kROM;
             optionWindow.RomToUse128k = config.Current128kROM;
             optionWindow.RomToUse128ke = config.Current128keROM;
@@ -2338,7 +2628,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             optionWindow.PixelSmoothing = dxWindow.PixelSmoothing;
             optionWindow.EnableVSync = config.EnableVSync;
 
-            switch (config.PaletteMode) {
+            switch (config.PaletteMode)
+            {
                 case "Grayscale":
                     optionWindow.Palette = 1;
                     break;
@@ -2373,7 +2664,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 optionWindow.windowSize = config.WindowSize / 50 + 1;
         }
 
-        private void PostOptionsWindowShow() {
+        private void PostOptionsWindowShow()
+        {
             config.UseIssue2Keyboard = optionWindow.UseIssue2Keyboard;
             config.UseLateTimings = (optionWindow.UseLateTimings);// == true ? 1 : 0);
             config.UseDirectX = optionWindow.UseDirectX;
@@ -2390,15 +2682,18 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             config.RestoreLastStateOnStart = optionWindow.RestoreLastState;
             config.ShowOnscreenIndicators = optionWindow.ShowOnScreenLEDS;
             dxWindow.ShowScanlines = interlaceToolStripMenuItem.Checked = config.EnableInterlacedOverlay;
-            config.EnablePixelSmoothing = optionWindow.PixelSmoothing;
-            if (config.EnableVSync != optionWindow.EnableVSync) {
+            pixelToolStripMenuItem.Checked = config.EnablePixelSmoothing = optionWindow.PixelSmoothing;
+
+            if (config.EnableVSync != optionWindow.EnableVSync)
+            {
                 config.EnableVSync = optionWindow.EnableVSync;
                 dxWindow.EnableVsync = config.EnableVSync;
                 dxWindow.InitDirectX(dxWindow.Width, dxWindow.Height);
             }
-            
+
             //Remove any previous session info if user doesn't want restore function
-            if (!config.RestoreLastStateOnStart) {
+            if (!config.RestoreLastStateOnStart)
+            {
                 if (File.Exists(ZeroSessionSnapshotName))
                     File.Delete(ZeroSessionSnapshotName);
             }
@@ -2408,11 +2703,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             else
                 gDIToolStripMenuItem_Click(this, null);
 
-            if (config.EmulationSpeed != optionWindow.EmulationSpeed) {
+            if (config.EmulationSpeed != optionWindow.EmulationSpeed)
+            {
                 config.EmulationSpeed = optionWindow.EmulationSpeed;
                 zx.SetEmulationSpeed(config.EmulationSpeed);
             }
-            switch (optionWindow.Palette) {
+            switch (optionWindow.Palette)
+            {
                 case 1:
                     grayscaleToolStripMenuItem_Click_1(this, null);
                     break;
@@ -2430,14 +2727,16 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                  || config.Current48kROM != optionWindow.RomToUse48k || config.current128kRom != optionWindow.RomToUse128k
                  || config.Current128keROM != optionWindow.RomToUse128ke
                  || config.CurrentPlus3ROM != optionWindow.RomToUsePlus3
-                 || config.CurrentPentagonROM != optionWindow.RomToUsePentagon) {
+                 || config.CurrentPentagonROM != optionWindow.RomToUsePentagon)
+            {
                 config.Current48kROM = optionWindow.RomToUse48k;
                 config.current128kRom = optionWindow.RomToUse128k;
                 config.Current128keROM = optionWindow.RomToUse128ke;
                 config.CurrentPlus3ROM = optionWindow.RomToUsePlus3;
                 config.CurrentPentagonROM = optionWindow.RomToUsePentagon;
 
-                switch (optionWindow.SpectrumModel) {
+                switch (optionWindow.SpectrumModel)
+                {
                     case 0:
                         zx48ktoolStripMenuItem1_Click(this, null);
                         break;
@@ -2492,24 +2791,24 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             bool requiresResizeWindow = false;
 
             //Are we going windowed from fullscreen?
-            if (optionWindow.windowSize != 0 && config.FullScreen) {
-                config.FullScreen = false;
-                config.WindowSize = (optionWindow.windowSize - 1) * 50;
-
-                GoFullscreen(config.FullScreen);
-            } else if (optionWindow.windowSize == 0 && !config.FullScreen) //or the other way
+            if (optionWindow.windowSize != 0 && config.FullScreen)
             {
-                config.FullScreen = true;
-
+                config.WindowSize = (optionWindow.windowSize - 1) * 50;
                 GoFullscreen(config.FullScreen);
-            } else if (optionWindow.windowSize > 0 && (config.WindowSize != (optionWindow.windowSize - 1) * 50)) //or diff window size from previous
+            }
+            else if (optionWindow.windowSize == 0 && !config.FullScreen) //or the other way
+            {
+                GoFullscreen(config.FullScreen);
+            }
+            else if (optionWindow.windowSize > 0 && (config.WindowSize != (optionWindow.windowSize - 1) * 50)) //or diff window size from previous
             {
                 config.WindowSize = (optionWindow.windowSize - 1) * 50;
                 requiresResizeWindow = true;
             }
 
             //Change in border size?
-            if (config.BorderSize != (optionWindow.borderSize * 24)) {
+            if (config.BorderSize != (optionWindow.borderSize * 24))
+            {
                 config.BorderSize = optionWindow.borderSize * 24;
                 requiresResizeWindow = true;
             }
@@ -2524,65 +2823,75 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         [System.Runtime.InteropServices.DllImport("shell32.dll")]
         private static extern void SHChangeNotify(int eventId, int flags, IntPtr item1, IntPtr item2);
 
-        public void CheckFileAssociations() {
+        public void CheckFileAssociations()
+        {
             string param = "";
             string assoc = "";
             bool iconsChanged = false;
 
-            if (optionWindow.FileAssociateDSK != config.AccociateDSKFiles) {
+            if (optionWindow.FileAssociateDSK != config.AccociateDSKFiles)
+            {
                 assoc = (optionWindow.FileAssociateDSK ? " 1.dsk" : " 0.dsk");
                 iconsChanged = true;
                 param += assoc;
             }
 
-            if (optionWindow.FileAssociateTRD != config.AccociateTRDFiles) {
+            if (optionWindow.FileAssociateTRD != config.AccociateTRDFiles)
+            {
                 assoc = (optionWindow.FileAssociateTRD ? " 1.trd" : " 0.trd");
                 iconsChanged = true;
                 param += assoc;
             }
 
-            if (optionWindow.FileAssociateSCL != config.AccociateSCLFiles) {
+            if (optionWindow.FileAssociateSCL != config.AccociateSCLFiles)
+            {
                 assoc = (optionWindow.FileAssociateSCL ? " 1.scl" : " 0.scl");
                 iconsChanged = true;
                 param += assoc;
             }
 
-            if (optionWindow.FileAssociatePZX != config.AccociatePZXFiles) {
+            if (optionWindow.FileAssociatePZX != config.AccociatePZXFiles)
+            {
                 assoc = (optionWindow.FileAssociatePZX ? " 1.pzx" : " 0.pzx");
 
                 iconsChanged = true;
                 param += assoc;
             }
 
-            if (optionWindow.FileAssociateTZX != config.AccociateTZXFiles) {
+            if (optionWindow.FileAssociateTZX != config.AccociateTZXFiles)
+            {
                 assoc = (optionWindow.FileAssociateTZX ? " 1.tzx" : " 0.tzx");
 
                 iconsChanged = true;
                 param += assoc;
             }
 
-            if (optionWindow.FileAssociateTAP != config.AccociateTAPFiles) {
+            if (optionWindow.FileAssociateTAP != config.AccociateTAPFiles)
+            {
                 assoc = (optionWindow.FileAssociateTAP ? " 1.tap" : " 0.tap");
 
                 iconsChanged = true;
                 param += assoc;
             }
 
-            if (optionWindow.FileAssociateSNA != config.AccociateSNAFiles) {
+            if (optionWindow.FileAssociateSNA != config.AccociateSNAFiles)
+            {
                 assoc = (optionWindow.FileAssociateSNA ? " 1.sna" : " 0.sna");
 
                 iconsChanged = true;
                 param += assoc;
             }
 
-            if (optionWindow.FileAssociateSZX != config.AccociateSZXFiles) {
+            if (optionWindow.FileAssociateSZX != config.AccociateSZXFiles)
+            {
                 assoc = (optionWindow.FileAssociateSZX ? " 1.szx" : " 0.szx");
 
                 iconsChanged = true;
                 param += assoc;
             }
 
-            if (optionWindow.FileAssociateZ80 != config.AccociateZ80Files) {
+            if (optionWindow.FileAssociateZ80 != config.AccociateZ80Files)
+            {
                 assoc = (optionWindow.FileAssociateZ80 ? " 1.z80" : " 0.z80");
                 iconsChanged = true;
                 param += assoc;
@@ -2590,7 +2899,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             int exitCode = -1;
             //Force icon refresh in windows explorer shell
-            if (iconsChanged) {
+            if (iconsChanged)
+            {
                 System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
                 startInfo.UseShellExecute = true;
                 startInfo.WorkingDirectory = Application.StartupPath;
@@ -2598,12 +2908,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 startInfo.Arguments = param;
                 startInfo.Verb = "runas";
                 startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden; //run silent, run deep...
-                try {
+                try
+                {
                     System.Diagnostics.Process p = System.Diagnostics.Process.Start(startInfo);
                     if (p != null)
                         p.WaitForExit();
                     exitCode = p.ExitCode;
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     MessageBox.Show(e.Message, "ZeroFileAssociater launch failed!", MessageBoxButtons.OK);
                     dxWindow.Focus();
                     return;
@@ -2611,7 +2924,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
 
             //file associations updated successfully!
-            if (exitCode == 0) {
+            if (exitCode == 0)
+            {
                 config.AccociatePZXFiles = optionWindow.FileAssociatePZX;
                 config.AccociateTZXFiles = optionWindow.FileAssociateTZX;
                 config.AccociateTAPFiles = optionWindow.FileAssociateTAP;
@@ -2628,7 +2942,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.Focus();
         }
 
-        private void aboutButton_Click(object sender, EventArgs e) {
+        private void aboutButton_Click(object sender, EventArgs e)
+        {
             if ((aboutWindow == null) || (aboutWindow.IsDisposed))
                 aboutWindow = new AboutBox1(this);
             aboutWindow.ShowDialog(this);
@@ -2636,57 +2951,95 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             aboutWindow.Dispose();
         }
 
-        private void label1_Click(object sender, EventArgs e) {
+        private void label1_Click(object sender, EventArgs e)
+        {
             dxWindow.Focus();
         }
 
-        private void toolStripMenuItem5_Click(object sender, EventArgs e) {
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
             showDiskIndicator = false;
             zx.Reset();
             dxWindow.Focus();
         }
 
-        private void renderingToolStripMenuItem_Paint(object sender, PaintEventArgs e) {
+        private void renderingToolStripMenuItem_Paint(object sender, PaintEventArgs e)
+        {
         }
 
         //power off
-        private void powerButton_Click(object sender, EventArgs e) {
+        private void powerButton_Click(object sender, EventArgs e)
+        {
             this.Close();
         }
 
-        private void hardResetToolStripMenuItem1_Click(object sender, EventArgs e) {
+        private void hardResetToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            state = EMULATOR_STATE.RESET;
+
+            if (didPlayRZX)
+            {
+                showTapeIndicator = false;
+                switch (previousMachine)
+                {
+                    case MachineModel._48k:
+                        zx48ktoolStripMenuItem1_Click(this, null);
+                        break;
+
+                    case MachineModel._128k:
+                        zXSpectrum128KToolStripMenuItem_Click(this, null);
+                        break;
+
+                    case MachineModel._128ke:
+                        zXSpectrumToolStripMenuItem_Click(this, null);
+                        break;
+
+                    case MachineModel._plus3:
+                        zxSpectrum3ToolStripMenuItem_Click(this, null);
+                        break;
+
+                    case MachineModel._pentagon:
+                        pentagon128KToolStripMenuItem_Click(this, null);
+                        break;
+                }
+                return;
+            }
+
             dxWindow.Suspend();
-            if (debugger != null) {
+
+            if (debugger != null)
+            {
                 debugger.DeRegisterAllEvents();
                 debugger.DeSyncWithZX();
             }
-            if (tapeDeck != null) {
+
+            if (tapeDeck != null)
                 tapeDeck.UnRegisterEventHooks();
-            }
+
             showDiskIndicator = false;
             zx.DiskEvent -= new DiskEventHandler(DiskMotorEvent);
             zx.Reset();
-            if (debugger != null) {
+
+            if (debugger != null)
+            {
                 debugger.ReRegisterAllEvents();
                 debugger.ReSyncWithZX();
-                //debugger.UpdateMachineInfo();
             }
 
-            if (tapeDeck != null) {
+            if (tapeDeck != null)
                 tapeDeck.RegisterEventHooks();
-            }
+
             zx.DiskEvent += new DiskEventHandler(DiskMotorEvent);
 
             dxWindow.Resume();
             dxWindow.Focus();
         }
 
-        private void soundButton_Click(object sender, EventArgs e) {
-        }
-
-        private void GoFullscreen(bool full) {
-            if (full) {
-                config.FullScreen = true;
+        private void GoFullscreen(bool full)
+        {
+            config.FullScreen = full;
+            if (full)
+            {
                 menuStrip1.Visible = false;
                 toolStrip1.Visible = false;
                 statusStrip1.Visible = false;
@@ -2694,45 +3047,25 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 toolStripMenuItem1.Enabled = false;
                 this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
                 LastMouseMove = DateTime.Now;
-                if (dxWindow.EnableDirectX) {
+
+                if (dxWindow.EnableDirectX)
+                {
                     this.SuspendLayout();
-                    
+
                     oldWindowPosition = this.Location;
                     dxWindow.EnableFullScreen = true;
-                    //this.Location = new Point(0, 0);
-                    //this.FormBorderStyle = FormBorderStyle.None;
-                    //this.WindowState = FormWindowState.Maximized;
-                   // Screen currentScreen = Screen.FromRectangle(this.RectangleToScreen(ClientRectangle));
-
-                    //Region r = new Region(new Rectangle(0, 0, currentScreen.Bounds.Width, currentScreen.Bounds.Height));
-                   // this.Region = r;
-                    //Maintain 4:3 aspect ration when full screen
-                    /*
-                    if (Screen.PrimaryScreen.Bounds.Height < Screen.PrimaryScreen.Bounds.Width) {
-                        float aspectXScale = (Screen.PrimaryScreen.Bounds.Height * 4.0f) / (Screen.PrimaryScreen.Bounds.Width * 3.0f);
-                        int newScreenWidth = (int)(Screen.PrimaryScreen.Bounds.Width * aspectXScale);
-                        dxWindow.Location = new Point((Screen.PrimaryScreen.Bounds.Width - newScreenWidth) / 2, 0);
-                        dxWindow.SetSize(newScreenWidth, Screen.PrimaryScreen.Bounds.Height);
-                        dxWindow.LEDIndicatorPosition = new Point(newScreenWidth - 32, Screen.PrimaryScreen.Bounds.Height - 32);
-                    } else //Not tested!!!
-                    {
-                        float aspectYScale = (Screen.PrimaryScreen.Bounds.Width * 3.0f) / (Screen.PrimaryScreen.Bounds.Height * 4.0f);
-                        int newScreenHeight = (int)(Screen.PrimaryScreen.Bounds.Height * aspectYScale);
-                        dxWindow.Location = new Point(Screen.PrimaryScreen.Bounds.Width, (Screen.PrimaryScreen.Bounds.Height - newScreenHeight) / 2);
-                        dxWindow.SetSize(Screen.PrimaryScreen.Bounds.Width, newScreenHeight);
-                        dxWindow.LEDIndicatorPosition = new Point(Screen.PrimaryScreen.Bounds.Width - 32, newScreenHeight - 32);
-                    }
-                     * */
                     dxWindow.InitDirectX(800, 600, false);
- 
-                    // panel3.BringToFront();
                     oldWindowSize = config.WindowSize;
                     config.WindowSize = 0;
-                    if (!commandLineLaunch) {
+
+                    if (!commandLineLaunch)
+                    {
                         Point cursorPos = Cursor.Position;
                         cursorPos.Y = this.PointToScreen(dxWindow.Location).Y;
                         Cursor.Position = cursorPos;
-                    } else {
+                    }
+                    else
+                    {
                         Cursor.Hide();
                         CursorIsHidden = true;
                         Cursor.Position = new Point(0, Screen.PrimaryScreen.Bounds.Height);
@@ -2741,12 +3074,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     }
                     this.ResumeLayout();
                     dxWindow.Focus();
-                } else {
+                }
+                else
+                {
                     this.SuspendLayout();
                     oldWindowPosition = this.Location;
                     dxWindow.EnableFullScreen = true;
                     this.Location = new Point(0, 0);
-                    //this.Size = new Size(800, 600);
                     this.FormBorderStyle = FormBorderStyle.None;
                     this.WindowState = FormWindowState.Maximized;
                     Screen currentScreen = Screen.FromRectangle(this.RectangleToScreen(ClientRectangle));
@@ -2756,14 +3090,16 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     dxWindow.SetSize(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
 
                     dxWindow.Focus();
-                    //panel3.BringToFront();
                     oldWindowSize = config.WindowSize;
                     config.WindowSize = 0;
-                    if (!commandLineLaunch) {
+                    if (!commandLineLaunch)
+                    {
                         Point cursorPos = Cursor.Position;
                         cursorPos.Y = this.PointToScreen(dxWindow.Location).Y;
                         Cursor.Position = cursorPos;
-                    } else {
+                    }
+                    else
+                    {
                         Cursor.Hide();
                         CursorIsHidden = true;
                         Cursor.Position = new Point(0, Screen.PrimaryScreen.Bounds.Height);
@@ -2771,25 +3107,26 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         mouseOldPos.Y = Cursor.Position.Y;
                     }
                 }
-            } else {
-                config.FullScreen = false;
-                //toolStripMenuItem5.Enabled = false;
-                //toolStripMenuItem1.Enabled = false;
+            }
+            else
+            {
                 menuStrip1.Visible = true;
                 toolStrip1.Visible = true;
                 statusStrip1.Visible = true;
                 toolStripMenuItem5.Enabled = true;
                 toolStripMenuItem1.Enabled = true;
                 this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
-                if (dxWindow.EnableDirectX) {
+                if (dxWindow.EnableDirectX)
+                {
                     dxWindow.EnableFullScreen = false;
-                    //this.WindowState = FormWindowState.Normal;
                     this.Location = oldWindowPosition;
                     panel1.Dock = DockStyle.None;
                     dxWindow.Dock = DockStyle.None;
                     config.WindowSize = oldWindowSize;
                     AdjustWindowSize();
-                } else {
+                }
+                else
+                {
                     dxWindow.EnableFullScreen = false;
                     this.FormBorderStyle = FormBorderStyle.None;
                     this.WindowState = FormWindowState.Normal;
@@ -2799,18 +3136,21 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     config.WindowSize = oldWindowSize;
                     AdjustWindowSize();
                 }
-                if (CursorIsHidden) {
+                if (CursorIsHidden)
+                {
                     Cursor.Show();
                     CursorIsHidden = false;
                 }
             }
         }
 
-        private void fullScreenToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void fullScreenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             GoFullscreen(!config.FullScreen);
         }
 
-        private void uLAPlusToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void uLAPlusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             ChangeZXPalette("ULA Plus");
             normalToolStripMenuItem.Checked = false;
             grayscaleToolStripMenuItem.Checked = false;
@@ -2818,40 +3158,43 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.Focus();
         }
 
-        private void PauseEmulation(bool val) {
+        private void PauseEmulation(bool val)
+        {
+            statusLabelText.Text = "Emulation Paused";
             pauseEmulation = val;
             dxWindow.EmulationIsPaused = val;
-            pauseEmulationESCToolStripMenuItem.Checked = pauseEmulation;
+            //pauseEmulationESCToolStripMenuItem.Checked = pauseEmulation;
             dxWindow.Invalidate();
+
             if (pauseEmulation)
                 zx.Pause();
             else
                 zx.Resume();
         }
 
-        private void pauseEmulationESCToolStripMenuItem_Click(object sender, EventArgs e) {
-            PauseEmulation(!pauseEmulationESCToolStripMenuItem.Checked);
+        
+        private void pauseEmulationESCToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PauseEmulation(!pauseEmulation);
         }
-
-        private void quitToolStripMenuItem_Click(object sender, EventArgs e) {
+      
+        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             powerButton_Click(this, null);
         }
 
-        private void panel3_MouseMove(object sender, MouseEventArgs e) {
-            // if (pauseEmulation)
-            //     return;
-            Form1_MouseMove(sender, e);
-            //dxWindow.Focus();
-        }
-
-        private void Form1_MouseMove(object sender, MouseEventArgs e) {
+        private void Form1_MouseMove(object sender, MouseEventArgs e)
+        {
             mouseMoveDiff.X = e.Location.X - mouseOldPos.X;
             mouseMoveDiff.Y = e.Location.Y - mouseOldPos.Y;
 
             LastMouseMove = DateTime.Now;
-            if (config.FullScreen) {
-                if ((Math.Abs(mouseMoveDiff.X)) > 5 || (Math.Abs(mouseMoveDiff.Y) > 5)) {
-                    if (CursorIsHidden) {
+            if (config.FullScreen)
+            {
+                if ((Math.Abs(mouseMoveDiff.X)) > 5 || (Math.Abs(mouseMoveDiff.Y) > 5))
+                {
+                    if (CursorIsHidden)
+                    {
                         Cursor.Show();
                         CursorIsHidden = false;
                     }
@@ -2860,85 +3203,112 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             mouseOldPos = e.Location;
         }
 
-        private void libraryButton_Click(object sender, EventArgs e) {
+        private void libraryButton_Click(object sender, EventArgs e)
+        {
             //library.Show();
         }
 
-        private void Form1_DragEnter(object sender, DragEventArgs e) {
+        private void Form1_DragEnter(object sender, DragEventArgs e)
+        {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 e.Effect = DragDropEffects.Copy;
             else
                 e.Effect = DragDropEffects.None;
         }
 
-        private void Form1_DragDrop(object sender, DragEventArgs e) {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+        private void Form1_DragDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 LoadZXFile(files[0]);
             }
         }
-   
-        private void UseSZX(SZXLoader szx) {
-            if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_48K) {
-                if (config.HighCompatibilityMode) {
+
+        private void UseSZX(SZXLoader szx)
+        {
+            if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_48K)
+            {
+                if (config.HighCompatibilityMode)
+                {
                     zXSpectrumToolStripMenuItem_Click(this, null);
                     zx.Out(0x7ffd, 0x10);
                     zx.Out(0x1ffd, 0x04);
                     zx.pagingDisabled = true;
-                } else
+                }
+                else
                     zx48ktoolStripMenuItem1_Click(this, null);
-            } else if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_128K) {
+            }
+            else if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_128K)
+            {
                 if (config.HighCompatibilityMode)
                     zXSpectrumToolStripMenuItem_Click(this, null);
                 else //if (config.Model == MachineModel._128k)
                     zXSpectrum128KToolStripMenuItem_Click(this, null);
                 //else
                 //    zXSpectrumToolStripMenuItem_Click(this, null);
-            } else if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_PENTAGON128) {
+            }
+            else if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_PENTAGON128)
+            {
                 pentagon128KToolStripMenuItem_Click(this, null);
-            } else if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_PLUS3) {
+            }
+            else if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_PLUS3)
+            {
                 zxSpectrum3ToolStripMenuItem_Click(this, null);
             }
 
             //Check if file is required in tape deck
-            if (szx.InsertTape) {
+            if (szx.InsertTape)
+            {
                 //External tape file?
-                if (szx.tape.flags == 0) {
+                if (szx.tape.flags == 0)
+                {
                     //Try to load the tape silently.
                     //With any luck the externalTapeFile holds the full path to the tape.
-                    if (File.Exists(szx.externalTapeFile)) {
+                    if (File.Exists(szx.externalTapeFile))
+                    {
                         LoadZXFile(szx.externalTapeFile);
-                    } else //Nope, not found. Ask the user what to do.
+                    }
+                    else //Nope, not found. Ask the user what to do.
                     {
                         String s = "The following tape is expected in the tape deck:\n" + szx.externalTapeFile + "\n\nDo you wish to browse for this file?";
-                        if (MessageBox.Show(s, "File request", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
+                        if (MessageBox.Show(s, "File request", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                        {
                             openFileDialog1.InitialDirectory = recentFolder;
                             openFileDialog1.FileName = "";
                             openFileDialog1.Filter = "Tapes (*.pzx, *.tap, *.tzx, *.csw)|*.pzx;*.tap;*.tzx;*.csw|ZIP Archive (*.zip)|*.zip";
-                            if (openFileDialog1.ShowDialog() == DialogResult.OK) {
+                            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                            {
                                 LoadZXFile(openFileDialog1.FileName);
                                 recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
                             }
                         }
                     }
-                } else {
+                }
+                else
+                {
                     System.IO.Stream s = new System.IO.MemoryStream(szx.embeddedTapeData);
                     tapeDeck.InsertTape("", s);
                 }
             }
 
             //Check if any disks needs to be inserted
-            for (int f = 0; f < szx.numDrivesPresent; f++) {
-                if (szx.InsertDisk[f]) {
+            for (int f = 0; f < szx.numDrivesPresent; f++)
+            {
+                if (szx.InsertDisk[f])
+                {
                     //Try to load the tape silently.
                     //With any luck the externalTapeFile holds the full path to the tape.
-                    if (File.Exists(szx.externalDisk[f])) {
+                    if (File.Exists(szx.externalDisk[f]))
+                    {
                         InsertDisk(szx.externalDisk[f], (byte)f);
                         zx.DiskInsert(szx.externalDisk[f], (byte)f);
-                    } else //No disk found. Ask user what to do.
+                    }
+                    else //No disk found. Ask user what to do.
                     {
                         String s = String.Format("The following disk is expected in drive {0}:\n{1}\n\nDo you wish to browse for this file?", f, szx.externalDisk[f]);
-                        if (MessageBox.Show(s, "File request", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
+                        if (MessageBox.Show(s, "File request", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                        {
                             OpenDiskFile((byte)f);
                         }
                     }
@@ -2949,7 +3319,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             szx = null;
         }
 
-        public bool LoadSZX(Stream fs) {
+        public bool LoadSZX(Stream fs)
+        {
             SZXLoader szx = new SZXLoader();
             bool success = szx.LoadSZX(fs);
             if (success)
@@ -2958,7 +3329,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return success;
         }
 
-        public bool LoadSZX(string filename) {
+        public bool LoadSZX(string filename)
+        {
             SZXLoader szx = new SZXLoader();
             bool success = szx.LoadSZX(filename);
             if (success)
@@ -2967,16 +3339,21 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return success;
         }
 
-        public void SaveSZX() {
+        public void SaveSZX()
+        {
         }
 
-        private void UseSNA(SNA_SNAPSHOT sna) {
+        private void UseSNA(SNA_SNAPSHOT sna)
+        {
             if (sna == null)
                 return;
 
-            if (sna is SNA_48K) {
+            if (sna is SNA_48K)
+            {
                 zx48ktoolStripMenuItem1_Click(this, null);
-            } else if (sna is SNA_128K) {
+            }
+            else if (sna is SNA_128K)
+            {
                 // if (((SNA_128K)sna).TR_DOS)
                 pentagon128KToolStripMenuItem_Click(this, null);
                 /*else
@@ -2991,17 +3368,22 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             sna = null;
         }
 
-        public void LoadSNA(Stream fs) {
+        public void LoadSNA(Stream fs)
+        {
             SNA_SNAPSHOT sna = SNALoader.LoadSNA(fs);
             UseSNA(sna);
         }
 
-        public void LoadSNA(string filename) {
+        public void LoadSNA(string filename)
+        {
             SNA_SNAPSHOT sna = SNALoader.LoadSNA(filename);
             UseSNA(sna);
         }
 
-        private void UseRZX(RZXLoader rzx, bool isRecording) {
+        private void UseRZX(RZXLoader rzx, bool isRecording)
+        {
+
+            previousMachine = zx.model;
             String ext = new String(rzx.snap.extension).ToLower();
             byte index = 0;
             if (rzx.snapshotData[1] != null)
@@ -3017,35 +3399,45 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 return;
 
             if (!isRecording)
+            {
+                didPlayRZX = true;
                 zx.PlaybackRZX(rzx);
+            }
             else
                 zx.RecordRZX(rzx);
         }
 
-        public void LoadRZX(Stream fs, bool isRecording) {
+        public void LoadRZX(Stream fs, bool isRecording)
+        {
             RZXLoader rzx = new RZXLoader();
             rzx.LoadRZX(fs);
             UseRZX(rzx, isRecording);
         }
 
-        public void LoadRZX(string filename, bool isRecording) {
+        public void LoadRZX(string filename, bool isRecording)
+        {
             RZXLoader rzx = new RZXLoader();
             rzx.LoadRZX(filename);
             UseRZX(rzx, isRecording);
         }
 
-        private void UseZ80(Z80_SNAPSHOT z80) {
+        private void UseZ80(Z80_SNAPSHOT z80)
+        {
             if (z80 == null)
                 return;
 
-            if (z80.TYPE == 0) {
+            if (z80.TYPE == 0)
+            {
                 zx48ktoolStripMenuItem1_Click(this, null);
-            } else if (z80.TYPE == 1) {
+            }
+            else if (z80.TYPE == 1)
+            {
                 if (config.HighCompatibilityMode)
                     zXSpectrumToolStripMenuItem_Click(this, null);
                 else //if (config.Model == MachineModel._128k)
                     zXSpectrum128KToolStripMenuItem_Click(this, null);
-            } else if (z80.TYPE == 2)
+            }
+            else if (z80.TYPE == 2)
                 zxSpectrum3ToolStripMenuItem_Click(this, null);
             else if (z80.TYPE == 3)
                 pentagon128KToolStripMenuItem_Click(this, null);
@@ -3054,17 +3446,20 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             z80 = null;
         }
 
-        public void LoadZ80(Stream fs) {
+        public void LoadZ80(Stream fs)
+        {
             Z80_SNAPSHOT z80 = Z80Loader.LoadZ80(fs);
             UseZ80(z80);
         }
 
-        public void LoadZ80(string filename) {
+        public void LoadZ80(string filename)
+        {
             Z80_SNAPSHOT z80 = Z80Loader.LoadZ80(filename);
             UseZ80(z80);
         }
 
-        private void OpenZXArchive(String zipFileName) {
+        private void OpenZXArchive(String zipFileName)
+        {
             if (archiver == null)
                 archiver = new ComponentAce.Compression.ZipForge.ZipForge();
             archiver.FileName = zipFileName;
@@ -3073,17 +3468,22 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             System.Collections.Generic.List<String> fileNameAndSizeList = new System.Collections.Generic.List<string>();
             String fileToOpen = "";
-            try {
+            try
+            {
                 archiver.OpenArchive(FileMode.Open);
 
                 // string[] fileNameAndSizeList = new string[archiver.FileCount * 2];
-                if (archiver.FindFirst("*.*", ref archiveItem)) {
-                    do {
-                        if (archiveItem.FileName != "") {
+                if (archiver.FindFirst("*.*", ref archiveItem))
+                {
+                    do
+                    {
+                        if (archiveItem.FileName != "")
+                        {
                             String ext = archiveItem.FileName.Substring(archiveItem.FileName.Length - 3).ToLower();
                             if (ext == "sna" | ext == "z80" || ext == "szx" || ext == "pzx" || ext == "tzx"
                                     || ext == "tap" || ext == "csw" || ext == "dsk" || ext == "trd"
-                                    || ext == "scl" || ext == "rzx" || ext == "scr") {
+                                    || ext == "scl" || ext == "rzx" || ext == "scr")
+                            {
                                 fileNameAndSizeList.Add(archiveItem.FileName);
                                 fileNameAndSizeList.Add((archiveItem.UncompressedSize).ToString());
                             }
@@ -3092,16 +3492,21 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     while (archiver.FindNext(ref archiveItem));
                 }
 
-                if (fileNameAndSizeList.Count == 0) {
+                if (fileNameAndSizeList.Count == 0)
+                {
                     MessageBox.Show("Couldn't find any suitable file to load in this archive!", "No suitable file", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                if (fileNameAndSizeList.Count == 2) {
+                if (fileNameAndSizeList.Count == 2)
+                {
                     fileToOpen = fileNameAndSizeList[0];
-                } else if (fileNameAndSizeList.Count > 2) {
+                }
+                else if (fileNameAndSizeList.Count > 2)
+                {
                     ArchiveHandler archiveHandler = new ArchiveHandler(fileNameAndSizeList.ToArray());
-                    if (archiveHandler.ShowDialog() != DialogResult.OK) {
+                    if (archiveHandler.ShowDialog() != DialogResult.OK)
+                    {
                         fileNameAndSizeList.Clear();
                         archiver.CloseArchive();
                         return;
@@ -3114,24 +3519,32 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 System.IO.MemoryStream stream = new MemoryStream();
 
                 archiver.Options.CreateDirs = false;
-                if ((ext2 == "dsk") || (ext2 == "trd") || (ext2 == "scl")) {
-                    if (diskArchivePath[0] != null) {
+                if ((ext2 == "dsk") || (ext2 == "trd") || (ext2 == "scl"))
+                {
+                    if (diskArchivePath[0] != null)
+                    {
                         zx.DiskEject(0);
                         File.Delete(diskArchivePath[0]);
                     }
                     byte[] tempBuffer;
                     archiver.ExtractToBuffer(fileToOpen, out tempBuffer);
-                    if (ext2 == "scl") {
+                    if (ext2 == "scl")
+                    {
                         string _tmpFile = Application.StartupPath + @"/tempDiskA." + ext2;
                         File.WriteAllBytes(_tmpFile, tempBuffer);
                         string _file = SCL2TRD(_tmpFile);
-                        if (_file != null) {
+                        if (_file != null)
+                        {
                             LoadDSK(_file, 0);
-                        } else {
+                        }
+                        else
+                        {
                             MessageBox.Show("Unable to open file!", "File error", MessageBoxButtons.OK);
                         }
                         File.Delete(_tmpFile);
-                    } else {
+                    }
+                    else
+                    {
                         diskArchivePath[0] = Application.StartupPath + @"/tempDiskA." + ext2;
                         File.WriteAllBytes(diskArchivePath[0], tempBuffer);
                         LoadDSK(diskArchivePath[0], 0);
@@ -3142,7 +3555,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 }
                 archiver.ExtractToStream(fileToOpen, stream);
                 stream.Position = 0;
-                switch (ext2) {
+                switch (ext2)
+                {
                     case "rzx":
                         LoadRZX(stream, false);
                         break;
@@ -3168,7 +3582,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     case "pzx":
                         tapeDeck.InsertTape(fileToOpen, stream);
                         //tapeDeck.Show();
-                        if (tapeDeck.DoAutoTapeLoad) {
+                        if (tapeDeck.DoAutoTapeLoad)
+                        {
                             doAutoLoadTape = true;
                             hardResetToolStripMenuItem1_Click(this, null);
                         }
@@ -3177,10 +3592,14 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     case "scr":
                         byte[] _buffer = stream.ToArray();
 
-                        if (_buffer.Length > 6912) {
+                        if (_buffer.Length > 6912)
+                        {
                             MessageBox.Show("This file seems to have an unsupported screen format.", "File error", MessageBoxButtons.OK);
-                        } else {
-                            for (int f = 0; f < 6912; f++) {
+                        }
+                        else
+                        {
+                            for (int f = 0; f < 6912; f++)
+                            {
                                 zx.PokeByteNoContend(16384 + f, _buffer[f]);
                             }
                         }
@@ -3201,7 +3620,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         else
                             _p = csw2pzx_buff(tempBuffer, _buffSize, ref  _sz);
 
-                        if (_p == (IntPtr)0) {
+                        if (_p == (IntPtr)0)
+                        {
                             MessageBox.Show("Unable to open the file.", "File Error", MessageBoxButtons.OK);
                             break;
                         }
@@ -3212,7 +3632,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         pzx_close();
                         fileNameAndSizeList.Clear();
                         archiver.CloseArchive();
-                        if (tapeDeck.DoAutoTapeLoad) {
+                        if (tapeDeck.DoAutoTapeLoad)
+                        {
                             doAutoLoadTape = true;
                             hardResetToolStripMenuItem1_Click(this, null);
                         }
@@ -3255,7 +3676,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     break;
                      */
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 System.Windows.Forms.MessageBox.Show(e.Message,
                         "Archive failure", System.Windows.Forms.MessageBoxButtons.OK);
             }
@@ -3267,62 +3690,74 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         }
 
         //Updates the insert disk file menu
-        private void InsertDisk(string filename, byte _unit) {
+        private void InsertDisk(string filename, byte _unit)
+        {
             string[] _files = filename.Split('\\');
             int _fileCnt = _files.Length;
-            if (zx.DiskInserted(_unit)) {
+            if (zx.DiskInserted(_unit))
+            {
                 zx.DiskEject(_unit);
             }
 
-            switch (_unit) {
+            switch (_unit)
+            {
                 case 0:
-                    ia.Text = _files[_fileCnt - 1];
-                    ia.DropDownItems.Add(EjectA);
+                    insertDiskAToolStripMenuItem.Text = _files[_fileCnt - 1];
+                    insertDiskAToolStripMenuItem.DropDownItems.Add(EjectA);
                     break;
 
                 case 1:
-                    ib.Text = _files[_fileCnt - 1];
-                    ib.DropDownItems.Add(EjectB);
+                    insertDiskBToolStripMenuItem.Text = _files[_fileCnt - 1];
+                    insertDiskBToolStripMenuItem.DropDownItems.Add(EjectB);
                     break;
 
                 case 2:
-                    ic.Text = _files[_fileCnt - 1];
-                    ic.DropDownItems.Add(EjectC);
+                    insertDiskCToolStripMenuItem.Text = _files[_fileCnt - 1];
+                    insertDiskCToolStripMenuItem.DropDownItems.Add(EjectC);
                     break;
 
                 case 3:
-                    id.Text = _files[_fileCnt - 1];
-                    id.DropDownItems.Add(EjectD);
+                    insertDiskDToolStripMenuItem.Text = _files[_fileCnt - 1];
+                    insertDiskDToolStripMenuItem.DropDownItems.Add(EjectD);
                     break;
             }
         }
 
         //Loads the disk, switching the machine model if required
-        private void LoadDSK(string filename, byte _unit) {
+        private void LoadDSK(string filename, byte _unit)
+        {
             String ext = filename.Substring(filename.Length - 3).ToLower();
-            if (ext == "dsk") {
+            if (ext == "dsk")
+            {
                 if (!(zx is zxPlus3))
                     zxSpectrum3ToolStripMenuItem_Click(this, null);
-            } else if (ext == "trd") {
+            }
+            else if (ext == "trd")
+            {
                 if (!(zx is Pentagon128K))
                     pentagon128KToolStripMenuItem_Click(this, null);
             }
             zx.DiskInsert(filename, _unit);
         }
 
-        private string SCL2TRD(string _filename) {
+        private string SCL2TRD(string _filename)
+        {
             diskArchivePath[0] = _filename.Substring(0, _filename.Length - 4).ToLower() + "_z0temp.trd";
 
             int trdCurrentSector = 16;
 
             FileStream fs;
-            try {
+            try
+            {
                 fs = new FileStream(_filename, FileMode.Open, FileAccess.Read);
-            } catch {
+            }
+            catch
+            {
                 return null;
             }
 
-            using (BinaryReader r = new BinaryReader(fs)) {
+            using (BinaryReader r = new BinaryReader(fs))
+            {
                 int bytesToRead = (int)fs.Length;
 
                 byte[] data = new byte[bytesToRead];
@@ -3335,9 +3770,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 int startIndex = 0;
 
                 FileStream trd = new FileStream(diskArchivePath[0], FileMode.Create, FileAccess.Write);
-                using (BinaryWriter w = new BinaryWriter(trd)) {
+                using (BinaryWriter w = new BinaryWriter(trd))
+                {
                     System.Collections.Generic.List<byte> fileSectorList = new System.Collections.Generic.List<byte>();
-                    for (int index = 0; index < fileCount; index++) {
+                    for (int index = 0; index < fileCount; index++)
+                    {
                         startIndex = 9 + index * 14;
 
                         ArraySegment<byte> dirEntry = new ArraySegment<byte>(data, startIndex, 14);
@@ -3420,7 +3857,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                     int sectorOffset = startIndex;
                     int bytesWritten = 4096;
-                    for (int index = 0; index < fileCount; index++) {
+                    for (int index = 0; index < fileCount; index++)
+                    {
                         sectorOffset += fileSectorList[index] * 256;
                         ArraySegment<byte> sclFile = new ArraySegment<byte>(data, startIndex, sectorOffset - startIndex);
 
@@ -3439,72 +3877,103 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return diskArchivePath[0];
         }
 
-        private void LoadZXFile(string filename) {
+        private void LoadZXFile(string filename)
+        {
             String ext = System.IO.Path.GetExtension(filename).ToLower();
 
-            if (ext == ".scr") {
-                using (FileStream fs = new FileStream(filename, FileMode.Open)) {
-                    using (BinaryReader br = new BinaryReader(fs)) {
+            if (ext == ".scr")
+            {
+                using (FileStream fs = new FileStream(filename, FileMode.Open))
+                {
+                    using (BinaryReader br = new BinaryReader(fs))
+                    {
                         byte[] buffer = new byte[6912];
                         int bytesRead = br.Read(buffer, 0, 6912);
 
-                        if (fs.Length > 6912 || bytesRead == 0) {
+                        if (fs.Length > 6912 || bytesRead == 0)
+                        {
                             MessageBox.Show("This file seems to have an unsupported screen format.", "File error", MessageBoxButtons.OK);
-                        } else {
-                            for (int f = 0; f < 6912; f++) {
+                        }
+                        else
+                        {
+                            for (int f = 0; f < 6912; f++)
+                            {
                                 zx.PokeByteNoContend(16384 + f, buffer[f]);
                             }
                         }
                     }
                 }
-            } else
-                if (ext == ".rzx") {
+            }
+            else
+                if (ext == ".rzx")
+                {
                     LoadRZX(filename, false);
                     if (tapeDeck.Visible)
                         tapeDeck.Hide();
-                } else
-                    if ((ext == ".dsk") || (ext == ".trd") || (ext == ".scl")) {
-                        if (diskArchivePath[0] != null) {
-                            if (zx.DiskInserted(0)) {
+                }
+                else
+                    if ((ext == ".dsk") || (ext == ".trd") || (ext == ".scl"))
+                    {
+                        if (diskArchivePath[0] != null)
+                        {
+                            if (zx.DiskInserted(0))
+                            {
                                 zx.DiskEject(0);
                             }
                             File.Delete(diskArchivePath[0]);
                             diskArchivePath[0] = null;
                         }
-                        if (ext == ".scl") {
+                        if (ext == ".scl")
+                        {
                             string _file = SCL2TRD(filename);
-                            if (_file != null) {
+                            if (_file != null)
+                            {
                                 InsertDisk(filename, 0);
                                 LoadDSK(_file, 0);
-                            } else {
+                            }
+                            else
+                            {
                                 MessageBox.Show("Unable to open file!", "File error", MessageBoxButtons.OK);
                                 return;
                             }
-                        } else {
+                        }
+                        else
+                        {
                             InsertDisk(filename, 0);
                             LoadDSK(filename, 0);
                         }
-                    } else
-                        if (ext == ".sna") {
+                    }
+                    else
+                        if (ext == ".sna")
+                        {
                             LoadSNA(filename);
                             if (tapeDeck.Visible)
                                 tapeDeck.Hide();
-                        } else if (ext == ".z80") {
+                        }
+                        else if (ext == ".z80")
+                        {
                             LoadZ80(filename);
                             if (tapeDeck.Visible)
                                 tapeDeck.Hide();
-                        } else if (ext == ".szx") {
+                        }
+                        else if (ext == ".szx")
+                        {
                             LoadSZX(filename);
                             if (tapeDeck.Visible)
                                 tapeDeck.Hide();
-                        } else if (ext == ".pzx") {
+                        }
+                        else if (ext == ".pzx")
+                        {
                             tapeDeck.InsertTape(filename);
                             //tapeDeck.Show();
-                            if (tapeDeck.DoAutoTapeLoad) {
+                            if (tapeDeck.DoAutoTapeLoad)
+                            {
                                 doAutoLoadTape = true;
                                 hardResetToolStripMenuItem1_Click(this, null);
                             }
-                        } else if ((ext == ".tzx") || (ext == ".tap") || (ext == ".csw")) {
+                        }
+                        else if ((ext == ".tzx") || (ext == ".tap") || (ext == ".csw"))
+                        {
                             IntPtr _p;
                             uint _sz = 0;
                             if (ext == ".tzx")
@@ -3520,7 +3989,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                             tapeDeck.InsertTape(filename, _st);
                             pzx_close();
 
-                            if (tapeDeck.DoAutoTapeLoad) {
+                            if (tapeDeck.DoAutoTapeLoad)
+                            {
                                 doAutoLoadTape = true;
                                 hardResetToolStripMenuItem1_Click(this, null);
                             }
@@ -3530,32 +4000,40 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                             pauseEmulation = true;
                             OpenZXArchive(filename);
                             pauseEmulation = false;
-                        } else
+                        }
+                        else
                             System.Windows.Forms.MessageBox.Show("Sorry, but Zero doesn't recognise this file format.",
                                "Unsupported Format", System.Windows.Forms.MessageBoxButtons.OK);
         }
 
-        private void interlaceToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void interlaceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             dxWindow.ShowScanlines = interlaceToolStripMenuItem.Checked;
             config.EnableInterlacedOverlay = dxWindow.ShowScanlines;
         }
 
-        private void screenshotMenuItem1_Click(object sender, EventArgs e) {
+        private void screenshotMenuItem1_Click(object sender, EventArgs e)
+        {
             saveFileDialog1.InitialDirectory = config.PathScreenshots;
             saveFileDialog1.Title = "Save Screenshot";
             saveFileDialog1.FileName = "";
             saveFileDialog1.Filter = "Bitmap (*.bmp)|*.bmp|Spectrum Screen (*.scr)|*.scr|PNG (*.png)|*.png|JPEG (*.jpeg)|*.jpeg|GIF (*.gif)|*.gif";
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK) {
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
                 Bitmap screenshot = dxWindow.GetScreen();
-                switch (saveFileDialog1.FilterIndex) {
+                switch (saveFileDialog1.FilterIndex)
+                {
                     case 1:
                         screenshot.Save(saveFileDialog1.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
                         break;
 
                     case 2:
-                        using (System.IO.FileStream scrFile = new System.IO.FileStream(saveFileDialog1.FileName, System.IO.FileMode.Create)) {
-                            using (System.IO.BinaryWriter r = new System.IO.BinaryWriter(scrFile)) {
-                                for (int f = 16384; f < 16384 + 6912; f++) {
+                        using (System.IO.FileStream scrFile = new System.IO.FileStream(saveFileDialog1.FileName, System.IO.FileMode.Create))
+                        {
+                            using (System.IO.BinaryWriter r = new System.IO.BinaryWriter(scrFile))
+                            {
+                                for (int f = 16384; f < 16384 + 6912; f++)
+                                {
                                     byte data = (byte)(zx.PeekByteNoContend(f));
                                     r.Write(data);
                                 }
@@ -3580,48 +4058,44 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
-        private void loadBinaryMenuItem1_Click(object sender, EventArgs e) {
+        private void loadBinaryMenuItem1_Click(object sender, EventArgs e)
+        {
             loadBinaryDialog = new LoadBinary(this, true);
             loadBinaryDialog.Show();
         }
 
-        private void saveBinaryMenuItem5_Click(object sender, EventArgs e) {
+        private void saveBinaryMenuItem5_Click(object sender, EventArgs e)
+        {
             loadBinaryDialog = new LoadBinary(this, false);
             loadBinaryDialog.Show();
         }
 
-        public void saveSnapshotMenuItem_Click(object sender, EventArgs e) {
+        public void saveSnapshotMenuItem_Click(object sender, EventArgs e)
+        {
             saveFileDialog1.Title = "Save Snapshot";
             saveFileDialog1.FileName = "";
             saveFileDialog1.Filter = "SZX snapshot|*.szx";
 
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK) {
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
                 zx.SaveSZX(saveFileDialog1.FileName);
                 MessageBox.Show("Snapshot saved successfully!", "File saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
-        public void openFileMenuItem1_Click(object sender, EventArgs e) {
+        public void openFileMenuItem1_Click(object sender, EventArgs e)
+        {
             zx.Pause();
             dxWindow.Suspend();
             openFileDialog1.InitialDirectory = recentFolder;
             openFileDialog1.Title = "Choose a file";
             openFileDialog1.FileName = "";
             openFileDialog1.Filter = "All supported files|*.szx;*.sna;*.z80;*.pzx;*.tzx;*.tap;*.csw;*.rzx;*.zip;*.dsk;*.trd;*.scl;*.scr|Snapshots (*.szx, *.sna, *.z80)|*.szx; *.sna;*.z80|Tapes (*.pzx, *.tap, *.tzx, *.csw)|*.pzx;*.tap;*.tzx;*.csw|Disks (*.dsk, *.trd, *.scl)|*.dsk;*.trd;*.scl|ZIP Archive (*.zip)|*.zip|Action Replay (*.rzx)|*.rzx|Spectrum Screen (*.scr)|*.scr";
-            if (openFileDialog1.ShowDialog() == DialogResult.OK) {
-                //if (debugger != null)
-                //{
-                //    debugger.Close();
-                //    debugger.Dispose();
-                //    debugger = null;
-                //}
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                this.mruManager.AddRecentFile(openFileDialog1.FileName);
                 recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
                 LoadZXFile(openFileDialog1.FileName);
-                //if (debugger != null)
-                //{
-                //    debugger = new Monitor(this);
-                //    debugger.Show();
-                //}
             }
 
             dxWindow.Resume();
@@ -3629,92 +4103,89 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.Focus();
         }
 
-        private void trainerToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void trainerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
         }
 
         //Adjust the window if switching between models that have different speccy screen sizes
-        private void AdjustRenderWindow(int x, int y) {
-            dxWindow.Suspend();
-            int _offsetX = zx.GetOriginOffsetX();
-            int _offsetY = zx.GetOriginOffsetY();
+        /* private void AdjustRenderWindow(int x, int y) {
+             dxWindow.Suspend();
+             int _offsetX = zx.GetOriginOffsetX();
+             int _offsetY = zx.GetOriginOffsetY();
+             int speccyWidth = zx.GetTotalScreenWidth() - _offsetX;
+             int speccyHeight = zx.GetTotalScreenHeight() - _offsetY;
+             int dxWindowOffsetX = 10;
+             int dxWindowOffsetY = toolStrip1.Location.Y + toolStrip1.Height;
 
-            int speccyWidth = zx.GetTotalScreenWidth() - _offsetX;
-            int speccyHeight = zx.GetTotalScreenHeight() - _offsetY;
+             Rectangle screenRectangle = RectangleToScreen(this.ClientRectangle);
 
-            int dxWindowOffsetX = 10;
-            int dxWindowOffsetY = toolStrip1.Location.Y + toolStrip1.Height;
-            Rectangle screenRectangle = RectangleToScreen(this.ClientRectangle);
-            int titleHeight = screenRectangle.Top - this.Top;
-            int totalClientWidth = speccyWidth + dxWindowOffsetX;
-            int totalClientHeight = speccyHeight + dxWindowOffsetY + statusStrip1.Height + titleHeight;
+             int titleHeight = screenRectangle.Top - this.Top;
+             int totalClientWidth = speccyWidth + dxWindowOffsetX;
+             int totalClientHeight = speccyHeight + dxWindowOffsetY + statusStrip1.Height + titleHeight;
+             int adjustWidth = speccyWidth * (config.WindowSize / 100);
+             int adjustHeight = speccyHeight * (config.WindowSize / 100);
 
-            int adjustWidth = speccyWidth * (config.WindowSize / 100);
-            int adjustHeight = speccyHeight * (config.WindowSize / 100);
-            borderAdjust = config.BorderSize + config.BorderSize * (config.WindowSize / 100);
-            this.Size = new Size(totalClientWidth + adjustWidth - (2 * borderAdjust), totalClientHeight + adjustHeight - (2 * borderAdjust));
-            //Hack: at the lowest window size the pentagon left border width doesn't match up with the right one,
-            //for reasons unknown.
-            //All it needs is a 8 pix adjust hence this:
-            if (zx.model == MachineModel._pentagon)
-                _offsetX -= 8;
+             borderAdjust = config.BorderSize + config.BorderSize * (config.WindowSize / 100);
+             this.Size = new Size(totalClientWidth + adjustWidth - (2 * borderAdjust), totalClientHeight + adjustHeight - (2 * borderAdjust));
+             //Hack: at the lowest window size the pentagon left border width doesn't match up with the right one,
+             //for reasons unknown.
+             //All it needs is a 8 pix adjust hence this:
+             if (zx.model == MachineModel._pentagon)
+                 _offsetX -= 8;
 
-            dxWindow.Location = new Point( _offsetX - borderAdjust, dxWindowOffsetY - _offsetY - borderAdjust);
-            dxWindow.SetSize(zx.GetTotalScreenWidth() + adjustWidth, zx.GetTotalScreenHeight() + adjustHeight);
-            dxWindow.SendToBack();
-            dxWindow.LEDIndicatorPosition = new Point(dxWindow.Location.X, dxWindow.Location.Y);
-            dxWindow.Resume();
-            //dxWindow.InitDirectX(dxWindow.Width, dxWindow.Height);
-           // dxWindow.Invalidate();
-            
-            dxWindow.Focus();
-            //this.CenterToScreen();
-           
-        }
+             dxWindow.Location = new Point( _offsetX - borderAdjust, dxWindowOffsetY - _offsetY - borderAdjust);
+             dxWindow.SetSize(zx.GetTotalScreenWidth() + adjustWidth, zx.GetTotalScreenHeight() + adjustHeight);
+             dxWindow.SendToBack();
+             dxWindow.LEDIndicatorPosition = new Point(dxWindow.Location.X, dxWindow.Location.Y);
+             dxWindow.Resume();
+             dxWindow.Focus();
+         }*/
 
-        //The app window, includin the emulator window and all the buttons, panels et al
-        private void AdjustWindowSize() {
-            //this.Hide();
+        //The app window, including the emulator window and all the buttons, panels et al
+        private void AdjustWindowSize()
+        {
             fullScreenToolStripMenuItem.Checked = false;
 
             int _offsetX = zx.GetOriginOffsetX();
             int _offsetY = zx.GetOriginOffsetY();
-
             int speccyWidth = zx.GetTotalScreenWidth() - _offsetX;
             int speccyHeight = zx.GetTotalScreenHeight() - _offsetY;
             int dxWindowOffsetX = 10;
             int dxWindowOffsetY = toolStrip1.Location.Y + toolStrip1.Height;
+
             Rectangle screenRectangle = RectangleToScreen(this.ClientRectangle);
+
             int titleHeight = screenRectangle.Top - this.Top;
             int totalClientWidth = speccyWidth + dxWindowOffsetX;
             int totalClientHeight = speccyHeight + dxWindowOffsetY + statusStrip1.Height + titleHeight;
-
             int adjustWidth = speccyWidth * (config.WindowSize / 100);
             int adjustHeight = speccyHeight * (config.WindowSize / 100);
 
             borderAdjust = config.BorderSize + config.BorderSize * (config.WindowSize / 100);
-            this.Size = new Size(totalClientWidth + adjustWidth - (2 * borderAdjust), totalClientHeight + adjustHeight - (2 * borderAdjust));
- 
+
             //Hack: at the lowest window size the pentagon left border width doesn't match up with the right one,
             //for reasons unknown.
             //All it needs is a 8 pix adjust hence this:
             if (zx.model == MachineModel._pentagon)
                 _offsetX -= 8;
 
-            dxWindow.Location = new Point(_offsetX - borderAdjust, dxWindowOffsetY  - _offsetY - borderAdjust);
+            this.Size = new Size(totalClientWidth + adjustWidth - (2 * borderAdjust) + _offsetX * 2, totalClientHeight + adjustHeight - (2 * borderAdjust));
+            dxWindow.Location = new Point(_offsetX - borderAdjust, dxWindowOffsetY - _offsetY - borderAdjust);
             dxWindow.SetSize(zx.GetTotalScreenWidth() + adjustWidth, zx.GetTotalScreenHeight() + adjustHeight);
             dxWindow.SendToBack();
-            //this.Size = new System.Drawing.Size(dxWindow.Size.Width + 10, dxWindow.Size.Height + 107);
-            //dxWindow.TapeIndicatorPosition = new Point(dxWindow.Width - panel1.Width, dxWindow.Height - panel3.Height);
             dxWindow.LEDIndicatorPosition = new Point(dxWindow.Location.X, dxWindow.Location.Y);
             dxWindow.Focus();
             dxWindow.Invalidate();
-            //this.CenterToScreen();
+
             Rectangle workingArea = Screen.GetWorkingArea(this);
 
             if ((totalClientWidth + (speccyWidth * (config.WindowSize + 50)) / 100 - (2 * borderAdjust) >= workingArea.Width) ||
-                ((totalClientHeight + (speccyHeight * (config.WindowSize + 50)) / 100 - (2 * borderAdjust)) >= workingArea.Height)) {
+                ((totalClientHeight + (speccyHeight * (config.WindowSize + 50)) / 100 - (2 * borderAdjust)) >= workingArea.Height))
+            {
                 toolStripMenuItem5.Enabled = false;
-            } else {
+            }
+            else
+            {
                 if (config.WindowSize >= 500)
                     toolStripMenuItem5.Enabled = false;
                 else
@@ -3725,12 +4196,12 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 toolStripMenuItem1.Enabled = false;
             else
                 toolStripMenuItem1.Enabled = true;
-
-            //this.Show();
         }
 
-        private void toolStripMenuItem5_Click_1(object sender, EventArgs e) {
-            if (!toolStripMenuItem5.Enabled) {
+        private void toolStripMenuItem5_Click_1(object sender, EventArgs e)
+        {
+            if (!toolStripMenuItem5.Enabled)
+            {
                 MessageBox.Show("Emulator window cannot be resized beyond your monitor's maximum screen dimensions.", "Window Size", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -3739,17 +4210,20 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             AdjustWindowSize();
         }
 
-        private void panel4_Paint(object sender, PaintEventArgs e) {
+        private void panel4_Paint(object sender, PaintEventArgs e)
+        {
             //e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             //e.Graphics.DrawImage(panel4.BackgroundImage, panel4.Location.X, panel4.Location.Y, panel4.Width, panel4.Height);
         }
 
-        private void panel5_Paint(object sender, PaintEventArgs e) {
+        private void panel5_Paint(object sender, PaintEventArgs e)
+        {
             // e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             // e.Graphics.DrawImage(ZiggyWin.Properties.Resources.rightPane11, panel5.Location.X, panel5.Location.Y, panel5.Width, panel5.Height);
         }
 
-        private void toolStripMenuItem1_Click(object sender, EventArgs e) {
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
             if (!toolStripMenuItem1.Enabled)
                 return;
             if (config.WindowSize > 0)
@@ -3758,25 +4232,33 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             AdjustWindowSize();
         }
 
-        private Region GetRegion(Bitmap _img, Color color) {
+        private Region GetRegion(Bitmap _img, Color color)
+        {
             Color _matchColor = Color.FromArgb(color.R, color.G, color.B);
             System.Drawing.Region rgn = new Region();
             rgn.MakeEmpty();
             Rectangle rc = new Rectangle(0, 0, 0, 0);
             bool inimage = false;
 
-            for (int y = 0; y < _img.Height; y++) {
-                for (int x = 0; x < _img.Width; x++) {
+            for (int y = 0; y < _img.Height; y++)
+            {
+                for (int x = 0; x < _img.Width; x++)
+                {
                     Color imgPixel = _img.GetPixel(x, y);
-                    if (!inimage) {
-                        if (imgPixel != _matchColor) {
+                    if (!inimage)
+                    {
+                        if (imgPixel != _matchColor)
+                        {
                             inimage = true;
                             rc.X = x;
                             rc.Y = y;
                             rc.Height = 1;
                         }
-                    } else {
-                        if (imgPixel == _matchColor) {
+                    }
+                    else
+                    {
+                        if (imgPixel == _matchColor)
+                        {
                             inimage = false;
                             rc.Width = x - rc.X;
                             rgn.Union(rc);
@@ -3784,7 +4266,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     }
                 }
 
-                if (inimage) {
+                if (inimage)
+                {
                     inimage = false;
                     rc.Width = _img.Width - rc.X;
                     rgn.Union(rc);
@@ -3793,36 +4276,43 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return rgn;
         }
 
-        private void contextMenuStrip1_VisibleChanged(object sender, EventArgs e) {
-            pauseEmulation = contextMenuStrip1.Visible;
-            if (CursorIsHidden) {
+        /*
+        private void contextMenuStrip1_VisibleChanged(object sender, EventArgs e)
+        {
+            //pauseEmulation = contextMenuStrip1.Visible;
+            if (CursorIsHidden)
+            {
                 CursorIsHidden = false;
                 Cursor.Show();
             }
         }
-
-        private void paneRight_MouseDown(object sender, MouseEventArgs e) {
+        */
+        private void paneRight_MouseDown(object sender, MouseEventArgs e)
+        {
             //if (pauseEmulation)
             //    return;
-            Form_MouseDown(sender, e);
+            //Form_MouseDown(sender, e);
             //dxWindow.Focus();
         }
 
-        private void paneRight_MouseMove(object sender, MouseEventArgs e) {
+        private void paneRight_MouseMove(object sender, MouseEventArgs e)
+        {
             // if (pauseEmulation)
             //     return;
-            Form_MouseMove(sender, e);
+            // Form_MouseMove(sender, e);
             // dxWindow.Focus();
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e) {
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
             if ((aboutWindow == null) || (aboutWindow.IsDisposed))
                 aboutWindow = new AboutBox1(this);
             aboutWindow.ShowDialog(this);
             dxWindow.Focus();
         }
 
-        private bool OpenDiskFile(byte _unit) {
+        private bool OpenDiskFile(byte _unit)
+        {
             bool isError = false;
 
             openFileDialog1.InitialDirectory = recentFolder;
@@ -3833,13 +4323,16 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             else
                 openFileDialog1.Filter = "All supported files|*.trd;*.scl;*.zip|Beta Disks (*.trd, *.scl)|*.trd;*.scl|ZIP Archive (*.zip)|*.zip";
 
-            if (openFileDialog1.ShowDialog() == DialogResult.OK) {
-                if (debugger != null) {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if (debugger != null)
+                {
                     debugger.Close();
                     debugger.Dispose();
                     debugger = null;
                 }
-                if (diskArchivePath[_unit] != null) {
+                if (diskArchivePath[_unit] != null)
+                {
                     File.Delete(diskArchivePath[_unit]);
                     diskArchivePath[_unit] = null;
                 }
@@ -3854,21 +4347,30 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         new ComponentAce.Compression.Archiver.ArchiveItem();
 
                     String fileToOpen = "";
-                    try {
+                    try
+                    {
                         archiver.OpenArchive(FileMode.Open);
                         System.Collections.Generic.List<String> fileNameAndSizeList = new System.Collections.Generic.List<string>();
 
-                        if (archiver.FindFirst("*.*", ref archiveItem)) {
-                            do {
-                                if (archiveItem.FileName != "") {
+                        if (archiver.FindFirst("*.*", ref archiveItem))
+                        {
+                            do
+                            {
+                                if (archiveItem.FileName != "")
+                                {
                                     String ext2 = archiveItem.FileName.Substring(archiveItem.FileName.Length - 3).ToLower();
-                                    if (zx is zxPlus3) {
-                                        if (ext2 == "dsk") {
+                                    if (zx is zxPlus3)
+                                    {
+                                        if (ext2 == "dsk")
+                                        {
                                             fileNameAndSizeList.Add(archiveItem.FileName);
                                             fileNameAndSizeList.Add((archiveItem.UncompressedSize).ToString());
                                         }
-                                    } else if (zx is Pentagon128K) {
-                                        if ((ext2 == "trd") || (ext2 == "scl")) {
+                                    }
+                                    else if (zx is Pentagon128K)
+                                    {
+                                        if ((ext2 == "trd") || (ext2 == "scl"))
+                                        {
                                             fileNameAndSizeList.Add(archiveItem.FileName);
                                             fileNameAndSizeList.Add((archiveItem.UncompressedSize).ToString());
                                         }
@@ -3878,21 +4380,30 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                             while (archiver.FindNext(ref archiveItem));
                         }
 
-                        if (fileNameAndSizeList.Count == 0) {
+                        if (fileNameAndSizeList.Count == 0)
+                        {
                             MessageBox.Show("Couldn't find any suitable file to load in this archive.", "No suitable file", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             isError = true;
-                        } else {
-                            if (fileNameAndSizeList.Count == 2) {
+                        }
+                        else
+                        {
+                            if (fileNameAndSizeList.Count == 2)
+                            {
                                 fileToOpen = fileNameAndSizeList[0];
-                            } else if (fileNameAndSizeList.Count > 2) {
+                            }
+                            else if (fileNameAndSizeList.Count > 2)
+                            {
                                 ArchiveHandler archiveHandler = new ArchiveHandler(fileNameAndSizeList.ToArray());
-                                if (archiveHandler.ShowDialog() == DialogResult.OK) {
+                                if (archiveHandler.ShowDialog() == DialogResult.OK)
+                                {
                                     fileToOpen = archiveHandler.FileToOpen;
-                                } else
+                                }
+                                else
                                     isError = true;
                             }
 
-                            if (!isError) {
+                            if (!isError)
+                            {
                                 String ext2 = fileToOpen.Substring(fileToOpen.Length - 3).ToLower();
                                 System.IO.MemoryStream stream = new MemoryStream();
                                 archiver.Options.CreateDirs = false;
@@ -3910,19 +4421,24 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         archiver.CloseArchive();
                         archiver.Dispose();
                         archiver = null;
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e)
+                    {
                         System.Windows.Forms.MessageBox.Show(e.Message,
                                 "Archive failure", System.Windows.Forms.MessageBoxButtons.OK);
                         isError = true;
                     }
                     pauseEmulation = false;
-                } else {
+                }
+                else
+                {
                     //string[] _files = openFileDialog1.FileName.Split('\\');
                     //int _fileCnt = _files.Length;
                     InsertDisk(openFileDialog1.FileName, _unit);
                     LoadDSK(openFileDialog1.FileName, _unit);
                 }
-                if (debugger != null) {
+                if (debugger != null)
+                {
                     debugger = new Monitor(this);
                     debugger.Show();
                 }
@@ -3932,24 +4448,30 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return isError;
         }
 
-        private void insertDiskAToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void insertDiskAToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             OpenDiskFile(0);
         }
 
-        private void insertDiskBToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void insertDiskBToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             OpenDiskFile(1);
         }
 
-        private void insertDiskCToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void insertDiskCToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             OpenDiskFile(2);
         }
 
-        private void insertDiskDToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void insertDiskDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             OpenDiskFile(3);
         }
 
-        private void searchOnlineToolStripMenuItem_Click(object sender, EventArgs e) {
-            if ((infoseekWiz == null) || (infoseekWiz.IsDisposed)) {
+        private void searchOnlineToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if ((infoseekWiz == null) || (infoseekWiz.IsDisposed))
+            {
                 infoseekWiz = new Infoseeker();
                 infoseekWiz.DownloadCompleteEvent += new FileDownloadHandler(OnFileDownloadEvent);
             }
@@ -3959,14 +4481,17 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             pauseEmulation = false;
         }
 
-        private void tapeToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (tapeDeck != null) {
+        private void tapeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tapeDeck != null)
+            {
                 tapeDeck.Show();
                 return;
             }
         }
 
-        private void cheatHelperToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void cheatHelperToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             if ((trainerWiz == null) || (trainerWiz.IsDisposed))
                 trainerWiz = new Trainer_Wizard(this);
             pauseEmulation = true;
@@ -3977,32 +4502,38 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             this.BringToFront();
         }
 
-        private void aboutZeroToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void aboutZeroToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             if (aboutWindow == null)
                 aboutWindow = new AboutBox1(this);
             aboutWindow.ShowDialog(this);
             dxWindow.Focus();
         }
 
-        private void pixelToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void pixelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             dxWindow.PixelSmoothing = pixelToolStripMenuItem.Checked;
             config.EnablePixelSmoothing = dxWindow.PixelSmoothing;
         }
 
-        private void toolStripMenuItem3_Click(object sender, EventArgs e) {
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        {
             SpectrumKeyboard keyb = new SpectrumKeyboard(this);
             keyb.Show();
         }
 
-        private void tapeBrowserButton_Click(object sender, EventArgs e) {
-            if (tapeDeck != null) {
+        private void tapeBrowserButton_Click(object sender, EventArgs e)
+        {
+            if (tapeDeck != null)
+            {
                 tapeDeck.Show();
                 tapeDeck.BringToFront();
                 return;
             }
         }
 
-        private void rzxPlaybackToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void rzxPlaybackToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             zx.Pause();
 
             dxWindow.Suspend();
@@ -4010,7 +4541,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             openFileDialog1.Title = "Choose a file";
             openFileDialog1.FileName = "";
             openFileDialog1.Filter = "Action Replay (*.rzx)|*.rzx";
-            if (openFileDialog1.ShowDialog() == DialogResult.OK) {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
                 recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
                 LoadZXFile(openFileDialog1.FileName);
                 rzxStopToolStripMenuItem1.Enabled = true;
@@ -4021,8 +4553,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.Focus();
         }
 
-        private void rzxRecordToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void rzxRecordToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             zx.StartRecordingRZX();
+            rzxRecordButton.Enabled = false;
             rzxStopToolStripMenuItem1.Enabled = true;
             rzxFinaliseToolStripMenuItem.Enabled = true;
             rzxDiscardToolStripMenuItem.Enabled = true;
@@ -4032,44 +4566,30 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             PauseEmulation(true);
         }
 
-        private void rzxStopToolStripMenuItem1_Click(object sender, EventArgs e) {
-            if (zx.isRecordingRZX) {
-                saveFileDialog1.Title = "Save Action Replay";
-                saveFileDialog1.FileName = "";
-                saveFileDialog1.Filter = "Action Replay|*.rzx";
-
-                if (saveFileDialog1.ShowDialog() == DialogResult.OK) {
-                    zx.SaveRZX(saveFileDialog1.FileName, false);
-                    MessageBox.Show("RZX recording saved successfully!", "File saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    rzxStopToolStripMenuItem1.Enabled = false;
-                    rzxFinaliseToolStripMenuItem.Enabled = false;
-                    rzxDiscardToolStripMenuItem.Enabled = false;
-                    rzxRecordToolStripMenuItem.Enabled = true;
-                    rzxContinueSessionToolStripMenuItem.Enabled = true;
-                    rzxPlaybackToolStripMenuItem.Enabled = true;
-                }
-            } else if (zx.isPlayingRZX)
-                zx.isPlayingRZX = false;
-        }
-
-        private void rzxContinueSessionToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void rzxContinueSessionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             dxWindow.Suspend();
             openFileDialog1.InitialDirectory = recentFolder;
             openFileDialog1.Title = "Choose a file";
             openFileDialog1.FileName = "";
             openFileDialog1.Filter = "Action Replay (*.rzx)|*.rzx";
-            if (openFileDialog1.ShowDialog() == DialogResult.OK) {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
                 recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
                 LoadRZX(openFileDialog1.FileName, true);
-                if (!zx.ContinueRecordingRZX()) {
-                    MessageBox.Show("This is not a valid or recognized recording session that's compatible with Zero", "Invalid RZX Session", MessageBoxButtons.OK);
-                } else {
+                if (!zx.ContinueRecordingRZX())
+                {
+                    MessageBox.Show("This is not a valid or recognized recording session.", "Invalid RZX Session", MessageBoxButtons.OK);
+                }
+                else
+                {
                     rzxStopToolStripMenuItem1.Enabled = true;
                     rzxFinaliseToolStripMenuItem.Enabled = true;
                     rzxRecordToolStripMenuItem.Enabled = false;
                     rzxContinueSessionToolStripMenuItem.Enabled = false;
                     rzxDiscardToolStripMenuItem.Enabled = true;
                     rzxPlaybackToolStripMenuItem.Enabled = false;
+                    rzxRecordButton.Enabled = false;
                     ForceScreenUpdate(true);
                     PauseEmulation(true);
                 }
@@ -4078,49 +4598,71 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.Focus();
         }
 
-        private void rzxFinaliseToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (zx.isRecordingRZX) {
-                saveFileDialog1.Title = "Save Action Replay";
-                saveFileDialog1.FileName = "";
-                saveFileDialog1.Filter = "Action Replay|*.rzx";
-
-                if (saveFileDialog1.ShowDialog() == DialogResult.OK) {
-                    zx.SaveRZX(saveFileDialog1.FileName, true);
-                    MessageBox.Show("RZX recording saved successfully!", "File saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    rzxStopToolStripMenuItem1.Enabled = false;
-                    rzxFinaliseToolStripMenuItem.Enabled = false;
-                    rzxDiscardToolStripMenuItem.Enabled = false;
-                    rzxRecordToolStripMenuItem.Enabled = true;
-                    rzxContinueSessionToolStripMenuItem.Enabled = true;
-                    rzxPlaybackToolStripMenuItem.Enabled = true;
-                }
-            }
+        private void rzxStopToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (zx.isRecordingRZX)
+                SaveRZXRecording(false);
+            else if (zx.isPlayingRZX)
+                zx.isPlayingRZX = false;
         }
 
-        private void rzxDiscardToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void rzxFinaliseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (zx.isRecordingRZX)
+                SaveRZXRecording(true);
+        }
+
+        private void SaveRZXRecording(bool finalise)
+        {
+            saveFileDialog1.Title = "Save Action Replay";
+            saveFileDialog1.FileName = "";
+            saveFileDialog1.Filter = "Action Replay|*.rzx";
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                zx.SaveRZX(saveFileDialog1.FileName, finalise);
+                MessageBox.Show("RZX recording saved successfully!", "File saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                rzxStopToolStripMenuItem1.Enabled = false;
+                rzxFinaliseToolStripMenuItem.Enabled = false;
+                rzxDiscardToolStripMenuItem.Enabled = false;
+                rzxRecordToolStripMenuItem.Enabled = true;
+                rzxContinueSessionToolStripMenuItem.Enabled = true;
+                rzxPlaybackToolStripMenuItem.Enabled = true;
+            }
+            rzxRecordButton.Enabled = true;
+
+        }
+
+        private void rzxDiscardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             zx.DiscardRZX();
             rzxStopToolStripMenuItem1.Enabled = false;
             rzxFinaliseToolStripMenuItem.Enabled = false;
             rzxDiscardToolStripMenuItem.Enabled = false;
             rzxRecordToolStripMenuItem.Enabled = true;
+            rzxRecordButton.Enabled = true;
             rzxContinueSessionToolStripMenuItem.Enabled = true;
             rzxPlaybackToolStripMenuItem.Enabled = true;
         }
 
-        private void insertBookmarkToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void insertBookmarkToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             if (zx.isRecordingRZX)
                 zx.InsertBookmark();
         }
 
-        private void rzxRollback(object sender, EventArgs e) {
+        private void rzxRollback(object sender, EventArgs e)
+        {
             ((System.Timers.Timer)sender).Enabled = false;
             zx.RollbackRZX();
             ForceScreenUpdate(true);
             PauseEmulation(true);
         }
 
-        private void rollbackToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (zx.isRecordingRZX) {
+        private void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (zx.isRecordingRZX)
+            {
                 System.Timers.Timer dispatcherTimer = new System.Timers.Timer();
                 dispatcherTimer.Elapsed += new System.Timers.ElapsedEventHandler(rzxRollback);
                 dispatcherTimer.Interval = 20;
@@ -4131,17 +4673,26 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
-        private void libraryToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void libraryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             library = new ZLibrary();
             library.Show();
         }
 
-        private void contextMenuStrip2_Opening(object sender, System.ComponentModel.CancelEventArgs e) {
+        private void contextMenuStrip2_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
 
         }
 
-        private void toolStripSeparator13_Click(object sender, EventArgs e) {
+        private void toolStripSeparator13_Click(object sender, EventArgs e)
+        {
 
+        }
+
+        private void soundStatusLabel_Click(object sender, EventArgs e)
+        {
+            zx.MuteSound(config.EnableSound);
+            config.EnableSound = !config.EnableSound;
         }
     }
 }

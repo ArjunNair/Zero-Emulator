@@ -7436,9 +7436,8 @@ namespace ZeroWin
                 ziggyWin.zx.doRun = true;
                 previousPC = pc;
                 previousTState = ziggyWin.zx.totalTStates;
-                // ziggyWin.zx.monitorSaysRun = true;
                 ziggyWin.zx.Resume();
-                ziggyWin.Focus();
+                //ziggyWin.Focus();
                 return;
             }
 
@@ -7453,9 +7452,8 @@ namespace ZeroWin
                 ziggyWin.zx.doRun = true;
                 previousPC = pc;
                 previousTState = ziggyWin.zx.totalTStates;
-                //ziggyWin.zx.monitorSaysRun = true;
                 ziggyWin.zx.Resume();
-                ziggyWin.Focus();
+                //ziggyWin.Focus();
                 return;
             }
             ziggyWin.zx.ResetKeyboard();

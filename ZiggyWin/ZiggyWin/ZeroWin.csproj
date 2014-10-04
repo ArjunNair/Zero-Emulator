@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ZeroWin</RootNamespace>
     <AssemblyName>Zero</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ManifestCertificateThumbprint>53667CC54C33AC4527E19EEA24F045740DB99D59</ManifestCertificateThumbprint>
     <ManifestKeyFile>ZiggyWin_1_TemporaryKey.pfx</ManifestKeyFile>
@@ -20,10 +20,9 @@
     <ApplicationIcon>
     </ApplicationIcon>
     <TargetZone>Custom</TargetZone>
-    <Win32Resource>C:\Users\Arjun\Documents\Speccy\Zero_Git\ZiggyWin\ZiggyWin\zeroIconResource.res</Win32Resource>
+    <Win32Resource>E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\zeroIconResource.res</Win32Resource>
     <SignAssembly>false</SignAssembly>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -86,6 +85,9 @@
     <ErrorReport>prompt</ErrorReport>
     <DebugSymbols>true</DebugSymbols>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>ZeroWin.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
@@ -162,6 +164,7 @@
     <Compile Include="Machine State.Designer.cs">
       <DependentUpon>Machine State.cs</DependentUpon>
     </Compile>
+    <Compile Include="MRUManager.cs" />
     <Compile Include="PicturePreview.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -502,14 +505,22 @@
     <None Include="Resources\wizard.png" />
     <None Include="Resources\arrow-1-left.png" />
     <None Include="Resources\arrow-1-right.png" />
+    <None Include="Resources\rzxPlay_16x16.png" />
+    <None Include="Resources\rzxPlay_16x16.jpg" />
+    <None Include="Resources\tape_16x16.png" />
+    <None Include="Resources\rzxRecord_16x16.png" />
+    <None Include="Resources\rzxRecord16x16.jpg" />
+    <None Include="Resources\rzxPlay16x16.png" />
+    <None Include="Resources\download_16x16.png" />
+    <None Include="Resources\sound_high.png" />
+    <None Include="Resources\sound_mute.png" />
+    <None Include="Resources\keyboard_16x16.png" />
     <Content Include="Ziggy Emulator.ico" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Service References\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

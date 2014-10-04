@@ -329,7 +329,7 @@ namespace ZeroWin
         private void detailsButton_Click(object sender, EventArgs e) {
             infoView.ResetDetails();
             infoView.ShowDetails(infoList[infoListBox.SelectedIndex].InfoseekID, infoList[infoListBox.SelectedIndex].PicInlayURL);
-            infoView.Owner = this;
+            //infoView.Owner = this;
         }
 
         private void Infoseeker_FormClosed(object sender, FormClosedEventArgs e) {

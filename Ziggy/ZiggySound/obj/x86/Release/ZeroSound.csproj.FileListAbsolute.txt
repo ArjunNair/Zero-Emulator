@@ -81,3 +81,11 @@ C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\x86\Release\ZeroSo
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\x86\Release\ZeroSound.csproj.GenerateResource.Cache
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\x86\Release\ZeroSound.dll
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\x86\Release\ZeroSound.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\bin\ZeroSound.dll.config
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\bin\ZeroSound.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\bin\ZeroSound.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\obj\x86\Release\ZeroSound.Properties.Resources.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\obj\x86\Release\ZeroSound.csproj.GenerateResource.Cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\obj\x86\Release\ZeroSound.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\obj\x86\Release\ZeroSound.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\obj\x86\Release\ZeroSound.csprojResolveAssemblyReference.cache

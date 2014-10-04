@@ -587,7 +587,6 @@ namespace Speccy
         public bool isPlayingRZX = false;
         public bool isRecordingRZX = false;
         protected int rzxCurrentBookmark = 0;
-        protected bool rzxInsertedForPlayback = false;
 
         //Disk related stuff
         protected int diskDriveState = 0;
@@ -683,7 +682,6 @@ namespace Speccy
         }
 
         public void PlaybackRZX(RZXLoader _rzx) {
-            rzxInsertedForPlayback = true;
             isRecordingRZX = false;
             rzx = _rzx;
             rzxFrameCount = 0;
@@ -875,7 +873,6 @@ namespace Speccy
 
         //Resets the speccy
         public virtual void Reset() {
-            rzxInsertedForPlayback = false;
             isResetOver = false;
             isPlayingRZX = false;
             isRecordingRZX = false;
@@ -1199,10 +1196,13 @@ namespace Speccy
         //The main loop which executes opcodes repeatedly till 1 frame (69888 tstates)
         //has been generated.
         public void Run() {
-           // for (int rep = 0; rep < (tapeIsPlaying && edgeLoadTapes ? 2000:1); rep++)
-                while (doRun) {
+            for (int rep = 0; rep < (tapeIsPlaying && edgeLoadTapes ? 200 : 1); rep++)
+            {
+                while (doRun)
+                {
                     //Raise event for debugger
-                    if (OpcodeExecutedEvent != null) {
+                    if (OpcodeExecutedEvent != null)
+                    {
                         // lock (lockThis2)
                         {
                             //monitorIsRunning = true;
@@ -1212,13 +1212,15 @@ namespace Speccy
                         }
                     }
 
-                    lock (lockThis) 
+                    lock (lockThis)
                     {
                         #region Tape Save Trap
                         //Tape Save trap
-                        if (PC == 0x04d1) {
+                        if (PC == 0x04d1)
+                        {
                             //Trap the tape only if lower ROM is 48k!
-                            if (lowROMis48K) {
+                            if (lowROMis48K)
+                            {
                                 if (TapeEvent != null)
                                     OnTapeEvent(new TapeEventArgs(TapeEventType.SAVE_TAP));
                                 IX = IX + DE;
@@ -1234,21 +1236,27 @@ namespace Speccy
                         else
                             if (doRun)
                                 Process();
-                      
+
                     } //lock
 
-                    if (needsPaint) {
+                    if (needsPaint)
+                    {
                         #region Tape Deck event for stopping tape on tape play timeout
 
-                        if (tapeIsPlaying) {
-                            if (tape_AutoPlay && tape_AutoStarted) {
-                                if (!(isPauseBlockPreproccess && (edgeDuration > 0) && and_32_Or_64)) {
-                                    if (tape_stopTimeOut <= 0) {
+                        if (tapeIsPlaying)
+                        {
+                            if (tape_AutoPlay && tape_AutoStarted)
+                            {
+                                if (!(isPauseBlockPreproccess && (edgeDuration > 0) && and_32_Or_64))
+                                {
+                                    if (tape_stopTimeOut <= 0)
+                                    {
                                         // if (TapeEvent != null)
                                         //     OnTapeEvent(new TapeEventArgs(TapeEventType.STOP_TAPE)); //stop the tape!
                                         DoTapeEvent(new TapeEventArgs(TapeEventType.STOP_TAPE));
-                                        tape_AutoStarted = false; 
-                                    } else
+                                        tape_AutoStarted = false;
+                                    }
+                                    else
                                         tape_stopTimeOut--;
                                 }
                             }
@@ -1256,10 +1264,12 @@ namespace Speccy
 
                         #endregion Tape Deck event for stopping tape on tape play timeout
                         FrameCount++;
-                        if (FrameCount > 50) {
+                        if (FrameCount > 50)
+                        {
                             FrameCount = 0;
                         }
-                        if (!externalSingleStep) {
+                        if (!externalSingleStep)
+                        {
                             while (!beeper.FinishedPlaying() && !tapeIsPlaying)
                                 System.Threading.Thread.Sleep(1);
                         }
@@ -1269,12 +1279,19 @@ namespace Speccy
                             continue;
                         }*/
 
+                        if (tapeIsPlaying && rep != 199)
+                        {
+                            needsPaint = false;
+                            System.Threading.Thread.Sleep(0); //TO DO: Remove?
+                        }
                         break;
                     }
 
                     if (externalSingleStep)
                         break;
                 } //run loop
+                
+            }
         }
 
         //In r, (C)
@@ -2474,14 +2491,14 @@ namespace Speccy
             deltaTStates = totalTStates - oldTStates;
             
             //// Change CPU speed///////////////////////
-            if (emulationSpeed > 0 && !isPauseBlockPreproccess) {
+            if (emulationSpeed > 0 && !tapeIsPlaying /*!isPauseBlockPreproccess*/) {
                 deltaTStates /= emulationSpeed;
                 if (deltaTStates < 1)
-                    deltaTStates = 1;// (tapeIsPlaying ? 1 : 1); //tape loading likes 0, sound emulation likes 1. WTF?
+                    deltaTStates = (tapeIsPlaying ? 0 : 1); //tape loading likes 0, sound emulation likes 1. WTF?
 
                 totalTStates = oldTStates + deltaTStates;
-                //if (tapeIsPlaying)
-                //   soundTStatesToSample = 79;
+                if (tapeIsPlaying)
+                   soundTStatesToSample = 79;
             }
             /////////////////////////////////////////////////
             timeToOutSound += deltaTStates;
@@ -10553,17 +10570,6 @@ namespace Speccy
             IFF1 = false;
             IFF2 = false;
 
-            //When interrupts are enabled we can be sure that the reset sequence is over.
-            //However, it actually takes a few more frames before the speccy reaches the copyright message,
-            //so we have to wait a bit.
-            if (!isResetOver) {
-                resetFrameCounter++;
-                if (resetFrameCounter > resetFrameTarget) {
-                    isResetOver = true;
-                    resetFrameCounter = 0;
-                }
-            }
-
             if (HaltOn) {
                 HaltOn = false;
                 PC++;
@@ -10572,6 +10578,18 @@ namespace Speccy
             int oldT = totalTStates;
             if (interruptMode < 2) //IM0 = IM1 for our purpose
             {
+                //When interrupts are enabled we can be sure that the reset sequence is over.
+                //However, it actually takes a few more frames before the speccy reaches the copyright message,
+                //so we have to wait a bit.
+                if (!isResetOver)
+                {
+                    resetFrameCounter++;
+                    if (resetFrameCounter > resetFrameTarget)
+                    {
+                        isResetOver = true;
+                        resetFrameCounter = 0;
+                    }
+                }
                 //Perform a RST 0x038
                 PushStack(PC);
                 totalTStates += 7;
