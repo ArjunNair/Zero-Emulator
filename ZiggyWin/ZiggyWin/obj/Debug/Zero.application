@@ -4,14 +4,14 @@
   <description asmv2:publisher="Zero" asmv2:product="Zero" xmlns="urn:schemas-microsoft-com:asm.v1" />
   <deployment install="true" mapFileExtensions="true" />
   <dependency>
-    <dependentAssembly dependencyType="install" codebase="Zero.exe.manifest" size="9924">
+    <dependentAssembly dependencyType="install" codebase="Zero.exe.manifest" size="10797">
       <assemblyIdentity name="Zero.exe" version="0.4.0.14" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>+QHpDO6QoezvMz3KmgWAGjRwbKE=</dsig:DigestValue>
+        <dsig:DigestValue>vFcjBKAHMTwIzWDGwfnWHyOpqCQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

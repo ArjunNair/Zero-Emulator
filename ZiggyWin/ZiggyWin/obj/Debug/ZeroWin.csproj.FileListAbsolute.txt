@@ -53,3 +53,46 @@ C:\Users\Arjun\Documents\Speccy\ZeroForm\run\Zero.application
 C:\Users\Arjun\Documents\Speccy\ZeroForm\run\Zero.exe
 C:\Users\Arjun\Documents\Speccy\ZeroForm\run\Zero.pdb
 C:\Users\Arjun\Documents\Speccy\ZeroForm\run\af-ZA\Zero.resources.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe.config
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\Zero.exe
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\Zero.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.csprojResolveAssemblyReference.cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.AboutBox1.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.ArchiveHandler.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Breakpoints.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.CallStackViewer.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.CodeProfiler.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Form1.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Infoseeker.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Infoviewer.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.JoystickButtonMapper.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.JoystickRemap.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.ZLibrary.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.LoadBinary.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Machine_State.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.PicturePreview.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Registers.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.MemoryViewer.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Monitor.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Options.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.pane.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.PokeMemory.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Profiler.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Properties.Resources.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.SpectrumKeyboard.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.TapeDeck.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.TapeInfo.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Trainer_Wizard.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.TrainerValueInput.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.ZRenderer.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.Form1.af-ZA.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\ZeroWin.csproj.GenerateResource.Cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe.manifest
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.application
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\af-ZA\Zero.resources.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\af-ZA\Zero.resources.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\Zero.TrustInfo.xml
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\Zero.exe.manifest
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\Debug\Zero.application

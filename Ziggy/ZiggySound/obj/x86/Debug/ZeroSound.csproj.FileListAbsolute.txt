@@ -55,3 +55,10 @@ C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\x86\Debug\ZeroSoun
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\x86\Debug\ZeroSound.csproj.GenerateResource.Cache
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\x86\Debug\ZeroSound.dll
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\ZiggySound\obj\x86\Debug\ZeroSound.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\bin\ZeroSound.dll.config
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\bin\ZeroSound.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\bin\ZeroSound.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\obj\x86\Debug\ZeroSound.Properties.Resources.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\obj\x86\Debug\ZeroSound.csproj.GenerateResource.Cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\obj\x86\Debug\ZeroSound.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\ZiggySound\obj\x86\Debug\ZeroSound.pdb

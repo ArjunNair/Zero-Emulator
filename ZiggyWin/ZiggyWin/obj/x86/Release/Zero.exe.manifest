@@ -52,7 +52,7 @@
   </dependency>
   <dependency>
     <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
-      <assemblyIdentity name="Microsoft.DirectX.Direct3DX" version="1.0.2909.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
+      <assemblyIdentity name="Microsoft.DirectX.Direct3DX" version="1.0.2911.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
     </dependentAssembly>
   </dependency>
   <dependency>
@@ -93,19 +93,19 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>md2qoQR24oV1k0ZfbYwX/HgMjuo=</dsig:DigestValue>
+        <dsig:DigestValue>2BZTmf7oRHgFbU5VkQHWnTTssdQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="138752">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="140800">
       <assemblyIdentity name="Speccy" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>8PBNNNO25nDq+VfLJ6stkdfnhfc=</dsig:DigestValue>
+        <dsig:DigestValue>V2tkhI2Qtl+xYtTZzmwR3Obnv38=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -122,26 +122,26 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2394624">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2398208">
       <assemblyIdentity name="Zero" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>qKm1DW9rlgXSyCQNUNPRNBob0eY=</dsig:DigestValue>
+        <dsig:DigestValue>OkPwk9t6vZi4YlBoxW2snLtqcOg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="af-ZA\Zero.resources.dll" size="90624">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="af-ZA\Zero.resources.dll" size="102400">
       <assemblyIdentity name="Zero.resources" version="1.0.0.0" language="af-ZA" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>CJZtKyymbIqWIWDtSLCDmmldlPg=</dsig:DigestValue>
+        <dsig:DigestValue>jsbM2hMXye7mFuhrsdrTJTwxC6c=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -153,7 +153,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>OMKHBz/S+ypN+7197T/deJ7Vfaw=</dsig:DigestValue>
+        <dsig:DigestValue>Gmol1c3TD8hbXDMeIfRhummr5ZQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -181,13 +181,13 @@
       </hash>
     </dependentAssembly>
   </dependency>
-  <file name="Zero.exe.config" size="6202">
+  <file name="Zero.exe.config" size="6325">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-      <dsig:DigestValue>J0K32PscPFe4aldejAjHabqShsU=</dsig:DigestValue>
+      <dsig:DigestValue>0lEt3o+PQ3Bdy73QLRDSNAJoFqc=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Ziggy Emulator.ico" size="86358">

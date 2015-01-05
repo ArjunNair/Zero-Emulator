@@ -158,8 +158,7 @@
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.label35 = new System.Windows.Forms.Label();
+            this.aspectRatioFullscreenCheckBox = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.hwPage.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -377,8 +376,7 @@
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.comboBox1);
-            this.groupBox5.Controls.Add(this.label35);
+            this.groupBox5.Controls.Add(this.aspectRatioFullscreenCheckBox);
             this.groupBox5.Controls.Add(this.label10);
             this.groupBox5.Controls.Add(this.label8);
             this.groupBox5.Controls.Add(this.windowSizeComboBox);
@@ -403,7 +401,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(65, 89);
+            this.label8.Location = new System.Drawing.Point(62, 54);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(72, 13);
             this.label8.TabIndex = 14;
@@ -426,7 +424,7 @@
             "400%",
             "450%",
             "500%"});
-            this.windowSizeComboBox.Location = new System.Drawing.Point(180, 87);
+            this.windowSizeComboBox.Location = new System.Drawing.Point(177, 52);
             this.windowSizeComboBox.Name = "windowSizeComboBox";
             this.windowSizeComboBox.Size = new System.Drawing.Size(124, 21);
             this.windowSizeComboBox.TabIndex = 13;
@@ -441,7 +439,7 @@
             "Full Border",
             "Medium Border",
             "Mini Border"});
-            this.borderSizeComboBox.Location = new System.Drawing.Point(180, 122);
+            this.borderSizeComboBox.Location = new System.Drawing.Point(177, 87);
             this.borderSizeComboBox.Name = "borderSizeComboBox";
             this.borderSizeComboBox.Size = new System.Drawing.Size(124, 21);
             this.borderSizeComboBox.TabIndex = 10;
@@ -449,7 +447,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(62, 125);
+            this.label9.Location = new System.Drawing.Point(59, 90);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(112, 13);
             this.label9.TabIndex = 9;
@@ -500,7 +498,7 @@
             this.label7.Size = new System.Drawing.Size(317, 26);
             this.label7.TabIndex = 7;
             this.label7.Text = "Select a colour palette to emulate - from the old school Black && White to the mo" +
-                "dern ULA Plus.";
+    "dern ULA Plus.";
             // 
             // pictureBox4
             // 
@@ -547,7 +545,7 @@
             this.vsyncCheckbox.TabIndex = 7;
             this.vsyncCheckbox.Text = "Enable VSync";
             this.toolTip1.SetToolTip(this.vsyncCheckbox, "If this option is enabled, the renderer will try update the display at your monit" +
-                    "ors refresh rate, which may or may not give smoother display.");
+        "ors refresh rate, which may or may not give smoother display.");
             this.vsyncCheckbox.UseVisualStyleBackColor = true;
             // 
             // pixelSmoothingCheckBox
@@ -674,8 +672,8 @@
             this.label20.Size = new System.Drawing.Size(314, 39);
             this.label20.TabIndex = 3;
             this.label20.Text = "Choose the speaker configuration for the three AY channels - A,B and C - in stere" +
-                "o mode. Default is: A on left speaker, C on both speakers (center) and B on righ" +
-                "t speaker.";
+    "o mode. Default is: A on left speaker, C on both speakers (center) and B on righ" +
+    "t speaker.";
             // 
             // pictureBox10
             // 
@@ -710,7 +708,7 @@
             this.ayFor48kCheckbox.TabIndex = 5;
             this.ayFor48kCheckbox.Text = "Enable AY emulation for 48K Spectrum.";
             this.toolTip1.SetToolTip(this.ayFor48kCheckbox, "Allows AY sound to be played even on a 48k machine \r\nlike the Melodik and Fuller " +
-                    "Box devices.");
+        "Box devices.");
             this.ayFor48kCheckbox.UseVisualStyleBackColor = true;
             this.ayFor48kCheckbox.CheckedChanged += new System.EventHandler(this.ayFor48kCheckbox_CheckedChanged);
             // 
@@ -754,7 +752,7 @@
             this.label19.Size = new System.Drawing.Size(315, 39);
             this.label19.TabIndex = 2;
             this.label19.Text = "Zero can emulate AY sound in both mono and stereo modes. Choose \'Mono\' for a more" +
-                " authentic experience or \'Stereo\' for a more amiable one.";
+    " authentic experience or \'Stereo\' for a more amiable one.";
             // 
             // tabPage1
             // 
@@ -834,7 +832,7 @@
             this.label30.Size = new System.Drawing.Size(320, 39);
             this.label30.TabIndex = 3;
             this.label30.Text = "Drag the slider to change the emulation speed. Useful if you\'re playing 3D games " +
-                "or graphic adventures like The Hobbit that run a touch slow on the speccy.";
+    "or graphic adventures like The Hobbit that run a touch slow on the speccy.";
             // 
             // pictureBox15
             // 
@@ -872,7 +870,7 @@
             this.onScreenLEDCheckbox.TabIndex = 5;
             this.onScreenLEDCheckbox.Text = "Show on screen indicators.";
             this.toolTip1.SetToolTip(this.onScreenLEDCheckbox, "If unchecked, this will turn off all on screen indicators including\r\nthe tape and" +
-                    " disk activity icons.");
+        " disk activity icons.");
             this.onScreenLEDCheckbox.UseVisualStyleBackColor = true;
             // 
             // lastStateCheckbox
@@ -884,8 +882,8 @@
             this.lastStateCheckbox.TabIndex = 4;
             this.lastStateCheckbox.Text = "Restore session on startup.";
             this.toolTip1.SetToolTip(this.lastStateCheckbox, "If checked, Zero will revert to the state it was in when it exited.\r\nNow you can " +
-                    "turn off the emulator in the middle of your work or gaming\r\nsession and then hav" +
-                    "e it carry on from where you left off.");
+        "turn off the emulator in the middle of your work or gaming\r\nsession and then hav" +
+        "e it carry on from where you left off.");
             this.lastStateCheckbox.UseVisualStyleBackColor = true;
             this.lastStateCheckbox.CheckedChanged += new System.EventHandler(this.lastStateCheckbox_CheckedChanged);
             // 
@@ -1020,7 +1018,7 @@
             this.label18.Size = new System.Drawing.Size(316, 26);
             this.label18.TabIndex = 23;
             this.label18.Text = "NOTE: Windows Security *may* ask you for permission to change settings on exiting" +
-                " this dialog. Do NOT Panic! :)";
+    " this dialog. Do NOT Panic! :)";
             // 
             // tapCheckBox
             // 
@@ -1110,7 +1108,7 @@
             this.label15.Size = new System.Drawing.Size(317, 26);
             this.label15.TabIndex = 13;
             this.label15.Text = "Choose the type of files you would like to automatically open with Zero on double" +
-                " clicking from Windows Explorer.";
+    " clicking from Windows Explorer.";
             // 
             // pictureBox9
             // 
@@ -1292,7 +1290,7 @@
             this.label28.Size = new System.Drawing.Size(271, 39);
             this.label28.TabIndex = 20;
             this.label28.Text = "The arrow keys on the PC keyboard can be used to \r\nemulate one of the popular joy" +
-                "stick interfaces. The ALT \r\nkey works as the fire button.\r\n";
+    "stick interfaces. The ALT \r\nkey works as the fire button.\r\n";
             // 
             // label29
             // 
@@ -1350,7 +1348,7 @@
             this.label1.Size = new System.Drawing.Size(281, 26);
             this.label1.TabIndex = 5;
             this.label1.Text = "A few of the older 16K and 48K games require an Issue 2\r\nkeyboard to work properl" +
-                "y.";
+    "y.";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // issue3radioButton
@@ -1429,7 +1427,7 @@
             this.label26.Size = new System.Drawing.Size(303, 26);
             this.label26.TabIndex = 18;
             this.label26.Text = "Up to two controllers can be used on the PC to emulate some of the popular joysti" +
-                "ck interfaces. ";
+    "ck interfaces. ";
             // 
             // pictureBox12
             // 
@@ -1592,7 +1590,7 @@
             this.mouseCheckBox.TabIndex = 11;
             this.mouseCheckBox.Text = "Enable Kempston Mouse";
             this.toolTip1.SetToolTip(this.mouseCheckBox, "Press F7 to toggle mouse focus between Zero and Windows\r\nrespectively from within" +
-                    " the emulator.");
+        " the emulator.");
             this.mouseCheckBox.UseVisualStyleBackColor = true;
             // 
             // label25
@@ -1602,7 +1600,7 @@
             this.label25.Size = new System.Drawing.Size(282, 26);
             this.label25.TabIndex = 10;
             this.label25.Text = "Zero can emulate a two button Kempston mouse using the mouse attached to your PC." +
-                " ";
+    " ";
             // 
             // button4
             // 
@@ -1640,29 +1638,18 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // comboBox1
+            // aspectRatioFullscreenCheckBox
             // 
-            this.comboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
-            this.comboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Full Border",
-            "Medium Border",
-            "Mini Border"});
-            this.comboBox1.Location = new System.Drawing.Point(180, 52);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(124, 21);
-            this.comboBox1.TabIndex = 17;
-            // 
-            // label35
-            // 
-            this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(62, 55);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(86, 13);
-            this.label35.TabIndex = 16;
-            this.label35.Text = "Full Screen Size:";
+            this.aspectRatioFullscreenCheckBox.AutoSize = true;
+            this.aspectRatioFullscreenCheckBox.Checked = true;
+            this.aspectRatioFullscreenCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.aspectRatioFullscreenCheckBox.Location = new System.Drawing.Point(62, 125);
+            this.aspectRatioFullscreenCheckBox.Name = "aspectRatioFullscreenCheckBox";
+            this.aspectRatioFullscreenCheckBox.Size = new System.Drawing.Size(186, 17);
+            this.aspectRatioFullscreenCheckBox.TabIndex = 8;
+            this.aspectRatioFullscreenCheckBox.Text = "Maintain aspect ratio in full screen";
+            this.toolTip1.SetToolTip(this.aspectRatioFullscreenCheckBox, resources.GetString("aspectRatioFullscreenCheckBox.ToolTip"));
+            this.aspectRatioFullscreenCheckBox.UseVisualStyleBackColor = true;
             // 
             // Options
             // 
@@ -1876,7 +1863,6 @@
         private System.Windows.Forms.CheckBox pixelSmoothingCheckBox;
         private System.Windows.Forms.Label label34;
         private System.Windows.Forms.CheckBox vsyncCheckbox;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.CheckBox aspectRatioFullscreenCheckBox;
     }
 }

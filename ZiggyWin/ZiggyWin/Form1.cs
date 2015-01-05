@@ -118,6 +118,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private ComponentAce.Compression.ZipForge.ZipForge archiver;
         private MouseController mouse = new MouseController();
         private MRUManager mruManager;
+        public Logger logger = new Logger();
+        public Speccy.zxmachine zx;
 
         //The pentagon has a different screen size to other speccy's.
         //However, when rendering we will match the normal speccy dimensions by using the offsets below
@@ -140,7 +142,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private int joystick1MapIndex = 0;  //Maps to one of the JoysticksEmulated enum in speccy.cs
         private int joystick2MapIndex = 0;  //Maps to one of the JoysticksEmulated enum in speccy.cs
 
-        public Speccy.zxmachine zx;
+
         private MachineModel previousMachine = MachineModel._48k;
 
         private bool capsLockOn = false;
@@ -167,8 +169,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private int frameCount = 0;
         private double lastTime = 0;
-        private double fpsFrame = 0;
-        private double averageFPS = 0;
+        private double frameTime = 0;
+        private double totalFrameTime = 0;
+        private int averageFPS = 50;
 
         private bool didPlayRZX = false;
         public bool invokeMonitor = false;
@@ -957,8 +960,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         AutoTapeLoad();
                 }
 
-                fpsFrame = PrecisionTimer.TimeInMilliseconds() - lastTime;// timer.DurationInMilliseconds;
+                frameTime = PrecisionTimer.TimeInMilliseconds() - lastTime;// timer.DurationInMilliseconds;
                 frameCount++;
+                totalFrameTime += frameTime;
 
                 if (zx.HasKempstonMouse)
                 {
@@ -986,9 +990,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                 if (!config.EnableSound) //we'll try and synch to ~60Hz framerate (50Hz makes it run slightly slower than audio synch)
                 {
-                    if ((fpsFrame) < 19 && !((zx.tapeIsPlaying && tapeFastLoad)))
+                    if ((frameTime) < 19 && !((zx.tapeIsPlaying && tapeFastLoad)))
                     {
-                        double sleepTime = ((19 - fpsFrame));
+                        double sleepTime = ((19 - frameTime));
                         System.Threading.Thread.Sleep((int)sleepTime);
                     }
                 }
@@ -1016,31 +1020,29 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 else
                     soundStatusLabel.Image = Properties.Resources.sound_mute;
 
-                averageFPS += fpsFrame;
-
-                switch (state)
+                if (!dxWindow.EnableFullScreen)
                 {
-                    case EMULATOR_STATE.IDLE:
-                        if (frameCount > 49)
-                        {
-                            averageFPS /= frameCount;
-                            int fps = (int)(1000 / averageFPS);
-                            statusLabelText.Text = "FPS: " + Math.Max(0, fps);
-                            frameCount = 0;
-                            averageFPS = 0;
-                        }
-                        break;
-                    case EMULATOR_STATE.PLAYING_RZX:
-                        statusLabelText.Text = "RZX Played: " + (zx.rzxFrameCount * 100 / zx.rzx.frames.Count) + "%";
-                        break;
-                    case EMULATOR_STATE.RECORDING_RZX:
-                        statusLabelText.Text = "Recording RZX ...";
-                        break;
+                    switch (state)
+                    {
+                        case EMULATOR_STATE.IDLE:
+                            if (totalFrameTime > 1000.0f)
+                            {
+                                frameCount = 0;
+                                totalFrameTime = 0;
+                                statusLabelText.Text = "FPS: " + Math.Max(0, dxWindow.averageFPS);
+                            }
+                            break;
+                        case EMULATOR_STATE.PLAYING_RZX:
+                            statusLabelText.Text = "RZX Played: " + (zx.rzxFrameCount * 100 / zx.rzx.frames.Count) + "%";
+                            break;
+                        case EMULATOR_STATE.RECORDING_RZX:
+                            statusLabelText.Text = "Recording RZX ...";
+                            break;
+                    }
                 }
                
-               
                 System.Threading.Thread.Sleep(1);
-                //dxWindow.Invalidate();
+                dxWindow.Invalidate();
             }
         }
 
@@ -1082,7 +1084,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             //First try to load from the path saved in the config file
             romLoaded = zx.LoadROM(config.PathRoms, romName);
-
+            logger.Log("Booting the speccy ROM...");
             //Next try the application startup path (useful if running off USB)
             if (!romLoaded)
             {
@@ -1941,6 +1943,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         protected override void OnClosed(EventArgs e)
         {
+            logger.Log("Shutting down...", true);
+
             if (config != null && config.RestoreLastStateOnStart)
                 zx.SaveSZX(Application.LocalUserAppDataPath + "//" + ZeroSessionSnapshotName);
 
@@ -1979,6 +1983,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void Form1_Load(object sender, System.EventArgs e)
         {
+            logger.Log("Starting up...");
             this.BringToFront();
 
             //Setup MRU (Recent files)
@@ -1999,6 +2004,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             romLoaded = false;
             recentFolder = config.PathGames;
 
+            logger.Log("Checking for command line arguments...");
             string[] commandLineArgs = Environment.GetCommandLineArgs();
             if (commandLineArgs.Length > 1)
             {
@@ -2081,7 +2087,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     }
                 }
             }
-
+            logger.Log("Powering on the speccy...");
             //Load the ROM
             switch (config.CurrentSpectrumModel)
             {
@@ -2137,17 +2143,18 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     break;
             }
 
+            logger.Log("Initializing tape deck...");
             tapeDeck = new TapeDeck(this);
             if (!romLoaded)
             {
                 this.Close();
                 return;
             }
+
             zx.SetSoundVolume(config.Volume / 100.0f);
             zx.SetEmulationSpeed(config.EmulationSpeed);
             zx.EnableAY(config.EnableAYFor48K);
             zx.SetStereoSound(config.StereoSoundOption);
-
 
             tapeDeck.DoTapeAutoStart = config.TapeAutoStart;
             tapeDeck.DoAutoTapeLoad = config.TapeAutoLoad;
@@ -2157,6 +2164,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             zx.DiskEvent += new DiskEventHandler(DiskMotorEvent);
             try
             {
+                logger.Log("Initializing renderer...");
                 dxWindow = new ZRenderer(this, panel1.Width, panel1.Height);
             }
             catch (System.TypeInitializationException dxex)
@@ -2184,6 +2192,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.PixelSmoothing = config.EnablePixelSmoothing;
             pixelToolStripMenuItem.Checked = config.EnablePixelSmoothing;
             dxWindow.EnableVsync = config.EnableVSync;
+
+            logger.Log("Initializing render window...");
             AdjustWindowSize();
 
             if (config.FullScreen)
@@ -2228,6 +2238,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
             else if (config.RestoreLastStateOnStart)
             {
+                logger.Log("Restoring last state...");
                 if (!LoadSZX(Application.LocalUserAppDataPath + "//" + ZeroSessionSnapshotName))
                 {
                     MessageBox.Show("Unable to restore previous session!", "Session Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -2366,6 +2377,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         //Monitor
         private void monitorButton_Click(object sender, EventArgs e)
         {
+            if (dxWindow.EnableFullScreen)
+                GoFullscreen(false);
+
             if (debugger == null || debugger.IsDisposed)
             {
                 //zx.doRun = false;
@@ -2627,6 +2641,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             optionWindow.MouseSensitivity = config.MouseSensitivity;
             optionWindow.PixelSmoothing = dxWindow.PixelSmoothing;
             optionWindow.EnableVSync = config.EnableVSync;
+            optionWindow.MaintainAspectRatioInFullScreen = config.MaintainAspectRatioInFullScreen;
 
             switch (config.PaletteMode)
             {
@@ -2681,6 +2696,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             config.Key2JoystickType = optionWindow.Key2JoyStickType + 1;
             config.RestoreLastStateOnStart = optionWindow.RestoreLastState;
             config.ShowOnscreenIndicators = optionWindow.ShowOnScreenLEDS;
+            config.MaintainAspectRatioInFullScreen = optionWindow.MaintainAspectRatioInFullScreen;
             dxWindow.ShowScanlines = interlaceToolStripMenuItem.Checked = config.EnableInterlacedOverlay;
             pixelToolStripMenuItem.Checked = config.EnablePixelSmoothing = optionWindow.PixelSmoothing;
 
@@ -3035,7 +3051,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.Focus();
         }
 
-        private void GoFullscreen(bool full)
+        public void GoFullscreen(bool full)
         {
             config.FullScreen = full;
             if (full)
@@ -3054,7 +3070,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                     oldWindowPosition = this.Location;
                     dxWindow.EnableFullScreen = true;
-                    dxWindow.InitDirectX(800, 600, false);
+                    dxWindow.InitDirectX(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height, false);
                     oldWindowSize = config.WindowSize;
                     config.WindowSize = 0;
 
@@ -4014,6 +4030,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void screenshotMenuItem1_Click(object sender, EventArgs e)
         {
+            if (dxWindow.EnableFullScreen)
+                GoFullscreen(false);
+
             saveFileDialog1.InitialDirectory = config.PathScreenshots;
             saveFileDialog1.Title = "Save Screenshot";
             saveFileDialog1.FileName = "";
@@ -4072,6 +4091,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public void saveSnapshotMenuItem_Click(object sender, EventArgs e)
         {
+            if (dxWindow.EnableFullScreen)
+                GoFullscreen(false);
+
             saveFileDialog1.Title = "Save Snapshot";
             saveFileDialog1.FileName = "";
             saveFileDialog1.Filter = "SZX snapshot|*.szx";
@@ -4085,6 +4107,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public void openFileMenuItem1_Click(object sender, EventArgs e)
         {
+            if (dxWindow.EnableFullScreen)
+                GoFullscreen(false);
+
             zx.Pause();
             dxWindow.Suspend();
             openFileDialog1.InitialDirectory = recentFolder;
@@ -4166,8 +4191,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             //Hack: at the lowest window size the pentagon left border width doesn't match up with the right one,
             //for reasons unknown.
             //All it needs is a 8 pix adjust hence this:
-            if (zx.model == MachineModel._pentagon)
-                _offsetX -= 8;
+           //if (zx.model == MachineModel._pentagon)
+            //    _offsetX -= 8;
 
             this.Size = new Size(totalClientWidth + adjustWidth - (2 * borderAdjust) + _offsetX * 2, totalClientHeight + adjustHeight - (2 * borderAdjust));
             dxWindow.Location = new Point(_offsetX - borderAdjust, dxWindowOffsetY - _offsetY - borderAdjust);
@@ -4470,6 +4495,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void searchOnlineToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (dxWindow.EnableFullScreen)
+                GoFullscreen(false);
+
             if ((infoseekWiz == null) || (infoseekWiz.IsDisposed))
             {
                 infoseekWiz = new Infoseeker();
@@ -4518,12 +4546,18 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void toolStripMenuItem3_Click(object sender, EventArgs e)
         {
+            if (dxWindow.EnableFullScreen)
+                GoFullscreen(false);
+
             SpectrumKeyboard keyb = new SpectrumKeyboard(this);
             keyb.Show();
         }
 
         private void tapeBrowserButton_Click(object sender, EventArgs e)
         {
+            if (dxWindow.EnableFullScreen)
+                GoFullscreen(false);
+
             if (tapeDeck != null)
             {
                 tapeDeck.Show();
@@ -4614,6 +4648,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void SaveRZXRecording(bool finalise)
         {
+            if (dxWindow.EnableFullScreen)
+                GoFullscreen(false);
+
             saveFileDialog1.Title = "Save Action Replay";
             saveFileDialog1.FileName = "";
             saveFileDialog1.Filter = "Action Replay|*.rzx";

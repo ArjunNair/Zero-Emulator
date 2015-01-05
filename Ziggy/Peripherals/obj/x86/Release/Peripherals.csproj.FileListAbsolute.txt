@@ -12,6 +12,6 @@ C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Peripherals\obj\x86\Release\Perip
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\bin\x86\Release\Peripherals.dll
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\bin\x86\Release\Peripherals.pdb
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\bin\x86\Release\zlib.net.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\obj\x86\Release\Peripherals.csprojResolveAssemblyReference.cache
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\obj\x86\Release\Peripherals.dll
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\obj\x86\Release\Peripherals.pdb
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\obj\x86\Release\Peripherals.csprojResolveAssemblyReference.cache

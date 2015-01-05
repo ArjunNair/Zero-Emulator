@@ -327,6 +327,12 @@ namespace ZeroWin
             set { exitConfirmCheckBox.Checked = value; }
         }
 
+        public bool MaintainAspectRatioInFullScreen
+        {
+            get { return aspectRatioFullscreenCheckBox.Checked; }
+            set { aspectRatioFullscreenCheckBox.Checked = value; }
+        }
+
         #endregion Accessors
 
         public Options(Form1 parentRef) {

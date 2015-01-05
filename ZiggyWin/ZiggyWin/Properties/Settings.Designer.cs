@@ -718,5 +718,17 @@ namespace ZeroWin.Properties {
                 this["FullScreenFormat16"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool MaintainAspectRatioInFullScreen {
+            get {
+                return ((bool)(this["MaintainAspectRatioInFullScreen"]));
+            }
+            set {
+                this["MaintainAspectRatioInFullScreen"] = value;
+            }
+        }
     }
 }

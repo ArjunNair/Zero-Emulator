@@ -6,10 +6,6 @@ namespace Speccy
 {
     public class zx128 : Speccy.zxmachine
     {
-        private byte gigaScreenFlipFlop = 0;
-        private bool gigaScreenEnabled = false;
-        private byte gigaScreenCounter = 0;
-
             public zx128(IntPtr handle, bool lateTimingModel)
             : base(handle, lateTimingModel) {
             FrameLength = 70908;
@@ -698,79 +694,6 @@ namespace Speccy
                 totalTStates = (int)szx.z80Regs.CyclesStart;
             }
         }
-
-        private uint GetUIntFromString(string data) {
-            byte[] carray = System.Text.ASCIIEncoding.UTF8.GetBytes(data);
-            uint val = BitConverter.ToUInt32(carray, 0);
-            return val;
-        }
-
-        /*  public override void SaveSZX(String filename)
-          {
-              SZXLoader szx = new SZXLoader();
-              szx.header = new SZXLoader.ZXST_Header();
-              szx.creator = new SZXLoader.ZXST_Creator();
-              szx.z80Regs = new SZXLoader.ZXST_Z80Regs();
-              szx.specRegs = new SZXLoader.ZXST_SpecRegs();
-              szx.keyboard = new SZXLoader.ZXST_Keyboard();
-              szx.ayState = new SZXLoader.ZXST_AYState();
-
-              for (int f = 0; f < 16; f++)
-                  szx.RAM_BANK[f] = new byte[8192];
-
-              szx.header.MachineId = (byte)SZXLoader.ZXTYPE.ZXSTMID_128K;
-              szx.header.Magic = GetUIntFromString("ZXST");
-              szx.header.MajorVersion = 1;
-              szx.header.MinorVersion = 3;
-              szx.creator.CreatorName = "Zero Spectrum Emulator by Arjun ".ToCharArray();
-              szx.creator.MajorVersion = 0;
-              szx.creator.MinorVersion = 5;
-              if (Issue2Keyboard)
-                  szx.keyboard.Flags |= Speccy.SZXLoader.ZXSTKF_ISSUE2;
-              szx.keyboard.KeyboardJoystick |= 8;
-              szx.z80Regs.AF = (ushort)AF;
-              szx.z80Regs.AF1 = (ushort)_AF;
-              szx.z80Regs.BC = (ushort)BC;
-              szx.z80Regs.BC1 = (ushort)_BC;
-              szx.z80Regs.BitReg = (byte)MemPtr;
-              szx.z80Regs.CyclesStart = (uint)totalTStates;
-              szx.z80Regs.DE = (ushort)DE;
-              szx.z80Regs.DE1 = (ushort)_DE;
-              if (lastOpcodeWasEI != 0)
-                  szx.z80Regs.Flags |= Speccy.SZXLoader.ZXSTZF_EILAST;
-              if (HaltOn)
-                  szx.z80Regs.Flags |= Speccy.SZXLoader.ZXSTZF_HALTED;
-              szx.z80Regs.HL = (ushort)HL;
-              szx.z80Regs.HL1 = (ushort)_HL;
-              szx.z80Regs.I = (byte)I;
-              szx.z80Regs.IFF1 = (byte)(IFF1 ? 1 : 0);
-              szx.z80Regs.IFF1 = (byte)(IFF2 ? 1 : 0);
-              szx.z80Regs.IM = (byte)interruptMode;
-              szx.z80Regs.IX = (ushort)IX;
-              szx.z80Regs.IY = (ushort)IY;
-              szx.z80Regs.PC = (ushort)PC;
-              szx.z80Regs.R = (byte)R;
-              szx.z80Regs.SP = (ushort)SP;
-              szx.specRegs.Border = (byte)borderColour;
-              szx.specRegs.Fe = (byte)lastFEOut;
-              szx.specRegs.pagePort = 0;
-              szx.specRegs.x7ffd = (byte)last7ffdOut;
-              szx.ayState.cFlags = 0;
-              szx.ayState.currentRegister = (byte)aySound.SelectedRegister;
-              szx.ayState.chRegs = aySound.GetRegisters();
-
-              for (int f = 0; f < 16; f++)
-              {
-                  Array.Copy(RAMpage[f], 0, szx.RAM_BANK[f], 0, 8192);
-              }
-              if (tape_readToPlay && (tapeFilename != ""))
-              {
-                  szx.InsertTape = true;
-                  szx.externalTapeFile = tapeFilename;
-              }
-              szx.SaveSZX(filename);
-          }
-          */
 
         public override void UseZ80(Z80_SNAPSHOT z80) {
             I = z80.I;

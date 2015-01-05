@@ -107,7 +107,6 @@ namespace ZeroWin
             }
             set {
                 im = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -117,51 +116,6 @@ namespace ZeroWin
             }
             set {
                 af = value;
-                /*
-                int low = Low(af);
-                int hi = High(af);
-
-                if ((low & 0x01) != 0)
-                    FlagCCheck.Checked = true;
-                else
-                    FlagCCheck.Checked = false;
-
-                if ((low & 0x02) != 0)
-                    FlagNCheck.Checked = true;
-                else
-                    FlagNCheck.Checked = false;
-
-                if ((low & 0x04) != 0)
-                    FlagVCheck.Checked = true;
-                else
-                    FlagVCheck.Checked = false;
-
-                if ((low & 0x08) != 0)
-                    Flag3Check.Checked = true;
-                else
-                    Flag3Check.Checked = false;
-
-                if ((low & 0x10) != 0)
-                    FlagHCheck.Checked = true;
-                else
-                    FlagHCheck.Checked = false;
-
-                if ((low & 0x20) != 0)
-                    Flag5Check.Checked = true;
-                else
-                    Flag5Check.Checked = false;
-
-                if ((low & 0x40) != 0)
-                    FlagZCheck.Checked = true;
-                else
-                    FlagZCheck.Checked = false;
-
-                if ((low & 0x80) != 0)
-                    FlagSCheck.Checked = true;
-                else
-                    FlagSCheck.Checked = false;
-                HexAnd8bitRegUpdate();
-                 */
             }
         }
 
@@ -171,7 +125,6 @@ namespace ZeroWin
             }
             set {
                 ir = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -181,7 +134,6 @@ namespace ZeroWin
             }
             set {
                 _af = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -191,7 +143,6 @@ namespace ZeroWin
             }
             set {
                 hl = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -201,7 +152,6 @@ namespace ZeroWin
             }
             set {
                 bc = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -211,7 +161,6 @@ namespace ZeroWin
             }
             set {
                 de = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -221,7 +170,6 @@ namespace ZeroWin
             }
             set {
                 _hl = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -231,7 +179,6 @@ namespace ZeroWin
             }
             set {
                 _bc = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -241,7 +188,6 @@ namespace ZeroWin
             }
             set {
                 _de = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -251,7 +197,6 @@ namespace ZeroWin
             }
             set {
                 ix = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -261,7 +206,6 @@ namespace ZeroWin
             }
             set {
                 iy = value;
-                //HexAnd8bitRegUpdate();
             }
         }
 
@@ -281,12 +225,13 @@ namespace ZeroWin
 
         public class BreakPointCondition : Object
         {
-            private string condition;
+            private SPECCY_EVENT condition;
             private int address;
             private int data;
 
-            public string Condition {
-                get { return condition; }
+            public string Condition
+            {
+                get { return Utilities.GetStringFromEnum(condition); }
             }
 
             public int Address {
@@ -320,7 +265,8 @@ namespace ZeroWin
                 data = 0;
             }
 
-            public BreakPointCondition(string cond, int addr, int val) {
+            public BreakPointCondition(SPECCY_EVENT cond, int addr, int val)
+            {
                 condition = cond;
                 address = addr;
                 data = val;
@@ -413,9 +359,11 @@ namespace ZeroWin
         //Event: Raised when the z80 memory contents have changed (via POKE)
         public void Monitor_MemoryWrite(Object sender, MemoryEventArgs e) {
             //Check if any breakpoints have been hit
-            foreach (KeyValuePair<String, BreakPointCondition> kv in breakPointList) {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv in breakPointList)
+            {
                 BreakPointCondition val = kv.Value;
-                if (kv.Key == "Memory Write") {
+                if (kv.Key == SPECCY_EVENT.MEMORY_WRITE)
+                {
                     if (e.Address == val.Address) {
                         if (val.Data > -1) {
                             if (e.Byte == val.Data) {
@@ -436,9 +384,10 @@ namespace ZeroWin
         //Event: Raised when the z80 memory contents are read (via PEEK)
         public void Monitor_MemoryRead(Object sender, MemoryEventArgs e) {
             //Check if any breakpoints have been hit
-            foreach (KeyValuePair<String, BreakPointCondition> kv in breakPointList) {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv in breakPointList)
+            {
                 BreakPointCondition val = kv.Value;
-                if (kv.Key == "Memory Read") {
+                if (kv.Key == SPECCY_EVENT.MEMORY_READ) {
                     if (e.Address == val.Address) {
                         if (val.Data > -1) {
                             if (e.Byte == val.Data) {
@@ -459,9 +408,11 @@ namespace ZeroWin
         //Event: Raised when the z80 memory contents are executed (opcode fetch)
         public void Monitor_MemoryExecute(Object sender, MemoryEventArgs e) {
             //Check if any breakpoints have been hit
-            foreach (KeyValuePair<String, BreakPointCondition> kv in breakPointList) {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv in breakPointList)
+            {
                 BreakPointCondition val = kv.Value;
-                if (kv.Key == "Memory Execute") {
+                if (kv.Key == SPECCY_EVENT.MEMORY_EXECUTE)
+                {
                     if (e.Address == val.Address) {
                         if (val.Data > -1) {
                             if (e.Byte == val.Data) {
@@ -480,6 +431,10 @@ namespace ZeroWin
         }
 
         public void DoPauseEmulation() {
+
+            if (ziggyWin.config.FullScreen)
+                ziggyWin.GoFullscreen(false);
+
             ziggyWin.zx.Pause();
 
             ziggyWin.ForceScreenUpdate();
@@ -535,61 +490,62 @@ namespace ZeroWin
             pc = ziggyWin.zx.PC;
 
             //Check if any breakpoints have been hit
-            foreach (KeyValuePair<String, BreakPointCondition> kv in breakPointList) {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv in breakPointList)
+            {
                 // int val = Convert.ToInt32(kv.Value);
                 BreakPointCondition val = kv.Value;
 
                 switch (kv.Key) {
-                    case "PC":
+                    case SPECCY_EVENT.OPCODE_PC:
                         if (pc == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("PC = {0} (${0:x})", val.Address);
                         }
                         break;
 
-                    case "HL":
+                    case SPECCY_EVENT.OPCODE_HL:
                         if (ziggyWin.zx.HL == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("HL = {0} (${0:x})", val.Address);
                         }
                         break;
 
-                    case "BC":
+                    case SPECCY_EVENT.OPCODE_BC:
                         if (ziggyWin.zx.BC == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("BC = {0} (${0:x})", val.Address);
                         }
                         break;
 
-                    case "DE":
+                    case SPECCY_EVENT.OPCODE_DE:
                         if (ziggyWin.zx.DE == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("DE = {0} (${0:x})", val.Address);
                         }
                         break;
 
-                    case "A":
+                    case SPECCY_EVENT.OPCODE_A:
                         if (ziggyWin.zx.A == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("A = {0} (${0:x})", val.Address);
                         }
                         break;
 
-                    case "IX":
+                    case SPECCY_EVENT.OPCODE_IX:
                         if (ziggyWin.zx.IX == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("IX = {0} (${0:x})", val.Address);
                         }
                         break;
 
-                    case "IY":
+                    case SPECCY_EVENT.OPCODE_IY:
                         if (ziggyWin.zx.IY == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("IY = {0} (${0:x})", val.Address);
                         }
                         break;
 
-                    case "SP":
+                    case SPECCY_EVENT.OPCODE_SP:
                         if (ziggyWin.zx.SP == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("SP = {0} (${0:x})", val.Address);
@@ -714,7 +670,8 @@ namespace ZeroWin
 
             pauseEmulation = false;
 
-            foreach (KeyValuePair<String, BreakPointCondition> kv in breakPointList) {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv in breakPointList)
+            {
                 // int val = Convert.ToInt32(kv.Value);
                 BreakPointCondition val = kv.Value;
 
@@ -752,12 +709,13 @@ namespace ZeroWin
 
             pauseEmulation = false;
             //Check if any breakpoints have been hit
-            foreach (KeyValuePair<String, BreakPointCondition> kv in breakPointList) {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv in breakPointList)
+            {
                 // int val = Convert.ToInt32(kv.Value);
                 BreakPointCondition val = kv.Value;
 
                 switch (kv.Key) {
-                    case "Port Write":
+                    case SPECCY_EVENT.PORT_WRITE:
                         if (e.IsWrite && (e.Port == val.Address)) {
                             //Break on specific data value only for this address?
                             if (val.Data > -1) {
@@ -773,14 +731,14 @@ namespace ZeroWin
                         }
                         break;
 
-                    case "Port Read":
+                    case SPECCY_EVENT.PORT_READ:
                         if (!e.IsWrite && (e.Port == val.Address)) {
                             breakPointStatus = String.Format("Port read @ {0} (${0:x})", val);
                             pauseEmulation = true;
                         }
                         break;
 
-                    case "ULA Write":
+                    case SPECCY_EVENT.ULA_WRITE:
                         if (e.IsWrite && ((e.Port & 0x1) == 0)) {
                             if (val.Data > -1) {
                                 if (val.Data == e.Value) {
@@ -794,7 +752,7 @@ namespace ZeroWin
                         }
                         break;
 
-                    case "ULA Read":
+                    case SPECCY_EVENT.ULA_READ:
                         if (!e.IsWrite && ((e.Port & 0x1) == 0)) {
                             breakPointStatus = String.Format("ULA read @ {0} (${0:x})", e.Port);
                             pauseEmulation = true;
@@ -905,17 +863,10 @@ namespace ZeroWin
                     bool foundSysVars = false;
                     if (monitorRef.showSysVars) {
                         if (param2 == int.MaxValue) {
-                            String toDec;
-                            if (monitorRef.useHexNumbers)
-                                toDec = opcodes.Replace(":x2", "");
-                            else
-                                toDec = opcodes.Replace(":D", "");
-
                             String svar;
-                            if (monitorRef.systemVariables.TryGetValue(param1, out svar)) {
+                            if (monitorRef.systemVariables.TryGetValue(Param1, out svar)) {
                                 foundSysVars = true;
-                                toolTipText = param1.ToString();
-
+                                toolTipText = Param1.ToString(monitorRef.useHexNumbers ? "x2": "D2");
                                 opString = String.Format(opcodes, svar);
                             }
                         }
@@ -923,15 +874,15 @@ namespace ZeroWin
 
                     if (!foundSysVars) {
                         if (monitorRef.useHexNumbers) {
-                            opcodes = opcodes.Replace(":D", ":x2");
+                            opcodes = opcodes.Replace(":D2", ":x2");
                         } else {
-                            opcodes = opcodes.Replace(":x2", ":D");
+                            opcodes = opcodes.Replace(":x2", ":D2");
                         }
-
+                        
                         if (param2 != int.MaxValue) {
-                            opString = String.Format(opcodes, param1, param2);
+                            opString = String.Format(opcodes, Param1, Param2);
                         } else if (param1 != int.MaxValue) {
-                            opString = String.Format(opcodes, param1);
+                            opString = String.Format(opcodes, Param1);
                         } else
                             opString = opcodes;
                     }
@@ -947,12 +898,12 @@ namespace ZeroWin
             }
 
             public int Param1 {
-                get { return param1; }
+                get { return (param1 % 65536); }
                 set { param1 = value; }
             }
 
             public int Param2 {
-                get { return param2; }
+                get { return (param2 % 65536); }
                 set { param2 = value; }
             }
         }
@@ -1030,7 +981,7 @@ namespace ZeroWin
         public BindingList<LogMessage> logList = new BindingList<LogMessage>();
 
         //Breakpoint lists consist of key (register) value pairs.
-        public BindingList<KeyValuePair<String, BreakPointCondition>> breakPointList = new BindingList<KeyValuePair<String, BreakPointCondition>>();
+        public BindingList<KeyValuePair<SPECCY_EVENT, BreakPointCondition>> breakPointList = new BindingList<KeyValuePair<SPECCY_EVENT, BreakPointCondition>>();
 
         //Stores the row numbers for active breakpoints
         private List<int> breakpointRowList = new List<int>();
@@ -7092,6 +7043,7 @@ namespace ZeroWin
                         }
                     } else
                         opcodeMatches = 0;
+
                     disassemblyList[line].BytesAtAddress = byteList;
                     disassemblyList[line].Opcodes = opcodeString;
                     disassemblyList[line].Param1 = param1;
@@ -7108,9 +7060,9 @@ namespace ZeroWin
                         TraceMessage.opcodes = opcodeString.Replace(":x2", ":D");
 
                     if (param2 != int.MaxValue) {
-                        TraceMessage.opcodes = String.Format(TraceMessage.opcodes, param1, param2);
+                        TraceMessage.opcodes = String.Format(TraceMessage.opcodes, disassemblyList[line].Param1, disassemblyList[line].Param2);
                     } else if (param1 != int.MaxValue) {
-                        TraceMessage.opcodes = String.Format(TraceMessage.opcodes, param1);
+                        TraceMessage.opcodes = String.Format(TraceMessage.opcodes, disassemblyList[line].Param1);
                     }
                 }
                 line++;
@@ -7137,10 +7089,11 @@ namespace ZeroWin
             if (e.RowIndex == -1) {
                 return;
             }
-            KeyValuePair<String, BreakPointCondition> kv = new KeyValuePair<String, BreakPointCondition>("PC", new BreakPointCondition("PC", disassemblyList[e.RowIndex].Address, -1));
+            KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv = new KeyValuePair<SPECCY_EVENT, BreakPointCondition>(SPECCY_EVENT.OPCODE_PC, new BreakPointCondition(SPECCY_EVENT.OPCODE_PC, disassemblyList[e.RowIndex].Address, -1));
             //int index = disassemblyList.Find("Address", disassemblyList[e.RowIndex].Address);
             bool found = false;
-            foreach (KeyValuePair<String, BreakPointCondition> breakpoint in breakPointList) {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> breakpoint in breakPointList)
+            {
                 if (breakpoint.Equals(kv)) {
                     found = true;
                     break;
@@ -7161,10 +7114,13 @@ namespace ZeroWin
             dataGridView1.Refresh();
         }
 
-        public void RemoveBreakpoint(KeyValuePair<String, Monitor.BreakPointCondition> _kv) {
-            foreach (KeyValuePair<String, Monitor.BreakPointCondition> breakpoint in breakPointList) {
+        public void RemoveBreakpoint(KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition> _kv)
+        {
+            foreach (KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition> breakpoint in breakPointList)
+            {
                 if (breakpoint.Equals(_kv)) {
-                    if (_kv.Key == "PC") {
+                    if (_kv.Key == SPECCY_EVENT.OPCODE_PC)
+                    {
                         int index = disassemblyList.Find("Address", _kv.Value.Address);
                         if (index >= 0) {
                             breakpointRowList.Remove(index);
@@ -7182,8 +7138,10 @@ namespace ZeroWin
 
         //Clear all breakpoints
         public void RemoveAllBreakpoints() {
-            foreach (KeyValuePair<String, BreakPointCondition> breakpoint in breakPointList) {
-                if (breakpoint.Key == "PC") {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> breakpoint in breakPointList)
+            {
+                if (breakpoint.Key == SPECCY_EVENT.OPCODE_PC)
+                {
                     int index = disassemblyList.Find("Address", breakpoint.Value.Address);
                     if (index >= 0)
                         dataGridView1.Rows[index].HeaderCell.Style.BackColor = Control.DefaultBackColor;
@@ -7245,9 +7203,11 @@ namespace ZeroWin
         private void label29_Click(object sender, EventArgs e) {
         }
 
-        public void AddBreakpoint(KeyValuePair<String, Monitor.BreakPointCondition> _kv) {
+        public void AddBreakpoint(KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition> _kv)
+        {
             bool found = false;
-            foreach (KeyValuePair<String, Monitor.BreakPointCondition> breakpoint in breakPointList) {
+            foreach (KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition> breakpoint in breakPointList)
+            {
                 if (breakpoint.Equals(_kv)) {
                     found = true;
                     break;
@@ -7255,7 +7215,8 @@ namespace ZeroWin
             }
 
             if (!found) {
-                if (_kv.Key == "PC") {
+                if (_kv.Key == SPECCY_EVENT.OPCODE_PC)
+                {
                     int index = disassemblyList.Find("Address", _kv.Value.Address);
                     if (index >= 0) {
                         breakpointRowList.Add(index);
@@ -7544,10 +7505,11 @@ namespace ZeroWin
             if (rowIndex == -1) {
                 return;
             }
-            KeyValuePair<String, BreakPointCondition> kv = new KeyValuePair<String, BreakPointCondition>("PC", new BreakPointCondition("PC", disassemblyList[rowIndex].Address, -1));
-            //int index = disassemblyList.Find("Address", disassemblyList[e.RowIndex].Address);
+            KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv = new KeyValuePair<SPECCY_EVENT, BreakPointCondition>(SPECCY_EVENT.OPCODE_PC, new BreakPointCondition(SPECCY_EVENT.OPCODE_PC, disassemblyList[rowIndex].Address, -1));
+
             bool found = false;
-            foreach (KeyValuePair<String, BreakPointCondition> breakpoint in breakPointList) {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> breakpoint in breakPointList)
+            {
                 if (breakpoint.Equals(kv)) {
                     found = true;
                     break;

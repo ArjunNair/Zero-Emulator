@@ -431,6 +431,14 @@
             set { enableVsync = value; }
         }
 
+        private bool maintainAspectRatioInFullScreen = true;
+
+        public bool MaintainAspectRatioInFullScreen
+        {
+            get { return maintainAspectRatioInFullScreen; }
+            set { maintainAspectRatioInFullScreen = value; }
+        }
+
         #endregion properties
 
         public void Load() {
@@ -451,6 +459,7 @@
             currentModel = Properties.Settings.Default.Model;
             useDirectX = Properties.Settings.Default.UseDirectX;
             fullScreen = Properties.Settings.Default.StartFullscreen;
+            maintainAspectRatioInFullScreen = Properties.Settings.Default.MaintainAspectRatioInFullScreen;
             windowSize = (int)Properties.Settings.Default.WindowSize;
             fullScreenWidth = Properties.Settings.Default.FullScreenWidth;
             fullScreenHeight = Properties.Settings.Default.FullScreenHeight;
@@ -647,6 +656,7 @@
             Properties.Settings.Default.UseDirectX = useDirectX;
             Properties.Settings.Default.EnableVSync = enableVsync;
             Properties.Settings.Default.StartFullscreen = fullScreen;
+            Properties.Settings.Default.MaintainAspectRatioInFullScreen = maintainAspectRatioInFullScreen;
             Properties.Settings.Default.WindowSize = (byte)windowSize;
             Properties.Settings.Default.FullScreenWidth = fullScreenWidth;
             Properties.Settings.Default.FullScreenHeight = fullScreenHeight;

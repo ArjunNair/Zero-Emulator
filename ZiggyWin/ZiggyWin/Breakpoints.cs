@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using ZeroWin;
+using Speccy;
 
 namespace ZeroWin
 {
@@ -26,7 +28,7 @@ namespace ZeroWin
                 System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             dataGridViewCellStyle2.BackColor = Control.DefaultBackColor;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Consolas",
-                10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle2.SelectionBackColor = Control.DefaultBackColor;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.WindowText;
@@ -40,7 +42,7 @@ namespace ZeroWin
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.ControlLightLight;
             dataGridViewCellStyle3.Font = new System.Drawing.Font("Consolas",
-                10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -76,23 +78,9 @@ namespace ZeroWin
             dataGridView2.DataSource = monitor.breakPointConditions;
 
             //Setup the listbox for valid breakpoint registers
-            comboBox2.Items.Add("PC");
-            comboBox2.Items.Add("HL");
-            comboBox2.Items.Add("BC");
-            comboBox2.Items.Add("DE");
-            comboBox2.Items.Add("A");
-            comboBox2.Items.Add("IX");
-            comboBox2.Items.Add("IY");
-            comboBox2.Items.Add("SP");
-            comboBox2.Items.Add("Memory Execute");
-            comboBox2.Items.Add("Memory Write");
-            comboBox2.Items.Add("Memory Read");
-            comboBox2.Items.Add("Port Write");
-            comboBox2.Items.Add("Port Read");
-            comboBox2.Items.Add("ULA Write");
-            comboBox2.Items.Add("ULA Read");
-            comboBox2.Items.Add("Interrupt (INT)");
-            comboBox2.Items.Add("Retriggered INT");
+            foreach (SPECCY_EVENT speccyEvent in Utilities.EnumToList<SPECCY_EVENT>())
+                comboBox2.Items.Add(Utilities.GetStringFromEnum(speccyEvent));
+           
             comboBox2.SelectedIndex = 0;
             comboBox2_SelectedIndexChanged(this, null); //sanity check for case ULA port breakpoints are selected
         }
@@ -110,7 +98,7 @@ namespace ZeroWin
                 return;
 
             foreach (DataGridViewRow row in rowCollection) {
-                KeyValuePair<String, Monitor.BreakPointCondition> kv;
+                KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition> kv;
 
                 //convert dashes (-) to -1 (int) where required,
                 //else convert the actual value to int.
@@ -122,7 +110,7 @@ namespace ZeroWin
                 if ((String)row.Cells[2].Value != "-")
                     _val = Convert.ToInt32(row.Cells[2].Value);
 
-                kv = new KeyValuePair<String, Monitor.BreakPointCondition>((String)row.Cells[0].Value, new Monitor.BreakPointCondition((String)row.Cells[0].Value, _addr, _val));
+                kv = new KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition>(Utilities.GetEnumFromString<SPECCY_EVENT>((string)row.Cells[0].Value,SPECCY_EVENT.OPCODE_PC), new Monitor.BreakPointCondition(Utilities.GetEnumFromString <SPECCY_EVENT>((string)row.Cells[0].Value, SPECCY_EVENT.OPCODE_PC), _addr, _val));
                 monitor.RemoveBreakpoint(kv);
             }
         }
@@ -174,7 +162,7 @@ namespace ZeroWin
                     System.Windows.Forms.MessageBox.Show("The address is not within 0 to 65535!", "Invalid input", MessageBoxButtons.OK);
                     return;
                 }
-            } else if (comboBox2.Text == "ULA Write" || comboBox2.Text == "ULA Read")
+            } else if (Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text,SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.ULA_WRITE || Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.ULA_READ)
                 addr = 254; //0xfe
 
             validInput = true;
@@ -217,18 +205,21 @@ namespace ZeroWin
                 val = -1;
 
             string _str = comboBox2.SelectedItem.ToString();// +"@" + addr.ToString();
-            KeyValuePair<String, Monitor.BreakPointCondition> kv = new KeyValuePair<String, Monitor.BreakPointCondition>(_str, new Monitor.BreakPointCondition(_str, addr, val));
+            KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition> kv = new KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition>(Utilities.GetEnumFromString<SPECCY_EVENT>(_str, SPECCY_EVENT.OPCODE_PC), new Monitor.BreakPointCondition(Utilities.GetEnumFromString<SPECCY_EVENT>(_str, SPECCY_EVENT.OPCODE_PC), addr, val));
 
             monitor.AddBreakpoint(kv);
         }
 
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e) {
             maskedTextBox3.Text = "";
-            if ((comboBox2.Text == "ULA Write") || (comboBox2.Text == "ULA Read")) {
+            if (Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.ULA_WRITE || Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.ULA_READ)
+            {
                 maskedTextBox2.Text = "$fe";
                 maskedTextBox2.ReadOnly = true;
                 maskedTextBox3.ReadOnly = false;
-            } else if (comboBox2.Text == "Interrupt") {
+            }
+            else if (Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.INTTERUPT || Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.RE_INTTERUPT)
+            {
                 maskedTextBox2.Text = "";
 
                 maskedTextBox3.ReadOnly = true;

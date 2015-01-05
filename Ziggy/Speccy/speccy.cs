@@ -8,17 +8,17 @@ namespace Speccy
     {
         public static string[] Keywords = {  "RND", "INKEY$", "PI", "FN", "POINT", "SCREEN$", "ATTR",
                                             "AT", "TAB", "VAL$", "CODE", "VAL", "LEN", "SIN", "COS",
-					                        "TAN", "ASN", "ACS", "ATN", "LN", "EXP", "INT", "SQR",
-									        "SGN", "ABS", "PEEK", "IN", "USR", "STR$","CHR$", "NOT",
-											"BIN", "OR", "AND", "<=", ">=", "<>", "LINE", "THEN",
-											"TO", "STEP", "DEF FN", "CAT", "FORMAT", "MOVE", "ERASE",
-											"OPEN #", "CLOSE #", "MERGE", "VERIFY", "BEEP", "CIRCLE",
-											"INK", "PAPER", "FLASH", "BRIGHT", "INVERSE", "OVER",
-											"OUT", "LPRINT", "LLIST", "STOP", "READ", "DATA", "RESTORE",
-											"NEW", "BORDER", "CONTINUE", "DIM", "REM", "FOR", "GO TO",
-											"GO SUB", "INPUT", "LOAD", "LIST", "LET", "PAUSE", "NEXT",
+                                            "TAN", "ASN", "ACS", "ATN", "LN", "EXP", "INT", "SQR",
+                                            "SGN", "ABS", "PEEK", "IN", "USR", "STR$","CHR$", "NOT",
+                                            "BIN", "OR", "AND", "<=", ">=", "<>", "LINE", "THEN",
+                                            "TO", "STEP", "DEF FN", "CAT", "FORMAT", "MOVE", "ERASE",
+                                            "OPEN #", "CLOSE #", "MERGE", "VERIFY", "BEEP", "CIRCLE",
+                                            "INK", "PAPER", "FLASH", "BRIGHT", "INVERSE", "OVER",
+                                            "OUT", "LPRINT", "LLIST", "STOP", "READ", "DATA", "RESTORE",
+                                            "NEW", "BORDER", "CONTINUE", "DIM", "REM", "FOR", "GO TO",
+                                            "GO SUB", "INPUT", "LOAD", "LIST", "LET", "PAUSE", "NEXT",
                                             "POKE", "PRINT", "PLOT", "RUN", "SAVE", "RANDOMIZE", "IF",
-											"CLS", "DRAW", "CLEAR", "RETURN", "COPY"};
+                                            "CLS", "DRAW", "CLEAR", "RETURN", "COPY"};
     };
 
     //Matches SZX snapshot machine identifiers
@@ -36,6 +36,48 @@ namespace Speccy
         _NTSC48k = 15,
         _128ke = 16
     };
+
+    public enum SPECCY_EVENT
+    {
+        [Description("PC")]
+        OPCODE_PC,
+        [Description("HL")]
+        OPCODE_HL,
+        [Description("BC")]
+        OPCODE_BC,
+        [Description("DE")]
+        OPCODE_DE,
+        [Description("A")]
+        OPCODE_A,
+        [Description("IX")]
+        OPCODE_IX,
+        [Description("IY")]
+        OPCODE_IY,
+        [Description("SP")]
+        OPCODE_SP,
+        [Description("Memory Write")]
+        MEMORY_WRITE,
+        [Description("Memory Read")]
+        MEMORY_READ,
+        [Description("Memory Execute")]
+        MEMORY_EXECUTE,
+        [Description("Port Write")]
+        PORT_WRITE,
+        [Description("Port Read")]
+        PORT_READ,
+        [Description("ULA Write")]
+        ULA_WRITE,
+        [Description("ULA Read")]
+        ULA_READ,
+        [Description("Retriggered Interrupt")]
+        RE_INTTERUPT,
+        [Description("Interrupt")]
+        INTTERUPT,
+        [Description("Frame Start")]
+        FRAME_START,
+        [Description("Frame End")]
+        FRAME_END
+    }
 
     //Encapsulates the capabilities of the machine
     public class MemoryEventArgs : EventArgs
@@ -123,13 +165,15 @@ namespace Speccy
 
     public class StateChangeEventArgs : EventArgs
     {
-        private string eventType;
+        private SPECCY_EVENT eventType;
 
-        public StateChangeEventArgs(string _eventType) {
+        public StateChangeEventArgs(SPECCY_EVENT _eventType)
+        {
             eventType = _eventType;
         }
 
-        public string EventType {
+        public SPECCY_EVENT EventType
+        {
             get { return eventType; }
         }
     }
@@ -153,6 +197,10 @@ namespace Speccy
     public delegate void PopStackEventHandler(object sender, int addr);
 
     public delegate void PushStackEventHandler(object sender, int addr);
+
+    public delegate void FrameStartEventHandler(object sender);
+
+    public delegate void FrameEndEventHandler(object sender);
 
     public enum RAM_BANK
     {
@@ -188,6 +236,20 @@ namespace Speccy
         public event StateChangeEventHandler StateChangeEvent;
         public event PopStackEventHandler PopStackEvent;
         public event PushStackEventHandler PushStackEvent;
+        public event FrameEndEventHandler FrameEndEvent;
+        public event FrameStartEventHandler FrameStartEvent;
+
+        protected virtual void OnFrameEndEvent()
+        {
+            if (FrameEndEvent != null)
+                FrameEndEvent(this);
+        }
+
+        protected virtual void OnFrameStartEvent()
+        {
+            if (FrameStartEvent != null)
+                FrameStartEvent(this);
+        }
 
         protected virtual void OnMemoryWriteEvent(MemoryEventArgs e) {
             if (MemoryWriteEvent != null)
@@ -307,7 +369,6 @@ namespace Speccy
         //THREAD
         public bool doRun = true;           //z80 executes only when true. Mainly for debugging purpose.
         private const uint DISPLAY_TIMEOUT = 70000 * 1;
-        private uint displayTimer = 0;
 
         //Important ports
         protected int lastFEOut = 0;        //The ULA Port
@@ -476,7 +537,6 @@ namespace Speccy
         public int blockCounter = 0;
         public bool tapePresent = false;
         public bool isPlaying = false;
-        private bool tapeIsInserted;
         private int pulseCounter = 0;
         private int repeatCount = 0;
         private int bitCounter = 0;
@@ -661,11 +721,11 @@ namespace Speccy
             emulationSpeed = (speed - 100) / 100; //0 = normal.
         }
 
-        public int GetTotalScreenWidth() {
+        public virtual int GetTotalScreenWidth() {
             return ScreenWidth + BorderLeftWidth + BorderRightWidth;
         }
 
-        public int GetTotalScreenHeight() {
+        public virtual int GetTotalScreenHeight() {
             return ScreenHeight + BorderTopHeight + BorderBottomHeight;
         }
 
@@ -839,6 +899,36 @@ namespace Speccy
             //emulationThread = new System.Threading.Thread(new System.Threading.ThreadStart(Run));
             //emulationThread.Name = @"Emulation Thread";
             //emulationThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+        }
+
+        public void ResetTapeEdgeDetector()
+        {
+            tape_detectionCount = 0;
+            tape_PC = 0;
+            tape_PCatLastIn = 0;
+            tape_whichRegToCheck = 0;
+            tape_regValue = 0;
+            tape_edgeDetectorRan = false;
+            tape_tstatesSinceLastIn = 0;
+            tapeBitWasFlipped = false;
+            tapeBitFlipAck = false;
+
+            tape_readToPlay = false;
+            tape_FrameCount = 0;
+            tapeTStates = 0;
+            edgeDuration = 0;
+            tapeIsPlaying = false;
+            tapeBit = 0;
+
+            blockCounter = 0;
+            isPlaying = false;
+            pulseCounter = 0;
+            repeatCount = 0;
+            bitCounter = 0;
+            dataCounter = 0;
+            dataByte = 0;
+            currentBit = 0;
+            pulse = 0;
         }
 
         protected void FlashLoadTape() {
@@ -1195,8 +1285,10 @@ namespace Speccy
 
         //The main loop which executes opcodes repeatedly till 1 frame (69888 tstates)
         //has been generated.
+        private int NO_PAINT_REP = 100;
+
         public void Run() {
-            for (int rep = 0; rep < (tapeIsPlaying && edgeLoadTapes ? 200 : 1); rep++)
+            for (int rep = 0; rep < (tapeIsPlaying && edgeLoadTapes ? NO_PAINT_REP : 1); rep++)
             {
                 while (doRun)
                 {
@@ -1268,18 +1360,14 @@ namespace Speccy
                         {
                             FrameCount = 0;
                         }
+
                         if (!externalSingleStep)
                         {
                             while (!beeper.FinishedPlaying() && !tapeIsPlaying)
                                 System.Threading.Thread.Sleep(1);
                         }
-                        /*
-                        if (tapeIsPlaying && FrameCount != 0) {
-                            needsPaint = false;
-                            continue;
-                        }*/
 
-                        if (tapeIsPlaying && rep != 199)
+                        if (tapeIsPlaying && rep != NO_PAINT_REP - 1)
                         {
                             needsPaint = false;
                             System.Threading.Thread.Sleep(0); //TO DO: Remove?
@@ -2433,7 +2521,7 @@ namespace Speccy
                 }
 
                 if (StateChangeEvent != null)
-                    OnStateChangeEvent(new StateChangeEventArgs("Retriggered INT"));
+                    OnStateChangeEvent(new StateChangeEventArgs(SPECCY_EVENT.RE_INTTERUPT));
                 Interrupt();
             }
 
@@ -2568,6 +2656,8 @@ namespace Speccy
                 if (!needsPaint)
                     UpdateScreenBuffer(FrameLength);
 
+                OnFrameEndEvent();
+
                 totalTStates -= FrameLength;
 
                 frameCount++;
@@ -2596,7 +2686,7 @@ namespace Speccy
                     R++;
 
                     if (StateChangeEvent != null)
-                        OnStateChangeEvent(new StateChangeEventArgs("Interrupt (INT)"));
+                        OnStateChangeEvent(new StateChangeEventArgs(SPECCY_EVENT.INTTERUPT));
 
                     Interrupt();
                 }
@@ -10611,6 +10701,7 @@ namespace Speccy
 
         public void TapeStopped(bool cancelCallback = false) {
             tapeIsPlaying = false;
+
             if (pulse != 0)
                 FlipTapeBit();
             if (TapeEvent != null && !cancelCallback)
@@ -10806,6 +10897,92 @@ namespace Speccy
             return false;
         }
 
+        private bool FlashLoad()
+        {
+            if (blockCounter < 0)
+                blockCounter = 0;
+
+            if (!tapeIsPlaying)
+                blockCounter++;
+
+            if (blockCounter >= PZXLoader.tapeBlockInfo.Count)
+            {
+                blockCounter--;
+                tape_readToPlay = false;
+                TapeStopped();
+                return true;
+            }
+
+            if (!PZXLoader.tapeBlockInfo[blockCounter].IsStandardBlock)
+            {
+                if (!tapeIsPlaying)
+                    blockCounter--;
+                return false;
+            }
+
+            PZXLoader.DATA_Block dataBlock = (PZXLoader.DATA_Block)PZXLoader.blocks[blockCounter + 1];
+            edgeDuration = (1000);
+            //if (pulse != dataBlock.initialPulseLevel)
+            //    FlipTapeBit();
+            H = 0;
+            int byteCounter = dataBlock.data.Count;
+            int dataIndex = 0;
+            bool loadStageFlagByte = true;
+            while (true)
+            {
+                if (byteCounter == 0)
+                {
+                    A = C & 32;
+                    B = 0;
+                    F = 0x50; //01010000b
+                    break;
+                }
+                byteCounter--;
+                L = dataBlock.data[dataIndex++];
+                H ^= L;
+                if (DE == 0)
+                {
+                    A = H;
+                    Cp_R(1);
+                    break;
+                }
+                if (loadStageFlagByte)
+                {
+                    loadStageFlagByte = false;
+                    A = (_AF >> 8) & 0xff;
+                    Xor_R(L);
+                    if ((F & 0x040) == 0)
+                        break;
+                }
+                else
+                {
+                    PokeByteNoContend(IX++, L);
+                    DE--;
+                }
+            }
+            PC = PopStack();
+            MemPtr = PC;
+
+            if (!tapeIsPlaying)
+                blockCounter++;
+
+            if (blockCounter >= PZXLoader.blocks.Count)
+            {
+                blockCounter--;
+                tape_readToPlay = false;
+                TapeStopped();
+                return true;
+            }
+            /*
+            if (!PZXLoader.tapeBlockInfo[blockCounter].IsStandardBlock)
+            {
+                blockCounter--;
+                return false;
+            }
+            */
+            return true;
+        }
+
         private void DoTapeEvent(Speccy.TapeEventArgs e) {
             if (tapeBitFlipAck)
                 tapeBitWasFlipped = false;
@@ -10836,6 +11013,14 @@ namespace Speccy
 
                 #region DATA
  else if (currentBlock is PZXLoader.DATA_Block) {
+     /*
+                    if (PZXLoader.tapeBlockInfo[blockCounter].IsStandardBlock)
+                    {
+                        blockCounter--;
+                        FlashLoad();
+                        return;
+                    }
+      * */
                     PZXLoader.DATA_Block block = (PZXLoader.DATA_Block)currentBlock;
 
                     //Are we done with pulses for a certain sequence?
@@ -10899,67 +11084,12 @@ namespace Speccy
 
             } else if (e.EventType == Speccy.TapeEventType.START_TAPE) {
                 if (TapeEvent != null)
-                    OnTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE)); //stop the tape!
+                    OnTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE));
+
                 NextPZXBlock();
+               
             } else if (e.EventType == Speccy.TapeEventType.FLASH_LOAD) {
-                if (blockCounter < 0)
-                    blockCounter = 0;
-                blockCounter++;
-                if (blockCounter >= PZXLoader.tapeBlockInfo.Count) {
-                    blockCounter--;
-                    tape_readToPlay = false;
-                    TapeStopped();
-                    return;
-                }
-
-                if (!PZXLoader.tapeBlockInfo[blockCounter].IsStandardBlock) {
-                    blockCounter--;
-                    return;
-                }
-
-                PZXLoader.DATA_Block dataBlock = (PZXLoader.DATA_Block)PZXLoader.blocks[blockCounter + 1];
-                edgeDuration = (1000);
-                //if (pulse != dataBlock.initialPulseLevel)
-                //    FlipTapeBit();
-                H = 0;
-                int byteCounter = dataBlock.data.Count;
-                int dataIndex = 0;
-                bool loadStageFlagByte = true;
-                while (true) {
-                    if (byteCounter == 0) {
-                        A = C & 32;
-                        B = 0;
-                        F = 0x50; //01010000b
-                        break;
-                    }
-                    byteCounter--;
-                    L = dataBlock.data[dataIndex++];
-                    H ^= L;
-                    if (DE == 0) {
-                        A = H;
-                        Cp_R(1);
-                        break;
-                    }
-                    if (loadStageFlagByte) {
-                        loadStageFlagByte = false;
-                        A = (_AF >> 8) & 0xff;
-                        Xor_R(L);
-                        if ((F & 0x040) == 0)
-                            break;
-                    } else {
-                        PokeByteNoContend(IX++, L);
-                        DE--;
-                    }
-                }
-                PC = PopStack();
-                MemPtr = PC;
-                blockCounter++;
-                if (blockCounter >= PZXLoader.blocks.Count) {
-                    blockCounter--;
-                    tape_readToPlay = false;
-                    TapeStopped();
-                    return;
-                }
+                FlashLoad();
             }
         }
     }

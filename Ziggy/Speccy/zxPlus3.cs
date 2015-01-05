@@ -41,50 +41,7 @@ namespace Speccy
             TstateAtTop = BorderTopHeight * TstatesPerScanline;
             TstateAtBottom = BorderBottomHeight * TstatesPerScanline;
             tstateToDisp = new short[FrameLength];
-            /*
-            contentionStartPeriod = 14361 + LateTiming;
-            contentionEndPeriod = contentionStartPeriod + (ScreenHeight * TstatesPerScanline); //57324 + LateTiming;
 
-            PagePointer[0] = ROMpage[0];  //128 editor default!
-            PagePointer[1] = ROMpage[1];
-            PagePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-            PagePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-            PagePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];   //Bank 2
-            PagePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];   //Bank 2
-            PagePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];   //Bank 0
-            PagePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];   //Bank 0
-
-            BankInPage0 = ROM_128_BAS;
-            BankInPage1 = "Bank 5";
-            BankInPage2 = "Bank 2";
-            BankInPage3 = "Bank 0";
-            lowROMis48K = false;
-            contendedBankPagedIn = false;
-            contendedBankIn8000 = false;
-
-            pagingDisabled = false;
-            showShadowScreen = false;
-
-            Random rand = new Random();
-
-            //Fill memory with zero to simulate hard reset
-            for (int i = DisplayStart; i < 65535; ++i)
-                PokeByteNoContend(i, 0);
-
-            screen = GetPageData(5); //Bank 5 is a copy of the screen
-
-            screenByteCtr = DisplayStart;
-            ULAByteCtr = 0;
-
-            ActualULAStart = 14364 - 24 - (TstatesPerScanline * BorderTopHeight);
-            lastTState = ActualULAStart;
-            BuildAttributeMap();
-
-            BuildContentionTable();
-            aySound.Reset();
-            beeper = new ZeroSound.SoundManager(handle, 32, 2, 44100);
-            beeper.Play();
-            */
             ScreenBuffer = new int[ScanLineWidth * BorderTopHeight //48 lines of border
                                               + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
                                               + ScanLineWidth * BorderBottomHeight]; //56 lines of border
@@ -865,76 +822,6 @@ namespace Speccy
                 totalTStates = (int)szx.z80Regs.CyclesStart;
             }
         }
-
-        private uint GetUIntFromString(string data) {
-            byte[] carray = System.Text.ASCIIEncoding.UTF8.GetBytes(data);
-            uint val = BitConverter.ToUInt32(carray, 0);
-            return val;
-        }
-
-        /*
-        public override void SaveSZX(String filename)
-        {
-            SZXLoader szx = new SZXLoader();
-            szx.header = new SZXLoader.ZXST_Header();
-            szx.creator = new SZXLoader.ZXST_Creator();
-            szx.z80Regs = new SZXLoader.ZXST_Z80Regs();
-            szx.specRegs = new SZXLoader.ZXST_SpecRegs();
-            szx.keyboard = new SZXLoader.ZXST_Keyboard();
-            szx.ayState = new SZXLoader.ZXST_AYState();
-
-            for (int f = 0; f < 16; f++)
-                szx.RAM_BANK[f] = new byte[8192];
-
-            szx.header.MachineId = (byte)SZXLoader.ZXTYPE.ZXSTMID_PLUS3;
-            szx.header.Magic = GetUIntFromString("ZXST");
-            szx.header.MajorVersion = 1;
-            szx.header.MinorVersion = 3;
-            szx.creator.CreatorName = "Zero Spectrum Emulator by Arjun ".ToCharArray();
-            szx.creator.MajorVersion = 0;
-            szx.creator.MinorVersion = 5;
-            if (Issue2Keyboard)
-                szx.keyboard.Flags |= Speccy.SZXLoader.ZXSTKF_ISSUE2;
-            szx.keyboard.KeyboardJoystick |= 8;
-            szx.z80Regs.AF = (ushort)AF;
-            szx.z80Regs.AF1 = (ushort)_AF;
-            szx.z80Regs.BC = (ushort)BC;
-            szx.z80Regs.BC1 = (ushort)_BC;
-            szx.z80Regs.BitReg = (byte)MemPtr;
-            szx.z80Regs.CyclesStart = (uint)totalTStates;
-            szx.z80Regs.DE = (ushort)DE;
-            szx.z80Regs.DE1 = (ushort)_DE;
-            if (lastOpcodeWasEI != 0)
-                szx.z80Regs.Flags |= Speccy.SZXLoader.ZXSTZF_EILAST;
-            if (HaltOn)
-                szx.z80Regs.Flags |= Speccy.SZXLoader.ZXSTZF_HALTED;
-            szx.z80Regs.HL = (ushort)HL;
-            szx.z80Regs.HL1 = (ushort)_HL;
-            szx.z80Regs.I = (byte)I;
-            szx.z80Regs.IFF1 = (byte)(IFF1 ? 1 : 0);
-            szx.z80Regs.IFF1 = (byte)(IFF2 ? 1 : 0);
-            szx.z80Regs.IM = (byte)interruptMode;
-            szx.z80Regs.IX = (ushort)IX;
-            szx.z80Regs.IY = (ushort)IY;
-            szx.z80Regs.PC = (ushort)PC;
-            szx.z80Regs.R = (byte)R;
-            szx.z80Regs.SP = (ushort)SP;
-            szx.specRegs.Border = (byte)borderColour;
-            szx.specRegs.Fe = (byte)lastFEOut;
-            szx.specRegs.pagePort = (byte)last1ffdOut;
-
-            szx.specRegs.x7ffd = (byte)last7ffdOut;
-            szx.ayState.cFlags = 0;
-            szx.ayState.currentRegister = (byte)aySound.SelectedRegister;
-            szx.ayState.chRegs = aySound.GetRegisters();
-
-            for (int f = 0; f < 16; f++)
-            {
-                Array.Copy(RAMpage[f], 0, szx.RAM_BANK[f], 0, 8192);
-            }
-            szx.SaveSZX(filename);
-        }
-        */
 
         public override void UseZ80(Z80_SNAPSHOT z80) {
             I = z80.I;

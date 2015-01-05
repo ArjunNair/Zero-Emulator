@@ -20,6 +20,17 @@ namespace Speccy
         private bool flashBitOn = false;
         private int bor = 0;
 
+        private int adjustedScreenHeight = 0;
+
+        int leftBorderOffset = 24;
+        int rightBorderOffset = 8;
+        int topBorderOffset = 8;
+       
+        int adjustedBorderLeftWidth = 0;
+        int adjustedBorderRightWidth = 0;
+        int adjustedBorderTopHeight = 0;
+        int adjustedScanlineWidth = 0;
+
         public override void DiskInsert(string filename, byte _unit) {
             if (diskInserted[_unit])
                 wdDrive.DiskEject(_unit);
@@ -39,13 +50,23 @@ namespace Speccy
         //The display offset of the speccy screen wrt to emulator window in horizontal direction.
         //Useful for "centering" unorthodox screen dimensions like the Pentagon that has different left & right border width.
         public override int GetOriginOffsetX() {
-            return  -32;
+            return 0;// -32;
         }
 
         //The display offset of the speccy screen wrt to emulator window in vertical direction.
         //Useful for "centering" unorthodox screen dimensions like the Pentagon that has different top & bottom border height.
         public override int GetOriginOffsetY() {
-            return  32;
+            return 0;// 32;
+        }
+
+        public override int GetTotalScreenWidth()
+        {
+            return ScreenWidth +  adjustedBorderLeftWidth + adjustedBorderRightWidth;
+        }
+
+        public override int GetTotalScreenHeight()
+        {
+            return ScreenHeight + adjustedBorderTopHeight + BorderBottomHeight;
         }
 
         public Pentagon128K(IntPtr handle, bool lateTimingModel)
@@ -81,52 +102,22 @@ namespace Speccy
             TstateAtBottom = BorderBottomHeight * TstatesPerScanline;
             tstateToDisp = new short[FrameLength + 1000];
 
+            adjustedBorderLeftWidth = BorderLeftWidth - leftBorderOffset;
+            adjustedBorderRightWidth = BorderRightWidth - rightBorderOffset;
+            adjustedBorderTopHeight = BorderTopHeight - topBorderOffset;
+            adjustedScanlineWidth = adjustedBorderLeftWidth + adjustedBorderRightWidth + ScreenWidth;
+            adjustedScreenHeight = adjustedBorderTopHeight + ScreenHeight + BorderBottomHeight;
+
+            
+            ScreenBuffer = new int[adjustedScanlineWidth * adjustedBorderTopHeight //48 lines of border
+                                             + adjustedScanlineWidth * ScreenHeight //border + main + border of 192 lines
+                                             + adjustedScanlineWidth * BorderBottomHeight]; //56 lines of border
+
             /*
-            contentionStartPeriod = 14336 + LateTiming;
-            contentionEndPeriod = contentionStartPeriod + (ScreenHeight * TstatesPerScanline); //57324 + LateTiming;
-
-            PagePointer[0] = ROMpage[0];  //128 editor default!
-            PagePointer[1] = ROMpage[1];
-            PagePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-            PagePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-            PagePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];   //Bank 2
-            PagePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];   //Bank 2
-            PagePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];   //Bank 0
-            PagePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];   //Bank 0
-
-            BankInPage0 = ROM_128_BAS;
-            BankInPage1 = "Bank 5";
-            BankInPage2 = "Bank 2";
-            BankInPage3 = "Bank 0";
-            contendedBankPagedIn = false;
-
-            pagingDisabled = false;
-            showShadowScreen = false;
-
-            Random rand = new Random();
-
-            //Fill memory with zero to simulate hard reset
-            for (int i = DisplayStart; i < 65535; ++i)
-                PokeByteNoContend(i, 0);
-
-            screen = GetPageData(5); //Bank 5 is a copy of the screen
-
-            screenByteCtr = DisplayStart;
-            ULAByteCtr = 0;
-
-            ActualULAStart = 3584;// from Russian FAQ!
-            lastTState = ActualULAStart;
-            BuildAttributeMap();
-
-            BuildContentionTable();
-            aySound.Reset();
-            beeper = new ZeroSound.SoundManager(handle, 32, 2, 44100);
-            beeper.Play();
-            */
             ScreenBuffer = new int[ScanLineWidth * BorderTopHeight //48 lines of border
                                               + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
                                               + ScanLineWidth * BorderBottomHeight]; //56 lines of border
-
+            */
             keyBuffer = new bool[(int)keyCode.LAST];
 
             attr = new short[DisplayLength];  //6144 bytes of display memory will be mapped
@@ -202,6 +193,7 @@ namespace Speccy
                 for (int f = 0; f < elapsedTStates; f++) {
                     //read new screen/border pixels
                     if (tstateToDisp[lastTState] > 1) {
+
                         if (pixelsWritten == 0) {
                             screenByteCtr = tstateToDisp[lastTState] - 16384; //adjust for actual screen offset
 
@@ -217,22 +209,19 @@ namespace Speccy
                             paper = AttrColors[((attrData >> 3) & 0x7) + bright];
 
                             if (flashOn && flashBitOn) //swap paper and ink when flash is on
-                                {
+                            {
                                 int temp = ink;
                                 ink = paper;
                                 paper = temp;
                             }
                         }
 
-                        //for (int g = 0; g < 8; g++)
-                        {
-                            if ((pixelData & 0x80) != 0) {
-                                ScreenBuffer[ULAByteCtr++] = ink;
-                            } else {
-                                ScreenBuffer[ULAByteCtr++] = paper;
-                            }
-                            pixelData <<= 1;
+                        if ((pixelData & 0x80) != 0) {
+                            ScreenBuffer[ULAByteCtr++] = ink;
+                        } else {
+                            ScreenBuffer[ULAByteCtr++] = paper;
                         }
+                        pixelData <<= 1;
 
                         if ((pixelData & 0x80) != 0) {
                             ScreenBuffer[ULAByteCtr++] = ink;
@@ -245,17 +234,15 @@ namespace Speccy
                         if (pixelsWritten >= 8)
                             pixelsWritten = 0;
 
-                        lastTState++;
-                        //lastTState += 4;
-                        //f += 3;
                     } else if (tstateToDisp[lastTState] == 1) {
                         bor = AttrColors[borderColour];
 
                         ScreenBuffer[ULAByteCtr++] = bor;
                         ScreenBuffer[ULAByteCtr++] = bor;
-                        lastTState++;
-                    } else
-                        lastTState++;
+
+                    }
+
+                    lastTState++;
                 }
             }
         }
@@ -266,34 +253,28 @@ namespace Speccy
         }
 
         public override void BuildContentionTable() {
-            /* int t = contentionStartPeriod;
-             while (t < contentionEndPeriod)
-             {
-                 contentionTable[t++] = 1;
-                 contentionTable[t++] = 0;
-                 //for 128 t-states
-                 for (int i = 2; i < 128; i += 8)
-                 {
-                     for (int g = 7; g >= 0; g--)
-                     {
-                         contentionTable[t++] = g;
-                     }
-                 }
-                 t += (TstatesPerScanline - 128);
-             }
-             */
             //build top half of tstateToDisp table
             //vertical retrace period
             int t = 0;
-            for (t = 0; t < ActualULAStart; t++)
+
+            for (; t < ActualULAStart; t++)
+                tstateToDisp[t] = 0;
+
+            for (; t < ActualULAStart + (topBorderOffset * TstatesPerScanline); t++)
                 tstateToDisp[t] = 0;
 
             //next 48 are actual border
             while (t < ActualULAStart + (TstateAtTop)) {
-                for (int g = 0; g < ScanLineWidth / 2; g++)
-                    tstateToDisp[t++] = 1;
+                int g = 0;
+                int k = 0;
 
-                for (int g = ScanLineWidth / 2; g < TstatesPerScanline; g++)
+                for (; g < leftBorderOffset / 2; g++, k++ )
+                    tstateToDisp[t++] = 0;
+
+                for (g = 0; g < adjustedScanlineWidth / 2; g++, k++)
+                        tstateToDisp[t++] = 1;
+
+                for (g = 0; g < TstatesPerScanline - 188; g++, k++)
                     tstateToDisp[t++] = 0;
             }
 
@@ -301,11 +282,17 @@ namespace Speccy
             int _x = 0;
             int _y = 0;
             int scrval = 2;
+
             while (t < ActualULAStart + (TstateAtTop) + (ScreenHeight * TstatesPerScanline)) {
-                for (int g = 0; g < BorderLeftWidth / 2; g++)
+                int g = 0;
+
+                for (; g < leftBorderOffset / 2; g++)
+                    tstateToDisp[t++] = 0;
+
+                for (g = 0; g < adjustedBorderLeftWidth / 2; g++)
                     tstateToDisp[t++] = 1;
 
-                for (int g = BorderLeftWidth / 2; g < (BorderLeftWidth + ScreenWidth) / 2; g++) {
+                for (g = 0; g < (ScreenWidth) / 2; g++) {
                     //Map screenaddr to tstate
                     if (g % 4 == 0) {
                         scrval = (((((_y & 0xc0) >> 3) | (_y & 0x07) | (0x40)) << 8)) | (((_x >> 3) & 0x1f) | ((_y & 0x38) << 2));
@@ -315,19 +302,25 @@ namespace Speccy
                 }
                 _y++;
 
-                for (int g = (BorderLeftWidth + ScreenWidth) / 2; g < (BorderLeftWidth + ScreenWidth + BorderRightWidth) / 2; g++)
+                for (g = 0; g < adjustedBorderRightWidth / 2; g++)
                     tstateToDisp[t++] = 1;
 
-                for (int g = (BorderLeftWidth + ScreenWidth + BorderRightWidth) / 2; g < TstatesPerScanline; g++)
+                for (g = 0; g < TstatesPerScanline - 188; g++)
                     tstateToDisp[t++] = 0;
             }
 
             //build bottom half
             while (t < ActualULAStart + (TstateAtTop) + (ScreenHeight * TstatesPerScanline) + (TstateAtBottom)) {
-                for (int g = 0; g < ScanLineWidth / 2; g++)
-                    tstateToDisp[t++] = 1;
+                int g = 0;
+                int k = 0;
 
-                for (int g = ScanLineWidth / 2; g < TstatesPerScanline; g++)
+                for (; g < leftBorderOffset / 2; g++, k++ )
+                    tstateToDisp[t++] = 0;
+
+                for (g = 0; g < adjustedScanlineWidth / 2; g++, k++)
+                        tstateToDisp[t++] = 1;
+
+                for (g = 0; g < TstatesPerScanline - 188; g++, k++)
                     tstateToDisp[t++] = 0;
             }
         }
@@ -811,75 +804,6 @@ namespace Speccy
                 totalTStates = (int)szx.z80Regs.CyclesStart;
             }
         }
-
-        private uint GetUIntFromString(string data) {
-            byte[] carray = System.Text.ASCIIEncoding.UTF8.GetBytes(data);
-            uint val = BitConverter.ToUInt32(carray, 0);
-            return val;
-        }
-
-        /*
-        public override void SaveSZX(String filename)
-        {
-            SZXLoader szx = new SZXLoader();
-            szx.header = new SZXLoader.ZXST_Header();
-            szx.creator = new SZXLoader.ZXST_Creator();
-            szx.z80Regs = new SZXLoader.ZXST_Z80Regs();
-            szx.specRegs = new SZXLoader.ZXST_SpecRegs();
-            szx.keyboard = new SZXLoader.ZXST_Keyboard();
-            szx.ayState = new SZXLoader.ZXST_AYState();
-
-            for (int f = 0; f < 16; f++)
-                szx.RAM_BANK[f] = new byte[8192];
-
-            szx.header.MachineId = (byte)SZXLoader.ZXTYPE.ZXSTMID_PENTAGON128;
-            szx.header.Magic = GetUIntFromString("ZXST");
-            szx.header.MajorVersion = 1;
-            szx.header.MinorVersion = 3;
-            szx.creator.CreatorName = "Zero Spectrum Emulator by Arjun ".ToCharArray();
-            szx.creator.MajorVersion = 0;
-            szx.creator.MinorVersion = 5;
-            if (Issue2Keyboard)
-                szx.keyboard.Flags |= Speccy.SZXLoader.ZXSTKF_ISSUE2;
-            szx.keyboard.KeyboardJoystick |= 8;
-            szx.z80Regs.AF = (ushort)AF;
-            szx.z80Regs.AF1 = (ushort)_AF;
-            szx.z80Regs.BC = (ushort)BC;
-            szx.z80Regs.BC1 = (ushort)_BC;
-            szx.z80Regs.BitReg = (byte)MemPtr;
-            szx.z80Regs.CyclesStart = (uint)totalTStates;
-            szx.z80Regs.DE = (ushort)DE;
-            szx.z80Regs.DE1 = (ushort)_DE;
-            if (lastOpcodeWasEI != 0)
-                szx.z80Regs.Flags |= Speccy.SZXLoader.ZXSTZF_EILAST;
-            if (HaltOn)
-                szx.z80Regs.Flags |= Speccy.SZXLoader.ZXSTZF_HALTED;
-            szx.z80Regs.HL = (ushort)HL;
-            szx.z80Regs.HL1 = (ushort)_HL;
-            szx.z80Regs.I = (byte)I;
-            szx.z80Regs.IFF1 = (byte)(IFF1 ? 1 : 0);
-            szx.z80Regs.IFF1 = (byte)(IFF2 ? 1 : 0);
-            szx.z80Regs.IM = (byte)interruptMode;
-            szx.z80Regs.IX = (ushort)IX;
-            szx.z80Regs.IY = (ushort)IY;
-            szx.z80Regs.PC = (ushort)PC;
-            szx.z80Regs.R = (byte)R;
-            szx.z80Regs.SP = (ushort)SP;
-            szx.specRegs.Border = (byte)borderColour;
-            szx.specRegs.Fe = (byte)lastFEOut;
-            szx.specRegs.pagePort = 0;
-            szx.specRegs.x7ffd = (byte)last7ffdOut;
-            szx.ayState.cFlags = 0;
-            szx.ayState.currentRegister = (byte)aySound.SelectedRegister;
-            szx.ayState.chRegs = aySound.GetRegisters();
-
-            for (int f = 0; f < 16; f++)
-            {
-                Array.Copy(RAMpage[f], 0, szx.RAM_BANK[f], 0, 8192);
-            }
-            szx.SaveSZX(filename);
-        }
-        */
 
         public override void UseZ80(Z80_SNAPSHOT z80) {
             I = z80.I;

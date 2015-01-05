@@ -23,3 +23,12 @@ C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\Speccy.pdb
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\Peripherals.dll
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\ZeroSound.dll
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\zlib.net.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\Speccy.dll.config
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\Speccy.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\Speccy.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\Peripherals.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\ZeroSound.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\zlib.net.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\obj\Debug\Speccy.csprojResolveAssemblyReference.cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\obj\Debug\Speccy.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\obj\Debug\Speccy.pdb

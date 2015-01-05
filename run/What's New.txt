@@ -2,8 +2,17 @@
 What's New
 --------------
 
-ver 0.6.2
----------------
+Ver 0.6.3 (ver 0.7 RC)
+---------------------------
+- Fixed full screen toggle issue. Also uses correct desktop resolution instead of hard coded width and height.
+- Fixed edge load interfering with fast load when trying to load standard blocks.
+- Fixed FPS.
+- Fixed framerate drop in fullscreen (introduced in 0.62 possibly).
+* Exit full screen if user needs to be shown a dialog box or tool window.
+* Reworked pentagon renderer to show aesthetically correct screen dimensions.
+
+ver 0.6.2 (ver 0.7 beta)
+-----------------------------------------------------
 + Added shortcut keys for all major emulator functions
 + Added indicators to main window.
 + Added FPS and emulator state readout to status menu.
@@ -11,18 +20,18 @@ ver 0.6.2
 + Made the Monitor window completely resizable (polomint)
 + Made the Memory viewer resizable vertically (polomint)
 + Added shortcut keys for debugging in the Monitor (polomint)
+* Refactored monitor to use enum ints instead of strings for event checking
 - Fixed sound being disabled after loading from tape (Russ Hoy)
 - Fixed Fast Loading, which was broken (didn't load some tapes) in 0.6.1
 - Fixed Pixel Smoothing option not reflecting currently in the Options window (Russ Hoy)
 - Fixed resetting to wrong machine after RZX playback (Russ Hoy)
 - Fixed a problem with Infoseek download not auto-loading selected tape. Plus some cross-thread exception. (Russ Hoy)
 - Fixed the issue with window not resizing correctly when switching between Pentagon and some other machine.
+- Fixed relative jump addresses not wrapping correctly if calculated address is > 65535, in the Debugger.
+- Fixed tool tip for system variables not showing hex number if user has selected hex view in Debugger.
 
-Pending issue: Full screen toggle doesn't set emulator screen size correctly.
-
-
-Ver 0.6.1
----------------
+Ver 0.6.1 (ver 0.7 alpha)
+----------------------------------------------------
 - Fixed an issue with IN when AY emulation is enabled on a 48k speccy.
 - Fixed a contention timing issue with IN.
 - Fixed Options page not correctly reflecting the sound settings for AY and Stereo sound modes.

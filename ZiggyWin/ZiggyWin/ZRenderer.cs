@@ -57,9 +57,13 @@ namespace ZeroWin
         private bool fullScreenMode = false;
         private Point ledIndicatorPos = new Point(0, 0);
         private double ledBlinkTimer = 0.0f;
-        private double deltaTime = 0;
-        private double currentTime = 0;
         private bool enableVsync = false;
+        private double lastTime = 0;
+        private double frameTime = 0;
+        private double totalFrameTime = 0;
+        private int frameCount = 0;
+        public int averageFPS = 0;
+
 
         public Point LEDIndicatorPosition {
             get { return ledIndicatorPos; }
@@ -724,8 +728,10 @@ namespace ZeroWin
             displayRect = new Rectangle(0, 0, width, height);
             displayWidth = width;
             displayHeight = height;
+
             AdapterInformation adapterInfo = Manager.Adapters.Default;
 
+            ziggyWin.logger.Log("Setting up render parameters...");
             currentParams = new PresentParameters();
             currentParams.BackBufferCount = 2;
             currentParams.BackBufferWidth = width;
@@ -754,6 +760,7 @@ namespace ZeroWin
             }
 
             try {
+                ziggyWin.logger.Log("Initializing directX device...");
                 dxDevice = new Device(0, DeviceType.Hardware, this, CreateFlags.HardwareVertexProcessing, currentParams);
             } catch (Microsoft.DirectX.DirectXException dx) {
                 MessageBox.Show(dx.ErrorString, "DX error", MessageBoxButtons.OK);
@@ -774,19 +781,19 @@ namespace ZeroWin
             float scaleY = ((float)displayHeight / (float)(ScreenHeight));
 
             //Maintain 4:3 aspect ration when full screen
-            if (EnableFullScreen)
+            if (EnableFullScreen && ziggyWin.config.MaintainAspectRatioInFullScreen)
             {
-                if (Screen.PrimaryScreen.Bounds.Height < Screen.PrimaryScreen.Bounds.Width)
+                if (displayHeight < displayWidth)
                 {
-                    float aspectXScale = (Screen.PrimaryScreen.Bounds.Height * 4.0f) / (Screen.PrimaryScreen.Bounds.Width * 3.0f);
+                    float aspectXScale = (displayHeight * 4.0f) / (displayWidth * 3.0f);
                     scaleX = (scaleX * aspectXScale);
                     int newWidth = (int)(displayWidth * aspectXScale);
                     //displayRect = new Rectangle(0, 0, newWidth, displayHeight);
-                    spritePos = new Vector3(((displayWidth - newWidth)) / 4.0f, 0, 0); //TBD: Fix pos calc
+                    spritePos = new Vector3(((displayWidth - newWidth)) / (scaleX * 2.0f), 0, 0);
                 }
                 else //Not tested!!!
                 {
-                    float aspectYScale = (Screen.PrimaryScreen.Bounds.Width * 3.0f) / (Screen.PrimaryScreen.Bounds.Height * 4.0f);
+                    float aspectYScale = (displayWidth * 3.0f) / (displayHeight * 4.0f);
                     scaleY = (scaleY * aspectYScale);
                     int newHeight = (int)(displayHeight * aspectYScale);
                     //displayRect = new Rectangle(0, 0, displayWidth, newHeight);
@@ -800,6 +807,7 @@ namespace ZeroWin
 
             if (scaleY < 1.0f)
                 scaleY = 1.0f;
+
             Matrix scaling = Matrix.Scaling(scaleX, scaleY, 0);
             sprite.Transform = scaling;
 
@@ -818,7 +826,7 @@ namespace ZeroWin
             System.Drawing.Font systemfont = new System.Drawing.Font(System.Drawing.SystemFonts.MessageBoxFont.FontFamily, 10f, FontStyle.Regular);
             text = new Microsoft.DirectX.Direct3D.Font(dxDevice, systemfont);
             isSuspended = false;
-            
+            lastTime = PrecisionTimer.TimeInMilliseconds();
             return true;
         }
 
@@ -957,6 +965,17 @@ namespace ZeroWin
                         isRendering = true;
                         this.Invalidate();
                     }
+                    frameTime = PrecisionTimer.TimeInMilliseconds() - lastTime;
+                    frameCount++;
+                    totalFrameTime += frameTime;
+
+                    if (totalFrameTime > 1000.0f)
+                    {
+                        averageFPS = (int)(1000 * frameCount / totalFrameTime);
+                        frameCount = 0;
+                        totalFrameTime = 0;
+                    }
+                    lastTime = PrecisionTimer.TimeInMilliseconds();
                 }
                 System.Threading.Thread.Sleep(1);
             }

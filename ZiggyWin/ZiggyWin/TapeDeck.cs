@@ -310,6 +310,12 @@ namespace ZeroWin
                 if (!ziggyWin.config.EnableSound)
                     ziggyWin.zx.MuteSound(true);
             }
+            //Deck_TapeEvent(this, new Speccy.TapeEventArgs(TapeEventType.START_TAPE));
+            ziggyWin.zx.blockCounter--;
+
+            if (ziggyWin.zx.blockCounter < 0)
+                ziggyWin.zx.blockCounter = 0;
+
             ziggyWin.zx.NextPZXBlock();
             return;
         }
@@ -329,6 +335,7 @@ namespace ZeroWin
             statusStrip1.Items[0].Text = "No tape inserted";
             tapeInfo.SetText("");
             ziggyWin.zx.TapeStopped(true);
+            ziggyWin.zx.ResetTapeEdgeDetector();
             tapeIsInserted = false;
             tapFileOpen = false;
             ziggyWin.zx.tape_readToPlay = false;
