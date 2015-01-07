@@ -395,8 +395,11 @@ namespace Peripherals
                             info.Info = "";
                     } else
                         info.Info = ((PZXLoader.DATA_Block)PZXLoader.blocks[f]).count.ToString() + " bits  (" + Math.Ceiling((double)(((PZXLoader.DATA_Block)PZXLoader.blocks[f]).count) / (double)8).ToString() + " bytes)";
-                } else if (PZXLoader.blocks[f] is PZXLoader.PZXT_Header)
+                }
+                else if (PZXLoader.blocks[f] is PZXLoader.PZXT_Header) {
+                    //info.Info = ((PZXLoader.PZXT_Header)(PZXLoader.blocks[f])).Title;
                     continue;
+                }
 
                 info.Block = PZXLoader.blocks[f].tag;
                 tapeBlockInfo.Add(info);

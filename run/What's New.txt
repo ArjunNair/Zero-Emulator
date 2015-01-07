@@ -2,6 +2,10 @@
 What's New
 --------------
 
+Ver 0.6.4 (ver 0.7 RC1)
+--------------------------
+- Really fixed edge load + flash load issues.
+
 Ver 0.6.3 (ver 0.7 RC)
 ---------------------------
 - Fixed full screen toggle issue. Also uses correct desktop resolution instead of hard coded width and height.

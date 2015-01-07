@@ -311,6 +311,7 @@ namespace ZeroWin
                     ziggyWin.zx.MuteSound(true);
             }
             //Deck_TapeEvent(this, new Speccy.TapeEventArgs(TapeEventType.START_TAPE));
+           
             ziggyWin.zx.blockCounter--;
 
             if (ziggyWin.zx.blockCounter < 0)

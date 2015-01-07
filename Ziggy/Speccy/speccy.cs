@@ -932,7 +932,7 @@ namespace Speccy
         }
 
         protected void FlashLoadTape() {
-            if (tape_edgeDetectorRan || !flashLoadTapes)
+            if (!flashLoadTapes)
                 return;
 
             //if (TapeEvent != null)
@@ -10897,12 +10897,14 @@ namespace Speccy
             return false;
         }
 
-        private bool FlashLoad()
+        private void FlashLoad()
         {
             if (blockCounter < 0)
                 blockCounter = 0;
 
-            if (!tapeIsPlaying)
+            PZXLoader.Block currBlock = PZXLoader.blocks[blockCounter];
+
+            if (!(currBlock is PZXLoader.PULS_Block))
                 blockCounter++;
 
             if (blockCounter >= PZXLoader.tapeBlockInfo.Count)
@@ -10910,14 +10912,14 @@ namespace Speccy
                 blockCounter--;
                 tape_readToPlay = false;
                 TapeStopped();
-                return true;
+                return;
             }
 
             if (!PZXLoader.tapeBlockInfo[blockCounter].IsStandardBlock)
             {
-                if (!tapeIsPlaying)
+                if (!(currBlock is PZXLoader.PULS_Block))
                     blockCounter--;
-                return false;
+                return;
             }
 
             PZXLoader.DATA_Block dataBlock = (PZXLoader.DATA_Block)PZXLoader.blocks[blockCounter + 1];
@@ -10962,25 +10964,14 @@ namespace Speccy
             }
             PC = PopStack();
             MemPtr = PC;
-
-            if (!tapeIsPlaying)
-                blockCounter++;
-
+            blockCounter++;
             if (blockCounter >= PZXLoader.blocks.Count)
             {
                 blockCounter--;
                 tape_readToPlay = false;
                 TapeStopped();
-                return true;
+                return;
             }
-            /*
-            if (!PZXLoader.tapeBlockInfo[blockCounter].IsStandardBlock)
-            {
-                blockCounter--;
-                return false;
-            }
-            */
-            return true;
         }
 
         private void DoTapeEvent(Speccy.TapeEventArgs e) {
@@ -11013,14 +11004,6 @@ namespace Speccy
 
                 #region DATA
  else if (currentBlock is PZXLoader.DATA_Block) {
-     /*
-                    if (PZXLoader.tapeBlockInfo[blockCounter].IsStandardBlock)
-                    {
-                        blockCounter--;
-                        FlashLoad();
-                        return;
-                    }
-      * */
                     PZXLoader.DATA_Block block = (PZXLoader.DATA_Block)currentBlock;
 
                     //Are we done with pulses for a certain sequence?
