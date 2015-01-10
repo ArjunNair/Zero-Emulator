@@ -899,43 +899,10 @@ namespace ZeroWin
             }
             dxDevice.SamplerState[0].AddressU = TextureAddress.Border;
             dxDevice.SamplerState[0].AddressV = TextureAddress.Border;
-            sprite.Draw(dxDisplay, displayRect, Vector3.Empty, spritePos,  16777215/*System.Drawing.Color.White*/);
+            sprite.Draw(dxDisplay, displayRect, Vector3.Empty, spritePos,  16777215); //System.Drawing.White
             sprite.End();
             interlaceSprite.Begin(SpriteFlags.AlphaBlend);
 
-            /*
-            if (ziggyWin.config.ShowOnscreenIndicators) {
-                currentTime = PrecisionTimer.TimeInSeconds();
-                deltaTime = currentTime - ledBlinkTimer;
-                if (EmulationIsPaused)
-                    interlaceSprite.Draw(spriteTexture, spriteSourceRects[(int)SpriteType.PAUSE_LED], Vector3.Empty, pauseLedPos, System.Drawing.Color.White);
-                else
-                    if (ziggyWin.showTapeIndicator)
-                        interlaceSprite.Draw(spriteTexture, spriteSourceRects[(int)SpriteType.TAPE_LED], Vector3.Empty, tapeLedPos, System.Drawing.Color.White);
-                    else
-                        if (ziggyWin.showDiskIndicator)
-                            interlaceSprite.Draw(spriteTexture, spriteSourceRects[(int)SpriteType.DISK_LED], Vector3.Empty, diskLedPos, System.Drawing.Color.White);
-                        else
-                            if (ziggyWin.showDownloadIndicator)
-                                interlaceSprite.Draw(spriteTexture, spriteSourceRects[(int)SpriteType.DOWNLOAD_LED], Vector3.Empty, downloadLedPos, System.Drawing.Color.White);
-
-                if (ziggyWin.zx.isPlayingRZX) {
-                    interlaceSprite.Draw(spriteTexture, spriteSourceRects[(int)SpriteType.VIDEO2_LED], Vector3.Empty, videoLedPos, System.Drawing.Color.White);
-                    if (deltaTime < 1.0f)
-                        interlaceSprite.Draw(spriteTexture, spriteSourceRects[(int)SpriteType.PLAY_LED], Vector3.Empty, playLedPos, System.Drawing.Color.White);
-                    text.DrawText(null, string.Format("{0}%", (int)(ziggyWin.zx.rzxFrameCount * 100 / ziggyWin.zx.rzx.frames.Count)), new Point((int)videoLedPos.X - 32, (int)videoLedPos.Y + 8), Color.SlateGray);
-                } else
-                    if (ziggyWin.zx.isRecordingRZX) {
-                        interlaceSprite.Draw(spriteTexture, spriteSourceRects[(int)SpriteType.VIDEO2_LED], Vector3.Empty, videoLedPos, System.Drawing.Color.White);
-                        if (deltaTime < 1.0f)
-                            interlaceSprite.Draw(spriteTexture, spriteSourceRects[(int)SpriteType.RECORD_LED], Vector3.Empty, recordLedPos, System.Drawing.Color.White);
-                    }
-                if (deltaTime > 2.0f) {
-                    ledBlinkTimer = currentTime;
-                    deltaTime = 0;
-                }
-            }
-             * */
             if (showScanlines) {
                 dxDevice.SamplerState[0].AddressU = TextureAddress.Wrap;
                 dxDevice.SamplerState[0].AddressV = TextureAddress.Wrap;

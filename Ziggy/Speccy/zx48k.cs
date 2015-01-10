@@ -53,11 +53,11 @@ namespace Speccy
             soundCounter = 0;
             ayIsAvailable = false;
             aySound.Reset();
-            Reset();
+            Reset(true);
         }
 
-        public override void Reset() {
-            base.Reset();
+        public override void Reset(bool coldBoot) {
+            base.Reset(coldBoot);
             contentionStartPeriod = 14335 + LateTiming;
             contentionEndPeriod = contentionStartPeriod + (ScreenHeight * TstatesPerScanline);//57324 + LateTiming;
 

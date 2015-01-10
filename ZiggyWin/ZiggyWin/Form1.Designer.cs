@@ -107,9 +107,9 @@
             this.toolStripButton5 = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton3 = new System.Windows.Forms.ToolStripButton();
+            this.keyboard48Button = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton7 = new System.Windows.Forms.ToolStripButton();
             this.rzxRecordButton = new System.Windows.Forms.ToolStripButton();
-            this.keyboard48Button = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabelText = new System.Windows.Forms.ToolStripStatusLabel();
             this.rzxPlaybackStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -681,6 +681,13 @@
             this.toolStripButton3.Name = "toolStripButton3";
             this.toolStripButton3.Click += new System.EventHandler(this.tapeBrowserButton_Click);
             // 
+            // keyboard48Button
+            // 
+            this.keyboard48Button.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.keyboard48Button.Image = global::ZeroWin.Properties.Resources.keyboard_16x16;
+            resources.ApplyResources(this.keyboard48Button, "keyboard48Button");
+            this.keyboard48Button.Name = "keyboard48Button";
+            // 
             // toolStripButton7
             // 
             this.toolStripButton7.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -696,13 +703,6 @@
             resources.ApplyResources(this.rzxRecordButton, "rzxRecordButton");
             this.rzxRecordButton.Name = "rzxRecordButton";
             this.rzxRecordButton.Click += new System.EventHandler(this.rzxRecordToolStripMenuItem_Click);
-            // 
-            // keyboard48Button
-            // 
-            this.keyboard48Button.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.keyboard48Button.Image = global::ZeroWin.Properties.Resources.keyboard_16x16;
-            resources.ApplyResources(this.keyboard48Button, "keyboard48Button");
-            this.keyboard48Button.Name = "keyboard48Button";
             // 
             // statusStrip1
             // 
@@ -787,21 +787,22 @@
             // 
             this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            resources.ApplyResources(this, "$this");
             this.BackColor = System.Drawing.SystemColors.Control;
+            resources.ApplyResources(this, "$this");
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.panel1);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.ResizeBegin += new System.EventHandler(this.Form1_ResizeBegin);
+            this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.Form1_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
+            this.Resize += new System.EventHandler(this.Form1_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);

@@ -44,13 +44,11 @@ namespace Speccy
 
             keyBuffer = new bool[(int)keyCode.LAST];
             attr = new short[DisplayLength];  //6144 bytes of display memory will be mapped
-            Reset();
-            //beeper = new ZeroSound.SoundManager(handle, 32, 2, 44100);
-            //beeper.Play();
+            Reset(true);
         }
 
-        public override void Reset() {
-            base.Reset();
+        public override void Reset(bool coldBoot) {
+            base.Reset(coldBoot);
             contentionStartPeriod = 14361 + LateTiming;
             contentionEndPeriod = contentionStartPeriod + (ScreenHeight * TstatesPerScanline); //57324 + LateTiming;
 

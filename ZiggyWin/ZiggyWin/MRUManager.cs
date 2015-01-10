@@ -109,7 +109,7 @@ public class MRUManager
 				s = rK.GetValue(i.ToString(), null) as string;
 				if (s == null)
 				{
-					rK.SetValue(i.ToString(), fileNameWithFullPath);
+                    rK.SetValue(i.ToString(), fileNameWithFullPath);
 					rK.Close();
 					break;
 				}

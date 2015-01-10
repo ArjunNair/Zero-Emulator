@@ -2,21 +2,14 @@
 What's New
 --------------
 
-Ver 0.6.4 (ver 0.7 RC1)
---------------------------
-- Really fixed edge load + flash load issues.
+Ver 0.7
+---------------------
 
-Ver 0.6.3 (ver 0.7 RC)
----------------------------
-- Fixed full screen toggle issue. Also uses correct desktop resolution instead of hard coded width and height.
-- Fixed edge load interfering with fast load when trying to load standard blocks.
-- Fixed FPS.
-- Fixed framerate drop in fullscreen (introduced in 0.62 possibly).
-* Exit full screen if user needs to be shown a dialog box or tool window.
-* Reworked pentagon renderer to show aesthetically correct screen dimensions.
-
-ver 0.6.2 (ver 0.7 beta)
------------------------------------------------------
++ Plain vanilla windows!
++ Implemented correct cold boot and reset emulation.
++ Updated SZX implementation to match SZX 1.4 specifications.
++ Almost all the aspects of the emulator can now be configured via the command line (see README)
++ Added option to enable Vsynch for DirectX renderer.
 + Added shortcut keys for all major emulator functions
 + Added indicators to main window.
 + Added FPS and emulator state readout to status menu.
@@ -24,38 +17,35 @@ ver 0.6.2 (ver 0.7 beta)
 + Made the Monitor window completely resizable (polomint)
 + Made the Memory viewer resizable vertically (polomint)
 + Added shortcut keys for debugging in the Monitor (polomint)
-* Refactored monitor to use enum ints instead of strings for event checking
++ Allow the main emulation window to be resized arbitratrily.
+* The emulator is not paused when switching to full screen mode anymore.
+* Exit full screen if user needs to be shown a dialog box or tool window.
+* Reworked pentagon renderer to show aesthetically correct screen dimensions.
+* The last used joystick(s) are now remembered when the emulator starts up.
+* On selecting a file from Recent Files list, it's moved to the top of the recent file stack.
+- Fixed an issue with IN when AY emulation is enabled on a 48k speccy.
+- Fixed a contention timing issue with IN.
+- Fixed Options page not correctly reflecting the sound settings for AY and Stereo sound modes.
+- Fixed the Machine State window not showing correct info when first invoked from Monitor.
+- Fixed issues with button and image placement if Windows text size is increased.
+- Fixed incorrect machine id being saved in SZX Header when 128KE is used.
+- Fixed AY not being enabled in 128K and above machines (doh!).
+- Fixed machine timing not being read or saved correctly when using a SZX snapshot.
+- Fixed Wrong Key2Joy joystick type being used during emulation.
+- Fixed renderer not being re-initialized correctly (say when VSync is enabled/disabled).
+- Fixed an issue with tape auto-stop causing edge loader to fail.
+- Fixed crash if monitor is launched or machine is reset during the Overscan demo.
+- Fixed a bug in DDCB and FDCB versions of RES opcode.
+- Fixed full screen toggle issue. Also uses correct desktop resolution instead of hard coded width and height.
+- Fixed edge load interfering with fast load when trying to load standard blocks.
 - Fixed sound being disabled after loading from tape (Russ Hoy)
-- Fixed Fast Loading, which was broken (didn't load some tapes) in 0.6.1
+- Fixed Fast Loading, which was broken (didn't load some tapes)
 - Fixed Pixel Smoothing option not reflecting currently in the Options window (Russ Hoy)
 - Fixed resetting to wrong machine after RZX playback (Russ Hoy)
 - Fixed a problem with Infoseek download not auto-loading selected tape. Plus some cross-thread exception. (Russ Hoy)
 - Fixed the issue with window not resizing correctly when switching between Pentagon and some other machine.
 - Fixed relative jump addresses not wrapping correctly if calculated address is > 65535, in the Debugger.
 - Fixed tool tip for system variables not showing hex number if user has selected hex view in Debugger.
-
-Ver 0.6.1 (ver 0.7 alpha)
-----------------------------------------------------
-- Fixed an issue with IN when AY emulation is enabled on a 48k speccy.
-- Fixed a contention timing issue with IN.
-- Fixed Options page not correctly reflecting the sound settings for AY and Stereo sound modes.
-- Fixed the Machine State window not showing correct info when first invoked from Monitor.
-- Fixed issues with button and image placement if Windows text size is increased (needs more testing!)
-- Fixed incorrect machine id being saved in SZX Header when 128KE is used.
-- Fixed AY not being enabled in 128K and above machines (doh!).
-- Fixed machine timing not being read or saved correctly when using a SZX snapshot.
-- Fixed Wrong Key2Joy joystick type being used during emulation.
-- Fixed renderer not being re-initialized correctly (say when VSync is enabled/disabled).
-- The last used joystick(s) are now remembered when the emulator starts up.
-- Fixed an issue with tape auto-stop causing edge loader to fail.
-- Fixed crash if monitor is launched or machine is reset during the Overscan demo.
-* Lots of code refactoring!
-* Switched to using tables for flag related operations.
-* The emulator is not paused when switching to full screen mode anymore.
-* The menu strip and cursor are hidden by default when launching emulator to full screen from command line.
-+ Updated SZX implementation to match SZX 1.4 specifications.
-+ Almost all the aspects of the emulator can now be configured via the command line (see README)
-+ Added option to enable Vsynch for DirectX renderer.
 
 Ver 0.6
 ---------------

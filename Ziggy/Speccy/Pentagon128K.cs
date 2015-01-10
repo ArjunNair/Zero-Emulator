@@ -113,21 +113,17 @@ namespace Speccy
                                              + adjustedScanlineWidth * ScreenHeight //border + main + border of 192 lines
                                              + adjustedScanlineWidth * BorderBottomHeight]; //56 lines of border
 
-            /*
-            ScreenBuffer = new int[ScanLineWidth * BorderTopHeight //48 lines of border
-                                              + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
-                                              + ScanLineWidth * BorderBottomHeight]; //56 lines of border
-            */
             keyBuffer = new bool[(int)keyCode.LAST];
 
             attr = new short[DisplayLength];  //6144 bytes of display memory will be mapped
-            Reset();
+            Reset(true);
 
             wdDrive.DiskInitialise();
         }
 
-        public override void Reset() {
-            base.Reset();
+        public override void Reset(bool coldBoot)
+        {
+            base.Reset(coldBoot);
             PageReadPointer[0] = ROMpage[0];
             PageReadPointer[1] = ROMpage[1];
             PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5

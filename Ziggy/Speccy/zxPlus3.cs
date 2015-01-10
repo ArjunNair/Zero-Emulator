@@ -50,15 +50,16 @@ namespace Speccy
 
             attr = new short[DisplayLength];  //6144 bytes of display memory will be mapped
 
-            Reset();
+            Reset(true);
             udpDrive.DiskInitialise();
         }
 
-        public override void Reset() {
+        public override void Reset(bool coldBoot)
+        {
             lock (lockThis) {
                 special64KRAM = false;
                 udpDrive.DiskReset();
-                base.Reset();
+                base.Reset(coldBoot);
 
                 contentionStartPeriod = 14360;// The +3 didn't have late timings!
                 contentionEndPeriod = contentionStartPeriod + (ScreenHeight * TstatesPerScanline); //57324 + LateTiming;

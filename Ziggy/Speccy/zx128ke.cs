@@ -37,50 +37,7 @@ namespace Speccy
             TstateAtTop = BorderTopHeight * TstatesPerScanline;
             TstateAtBottom = BorderBottomHeight * TstatesPerScanline;
             tstateToDisp = new short[FrameLength];
-            /*
-            contentionStartPeriod = 14361 + LateTiming;
-            contentionEndPeriod = contentionStartPeriod + (ScreenHeight * TstatesPerScanline); //57324 + LateTiming;
 
-            PagePointer[0] = ROMpage[0];  //128 editor default!
-            PagePointer[1] = ROMpage[1];
-            PagePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-            PagePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-            PagePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];   //Bank 2
-            PagePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];   //Bank 2
-            PagePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];   //Bank 0
-            PagePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];   //Bank 0
-
-            BankInPage0 = ROM_128_BAS;
-            BankInPage1 = "Bank 5";
-            BankInPage2 = "Bank 2";
-            BankInPage3 = "Bank 0";
-            contendedBankPagedIn = false;
-            contendedBankIn8000 = false;
-            lowROMis48K = false;
-            pagingDisabled = false;
-            showShadowScreen = false;
-
-            Random rand = new Random();
-
-            //Fill memory with zero
-            for (int i = DisplayStart; i < 65535; ++i)
-                PokeByteNoContend(i, 0);
-                //PokeByteNoContend(i, rand.Next(255));
-
-            screen = GetPageData(5); //Bank 5 is a copy of the screen
-
-            screenByteCtr = DisplayStart;
-            ULAByteCtr = 0;
-
-            ActualULAStart = 14364 - 24 - (TstatesPerScanline * BorderTopHeight);
-            lastTState = ActualULAStart;
-            BuildAttributeMap();
-
-            BuildContentionTable();
-            aySound.Reset();
-            beeper = new ZeroSound.SoundManager(handle, 32, 2, 44100);
-            beeper.Play();
-            */
             ScreenBuffer = new int[ScanLineWidth * BorderTopHeight //48 lines of border
                                               + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
                                               + ScanLineWidth * BorderBottomHeight]; //56 lines of border
@@ -88,11 +45,11 @@ namespace Speccy
             keyBuffer = new bool[(int)keyCode.LAST];
 
             attr = new short[DisplayLength];  //6144 bytes of display memory will be mapped
-            Reset();
+            Reset(true);
         }
 
-        public override void Reset() {
-            base.Reset();
+        public override void Reset(bool coldBoot) {
+            base.Reset(coldBoot);
             PageReadPointer[0] = ROMpage[0];  //128 editor default!
             PageReadPointer[1] = ROMpage[1];
             PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5

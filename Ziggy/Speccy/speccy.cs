@@ -899,6 +899,32 @@ namespace Speccy
             //emulationThread = new System.Threading.Thread(new System.Threading.ThreadStart(Run));
             //emulationThread.Name = @"Emulation Thread";
             //emulationThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+
+            //During warm start, all registers are set to 0xffff
+            //http://worldofspectrum.org/forums/showthread.php?t=34574&page=3
+            interruptMode = 0;
+            I = 0;
+            R = 0;
+            _R = 0;
+            MemPtr = 0;
+
+            PC = 0;
+            SP = 0xffff;
+            IY = 0xffff;
+            IX = 0xffff;
+
+            AF = 0xffff;
+            BC = 0xffff;
+            DE = 0xffff;
+            HL = 0xffff;
+
+            exx();
+            ex_af_af();
+
+            AF = 0xffff;
+            BC = 0xffff;
+            DE = 0xffff;
+            HL = 0xffff;
         }
 
         public void ResetTapeEdgeDetector()
@@ -962,36 +988,40 @@ namespace Speccy
         }
 
         //Resets the speccy
-        public virtual void Reset() {
+        public virtual void Reset(bool coldBoot) {
             isResetOver = false;
             isPlayingRZX = false;
             isRecordingRZX = false;
-            //if (TapeEvent != null)
-            //    OnTapeEvent(new TapeEventArgs(TapeEventType.STOP_TAPE));
+
             DoTapeEvent(new TapeEventArgs(TapeEventType.STOP_TAPE));
-            //From z80core//////////////
+           
+            //All registers are set to 0xffff during a cold boot
+            //http://worldofspectrum.org/forums/showthread.php?t=34574&page=3
+            if (coldBoot)
+            {
+                SP = 0xffff;
+                IY = 0xffff;
+                IX = 0xffff;
+
+                AF = 0xffff;
+                BC = 0xffff;
+                DE = 0xffff;
+                HL = 0xffff;
+
+                exx();
+                ex_af_af();
+
+                AF = 0xffff;
+                BC = 0xffff;
+                DE = 0xffff;
+                HL = 0xffff;
+            }
+
+            PC = 0;
             interruptMode = 0;
             I = 0;
             R = 0;
             _R = 0;
-            PC = 0;
-            SP = 0;
-
-            AF = 0;
-            BC = 0;
-            DE = 0;
-            HL = 0;
-
-            exx();
-            ex_af_af();
-
-            AF = 0;
-            BC = 0;
-            DE = 0;
-            HL = 0;
-
-            IY = 0;
-            IX = 0;
             MemPtr = 0;
 
             tapeBitWasFlipped = false;
@@ -1025,6 +1055,7 @@ namespace Speccy
             pulse = 0;
             isPauseBlockPreproccess = false; //To ensure previous edge is finished correctly
             ////////////////////////////
+
             averagedSound = 0;
             aySound = new AYSound(); //aySound.reset doesn't work so well...
             flashOn = false;
@@ -6746,7 +6777,7 @@ namespace Speccy
                                     PokeByte(offset, H);
                                     break;
 
-                                case 0x1D: //LD L, RRC (IX+d)
+                                case 0x1D: //LD L, RR (IX+d)
                                     // Log(string.Format("LD L, RR (IX + {0:X})", disp));
                                     L = Rr_R(disp);
                                     PokeByte(offset, L);
@@ -6757,7 +6788,7 @@ namespace Speccy
                                     PokeByte(offset, Rr_R(disp));
                                     break;
 
-                                case 0x1F: //LD A, RRC (IX+d)
+                                case 0x1F: //LD A, RR (IX+d)
                                     // Log(string.Format("LD A, RR (IX + {0:X})", disp));
                                     A = Rr_R(disp);
                                     PokeByte(offset, A);
@@ -7154,7 +7185,7 @@ namespace Speccy
                                 case 0x8F: //LD A, RES 1, (IX+d)
                                     // Log(string.Format("LD A, RES 1, (IX + {0:X})", disp));
                                     A = Res_R(1, disp);
-                                    PokeByte(offset, B);
+                                    PokeByte(offset, A);
                                     break;
 
                                 case 0x90: //LD B, RES 2, (IX+d)
@@ -9937,7 +9968,7 @@ namespace Speccy
                                 case 0x8F: //LD A, RES 1, (IY+d)
                                     // Log(string.Format("LD A, RES 1, (IY + {0:X})", disp));
                                     A = Res_R(1, disp);
-                                    PokeByte(offset, B);
+                                    PokeByte(offset, A);
                                     break;
 
                                 case 0x90: //LD B, RES 2, (IY+d)

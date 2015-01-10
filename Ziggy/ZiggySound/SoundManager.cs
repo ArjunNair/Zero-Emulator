@@ -342,6 +342,7 @@ namespace ZeroSound
         private System.Threading.Thread _waveFillThread = null;
         private System.Threading.AutoResetEvent _fillEvent = new System.Threading.AutoResetEvent(true);
         private bool _isFinished = false;
+        private bool disposed = false;
 
         public SoundManager(System.IntPtr handle, short bitsPerSample, short channels, int samplesPerSecond) {
             System.AppDomain.CurrentDomain.AssemblyResolve += new System.ResolveEventHandler(CurrentDomain_AssemblyResolve);
@@ -390,6 +391,11 @@ namespace ZeroSound
             _waveFillThread.Start();
         }
 
+        ~SoundManager()
+        {
+            Dispose(false);
+        }
+
         public void Shutdown() {
             this.Dispose();
         }
@@ -424,36 +430,55 @@ namespace ZeroSound
                 _soundBuffer.Volume = (int)(-2000.0f * System.Math.Log10(1.0f / t));
         }
 
-        public void Dispose() {
-            if (_waveFillThread != null) {
-                try {
-                    _isFinished = true;
-                    if (_soundBuffer != null)
-                        if (_soundBuffer.Status.Playing)
-                            _soundBuffer.Stop();
-                    _fillEvent.Set();
-
-                    _waveFillThread.Join();
-
-                    if (_soundBuffer != null)
-                        _soundBuffer.Dispose();
-                    if (_notify != null)
-                        _notify.Dispose();
-
-                    if (_device != null)
-                        _device.Dispose();
-                } catch (System.Threading.ThreadAbortException e) {
-                    System.Console.WriteLine("Sound thread exception " + e.Message);
-                }
-                finally {
-                    _waveFillThread = null;
-                    _soundBuffer = null;
-                    _notify = null;
-                    _device = null;
-                }
-            }
+        public void Dispose() 
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    if (_waveFillThread != null)
+                    {
+                        try
+                        {
+                            _isFinished = true;
+                            if (_soundBuffer != null)
+                                if (_soundBuffer.Status.Playing)
+                                    _soundBuffer.Stop();
+                            _fillEvent.Set();
+
+                            _waveFillThread.Join();
+
+                            if (_soundBuffer != null)
+                                _soundBuffer.Dispose();
+                            if (_notify != null)
+                                _notify.Dispose();
+
+                            if (_device != null)
+                                _device.Dispose();
+                        }
+                        catch (System.Threading.ThreadAbortException e)
+                        {
+                            System.Console.WriteLine("Sound thread exception " + e.Message);
+                        }
+                        finally
+                        {
+                            _waveFillThread = null;
+                            _soundBuffer = null;
+                            _notify = null;
+                            _device = null;
+                        }
+                    }
+                }
+                // No unmanaged resources to release otherwise they'd go here.
+            }
+            disposed = true;
+        }
         private unsafe void waveFillThreadProc() {
             int lastWrittenBuffer = -1;
             byte[] sampleData = new byte[_bufferSize];
@@ -471,11 +496,11 @@ namespace ZeroSound
                         }
                     }
                 }
-				catch (System.Exception ex)
-				{
+                catch (System.Exception ex)
+                {
                     System.Console.WriteLine("Sound thread exception " + ex.Message);
-					//LogAgent.Error(ex);
-				}
+                    //LogAgent.Error(ex);
+                }
             }
         }
 

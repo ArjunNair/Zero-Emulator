@@ -46,6 +46,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.aspectRatioFullscreenCheckBox = new System.Windows.Forms.CheckBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.windowSizeComboBox = new System.Windows.Forms.ComboBox();
@@ -158,7 +159,6 @@
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.aspectRatioFullscreenCheckBox = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.hwPage.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -390,6 +390,19 @@
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Size";
             // 
+            // aspectRatioFullscreenCheckBox
+            // 
+            this.aspectRatioFullscreenCheckBox.AutoSize = true;
+            this.aspectRatioFullscreenCheckBox.Checked = true;
+            this.aspectRatioFullscreenCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.aspectRatioFullscreenCheckBox.Location = new System.Drawing.Point(62, 125);
+            this.aspectRatioFullscreenCheckBox.Name = "aspectRatioFullscreenCheckBox";
+            this.aspectRatioFullscreenCheckBox.Size = new System.Drawing.Size(186, 17);
+            this.aspectRatioFullscreenCheckBox.TabIndex = 8;
+            this.aspectRatioFullscreenCheckBox.Text = "Maintain aspect ratio in full screen";
+            this.toolTip1.SetToolTip(this.aspectRatioFullscreenCheckBox, resources.GetString("aspectRatioFullscreenCheckBox.ToolTip"));
+            this.aspectRatioFullscreenCheckBox.UseVisualStyleBackColor = true;
+            // 
             // label10
             // 
             this.label10.Location = new System.Drawing.Point(62, 21);
@@ -551,7 +564,7 @@
             // pixelSmoothingCheckBox
             // 
             this.pixelSmoothingCheckBox.AutoSize = true;
-            this.pixelSmoothingCheckBox.Location = new System.Drawing.Point(187, 47);
+            this.pixelSmoothingCheckBox.Location = new System.Drawing.Point(268, 70);
             this.pixelSmoothingCheckBox.Name = "pixelSmoothingCheckBox";
             this.pixelSmoothingCheckBox.Size = new System.Drawing.Size(114, 17);
             this.pixelSmoothingCheckBox.TabIndex = 6;
@@ -563,7 +576,7 @@
             // interlaceCheckBox
             // 
             this.interlaceCheckBox.AutoSize = true;
-            this.interlaceCheckBox.Location = new System.Drawing.Point(65, 47);
+            this.interlaceCheckBox.Location = new System.Drawing.Point(162, 70);
             this.interlaceCheckBox.Name = "interlaceCheckBox";
             this.interlaceCheckBox.Size = new System.Drawing.Size(102, 17);
             this.interlaceCheckBox.TabIndex = 5;
@@ -586,7 +599,7 @@
             this.label2.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(59, 17);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(317, 33);
+            this.label2.Size = new System.Drawing.Size(317, 23);
             this.label2.TabIndex = 3;
             this.label2.Text = "Enhance your experience by way of these effects.";
             // 
@@ -594,7 +607,7 @@
             // 
             this.gdiRadioButton.AutoSize = true;
             this.gdiRadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gdiRadioButton.Location = new System.Drawing.Point(317, 50);
+            this.gdiRadioButton.Location = new System.Drawing.Point(141, 43);
             this.gdiRadioButton.Name = "gdiRadioButton";
             this.gdiRadioButton.Size = new System.Drawing.Size(43, 17);
             this.gdiRadioButton.TabIndex = 1;
@@ -608,7 +621,7 @@
             this.directXRadioButton.AutoSize = true;
             this.directXRadioButton.Checked = true;
             this.directXRadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.directXRadioButton.Location = new System.Drawing.Point(317, 73);
+            this.directXRadioButton.Location = new System.Drawing.Point(65, 43);
             this.directXRadioButton.Name = "directXRadioButton";
             this.directXRadioButton.Size = new System.Drawing.Size(59, 17);
             this.directXRadioButton.TabIndex = 2;
@@ -1637,19 +1650,6 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // aspectRatioFullscreenCheckBox
-            // 
-            this.aspectRatioFullscreenCheckBox.AutoSize = true;
-            this.aspectRatioFullscreenCheckBox.Checked = true;
-            this.aspectRatioFullscreenCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.aspectRatioFullscreenCheckBox.Location = new System.Drawing.Point(62, 125);
-            this.aspectRatioFullscreenCheckBox.Name = "aspectRatioFullscreenCheckBox";
-            this.aspectRatioFullscreenCheckBox.Size = new System.Drawing.Size(186, 17);
-            this.aspectRatioFullscreenCheckBox.TabIndex = 8;
-            this.aspectRatioFullscreenCheckBox.Text = "Maintain aspect ratio in full screen";
-            this.toolTip1.SetToolTip(this.aspectRatioFullscreenCheckBox, resources.GetString("aspectRatioFullscreenCheckBox.ToolTip"));
-            this.aspectRatioFullscreenCheckBox.UseVisualStyleBackColor = true;
             // 
             // Options
             // 

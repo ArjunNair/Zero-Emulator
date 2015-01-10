@@ -42,6 +42,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         const int WM_KEYDOWN = 0x100;
         const int WM_KEYUP = 0x101;
         const int WM_SYSCOMMAND = 0x0112;
+        const int WM_NCLBUTTONDBLCLK = 0x00A3; //double click on a title bar a.k.a. non-client area of the form
+        const int WM_MAXIMIZE = 0xF030;
 
         IntPtr tempHandle;
 
@@ -173,6 +175,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private double totalFrameTime = 0;
         private int averageFPS = 50;
 
+        private bool isResizing = false;
         private bool didPlayRZX = false;
         public bool invokeMonitor = false;
         public bool pauseEmulation = false;
@@ -255,16 +258,21 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         {
             if (message.Msg == WM_SYSCOMMAND)
             {
-                if (message.WParam == new IntPtr(0xF030)) // Maximize event - SC_MAXIMIZE from Winuser.h
+                if (message.WParam == new IntPtr(WM_MAXIMIZE)) 
                 {
                     GoFullscreen(true);
                     return;
                 }
-                else if (message.WParam == new IntPtr(0xF120))
+                else if (message.WParam == new IntPtr(0xF120)) //Restore?
                 {
                     GoFullscreen(false);
                     return;
                 }
+            }
+            else if  (message.Msg == WM_NCLBUTTONDBLCLK)
+            {
+                GoFullscreen(true);
+                return;
             }
             else if (message.Msg == WM_COPYDATA)
             {
@@ -369,6 +377,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     this.mruManager.RemoveRecentFile(fullFilePath);
                 return;
             }
+
+            //Move this file to the top
+            this.mruManager.RemoveRecentFile(fullFilePath);
+            this.mruManager.AddRecentFile(fullFilePath);
 
             zx.Pause();
             dxWindow.Suspend();
@@ -2313,7 +2325,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void kToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            zx.Reset();
+            zx.Reset(false);
             dxWindow.Focus();
         }
 
@@ -2554,7 +2566,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             zx.SetEmulationSpeed(config.EmulationSpeed);
             zx.EnableAY(config.EnableAYFor48K);
             zx.SetStereoSound(config.StereoSoundOption);
-            zx.Reset();
+            //zx.Reset();
 
             if ((joystick2MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON) || (joystick1MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON))
                 zx.HasKempstonJoystick = true;
@@ -2975,7 +2987,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private void toolStripMenuItem5_Click(object sender, EventArgs e)
         {
             showDiskIndicator = false;
-            zx.Reset();
+            zx.Reset(false);
             dxWindow.Focus();
         }
 
@@ -3034,7 +3046,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             showDiskIndicator = false;
             zx.DiskEvent -= new DiskEventHandler(DiskMotorEvent);
-            zx.Reset();
+            zx.Reset(false);
 
             if (debugger != null)
             {
@@ -3131,7 +3143,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 statusStrip1.Visible = true;
                 toolStripMenuItem5.Enabled = true;
                 toolStripMenuItem1.Enabled = true;
-                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
                 if (dxWindow.EnableDirectX)
                 {
                     dxWindow.EnableFullScreen = false;
@@ -3176,16 +3188,24 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void PauseEmulation(bool val)
         {
-            statusLabelText.Text = "Emulation Paused";
             pauseEmulation = val;
             dxWindow.EmulationIsPaused = val;
             //pauseEmulationESCToolStripMenuItem.Checked = pauseEmulation;
             dxWindow.Invalidate();
+            toolStripMenuItem6.Checked = val;
+            toolStripButton4.Checked = val;
 
             if (pauseEmulation)
+            {
+                statusLabelText.Text = "Emulation Paused";
                 zx.Pause();
+
+            }
             else
+            {
+                statusLabelText.Text = "Ready";
                 zx.Resume();
+            }
         }
 
         
@@ -4730,6 +4750,22 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         {
             zx.MuteSound(config.EnableSound);
             config.EnableSound = !config.EnableSound;
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            if (!config.FullScreen && isResizing)
+                dxWindow.SetSize(panel1.Width, panel1.Height);
+        }
+
+        private void Form1_ResizeBegin(object sender, EventArgs e)
+        {
+            isResizing = true;
+        }
+
+        private void Form1_ResizeEnd(object sender, EventArgs e)
+        {
+            isResizing = false;
         }
     }
 }
