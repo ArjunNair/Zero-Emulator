@@ -113,11 +113,13 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabelText = new System.Windows.Forms.ToolStripStatusLabel();
             this.rzxPlaybackStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.rzxRecordStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.fileDownloadStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.rzxRecordStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.mouseStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.tapeStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.diskStatusLable = new System.Windows.Forms.ToolStripStatusLabel();
             this.soundStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -687,6 +689,7 @@
             this.keyboard48Button.Image = global::ZeroWin.Properties.Resources.keyboard_16x16;
             resources.ApplyResources(this.keyboard48Button, "keyboard48Button");
             this.keyboard48Button.Name = "keyboard48Button";
+            this.keyboard48Button.Click += new System.EventHandler(this.toolStripMenuItem3_Click);
             // 
             // toolStripButton7
             // 
@@ -709,11 +712,13 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabelText,
             this.rzxPlaybackStatusLabel,
-            this.rzxRecordStatusLabel,
             this.fileDownloadStatusLabel,
+            this.rzxRecordStatusLabel,
+            this.mouseStripStatusLabel,
             this.tapeStatusLabel,
             this.diskStatusLable,
-            this.soundStatusLabel});
+            this.soundStatusLabel,
+            this.toolStripStatusLabel1});
             resources.ApplyResources(this.statusStrip1, "statusStrip1");
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.ShowItemToolTips = true;
@@ -736,6 +741,13 @@
             this.rzxPlaybackStatusLabel.Image = global::ZeroWin.Properties.Resources.rzxPlay16x16;
             this.rzxPlaybackStatusLabel.Name = "rzxPlaybackStatusLabel";
             // 
+            // fileDownloadStatusLabel
+            // 
+            this.fileDownloadStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            resources.ApplyResources(this.fileDownloadStatusLabel, "fileDownloadStatusLabel");
+            this.fileDownloadStatusLabel.Image = global::ZeroWin.Properties.Resources.download_16x16;
+            this.fileDownloadStatusLabel.Name = "fileDownloadStatusLabel";
+            // 
             // rzxRecordStatusLabel
             // 
             this.rzxRecordStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -743,12 +755,11 @@
             this.rzxRecordStatusLabel.Image = global::ZeroWin.Properties.Resources.BreakpointEnabled_6584_16x;
             this.rzxRecordStatusLabel.Name = "rzxRecordStatusLabel";
             // 
-            // fileDownloadStatusLabel
+            // mouseStripStatusLabel
             // 
-            this.fileDownloadStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            resources.ApplyResources(this.fileDownloadStatusLabel, "fileDownloadStatusLabel");
-            this.fileDownloadStatusLabel.Image = global::ZeroWin.Properties.Resources.download_16x16;
-            this.fileDownloadStatusLabel.Name = "fileDownloadStatusLabel";
+            resources.ApplyResources(this.mouseStripStatusLabel, "mouseStripStatusLabel");
+            this.mouseStripStatusLabel.Image = global::ZeroWin.Properties.Resources.mouse_32x32;
+            this.mouseStripStatusLabel.Name = "mouseStripStatusLabel";
             // 
             // tapeStatusLabel
             // 
@@ -782,6 +793,11 @@
             this.soundStatusLabel.Name = "soundStatusLabel";
             resources.ApplyResources(this.soundStatusLabel, "soundStatusLabel");
             this.soundStatusLabel.Click += new System.EventHandler(this.soundStatusLabel_Click);
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            resources.ApplyResources(this.toolStripStatusLabel1, "toolStripStatusLabel1");
             // 
             // Form1
             // 
@@ -904,6 +920,8 @@
         private System.Windows.Forms.ToolStripStatusLabel rzxPlaybackStatusLabel;
         private System.Windows.Forms.ToolStripStatusLabel soundStatusLabel;
         private System.Windows.Forms.ToolStripButton keyboard48Button;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel mouseStripStatusLabel;
     }
 }
 

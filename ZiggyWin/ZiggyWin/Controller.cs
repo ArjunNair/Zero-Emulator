@@ -5,7 +5,7 @@ namespace ZeroWin
     public class MouseController
     {
         private Microsoft.DirectX.DirectInput.Device mouse = null;
-
+        Form1 ziggyWin;
         //Mouse mouse = null;
         public int MouseX {
             get;
@@ -27,11 +27,13 @@ namespace ZeroWin
             set;
         }
 
-        public void AcquireMouse(Form1 ziggyWin) {
+        public void AcquireMouse(Form1 zw) {
+            ziggyWin = zw;
             // DirectInput dinput = new DirectInput();
             //mouse = new Mouse(dinput);
             //CooperativeLevel coopLevel = CooperativeLevel.Exclusive | CooperativeLevel.Foreground;
             mouse = new DirectInput.Device(DirectInput.SystemGuid.Mouse);
+            mouse.SetDataFormat(DirectInput.DeviceDataFormat.Mouse);
             DirectInput.CooperativeLevelFlags coopLevel = DirectInput.CooperativeLevelFlags.Exclusive | DirectInput.CooperativeLevelFlags.Foreground;
             mouse.SetCooperativeLevel(ziggyWin, coopLevel);
             mouse.Acquire();
@@ -39,21 +41,21 @@ namespace ZeroWin
 
         public void UpdateMouse() {
             if (mouse != null) {
-                //if (mouse.Acquire().IsFailure)
-                //   return;
 
-                //if (mouse.Poll().IsFailure)
-                //    return;
+                try
+                {
+                    DirectInput.MouseState state = mouse.CurrentMouseState;
 
-                DirectInput.MouseState state = mouse.CurrentMouseState;
-
-                //if (SlimDX.Result.Last.IsFailure)
-                //    return;
-                MouseX = state.X;
-                MouseY = state.Y;
-                byte[] buttons = state.GetMouseButtons();
-                MouseLeftButtonDown = buttons[0] > 0;//state.IsPressed(0);
-                MouseRightButtonDown = buttons[1] > 0;//state.IsPressed(1);
+                    MouseX = state.X;
+                    MouseY = state.Y;
+                    byte[] buttons = state.GetMouseButtons();
+                    MouseLeftButtonDown = buttons[0] > 0;//state.IsPressed(0);
+                    MouseRightButtonDown = buttons[1] > 0;//state.IsPressed(1);
+                }
+                catch (System.Exception e)
+                {
+                    ziggyWin.EnableMouse(false);
+                }
             }
         }
 
@@ -110,6 +112,7 @@ namespace ZeroWin
             try {
                 joystick = new DirectInput.Device(joystickList[deviceNum].InstanceGuid);
                 joystick.SetCooperativeLevel(zw, DirectInput.CooperativeLevelFlags.NonExclusive | DirectInput.CooperativeLevelFlags.Background);
+                joystick.SetDataFormat(DirectInput.DeviceDataFormat.Joystick);
                 name = joystickList[deviceNum].ProductName;
             } catch (Microsoft.DirectX.DirectInput.InputException de) {
                 System.Windows.Forms.MessageBox.Show(de.Message, "Joystick Error", System.Windows.Forms.MessageBoxButtons.OK);

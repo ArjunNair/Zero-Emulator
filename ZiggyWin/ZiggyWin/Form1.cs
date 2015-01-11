@@ -115,6 +115,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private LoadBinary loadBinaryDialog;
         private Trainer_Wizard trainerWiz;
         private Infoseeker infoseekWiz;
+        private SpectrumKeyboard speccyKeyboard;
         public ZeroConfig config = new ZeroConfig();
         private PrecisionTimer timer = new PrecisionTimer();
         private ComponentAce.Compression.ZipForge.ZipForge archiver;
@@ -1058,6 +1059,25 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
+        public void EnableMouse(bool isEnabled)
+        {
+            if (zx.HasKempstonMouse && !isEnabled)
+            {
+                mouse.ReleaseMouse();
+                zx.HasKempstonMouse = false;
+                mouseStripStatusLabel.Enabled = false;
+            }
+            else if (isEnabled)
+            {
+                if (config.EnableKempstonMouse && !zx.HasKempstonMouse)
+                {
+                    mouse.AcquireMouse(this);
+                    zx.HasKempstonMouse = true;
+                    mouseStripStatusLabel.Enabled = true;
+                }
+            }
+        }
+
         public string GetConfigData(StreamReader sr, string section, string data)
         {
             String readStr = "dummy";
@@ -1526,21 +1546,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 */
                 case Keys.F6:
                     if (altIsPressed)
-                    {
-                        if (zx.HasKempstonMouse)
-                        {
-                            mouse.ReleaseMouse();
-                            zx.HasKempstonMouse = false;
-                        }
-                    }
+                        EnableMouse(false);
                     else
-                    {
-                        if (!zx.HasKempstonMouse)
-                        {
-                            mouse.AcquireMouse(this);
-                            zx.HasKempstonMouse = true;
-                        }
-                    }
+                        EnableMouse(true);
+
                     break;
 
                 case Keys.F7:
@@ -2410,6 +2419,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 debugger.SetState(Monitor.MonitorState.PAUSE);
                 debugger.Show();
             }
+            debugger.BringToFront();
         }
 
         //Normal palette
@@ -2811,7 +2821,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             else
                 zx.HasKempstonJoystick = false;
 
-            zx.HasKempstonMouse = config.EnableKempstonMouse;
+            //zx.HasKempstonMouse = config.EnableKempstonMouse;
             //dxWindow.Suspend();
             CheckFileAssociations();
             //dxWindow.Resume();
@@ -4524,8 +4534,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 infoseekWiz.DownloadCompleteEvent += new FileDownloadHandler(OnFileDownloadEvent);
             }
             pauseEmulation = true;
-            infoseekWiz.ShowDialog();
-
+            infoseekWiz.Show();
+            infoseekWiz.BringToFront();
             pauseEmulation = false;
         }
 
@@ -4541,13 +4551,16 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private void cheatHelperToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if ((trainerWiz == null) || (trainerWiz.IsDisposed))
+            {
                 trainerWiz = new Trainer_Wizard(this);
-            pauseEmulation = true;
-            trainerWiz.ShowDialog(this);
+                trainerWiz.Show();
+            }
 
-            pauseEmulation = false;
-            trainerWiz.Dispose();
-            this.BringToFront();
+            //pauseEmulation = true;
+
+            //pauseEmulation = false;
+            //trainerWiz.Dispose();
+            trainerWiz.BringToFront();
         }
 
         private void aboutZeroToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4569,8 +4582,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             if (dxWindow.EnableFullScreen)
                 GoFullscreen(false);
 
-            SpectrumKeyboard keyb = new SpectrumKeyboard(this);
-            keyb.Show();
+            if (speccyKeyboard == null || speccyKeyboard.IsDisposed)
+                speccyKeyboard = new SpectrumKeyboard(this);
+
+            speccyKeyboard.Show();
+            speccyKeyboard.BringToFront();
         }
 
         private void tapeBrowserButton_Click(object sender, EventArgs e)

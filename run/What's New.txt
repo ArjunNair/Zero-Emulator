@@ -18,12 +18,15 @@ Ver 0.7
 + Made the Memory viewer resizable vertically (polomint)
 + Added shortcut keys for debugging in the Monitor (polomint)
 + Allow the main emulation window to be resized arbitratrily.
++ Added Flash Load for standard tape blocks.
 * The emulator is not paused when switching to full screen mode anymore.
 * Exit full screen if user needs to be shown a dialog box or tool window.
 * Reworked pentagon renderer to show aesthetically correct screen dimensions.
 * The last used joystick(s) are now remembered when the emulator starts up.
 * On selecting a file from Recent Files list, it's moved to the top of the recent file stack.
+* The tape browser and other tool windows are non-modal. They will also pop to front if their icons are clicked again (Stefan).
 - Fixed an issue with IN when AY emulation is enabled on a 48k speccy.
+- Fixed an issue with the envelope in AY emulation (FrankT).
 - Fixed a contention timing issue with IN.
 - Fixed Options page not correctly reflecting the sound settings for AY and Stereo sound modes.
 - Fixed the Machine State window not showing correct info when first invoked from Monitor.
@@ -34,7 +37,7 @@ Ver 0.7
 - Fixed Wrong Key2Joy joystick type being used during emulation.
 - Fixed renderer not being re-initialized correctly (say when VSync is enabled/disabled).
 - Fixed an issue with tape auto-stop causing edge loader to fail.
-- Fixed crash if monitor is launched or machine is reset during the Overscan demo.
+- Fixed crash if monitor is launched or machine is reset during the Overscan demo (Stefan).
 - Fixed a bug in DDCB and FDCB versions of RES opcode.
 - Fixed full screen toggle issue. Also uses correct desktop resolution instead of hard coded width and height.
 - Fixed edge load interfering with fast load when trying to load standard blocks.
@@ -46,6 +49,8 @@ Ver 0.7
 - Fixed the issue with window not resizing correctly when switching between Pentagon and some other machine.
 - Fixed relative jump addresses not wrapping correctly if calculated address is > 65535, in the Debugger.
 - Fixed tool tip for system variables not showing hex number if user has selected hex view in Debugger.
+- Fixed an issue with the +3 not resetting properly (serbalgi).
+- Fixed crash on mouse focus being lost due to ALT + TAB (karingal).
 
 Ver 0.6
 ---------------

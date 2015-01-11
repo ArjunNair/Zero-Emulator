@@ -1602,8 +1602,6 @@
             this.mouseCheckBox.Size = new System.Drawing.Size(144, 17);
             this.mouseCheckBox.TabIndex = 11;
             this.mouseCheckBox.Text = "Enable Kempston Mouse";
-            this.toolTip1.SetToolTip(this.mouseCheckBox, "Press F7 to toggle mouse focus between Zero and Windows\r\nrespectively from within" +
-        " the emulator.");
             this.mouseCheckBox.UseVisualStyleBackColor = true;
             // 
             // label25

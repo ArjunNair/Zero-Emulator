@@ -521,6 +521,8 @@
     <None Include="Resources\sound_high.png" />
     <None Include="Resources\sound_mute.png" />
     <None Include="Resources\keyboard_16x16.png" />
+    <None Include="Resources\mouse 16x16.png" />
+    <None Include="Resources\mouse 32x32.png" />
     <Content Include="Ziggy Emulator.ico" />
   </ItemGroup>
   <ItemGroup>

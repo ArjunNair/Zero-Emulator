@@ -817,12 +817,12 @@ namespace ZeroWin
                 stream.Position = 0;
                 interlaceOverlay = Texture.FromStream(dxDevice, stream, Usage.None, Pool.Managed);
             }
-
+            /*
             using (System.IO.MemoryStream stream = new System.IO.MemoryStream()) {
                 ZeroWin.Properties.Resources.zeroIndicators.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                 stream.Position = 0;
                 spriteTexture = Texture.FromStream(dxDevice, stream, Usage.None, Pool.Managed);
-            }
+            }*/
             System.Drawing.Font systemfont = new System.Drawing.Font(System.Drawing.SystemFonts.MessageBoxFont.FontFamily, 10f, FontStyle.Regular);
             text = new Microsoft.DirectX.Direct3D.Font(dxDevice, systemfont);
             isSuspended = false;
