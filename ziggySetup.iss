@@ -7,11 +7,11 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{4E0641B3-F422-4982-B3C8-BBF94C84204A}
 AppName=Zero
-AppVerName=Zero 0.6
+AppVerName=Zero 0.7
 AppPublisher=Arjun Nair
-AppPublisherURL=www.yantragames.com
-AppSupportURL=www.ramtop.wordpress.com
-AppUpdatesURL=www.ramtop.wordpress.com
+AppPublisherURL=www.arjunnair.com
+AppSupportURL=www.zero.arjunnair.com
+AppUpdatesURL=www.zero.arjunnair.com
 DefaultDirName={pf}\Zero
 DefaultGroupName=Zero
 AllowNoIcons=yes
@@ -36,7 +36,6 @@ Source: ".\Run\programs\*"; DestDir: "{app}\programs"; Flags: ignoreversion recu
 Source: ".\Run\Speccy.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\ZeroSound.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\ZipForge.dll"; DestDir: "{app}"; Flags: ignoreversion
-; Source: ".\Run\SlimDX.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\zlib.net.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\zlib1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\wd1793.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -47,7 +46,6 @@ Source: ".\Run\Zero.exe.config"; DestDir: "{app}"; Flags: onlyifdoesntexist
 Source: ".\Run\License.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\What's New.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\ReadMe.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\Run\ReadMe.txt"; DestDir: "{group}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -59,9 +57,6 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Zero"; Filename: "
 [Run]
 Filename: "{app}\Zero.exe"; Description: "{cm:LaunchProgram,Zero}"; Flags: nowait postinstall skipifsilent
 
-[UninstallDelete]
-Type: files; Name: "{app}\ZeroDefaultConfig.xml"
-Type: files; Name: "{app}\ZeroConfig.xml"
 
 [CustomMessages]
 slimdxmissing =This setup requires the Slim DX Runtime Feb 2010.%nPlease download and install it and then run this setup again.%n%nDo you want to download SlimDX now?

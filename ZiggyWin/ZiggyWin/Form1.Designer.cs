@@ -472,9 +472,9 @@
             this.rzxRecordToolStripMenuItem,
             this.rzxContinueSessionToolStripMenuItem,
             this.toolStripSeparator9,
-            this.rzxStopToolStripMenuItem1,
             this.rzxFinaliseToolStripMenuItem,
             this.rzxDiscardToolStripMenuItem,
+            this.rzxStopToolStripMenuItem1,
             this.toolStripSeparator10,
             this.rzxInsertBookmarkToolStripMenuItem,
             this.rzxRollbackToolStripMenuItem});

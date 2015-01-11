@@ -1567,10 +1567,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     }
                     break;
                     */
-              /*  case Keys.Escape:
+              case Keys.Escape:
                     pauseEmulationESCToolStripMenuItem_Click(this, null);
                     break;
-                    */
+                    
                 case Keys.ControlKey:
                     {
                         zx.keyBuffer[(int)keyCode.CTRL] = true;
@@ -2058,8 +2058,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     {
                         string s = command.Substring(7);
                         config.EmulationSpeed = Convert.ToInt32(s);
-                        if (config.EmulationSpeed > 100)
-                            config.EmulationSpeed = 99;
+                        if (config.EmulationSpeed > 500)
+                            config.EmulationSpeed = 499;
                     }
                     if (command.Contains("-renderer:"))
                         config.UseDirectX = !(command.Substring(10) == "gdi");

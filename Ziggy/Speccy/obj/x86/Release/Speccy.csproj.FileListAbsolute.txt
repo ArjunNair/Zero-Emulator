@@ -96,12 +96,3 @@ C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\bin\zlib.net.dll
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\obj\x86\Release\Speccy.csprojResolveAssemblyReference.cache
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\obj\x86\Release\Speccy.dll
 C:\Users\Arjun\Documents\Speccy\ZeroForm\Ziggy\Speccy\obj\x86\Release\Speccy.pdb
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\obj\x86\Release\Speccy.csprojResolveAssemblyReference.cache
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\Speccy.dll.config
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\Speccy.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\Speccy.pdb
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\Peripherals.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\ZeroSound.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\bin\zlib.net.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\obj\x86\Release\Speccy.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Speccy\obj\x86\Release\Speccy.pdb

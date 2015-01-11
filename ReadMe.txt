@@ -1,3 +1,7 @@
+IMPORTANT
+------------------
+If you're unable to launch the emulator or the emulator crashes immediately on launching, you may need to install an additional DirectX component, which can be found here: http://www.microsoft.com/en-us/download/details.aspx?id=8109
+
 ------------------
 Using the Emulator
 ------------------
@@ -29,21 +33,67 @@ In addition, you can type in symbols like + , - ? etc directly from the PC keybo
 
 If you're in the habit of forgetting what key does what on the speccy (like me!), I recommend you use the SEBasic ROM or the Gosh Wonderful for the 48k, which support full typing (i.e to do LOAD "" you would actually have to type it in one letter at a time like on the PC). 
 
-The following key combinations are used by Zero for its own purpose:
+The following key combinations are used by Zero:
 
-Alt+O   = Open File
-Alt+S   = Save snapshot
-F5      = Save screenshot
-ESC     = Pause Emulation
-Alt+F4  = Exit emulator
-Alt+0   = 100% window size
-Alt++   = Increase window size by 50% of original speccy size
-Alt+-   = Decrease window size by 50% of original speccy size
-Alt+Enter = Full screen toggle
+F2		= Tape Browser
+F3 		= Debugger
+F4		= Search Infoseek
+F5     		= Pause Emulation
+F6		= Acquire Mouse (May first need to enable mouse emulation in Options)
+F7		= New RZX Recording
+F8		= Finalise RZX Recording
+F9		= Stop RZX Recording
+Ins		= Insert RZX Bookmark
+Del		= Rollback RZX to previous bookmark
+Alt+F8 		= Discard RZX Recording
+Alt+F4  	= Exit emulator
+Alt+F5		= Reset Emulator
+Alt+F6		= Unacquire mouse
+Alt+O   	= Open File
+Alt+S   	= Save snapshot
+Alt+Shift+S     = Save screenshot
+Alt+K		= Show 48k Keyboard helper
+Alt+0   	= 100% window size
+Alt+ +   	= Increase window size by 50% of original speccy size
+Alt+ -   	= Decrease window size by 50% of original speccy size
+Alt+Enter 	= Full screen toggle
 
-In full screen mode, Zero shows the menu-bar on the top, which can be hidden by moving the mouse away from the top. To bring it back simply move the mouse back to the top of the screen. The mouse cursor will hide itself automatically after 5 seconds of inactivity
+In the Debugger, the following keys can be used:
+F5		= Resume Emulation
+F10		= Step Over
+F11		= Step In
+F12 		= Step Out
+Alt+B		= Show Breakpoints Editor
+Alt+S		= Show Machine State
+Alt+V		= Show Memory Viewer
+Alt+R		= Show Registers
+Alt+L		= Show Execution Log
+Alt+P		= Poke Memory
 
-Also, the right-click context menu is available in fullscreen mode as well.
+--------------------
+Command line options
+--------------------
+
+Zero can be fully configured via the command line by passing parameters in the following format:
+zero [-option:[value]]
+
+Multiple options can be passed by separating each with a space, like so:
+zero -fullscreen:on -model:128k -scanlines:on
+
+The following options are available:
+
+fullscreen (on/off) - Launches the emulator in full screen mode
+model (48k/128k/128ke/plus3/pentagon128k) - Selects a spectrum machine model
+speed (-10 to 500) - Sets the emulation speed
+renderer (gdi/directx) - Selects the renderer
+smoothing (on/off) - Enables or disables pixel smoothing
+vsync (on/off) - Enables or disables vertical syncing
+palette (ula+/ulaplus/grayscale/normal) - Selects a colour palette
+scanlines (on/off) - Enables or disables display interlacing (scanlines)
+timing (early/late) - Selects timing model of the machine
+windowsize (multiples of 50) - Selects a window size as a percentage of speccy size
+bordersize (mini/medium/full) - Sets the emulated border size
+
 
 --------------------
 Uninstalling Zero
@@ -53,13 +103,10 @@ Simply run the uninstaller to uninstall the emulator.It's generally a good idea 
 --------------------
 About Zero
 --------------------
-Copyright © 2009 Arjun Nair.
+Copyright © 2009-2015 Arjun Nair.
 All rights reserved.
 
 Zero is a spectrum emulator written entirely on the .NET platform, using C#, and requires .NET framework 2.0.
-
-It currently (and probably will continue to!) requires a fairly fast PC to run at true potential. Running on a crappy system will cause sound stutters or severe video lag.
-You've been warned! :P
 
 The philosophy behind Zero is to provide a highly accurate emulation of the various Spectrum models while also providing a nice, user friendly experience.
 
@@ -74,4 +121,4 @@ Thanks to Alex Makeev for permission to use his DirectSound routines from ZXMAK 
 --------------------------------------------------------------------------------------
 
 Zero uses various public domain icons. Copyright rests with their respective authors. 
-Zero is © Copyright 2009 Arjun Nair. Yes, really. :)
+Zero is © Copyright 2009-2015 Arjun Nair. Yes, really. :)
