@@ -1,8 +1,0 @@
-C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\Release\ResolveAssemblyReference.cache
-C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\Release\FileAssoc.Form1.resources
-C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\Release\ZeroFileAssociater.Properties.Resources.resources
-C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\Release\GenerateResource-ResGen.read.1.tlog
-C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\Release\GenerateResource-ResGen.write.1.tlog
-C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\bin\ZeroFileAssociater.exe.config
-C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\bin\ZeroFileAssociater.exe
-C:\Users\Arjun\Documents\Speccy\Zero_Git\Ziggy\FileAssoc\obj\Release\ZeroFileAssociater.exe

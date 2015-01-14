@@ -1,9 +1,0 @@
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\bin\x86\Debug\ZeroFileAssociater.exe.config
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\bin\x86\Debug\ZeroFileAssociater.exe
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\bin\x86\Debug\ZeroFileAssociater.pdb
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Debug\FileAssoc.Form1.resources
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Debug\ZeroFileAssociater.Properties.Resources.resources
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Debug\ZeroFileAssociater.csproj.GenerateResource.Cache
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Debug\ZeroFileAssociater.exe
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Debug\ZeroFileAssociater.pdb
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Debug\ZeroFileAssociater.csprojResolveAssemblyReference.cache

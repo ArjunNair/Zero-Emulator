@@ -1,23 +1,13 @@
 IMPORTANT
-------------------
-If you're unable to launch the emulator or the emulator crashes immediately on launching, you may need to install an additional DirectX component, which can be found here: http://www.microsoft.com/en-us/download/details.aspx?id=8109
+=========
+If you have problem launching Zero, you may need to download an additional DirectX component from here:
+http://www.microsoft.com/en-us/download/details.aspx?id=8109 
 
 ------------------
 Using the Emulator
 ------------------
 
-On the main window you can access the following buttons:
-1) Machine - This will pop up a menu allowing you to reset or switch to a different spectrum model.
-2) Load - You can load a tape or a snapshot by pressing this button.
-3) Monitor - This brings up the Zero Monitor allowing you to debug your programs.
-4) Options - The options window allows you to configure Zero in various ways.
-5) Tool box - This holds various other functionalities like WoS infoseek program finder, tape browser, cheat helper et al
-6) Volume Control - Increase or decrease the sound volume by moving the slider right or left.
-7) Power off (red button on the top left) - Shuts down Zero
-
-Right clicking on the emulation window will bring up a context menu that allows you to quickly configure Zero in various ways. 
-
-You can do all these operations via the Options window as well.
+The entire emulator can be controlled and configured via the menu bar at the top. Additional tools can be found under the Tools section in the menu.
 
 -------------------
 Using the Keyboard
@@ -33,42 +23,17 @@ In addition, you can type in symbols like + , - ? etc directly from the PC keybo
 
 If you're in the habit of forgetting what key does what on the speccy (like me!), I recommend you use the SEBasic ROM or the Gosh Wonderful for the 48k, which support full typing (i.e to do LOAD "" you would actually have to type it in one letter at a time like on the PC). 
 
-The following key combinations are used by Zero:
+The following key combinations are used by Zero for its own purpose:
 
-F2		= Tape Browser
-F3 		= Debugger
-F4		= Search Infoseek
-F5     		= Pause Emulation
-F6		= Acquire Mouse (May first need to enable mouse emulation in Options)
-F7		= New RZX Recording
-F8		= Finalise RZX Recording
-F9		= Stop RZX Recording
-Ins		= Insert RZX Bookmark
-Del		= Rollback RZX to previous bookmark
-Alt+F8 		= Discard RZX Recording
-Alt+F4  	= Exit emulator
-Alt+F5		= Reset Emulator
-Alt+F6		= Unacquire mouse
-Alt+O   	= Open File
-Alt+S   	= Save snapshot
-Alt+Shift+S     = Save screenshot
-Alt+K		= Show 48k Keyboard helper
-Alt+0   	= 100% window size
-Alt+ +   	= Increase window size by 50% of original speccy size
-Alt+ -   	= Decrease window size by 50% of original speccy size
-Alt+Enter 	= Full screen toggle
-
-In the Debugger, the following keys can be used:
-F5		= Resume Emulation
-F10		= Step Over
-F11		= Step In
-F12 		= Step Out
-Alt+B		= Show Breakpoints Editor
-Alt+S		= Show Machine State
-Alt+V		= Show Memory Viewer
-Alt+R		= Show Registers
-Alt+L		= Show Execution Log
-Alt+P		= Poke Memory
+Alt+O   = Open File
+Alt+S   = Save snapshot
+F5      = Save screenshot
+ESC     = Pause Emulation
+Alt+F4  = Exit emulator
+Alt+0   = 100% window size
+Alt++   = Increase window size by 50% of original speccy size
+Alt+-   = Decrease window size by 50% of original speccy size
+Alt+Enter = Full screen toggle
 
 --------------------
 Command line options
@@ -91,9 +56,8 @@ vsync (on/off) - Enables or disables vertical syncing
 palette (ula+/ulaplus/grayscale/normal) - Selects a colour palette
 scanlines (on/off) - Enables or disables display interlacing (scanlines)
 timing (early/late) - Selects timing model of the machine
-windowsize (multiples of 50) - Selects a window size as a percentage of speccy size
+windowsize (multiples of 50) - Selects a window size as a percentage increment of speccy size (0 = no increment, 50 = 50% increment, etc)
 bordersize (mini/medium/full) - Sets the emulated border size
-
 
 --------------------
 Uninstalling Zero
@@ -103,10 +67,10 @@ Simply run the uninstaller to uninstall the emulator.It's generally a good idea 
 --------------------
 About Zero
 --------------------
-Copyright © 2009-2015 Arjun Nair.
+Copyright © 2009 Arjun Nair.
 All rights reserved.
 
-Zero is a spectrum emulator written entirely on the .NET platform, using C#, and requires .NET framework 2.0.
+Zero is a spectrum emulator written entirely on the .NET platform, using C#, and requires .NET framework 3.5.
 
 The philosophy behind Zero is to provide a highly accurate emulation of the various Spectrum models while also providing a nice, user friendly experience.
 
@@ -114,11 +78,12 @@ Many thanks to Woody for his patient and detailed technical advice on various as
 
 I must also thank my wife Purnima for putting up with my obsession with the speccy and even providing encouragement and help with this project!
 
-Thanks also to Patrik Rak for permission to use the various PZX conversion tools that Zero uses to support other tape formats. You can find more information on them on Patrik's site: http://zxds.raxoft.cz/pzx.html.
+Thanks also to Patrik Rak for permission to use the various PZX conversion tools that Zero uses to support other tape formats. 
 
-Thanks to Alex Makeev for permission to use his DirectSound routines from ZXMAK 2.
+You can find more information on them on Patrik's site: http://zxds.raxoft.cz/pzx.html
 
 --------------------------------------------------------------------------------------
 
 Zero uses various public domain icons. Copyright rests with their respective authors. 
-Zero is © Copyright 2009-2015 Arjun Nair. Yes, really. :)
+Zero is © Copyright 2009 Arjun Nair. Yes, really. :)
+www.zero.arjunnair.in

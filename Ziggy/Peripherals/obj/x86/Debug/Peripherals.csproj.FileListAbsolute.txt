@@ -1,6 +1,0 @@
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\bin\Peripherals.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\bin\Peripherals.pdb
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\bin\zlib.net.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\obj\x86\Debug\Peripherals.csprojResolveAssemblyReference.cache
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\obj\x86\Debug\Peripherals.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\obj\x86\Debug\Peripherals.pdb
