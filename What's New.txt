@@ -2,6 +2,14 @@
 What's New
 --------------
 
+Ver 0.7.1
+--------------------
+
+- Fixed issues in load and save binary dialog boxes (serbalgi)
+- Fixed issues with going fullscreen in GDI (serbalgi)
+- Fixed crash issue on .Net 4 and above (zxmak)
+- Fixed crash when loading invalid SNA snapshot (karingal)
+
 Ver 0.7
 ---------------------
 
