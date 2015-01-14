@@ -7,20 +7,22 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{4E0641B3-F422-4982-B3C8-BBF94C84204A}
 AppName=Zero
-AppVerName=Zero 0.7
+AppVersion=Zero 0.7
+;AppVerName=Zero 0.7
 AppPublisher=Arjun Nair
-AppPublisherURL=www.arjunnair.com
-AppSupportURL=www.zero.arjunnair.com
-AppUpdatesURL=www.zero.arjunnair.com
+AppPublisherURL=www.arjunnair.in
+AppSupportURL=www.zero.arjunnair.in
+AppUpdatesURL=www.zero.arjunnair.in
 DefaultDirName={pf}\Zero
 DefaultGroupName=Zero
 AllowNoIcons=yes
 LicenseFile=.\Run\License.txt
 InfoAfterFile=.\Run\ReadMe.txt
 OutputDir=.\InnoScript
-OutputBaseFilename=Zero Setup
+OutputBaseFilename=Zero 0.7 Setup
 Compression=lzma
 SolidCompression=yes
+AppCopyright=Copyright 2015 Arjun Nair
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -40,6 +42,7 @@ Source: ".\Run\zlib.net.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\zlib1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\wd1793.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\fdc765.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\Run\Peripherals.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\pzxtools.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\ZeroFileAssociater.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\Zero.exe.config"; DestDir: "{app}"; Flags: onlyifdoesntexist
@@ -57,11 +60,9 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Zero"; Filename: "
 [Run]
 Filename: "{app}\Zero.exe"; Description: "{cm:LaunchProgram,Zero}"; Flags: nowait postinstall skipifsilent
 
-
 [CustomMessages]
 slimdxmissing =This setup requires the Slim DX Runtime Feb 2010.%nPlease download and install it and then run this setup again.%n%nDo you want to download SlimDX now?
 dotnetmissing =This setup requires .NET Framework 3.5.%nPlease download and install it and then run this setup again.%n%nDo you want to download .NET Framework 3.5 now?
-
 
 [Code]
 // function InitializeSetup(): Boolean;

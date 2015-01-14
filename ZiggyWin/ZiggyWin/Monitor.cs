@@ -432,8 +432,7 @@ namespace ZeroWin
 
         public void DoPauseEmulation() {
 
-            if (ziggyWin.config.FullScreen)
-                ziggyWin.GoFullscreen(false);
+            ziggyWin.ShouldExitFullscreen();
 
             ziggyWin.zx.Pause();
 

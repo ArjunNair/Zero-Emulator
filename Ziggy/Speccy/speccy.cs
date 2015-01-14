@@ -37,6 +37,7 @@ namespace Speccy
         _128ke = 16
     };
 
+    //Handy enum for Monitor
     public enum SPECCY_EVENT
     {
         [Description("PC")]
@@ -79,7 +80,41 @@ namespace Speccy
         FRAME_END
     }
 
-    //Encapsulates the capabilities of the machine
+    //Handy enum for the tape deck
+    public enum TapeEventType
+    {
+        START_TAPE,
+        STOP_TAPE,
+        EDGE_LOAD,
+        SAVE_TAP,
+        CLOSE_TAP,
+        FLASH_LOAD,
+        NEXT_BLOCK
+    }
+
+    public enum RAM_BANK
+    {
+        ZERO_1 = 0,
+        ZERO_2,
+        ONE_1,
+        ONE_2,
+        TWO_1,
+        TWO_2,
+        THREE_1,
+        THREE_2,
+        FOUR_1,
+        FOUR_2,
+        FIVE_1,
+        FIVE_2,
+        SIX_1,
+        SIX_2,
+        SEVEN_1,
+        SEVEN_2,
+        EIGHT_1,
+        EIGHT_2
+    }
+
+    #region Delegates and args for speccy related events (used by monitor)
     public class MemoryEventArgs : EventArgs
     {
         private int addr, val;
@@ -113,17 +148,6 @@ namespace Speccy
         public DiskEventArgs(int _type) {
             EventType = _type;
         }
-    }
-
-    public enum TapeEventType
-    {
-        START_TAPE,
-        STOP_TAPE,
-        EDGE_LOAD,
-        SAVE_TAP,
-        CLOSE_TAP,
-        FLASH_LOAD,
-        NEXT_BLOCK
     }
 
     public class TapeEventArgs : EventArgs
@@ -201,31 +225,15 @@ namespace Speccy
     public delegate void FrameStartEventHandler(object sender);
 
     public delegate void FrameEndEventHandler(object sender);
+    #endregion
 
-    public enum RAM_BANK
-    {
-        ZERO_1 = 0,
-        ZERO_2,
-        ONE_1,
-        ONE_2,
-        TWO_1,
-        TWO_2,
-        THREE_1,
-        THREE_2,
-        FOUR_1,
-        FOUR_2,
-        FIVE_1,
-        FIVE_2,
-        SIX_1,
-        SIX_2,
-        SEVEN_1,
-        SEVEN_2,
-        EIGHT_1,
-        EIGHT_2
-    }
-
+    /// <summary>
+    /// zxmachine is the heart of speccy emulation.
+    /// It includes core execution, ula, sound, input and interrupt handling
+    /// </summary>
     public abstract class zxmachine : Z80Core
     {
+        #region Event handlers for the Monitor, primarily
         public event MemoryWriteEventHandler MemoryWriteEvent;
         public event MemoryReadEventHandler MemoryReadEvent;
         public event MemoryExecuteEventHandler MemoryExecuteEvent;
@@ -292,24 +300,29 @@ namespace Speccy
         }
 
         protected virtual void OnPopStackEvent(int addr) {
-            if (callStackList.Count > 0)
-                callStackList.RemoveAt(0);
+            //if (callStackList.Count > 0)
+            //    callStackList.RemoveAt(0);
             //if (PopStackEvent != null)
             //    PopStackEvent(this, addr);
         }
 
         protected virtual void OnPushStackEvent(int addr, int val) {
-            callStackList.Insert(0, new CallStack(addr, val));
+            //callStackList.Insert(0, new CallStack(addr, val));
             //if (PushStackEvent != null)
             //    PushStackEvent(this, addr);
         }
+        #endregion
 
         private IntPtr mainHandle;
 
+
         protected int[] keyLine = { 255, 255, 255, 255, 255, 255, 255, 255 };
 
-        //The normal spectrum pallette
         public int[] AttrColors = new int[16];
+
+        /// <summary>
+        /// The regular speccy palette
+        /// </summary>
         public int[] NormalColors = {
                                              0x000000,            // Blacks
                                              0x0000C0,            // Red
@@ -329,8 +342,11 @@ namespace Speccy
                                              0xF0F0F0             // Bright White
                                     };
 
-        //4 x 16 array = 64 colours
-        //Following values taken from generic colour palette from ULA plus site
+        /// <summary>
+        /// The ULA+ Palette
+        /// </summary>
+        // 4 x 16 array = 64 colours
+        // Following values taken from generic colour palette from ULA plus site
         public int[] ULAPlusColours = new int[64] { 0x000000, 0x404040, 0xff0000,0xff6a00,0xffd800,0xb6ff00,0x4cff00,0x00ff21,
                                                     0x00ff90,0x00ffff,0x0094ff,0x0026ff,0x4800ff,0xb200ff,0xff00dc,0xff006e,
                                                     0xffffff,0x808080,0x7f0000,0x7f3300,0x7f6a00,0x5b7f00,0x267f00,0x007f0e,
@@ -341,11 +357,19 @@ namespace Speccy
                                                     0x3f7f62,0x3f7f7f,0x3f647f,0x3f497f,0x503f7f,0x6b3f7f,0x7f3f76,0x7f3f5b
                                                   };
 
+
         //ULA Plus support
         public bool ULAPlusEnabled = false;
         protected int ULAGroupMode = 0; //0 = palette group, 1 = mode group
         protected int ULAPaletteGroup = 0;
         public bool ULAPaletteEnabled = false;
+
+        //Misc variables
+        protected int opcode = 0;
+        protected int val, addr;
+        public bool isROMprotected = true;  //not really used ATM
+        public bool needsPaint = false;     //Raised when the ULA has finished painting the entire screen
+        protected bool CapsLockOn = false;
 
         //Sound
         public const short MIN_SOUND_VOL = 0;
@@ -361,14 +385,8 @@ namespace Speccy
         private float soundVolume = 0f;        //cached reference used when beeper instance is recreated.
         private short soundSampleCounter = 0;
 
-        //Misc
-        public bool isROMprotected = true;  //not really used ATM
-        public bool needsPaint = false;     //Raised when the ULA has finished painting the entire screen
-        protected bool CapsLockOn = false;
-
-        //THREAD
+        //Threading stuff (not used)
         public bool doRun = true;           //z80 executes only when true. Mainly for debugging purpose.
-        private const uint DISPLAY_TIMEOUT = 70000 * 1;
 
         //Important ports
         protected int lastFEOut = 0;        //The ULA Port
@@ -399,9 +417,9 @@ namespace Speccy
         protected int DisplayLength;        //total # bytes of display memory
         protected int AttributeStart;       //memory address of attribute start
         protected int AttributeLength;      //total # bytes of attribute memory
+        protected bool ULASnowEffect = true;
         public bool Issue2Keyboard = false; //Only of use for 48k & 16k machines.
         public int LateTiming = 0;       //Some machines have late timings. This affects contention and has to be factored in.
-        public bool ULASnowEffect = true;
 
         //Utility strings
         protected const string ROM_128_BAS = "128K BAS";
@@ -417,7 +435,8 @@ namespace Speccy
         public string BankInPage0 = ROM_48_BAS;
         public bool monitorIsRunning = false;
 
-        //List of addresses in the call stack
+        //List of addresses in the call stack (not used ATM)
+        /*
         public class CallStack
         {
             private int address;
@@ -439,8 +458,9 @@ namespace Speccy
         }
 
         public BindingList<CallStack> callStackList = new BindingList<CallStack>();
-
-        //PAGING
+        */
+        
+        //Paging
         protected bool lowROMis48K = true;
         protected bool trDosPagedIn = false ;//TR DOS is swapped in only if the lower ROM is 48k.
         protected bool special64KRAM = false;  //for +3
@@ -448,7 +468,7 @@ namespace Speccy
         public bool showShadowScreen = false;
         public bool pagingDisabled = false;    //on 128k, depends on bit 5 of the value output to port (whose 1st and 15th bits are reset)
 
-        //the cpu needs access to this so are public
+        //The cpu needs access to this so are public
         public int InterruptPeriod;             //Number of t-states to hold down /INT
         public int FrameLength;                 //Number of t-states of in 1 frame before interrupt is fired.
         private byte FrameCount = 0;            //Used to keep tabs on tape play time out period.
@@ -472,21 +492,16 @@ namespace Speccy
         protected int borderColour;                       //Used by the screen update routine to output border colour
         protected bool flashOn = false;
 
-        public bool FlashIsOn {
-            get { return flashOn; }
-            set { flashOn = value; }
-        }
-
         //For floating bus implementation
         protected int lastPixelValue;                     //last 8-bit bitmap read from display memory
         protected int lastAttrValue;                      //last 8-bit attr val read from attribute memory
         protected int lastPixelValuePlusOne;              //last 8-bit bitmap read from display memory+1
         protected int lastAttrValuePlusOne;               //last 8-bit attr val read from attribute memory+1
 
-        //For 4 bright levels ULA artifacting (gamma ramping)
-        protected bool pixelIsPaper = false;
+        //For 4 bright levels ULA artifacting (gamma ramping). DOESN'T WORK!
+        //protected bool pixelIsPaper = false;
 
-        //these variables are used to create a screen display box (non border area).
+        //These variables are used to create a screen display box (non border area).
         protected int TtateAtLeft, TstateWidth, TstateAtTop,
                       TstateHeight, TstateAtRight, TstateAtBottom;
 
@@ -496,13 +511,13 @@ namespace Speccy
         //8x8k flat ROM bank
         protected byte[][] ROMpage = new byte[8][];
 
-        protected byte[][] JunkMemory = new byte[2][]; //for writing to ROM space
+        //For writing to ROM space
+        protected byte[][] JunkMemory = new byte[2][]; 
 
         //8 "pointers" to the pages
         //NOTE: In the case of +3, Pages 0 and 1 *can* point to a RAMpage. In other cases they point to a
         //ROMpage. To differentiate which is being pointed to, the +3 machine employs the specialMode boolean.
         protected byte[][] PageReadPointer = new byte[8][];
-
         protected byte[][] PageWritePointer = new byte[8][];
 
         //Tape edge detection variables
@@ -543,9 +558,9 @@ namespace Speccy
         private int dataCounter = 0;
         private byte dataByte = 0;
         private int currentBit = 0;
-        public PZXLoader.Block currentBlock;
         private int pulse = 0;
         private bool isPauseBlockPreproccess = false; //To ensure previous edge is finished correctly
+        public PZXLoader.Block currentBlock;
 
         //AY support
         protected bool ayIsAvailable = true;
@@ -570,11 +585,6 @@ namespace Speccy
             LAST
         };
 
-        //This holds the key lines used by the speccy for input
-        public bool[] keyBuffer;
-
-        public bool externalSingleStep = false;
-
         public enum JoysticksEmulated
         {
             NONE,
@@ -584,6 +594,11 @@ namespace Speccy
             CURSOR,
             LAST
         };
+
+        //This holds the key lines used by the speccy for input
+        public bool[] keyBuffer;
+
+        public bool externalSingleStep = false;
 
         public int joystickType = 0; //A bit field of above joysticks to emulate (usually not more than 2).
 
@@ -600,7 +615,6 @@ namespace Speccy
         public const byte JOYSTICK_BUTTON_3 = 0x40;
         public const byte JOYSTICK_BUTTON_4 = 0x80;
 
-        //Peripherals that are currently attached
         public bool HasKempstonJoystick {
             get;
             set;
@@ -651,9 +665,8 @@ namespace Speccy
         //Disk related stuff
         protected int diskDriveState = 0;
 
-        //Thread related stuff
+        //Thread related stuff (not used ATM)
         private System.Threading.Thread emulationThread;
-
         public bool isSuspended = true;
         public System.Object lockThis = new System.Object(); //used to synchronise emulation with methods that change emulation state
         public System.Object lockThis2 = new System.Object(); //used by monitor/emulation
@@ -665,7 +678,6 @@ namespace Speccy
 
         //How long should we wait after speccy reset before signalling that it's safe to assume so.
         private int resetFrameTarget = 0;
-
         private int resetFrameCounter = 0;
 
         public void Start() {
@@ -1682,7 +1694,7 @@ namespace Speccy
                             if ((pixelData & 0x80) != 0) {
                                 ScreenBuffer[ULAByteCtr++] = paletteInk;
                                 lastAttrValue = ink;
-                                pixelIsPaper = false;
+                                //pixelIsPaper = false;
                             } else {
                                 /* Gamma ramping
                                 int p = palettePaper;
@@ -1695,7 +1707,7 @@ namespace Speccy
                                 */
                                 ScreenBuffer[ULAByteCtr++] = palettePaper;
                                 lastAttrValue = paper;
-                                pixelIsPaper = true;
+                               // pixelIsPaper = true;
                             }
                             pixelData <<= 1;
                         }                 
@@ -2206,6 +2218,17 @@ namespace Speccy
             lastOpcodeWasEI = (byte)((szx.z80Regs.Flags & SZXLoader.ZXSTZF_EILAST) != 0 ? 2 : 0);
             HaltOn = (szx.z80Regs.Flags & SZXLoader.ZXSTZF_HALTED) != 0;
             Issue2Keyboard = (szx.keyboard.Flags & SZXLoader.ZXSTKF_ISSUE2) != 0;
+            
+            //disabled till I work out how to load the damn palette table back
+            /*
+            if (szx.paletteLoaded)
+            {
+                ULAPlusEnabled = true;
+                ULAPaletteEnabled = szx.palette.flags > 0 ? true : false;
+                ULAPaletteGroup = szx.palette.currentRegister;
+
+            }*/
+
             if (szx.header.MinorVersion > (byte)3)
                 MemPtr = szx.z80Regs.MemPtr;
             else
@@ -2458,7 +2481,7 @@ namespace Speccy
             frameCount++;
 
             if (frameCount > 15) {
-                FlashIsOn = !FlashIsOn;
+                flashOn = !flashOn;
                 frameCount = 0;
             }
             ULAUpdateStart();
@@ -2694,7 +2717,7 @@ namespace Speccy
                 frameCount++;
 
                 if (frameCount > 15) {
-                    FlashIsOn = !FlashIsOn;
+                    flashOn = !flashOn;
                     frameCount = 0;
                 }
 

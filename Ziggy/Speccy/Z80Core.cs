@@ -5,29 +5,13 @@ namespace Speccy
 {
     public class Z80Core
     {
-        // private zxmachine machine;
-
-        /* public zxmachine Machine
-         {
-             get
-             {
-                 return machine;
-             }
-             set
-             {
-                 machine = value;
-             }
-         }
-         */
 
         public bool loggingEnabled = false;
-
         public bool runningInterrupt = false;   //true if interrupts are active
-
-        public bool and_32_Or_64 = false;         //used for edge loading
-
+        public bool and_32_Or_64 = false;       //used for edge loading
         public bool resetOver = false;
         public bool HaltOn = false;            //true if HALT instruction is being processed
+        
         protected int frameCount;
         public byte lastOpcodeWasEI = 0;   //used for re-triggered interrupts
 
@@ -78,11 +62,7 @@ namespace Speccy
         protected const int F_SIGN = 0x080;
         public bool IFF1, IFF2;
 
-        //Misc variables used in the switch-case statement
-        protected int opcode = 0;
-
-        protected int val, addr;
-
+        //Tables for parity and flags. Pretty much taken from Fuse.
         protected byte[] parity = new byte[256];
         protected byte[] IOIncParityTable = new byte[16] { 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0 };
         protected byte[] IODecParityTable = new byte[16] { 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1 };
@@ -1102,6 +1082,7 @@ namespace Speccy
         }
 
         //Returns parity of a number (true if there are even numbers of 1, false otherwise)
+        //Superseded by the table method.
         public bool GetParity(int val) {
             bool parity = false;
             int runningCounter = 0;

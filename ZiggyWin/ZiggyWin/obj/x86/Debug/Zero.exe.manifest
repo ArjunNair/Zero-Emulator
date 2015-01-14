@@ -86,14 +86,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="37888">
-      <assemblyIdentity name="Peripherals" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="38400">
+      <assemblyIdentity name="Peripherals" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>2BZTmf7oRHgFbU5VkQHWnTTssdQ=</dsig:DigestValue>
+        <dsig:DigestValue>V9jKBKORz5y0oGQrdd/vRQ0wxyk=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -105,7 +105,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>3Gvcvnlh5KX2H0ZcEpOG4qi1k80=</dsig:DigestValue>
+        <dsig:DigestValue>E9EguQnj1Y8snOYreumCNXz8/Z0=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -122,14 +122,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2425344">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2377216">
       <assemblyIdentity name="Zero" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>x864g7lMo0+LflR8uGVQIBLMeSQ=</dsig:DigestValue>
+        <dsig:DigestValue>Kyqs+A2fiTVu1wrW05/ci/DOJxc=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -141,19 +141,19 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>a88srrxv2VS3cu1kLGt1hZ/hs7c=</dsig:DigestValue>
+        <dsig:DigestValue>L94t/yLDfQVsKU5gTj1yORhxGeU=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ZeroSound.dll" size="11264">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ZeroSound.dll" size="11776">
       <assemblyIdentity name="ZeroSound" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>mxOsSFsUgHPSKwcP/uEfR009FbU=</dsig:DigestValue>
+        <dsig:DigestValue>5pXvkRtLFaJEzlwiNUagWSZQZt4=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -181,13 +181,13 @@
       </hash>
     </dependentAssembly>
   </dependency>
-  <file name="Zero.exe.config" size="6325">
+  <file name="Zero.exe.config" size="7011">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-      <dsig:DigestValue>0lEt3o+PQ3Bdy73QLRDSNAJoFqc=</dsig:DigestValue>
+      <dsig:DigestValue>BFkuyFVP8H/afPZEJFEYgpf1/+4=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Ziggy Emulator.ico" size="86358">

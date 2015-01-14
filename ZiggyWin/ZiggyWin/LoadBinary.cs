@@ -48,13 +48,17 @@ namespace ZeroWin
         }
 
         private void button2_Click(object sender, EventArgs e) {
-            if (addressRadioButton.Checked && maskedTextBox1.Text == "") {
-                return;
-            }
-
+          
             if (loadMode) {
                 int start = 16384;
                 if (addressRadioButton.Checked) {
+
+                    if (string.IsNullOrEmpty(maskedTextBox1.Text))
+                    {
+                        MessageBox.Show("Enter a valid address from 0 to 65535.", "Invalid address", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
                     start = Convert.ToInt32(maskedTextBox1.Text);
                     if ((start < 16384) || (start > 65535)) {
                         MessageBox.Show("Enter a valid address from 16384 to 65535.", "Invalid address", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -98,29 +102,49 @@ namespace ZeroWin
                             end = 16384;
 
                         for (int f = 0; f < end; f++) {
-                            ziggyWin.zx.PokeRAMPage(pageComboBox.SelectedIndex, f, buffer[f]);
+                            ziggyWin.zx.PokeRAMPage(pageComboBox.SelectedIndex * 2, f, buffer[f]);
                         }
                     }
+
+                    MessageBox.Show("Binary file loaded successfully.", "File loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 fs.Close();
             } else {
                 int start = 16384;
                 int end = 16384;
                 if (addressRadioButton.Checked) {
+
+                    if (string.IsNullOrEmpty(maskedTextBox1.Text))
+                    {
+                        MessageBox.Show("Enter a valid address from 0 to 65535.", "Invalid address", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
                     start = Convert.ToInt32(maskedTextBox1.Text);
                     if ((start < 0) || (start > 65535)) {
                         MessageBox.Show("Enter a valid address from 0 to 65535.", "Invalid address", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
+                    if (string.IsNullOrEmpty(maskedTextBox2.Text))
+                    {
+                        MessageBox.Show("Enter a valid length from 0 to 65535.", "Invalid Length", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
                     end = start + Convert.ToInt32(maskedTextBox2.Text);
 
-                    if (end > 65536) {
+                    if (end > 65535) {
                         MessageBox.Show("Far too many bytes to write than that exist in memory!", "Invalid address range", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 } else {
-                    end = Convert.ToInt32(maskedTextBox2.Text);
+
+                    if (string.IsNullOrEmpty(maskedTextBox2.Text))
+                        end = 16384;
+                    else
+                        end = Convert.ToInt32(maskedTextBox2.Text);
+
                     if (end > 16384)
                         end = 16384;
                 }
@@ -140,8 +164,15 @@ namespace ZeroWin
                         for (int f = start; f < end; f++)
                             r.Write((byte)ziggyWin.zx.PeekByteNoContend(f));
                     } else {
-                        byte[] ramData = ziggyWin.zx.GetPageData(pageComboBox.SelectedIndex);
-                        r.Write(ramData, 0, end);
+                        byte[] ramData = ziggyWin.zx.GetPageData(pageComboBox.SelectedIndex * 2);
+                        int adjust = (end > 8192 ? end - 8192 : 0);
+                        r.Write(ramData, 0, Math.Min(end, 8192));
+                        
+                        if (adjust > 0)
+                        {
+                            ramData = ziggyWin.zx.GetPageData(pageComboBox.SelectedIndex * 2 + 1);
+                            r.Write(ramData, 0, Math.Min(adjust, 8192));
+                        }
                     }
                 }
                 fs.Close();

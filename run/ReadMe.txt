@@ -1,19 +1,13 @@
+IMPORTANT
+=========
+If you have problem launching Zero, you may need to download an additional DirectX component from here:
+http://www.microsoft.com/en-us/download/details.aspx?id=8109 
+
 ------------------
 Using the Emulator
 ------------------
 
-On the main window you can access the following buttons:
-1) Machine - This will pop up a menu allowing you to reset or switch to a different spectrum model.
-2) Load - You can load a tape or a snapshot by pressing this button.
-3) Monitor - This brings up the Zero Monitor allowing you to debug your programs.
-4) Options - The options window allows you to configure Zero in various ways.
-5) Tool box - This holds various other functionalities like WoS infoseek program finder, tape browser, cheat helper et al
-6) Volume Control - Increase or decrease the sound volume by moving the slider right or left.
-7) Power off (red button on the top left) - Shuts down Zero
-
-Right clicking on the emulation window will bring up a context menu that allows you to quickly configure Zero in various ways. 
-
-You can do all these operations via the Options window as well.
+The entire emulator can be controlled and configured via the menu bar at the top. Additional tools can be found under the Tools section in the menu.
 
 -------------------
 Using the Keyboard
@@ -41,9 +35,29 @@ Alt++   = Increase window size by 50% of original speccy size
 Alt+-   = Decrease window size by 50% of original speccy size
 Alt+Enter = Full screen toggle
 
-In full screen mode, Zero shows the menu-bar on the top, which can be hidden by moving the mouse away from the top. To bring it back simply move the mouse back to the top of the screen. The mouse cursor will hide itself automatically after 5 seconds of inactivity
+--------------------
+Command line options
+--------------------
 
-Also, the right-click context menu is available in fullscreen mode as well.
+Zero can be fully configured via the command line by passing parameters in the following format:
+zero [-option:[value]]
+
+Multiple options can be passed by separating each with a space, like so:
+zero -fullscreen:on -model:128k -scanlines:on
+
+The following options are available:
+
+fullscreen (on/off) - Launches the emulator in full screen mode
+model (48k/128k/128ke/plus3/pentagon128k) - Selects a spectrum machine model
+speed (-10 to 500) - Sets the emulation speed
+renderer (gdi/directx) - Selects the renderer
+smoothing (on/off) - Enables or disables pixel smoothing
+vsync (on/off) - Enables or disables vertical syncing
+palette (ula+/ulaplus/grayscale/normal) - Selects a colour palette
+scanlines (on/off) - Enables or disables display interlacing (scanlines)
+timing (early/late) - Selects timing model of the machine
+windowsize (multiples of 50) - Selects a window size as a percentage increment of speccy size (0 = no increment, 50 = 50% increment, etc)
+bordersize (mini/medium/full) - Sets the emulated border size
 
 --------------------
 Uninstalling Zero
@@ -57,9 +71,6 @@ Copyright © 2009 Arjun Nair.
 All rights reserved.
 
 Zero is a spectrum emulator written entirely on the .NET platform, using C#, and requires .NET framework 3.5.
-
-It currently (and probably will continue to!) requires a fairly fast PC to run at true potential. Running on a crappy system will cause sound stutters or severe video lag.
-You've been warned! :P
 
 The philosophy behind Zero is to provide a highly accurate emulation of the various Spectrum models while also providing a nice, user friendly experience.
 
@@ -75,3 +86,4 @@ You can find more information on them on Patrik's site: http://zxds.raxoft.cz/pz
 
 Zero uses various public domain icons. Copyright rests with their respective authors. 
 Zero is © Copyright 2009 Arjun Nair. Yes, really. :)
+www.zero.arjunnair.in

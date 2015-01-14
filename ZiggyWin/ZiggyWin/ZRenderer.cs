@@ -105,7 +105,10 @@ namespace ZeroWin
                 if (useDirectX)
                     this.DoubleBuffered = false;
                 else
+                {
                     this.DoubleBuffered = true;
+                    directXAvailable = false;
+                }
             }
         }
 
@@ -716,7 +719,7 @@ namespace ZeroWin
             displayRect = new Rectangle(0, 0, displayWidth, displayHeight);
 
             this.ClientSize = new Size(width, height);
-            if (!InitDirectX(width, height)) {
+            if (EnableDirectX && !InitDirectX(width, height)) {
                 directXAvailable = false;
             }
         }
@@ -811,7 +814,6 @@ namespace ZeroWin
             Matrix scaling = Matrix.Scaling(scaleX, scaleY, 0);
             sprite.Transform = scaling;
 
-            directXAvailable = true;
             using (System.IO.MemoryStream stream = new System.IO.MemoryStream()) {
                 ZeroWin.Properties.Resources.scanlines2.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                 stream.Position = 0;
@@ -827,6 +829,7 @@ namespace ZeroWin
             text = new Microsoft.DirectX.Direct3D.Font(dxDevice, systemfont);
             isSuspended = false;
             lastTime = PrecisionTimer.TimeInMilliseconds();
+            directXAvailable = true;
             return true;
         }
 

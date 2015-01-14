@@ -1,7 +1,0 @@
-G:\Projects\ziggy\Ziggy\ZiggySound\obj\Release\ResolveAssemblyReference.cache
-G:\Projects\ziggy\Ziggy\ZiggySound\bin\Release\ZiggySound.dll
-G:\Projects\ziggy\Ziggy\ZiggySound\bin\Release\ZiggySound.pdb
-G:\Projects\ziggy\Ziggy\ZiggySound\obj\Release\ZiggySound.dll
-G:\Projects\ziggy\Ziggy\ZiggySound\obj\Release\ZiggySound.pdb
-C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggySound\obj\Release\ResolveAssemblyReference.cache
-C:\Documents and Settings\Arj\My Documents\Visual Studio 2008\Projects\Ziggy\Ziggy\ZiggySound\obj\Release\ZiggySound.pdb

@@ -395,3 +395,46 @@ C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.
 C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
 C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
 C:\Users\Arjun\Documents\Speccy\ZeroForm\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe.config
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe.manifest
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.application
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\af-ZA\Zero.resources.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csprojResolveAssemblyReference.cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Breakpoints.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.CallStackViewer.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.CodeProfiler.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoseeker.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Infoviewer.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickButtonMapper.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.JoystickRemap.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZLibrary.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.LoadBinary.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Machine_State.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PicturePreview.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Registers.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.MemoryViewer.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Monitor.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Options.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.pane.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.PokeMemory.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Profiler.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Properties.Resources.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.SpectrumKeyboard.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeDeck.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TapeInfo.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Trainer_Wizard.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.TrainerValueInput.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.application
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.pdb

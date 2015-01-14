@@ -205,7 +205,7 @@ namespace ZeroWin.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
         public byte WindowSize {
             get {
                 return ((byte)(this["WindowSize"]));

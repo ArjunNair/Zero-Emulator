@@ -16,7 +16,7 @@ namespace ZeroWin
             //dataGridView1.DoubleBuffered(true);
             //Set up the datagridview for memory
             dataGridView1.AutoGenerateColumns = true;
-            dataGridView1.DataSource = monitor.ziggyWin.zx.callStackList;
+            //dataGridView1.DataSource = monitor.ziggyWin.zx.callStackList;
             dataGridView1.RowHeadersVisible = false;
         }
 
@@ -34,7 +34,7 @@ namespace ZeroWin
         public void RefreshView() {
             dataGridView1.DataSource = null;
             System.Threading.Thread.Sleep(1);
-            dataGridView1.DataSource = monitor.ziggyWin.zx.callStackList;
+            //dataGridView1.DataSource = monitor.ziggyWin.zx.callStackList;
             dataGridView1.Invalidate();
         }
     }

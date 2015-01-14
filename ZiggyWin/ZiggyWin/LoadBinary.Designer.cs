@@ -99,7 +99,7 @@
             // 
             this.maskedTextBox1.AllowPromptAsInput = false;
             this.maskedTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.maskedTextBox1.Location = new System.Drawing.Point(105, 92);
+            this.maskedTextBox1.Location = new System.Drawing.Point(127, 92);
             this.maskedTextBox1.Mask = "00000";
             this.maskedTextBox1.Name = "maskedTextBox1";
             this.maskedTextBox1.Size = new System.Drawing.Size(86, 20);
@@ -119,7 +119,7 @@
             // maskedTextBox2
             // 
             this.maskedTextBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.maskedTextBox2.Location = new System.Drawing.Point(105, 135);
+            this.maskedTextBox2.Location = new System.Drawing.Point(127, 135);
             this.maskedTextBox2.Mask = "00000";
             this.maskedTextBox2.Name = "maskedTextBox2";
             this.maskedTextBox2.Size = new System.Drawing.Size(87, 20);
@@ -139,7 +139,7 @@
             "Bank 5",
             "Bank 6",
             "Bank 7"});
-            this.pageComboBox.Location = new System.Drawing.Point(106, 57);
+            this.pageComboBox.Location = new System.Drawing.Point(128, 57);
             this.pageComboBox.Name = "pageComboBox";
             this.pageComboBox.Size = new System.Drawing.Size(84, 21);
             this.pageComboBox.TabIndex = 12;

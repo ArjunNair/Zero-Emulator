@@ -1,7 +1,7 @@
 ---------------------------------
 Zero Emulator
 ---------------------------------
-Copyright © 2009-2013 Arjun Nair.
+Copyright © 2009 Arjun Nair.
 All rights reserved.
 
 You may freely use and distribute this emulator for non-commercial use only. Period.

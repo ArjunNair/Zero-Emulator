@@ -956,6 +956,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     {
                         Cursor.Hide();
                         CursorIsHidden = true;
+                        dxWindow.Focus();
                     }
                 }
 
@@ -2398,8 +2399,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         //Monitor
         private void monitorButton_Click(object sender, EventArgs e)
         {
-            if (dxWindow.EnableFullScreen)
-                GoFullscreen(false);
+            ShouldExitFullscreen();
 
             if (debugger == null || debugger.IsDisposed)
             {
@@ -3073,78 +3073,59 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.Focus();
         }
 
-        public void GoFullscreen(bool full)
+        public void ShouldExitFullscreen()
+        {
+            if (dxWindow.EnableDirectX && config.FullScreen)
+                GoFullscreen(false);
+        }
+
+        private void GoFullscreen(bool full)
         {
             config.FullScreen = full;
+           
             if (full)
             {
-                menuStrip1.Visible = false;
                 toolStrip1.Visible = false;
                 statusStrip1.Visible = false;
                 toolStripMenuItem5.Enabled = false;
                 toolStripMenuItem1.Enabled = false;
-                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
                 LastMouseMove = DateTime.Now;
+                this.SuspendLayout();
+                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                oldWindowPosition = this.Location;
+                dxWindow.EnableFullScreen = true;
+                oldWindowSize = config.WindowSize;
+                config.WindowSize = 0;
 
                 if (dxWindow.EnableDirectX)
                 {
-                    this.SuspendLayout();
-
-                    oldWindowPosition = this.Location;
-                    dxWindow.EnableFullScreen = true;
+                    menuStrip1.Visible = false;
                     dxWindow.InitDirectX(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height, false);
-                    oldWindowSize = config.WindowSize;
-                    config.WindowSize = 0;
-
-                    if (!commandLineLaunch)
-                    {
-                        Point cursorPos = Cursor.Position;
-                        cursorPos.Y = this.PointToScreen(dxWindow.Location).Y;
-                        Cursor.Position = cursorPos;
-                    }
-                    else
-                    {
-                        Cursor.Hide();
-                        CursorIsHidden = true;
-                        Cursor.Position = new Point(0, Screen.PrimaryScreen.Bounds.Height);
-                        mouseOldPos.X = Cursor.Position.X;
-                        mouseOldPos.Y = Cursor.Position.Y;
-                    }
-                    this.ResumeLayout();
-                    dxWindow.Focus();
                 }
                 else
                 {
-                    this.SuspendLayout();
-                    oldWindowPosition = this.Location;
-                    dxWindow.EnableFullScreen = true;
                     this.Location = new Point(0, 0);
-                    this.FormBorderStyle = FormBorderStyle.None;
                     this.WindowState = FormWindowState.Maximized;
-                    Screen currentScreen = Screen.FromRectangle(this.RectangleToScreen(ClientRectangle));
-                    Region r = new Region(new Rectangle(0, 0, currentScreen.Bounds.Width, currentScreen.Bounds.Height));
-                    this.Region = r;
                     dxWindow.Location = new Point(0, 0);
                     dxWindow.SetSize(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-
-                    dxWindow.Focus();
-                    oldWindowSize = config.WindowSize;
-                    config.WindowSize = 0;
-                    if (!commandLineLaunch)
-                    {
-                        Point cursorPos = Cursor.Position;
-                        cursorPos.Y = this.PointToScreen(dxWindow.Location).Y;
-                        Cursor.Position = cursorPos;
-                    }
-                    else
-                    {
-                        Cursor.Hide();
-                        CursorIsHidden = true;
-                        Cursor.Position = new Point(0, Screen.PrimaryScreen.Bounds.Height);
-                        mouseOldPos.X = Cursor.Position.X;
-                        mouseOldPos.Y = Cursor.Position.Y;
-                    }
                 }
+
+                if (!commandLineLaunch)
+                {
+                    Point cursorPos = Cursor.Position;
+                    cursorPos.Y = this.PointToScreen(dxWindow.Location).Y;
+                    Cursor.Position = cursorPos;
+                }
+                else
+                {
+                    Cursor.Hide();
+                    CursorIsHidden = true;
+                    Cursor.Position = new Point(0, Screen.PrimaryScreen.Bounds.Height);
+                    mouseOldPos.X = Cursor.Position.X;
+                    mouseOldPos.Y = Cursor.Position.Y;
+                }
+                this.ResumeLayout();
+                dxWindow.Focus();
             }
             else
             {
@@ -3154,26 +3135,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 toolStripMenuItem5.Enabled = true;
                 toolStripMenuItem1.Enabled = true;
                 this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
-                if (dxWindow.EnableDirectX)
-                {
-                    dxWindow.EnableFullScreen = false;
-                    this.Location = oldWindowPosition;
-                    panel1.Dock = DockStyle.None;
-                    dxWindow.Dock = DockStyle.None;
-                    config.WindowSize = oldWindowSize;
-                    AdjustWindowSize();
-                }
-                else
-                {
-                    dxWindow.EnableFullScreen = false;
-                    this.FormBorderStyle = FormBorderStyle.None;
-                    this.WindowState = FormWindowState.Normal;
-                    panel1.Dock = DockStyle.None;
-                    dxWindow.Dock = DockStyle.None;
-                    this.Location = oldWindowPosition;
-                    config.WindowSize = oldWindowSize;
-                    AdjustWindowSize();
-                }
+                this.WindowState = FormWindowState.Normal;
+
+                dxWindow.EnableFullScreen = false;
+                this.Location = oldWindowPosition;
+                config.WindowSize = oldWindowSize;
+                AdjustWindowSize();
+
                 if (CursorIsHidden)
                 {
                     Cursor.Show();
@@ -4060,8 +4028,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void screenshotMenuItem1_Click(object sender, EventArgs e)
         {
-            if (dxWindow.EnableFullScreen)
-                GoFullscreen(false);
+            ShouldExitFullscreen();
 
             saveFileDialog1.InitialDirectory = config.PathScreenshots;
             saveFileDialog1.Title = "Save Screenshot";
@@ -4121,8 +4088,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public void saveSnapshotMenuItem_Click(object sender, EventArgs e)
         {
-            if (dxWindow.EnableFullScreen)
-                GoFullscreen(false);
+            ShouldExitFullscreen();
 
             saveFileDialog1.Title = "Save Snapshot";
             saveFileDialog1.FileName = "";
@@ -4137,8 +4103,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public void openFileMenuItem1_Click(object sender, EventArgs e)
         {
-            if (dxWindow.EnableFullScreen)
-                GoFullscreen(false);
+            ShouldExitFullscreen();
 
             zx.Pause();
             dxWindow.Suspend();
@@ -4213,8 +4178,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             int titleHeight = screenRectangle.Top - this.Top;
             int totalClientWidth = speccyWidth + dxWindowOffsetX;
             int totalClientHeight = speccyHeight + dxWindowOffsetY + statusStrip1.Height + titleHeight;
-            int adjustWidth = speccyWidth * (config.WindowSize / 100);
-            int adjustHeight = speccyHeight * (config.WindowSize / 100);
+            int adjustWidth = (speccyWidth * config.WindowSize / 100);
+            int adjustHeight = (speccyHeight * config.WindowSize / 100);
 
             borderAdjust = config.BorderSize + config.BorderSize * (config.WindowSize / 100);
 
@@ -4525,8 +4490,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void searchOnlineToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (dxWindow.EnableFullScreen)
-                GoFullscreen(false);
+            ShouldExitFullscreen();
 
             if ((infoseekWiz == null) || (infoseekWiz.IsDisposed))
             {
@@ -4579,8 +4543,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void toolStripMenuItem3_Click(object sender, EventArgs e)
         {
-            if (dxWindow.EnableFullScreen)
-                GoFullscreen(false);
+            ShouldExitFullscreen();
 
             if (speccyKeyboard == null || speccyKeyboard.IsDisposed)
                 speccyKeyboard = new SpectrumKeyboard(this);
@@ -4591,8 +4554,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void tapeBrowserButton_Click(object sender, EventArgs e)
         {
-            if (dxWindow.EnableFullScreen)
-                GoFullscreen(false);
+            ShouldExitFullscreen();
 
             if (tapeDeck != null)
             {
@@ -4684,8 +4646,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void SaveRZXRecording(bool finalise)
         {
-            if (dxWindow.EnableFullScreen)
-                GoFullscreen(false);
+            ShouldExitFullscreen();
 
             saveFileDialog1.Title = "Save Action Replay";
             saveFileDialog1.FileName = "";

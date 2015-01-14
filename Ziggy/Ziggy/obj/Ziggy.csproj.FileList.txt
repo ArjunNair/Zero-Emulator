@@ -1,3 +1,0 @@
-obj\Debug\Ziggy.Form1.resources
-obj\Debug\Ziggy.csproj.GenerateResource.Cache
-obj\Debug\ResolveAssemblyReference.cache

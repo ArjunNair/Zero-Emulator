@@ -51,6 +51,7 @@ Ver 0.7
 - Fixed tool tip for system variables not showing hex number if user has selected hex view in Debugger.
 - Fixed an issue with the +3 not resetting properly (serbalgi).
 - Fixed crash on mouse focus being lost due to ALT + TAB (karingal).
+- Fixed window size incrementing by 100% instead of 50% as intended (Daren)
 
 Ver 0.6
 ---------------

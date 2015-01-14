@@ -50,13 +50,18 @@ namespace Peripherals
                 if (bytesRead == 0)
                     return null; //something bad happened!
 
-                if (bytesToRead == 49179) {
+                if (bytesRead == 49179)
+                {
                     snapshot = new SNA_48K();
                     snapshot.TYPE = 0;
-                } else {
+                }
+                else if (bytesRead == 131103 || bytesRead == 147487)
+                {
                     snapshot = new SNA_128K();
                     snapshot.TYPE = 1;
                 }
+                else
+                    return null;
 
                 snapshot.HEADER.I = buffer[0];
                 snapshot.HEADER.HL_ = buffer[1] | (buffer[2] << 8);
