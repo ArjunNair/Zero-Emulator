@@ -100,7 +100,7 @@ If you used the .zip version, simply delete the folder in which Zero resides.
 
 About Zero
 --------------------
-Zero is a spectrum emulator written entirely on the .NET platform, using C#, and requires .NET framework 2.0.
+Zero is a spectrum emulator written entirely on the .NET platform, using C#, and requires .NET framework 3.5 or above.
 
 The philosophy behind Zero is to provide a highly accurate emulation of the various Spectrum models while also providing a nice, user friendly experience.
 
