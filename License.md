@@ -1,4 +1,5 @@
 The MIT License (MIT)
+-----------------------------
 
 Copyright (c) 2015 Arjun Nair
 
@@ -21,9 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
----------------------------------
-PZX Tools
----------------------------------
+#### PZX Tools
 Copyright (c) 2007 Patrik Rak (patrik@raxoft.cz)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
