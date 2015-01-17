@@ -98,6 +98,11 @@ If you installed the emulator using the Setup, simply run the uninstaller to uni
 
 If you used the .zip version, simply delete the folder in which Zero resides.
 
+Building the project using source
+---------------------------------
+The project currently uses Visual Studio 2013 Community edition (free). It may not be compatible with older Visual Studio editions. I recommend downloading VS 2013 Community as it's almost like the professional version (supports plugins for example) and is free to download from here: http://www.visualstudio.com/en-us/news/vs2013-community-vs.aspx
+
+
 About Zero
 --------------------
 Zero is a spectrum emulator written entirely on the .NET platform, using C#, and requires .NET framework 3.5 or above.
