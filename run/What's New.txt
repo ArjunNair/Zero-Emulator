@@ -9,6 +9,7 @@ Ver 0.7.1
 - Fixed issues with going fullscreen in GDI (serbalgi)
 - Fixed crash issue on .Net 4 and above (zxmak)
 - Fixed crash when loading invalid SNA snapshot (karingal)
+- Fixed apparent hang when trying to close emulator in fullscreen - directX only (hikoki).
 
 Ver 0.7
 ---------------------
