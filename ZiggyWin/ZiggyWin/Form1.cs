@@ -1951,8 +1951,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            //Show the confirmation box only if it's not an invalid ROM exit event
-            if (config.ConfirmOnExit && romLoaded)
+            //Show the confirmation box only if it's not an invalid ROM exit event and not fullscreen
+            if (config.ConfirmOnExit && romLoaded && !config.FullScreen)
             {
                 if (System.Windows.Forms.MessageBox.Show("Are you sure you want to exit?",
                            "Confirm Exit", System.Windows.Forms.MessageBoxButtons.YesNo,

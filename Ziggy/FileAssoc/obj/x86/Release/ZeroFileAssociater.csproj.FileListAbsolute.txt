@@ -1,0 +1,7 @@
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\bin\x86\Release\ZeroFileAssociater.exe.config
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\bin\x86\Release\ZeroFileAssociater.exe
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.csprojResolveAssemblyReference.cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Release\FileAssoc.Form1.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.Properties.Resources.resources
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.csproj.GenerateResource.Cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\FileAssoc\obj\x86\Release\ZeroFileAssociater.exe
