@@ -7,8 +7,8 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{4E0641B3-F422-4982-B3C8-BBF94C84204A}
 AppName=Zero
-AppVersion=Zero 0.7
-;AppVerName=Zero 0.7
+AppVersion=Zero 0.7.1
+;AppVerName=Zero 0.7.1
 AppPublisher=Arjun Nair
 AppPublisherURL=www.arjunnair.in
 AppSupportURL=www.zero.arjunnair.in
@@ -19,7 +19,7 @@ AllowNoIcons=yes
 LicenseFile=.\Run\License.txt
 InfoAfterFile=.\Run\ReadMe.txt
 OutputDir=.\InnoScript
-OutputBaseFilename=Zero 0.7 Setup
+OutputBaseFilename=Zero 0.7.1 Setup
 Compression=lzma
 SolidCompression=yes
 AppCopyright=Copyright 2015 Arjun Nair
@@ -33,8 +33,8 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 Source: ".\Run\Zero.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\Run\roms\*"; DestDir: "{app}\roms"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: ".\Run\programs\*"; DestDir: "{app}\programs"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ".\Run\roms\*"; DestDir: "{app}\roms"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
+Source: ".\Run\programs\*"; DestDir: "{app}\programs"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
 Source: ".\Run\Speccy.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\ZeroSound.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\ZipForge.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -43,12 +43,17 @@ Source: ".\Run\zlib1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\wd1793.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\fdc765.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\Peripherals.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\Run\System.Data.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\Run\System.Data.SQLite.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\pzxtools.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\Run\zxLibrary.db"; DestDir: "{app}"; Flags: onlyifdoesntexist
 Source: ".\Run\ZeroFileAssociater.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\Run\ZeroFileAssociater.manifest"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\Zero.exe.config"; DestDir: "{app}"; Flags: onlyifdoesntexist
 Source: ".\Run\License.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\What's New.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\ReadMe.txt"; DestDir: "{app}"; Flags: ignoreversion
+
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

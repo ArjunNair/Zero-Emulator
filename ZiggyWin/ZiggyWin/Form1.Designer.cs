@@ -83,9 +83,9 @@
             this.rzxRecordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxContinueSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
-            this.rzxStopToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxFinaliseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxDiscardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rzxStopToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
             this.rzxInsertBookmarkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxRollbackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -509,12 +509,6 @@
             this.toolStripSeparator9.Name = "toolStripSeparator9";
             resources.ApplyResources(this.toolStripSeparator9, "toolStripSeparator9");
             // 
-            // rzxStopToolStripMenuItem1
-            // 
-            resources.ApplyResources(this.rzxStopToolStripMenuItem1, "rzxStopToolStripMenuItem1");
-            this.rzxStopToolStripMenuItem1.Name = "rzxStopToolStripMenuItem1";
-            this.rzxStopToolStripMenuItem1.Click += new System.EventHandler(this.rzxStopToolStripMenuItem1_Click);
-            // 
             // rzxFinaliseToolStripMenuItem
             // 
             resources.ApplyResources(this.rzxFinaliseToolStripMenuItem, "rzxFinaliseToolStripMenuItem");
@@ -526,6 +520,12 @@
             resources.ApplyResources(this.rzxDiscardToolStripMenuItem, "rzxDiscardToolStripMenuItem");
             this.rzxDiscardToolStripMenuItem.Name = "rzxDiscardToolStripMenuItem";
             this.rzxDiscardToolStripMenuItem.Click += new System.EventHandler(this.rzxDiscardToolStripMenuItem_Click);
+            // 
+            // rzxStopToolStripMenuItem1
+            // 
+            resources.ApplyResources(this.rzxStopToolStripMenuItem1, "rzxStopToolStripMenuItem1");
+            this.rzxStopToolStripMenuItem1.Name = "rzxStopToolStripMenuItem1";
+            this.rzxStopToolStripMenuItem1.Click += new System.EventHandler(this.rzxStopToolStripMenuItem1_Click);
             // 
             // toolStripSeparator10
             // 

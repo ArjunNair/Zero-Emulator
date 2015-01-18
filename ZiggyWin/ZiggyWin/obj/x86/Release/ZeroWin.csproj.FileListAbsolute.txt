@@ -1,9 +1,3 @@
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe.config
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe.manifest
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.application
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.pdb
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\af-ZA\Zero.resources.dll
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csprojResolveAssemblyReference.cache
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.AboutBox1.resources
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ArchiveHandler.resources
@@ -35,6 +29,12 @@ E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\Z
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.ZRenderer.resources
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.Form1.af-ZA.resources
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\ZeroWin.csproj.GenerateResource.Cache
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe.config
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe.manifest
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.application
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.exe
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\Zero.pdb
+E:\Projects\Speccy\Zero Vanilla\zero-vanilla\run\af-ZA\Zero.resources.dll
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\af-ZA\Zero.resources.dll
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.TrustInfo.xml
 E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\obj\x86\Release\Zero.exe.manifest
