@@ -10,6 +10,7 @@ Ver 0.7.1
 - Fixed crash issue on .Net 4 and above (zxmak)
 - Fixed crash when loading invalid SNA snapshot (karingal)
 - Fixed apparent hang when trying to close emulator in fullscreen - directX only (hikoki).
+- Fixed ULA Snapshot (SZX) not loading correctly (serbalgi)
 
 Ver 0.7
 ---------------------
