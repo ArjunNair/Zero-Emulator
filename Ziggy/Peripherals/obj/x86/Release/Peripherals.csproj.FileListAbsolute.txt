@@ -1,5 +1,0 @@
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\bin\Peripherals.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\bin\Peripherals.pdb
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\bin\zlib.net.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\obj\x86\Release\Peripherals.dll
-E:\Projects\Speccy\Zero Vanilla\zero-vanilla\Ziggy\Peripherals\obj\x86\Release\Peripherals.pdb
