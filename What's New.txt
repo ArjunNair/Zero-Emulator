@@ -5,10 +5,12 @@ What's New
 Ver 0.7.1
 --------------------
 
-- Fixed issues in load and save binary dialog boxes (serbalgi)
+- Fixed crashes in load and save binary dialog boxes for incorrect values (serbalgi)
 - Fixed issues with going fullscreen in GDI (serbalgi)
 - Fixed crash issue on .Net 4 and above (zxmak)
 - Fixed crash when loading invalid SNA snapshot (karingal)
+- Fixed ULA plus snapshot (SZX) not loading back correctly (serbalgi)
+- Fixed apparent hang when trying to close emulator in fullscreen in directX mode (hikoki).
 
 Ver 0.7
 ---------------------

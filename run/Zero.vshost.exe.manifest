@@ -86,26 +86,26 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="35840">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="38400">
       <assemblyIdentity name="Peripherals" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>mOR1GmLM1VvJzmUqxHOYm6p428Q=</dsig:DigestValue>
+        <dsig:DigestValue>HS1ZkrniONBC5cL4B0/ZY2bMOUQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="140800">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="157696">
       <assemblyIdentity name="Speccy" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>kR3pei1xU824OJhcPe65Oe24QIs=</dsig:DigestValue>
+        <dsig:DigestValue>oXYePil2bf0Ukzd2mgyWsutNlqs=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -122,14 +122,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2350080">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2377216">
       <assemblyIdentity name="Zero" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>sK6DtL7RjvqpIokC9ouu9Dhq7L0=</dsig:DigestValue>
+        <dsig:DigestValue>vpOdhsgiaYILsbX169dXqIF0HL8=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -141,19 +141,19 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>RQPzMeZr2byMFhP6OI0/icLncww=</dsig:DigestValue>
+        <dsig:DigestValue>HGukuHpDDWqvSAAvtSZ4MtZJiNM=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ZeroSound.dll" size="11264">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ZeroSound.dll" size="11776">
       <assemblyIdentity name="ZeroSound" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>CXum5Oeh6EcSYLIYaLvG6pado64=</dsig:DigestValue>
+        <dsig:DigestValue>hUXdcP3ghh4NUOUSYIHqf208YSo=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

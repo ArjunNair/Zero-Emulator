@@ -2219,15 +2219,40 @@ namespace Speccy
             HaltOn = (szx.z80Regs.Flags & SZXLoader.ZXSTZF_HALTED) != 0;
             Issue2Keyboard = (szx.keyboard.Flags & SZXLoader.ZXSTKF_ISSUE2) != 0;
             
-            //disabled till I work out how to load the damn palette table back
-            /*
             if (szx.paletteLoaded)
             {
-                ULAPlusEnabled = true;
                 ULAPaletteEnabled = szx.palette.flags > 0 ? true : false;
                 ULAPaletteGroup = szx.palette.currentRegister;
 
-            }*/
+                for (int f = 0; f < 64 ; f++)
+                {
+                    byte val = szx.palette.paletteRegs[f];
+
+                    //3 bits to 8 bits to be stored as hmlhmlml for each color
+
+                    //First get B
+                    int bh = (val & 0x2) >> 1;
+                    int bl = val & 0x1;
+                    int bm = bl;
+                    int B = (bh << 7) | (bm << 6) | (bl << 5) | (bh << 4) | (bm << 3) | (bl << 2) | (bm << 1) | bl;
+
+                    //R
+                    int rl = (val & 0x4) >> 2;
+                    int rm = (val & 0x8) >> 3;
+                    int rh = (val & 0x10) >> 4;
+
+                    int R = (rh << 7) | (rm << 6) | (rl << 5) | (rh << 4) | (rm << 3) | (rl << 2) | (rm << 1) | rl;
+
+                    //G
+                    int gl = (val & 0x20) >> 5;
+                    int gm = (val & 0x40) >> 6;
+                    int gh = (val & 0x80) >> 7;
+
+                    int G = (gh << 7) | (gm << 6) | (gl << 5) | (gh << 4) | (gm << 3) | (gl << 2) | (gm << 1) | gl;
+
+                    ULAPlusColours[f] = (R << 16) | (G << 8) | B;
+                }
+            }
 
             if (szx.header.MinorVersion > (byte)3)
                 MemPtr = szx.z80Regs.MemPtr;
