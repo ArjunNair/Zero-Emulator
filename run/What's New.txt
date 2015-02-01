@@ -2,6 +2,10 @@
 What's New
 --------------
 
+Ver 0.7.2
+-------------------
+- Fixed mic boost emulation (Hernan). Cobra's arc works fine now.
+
 Ver 0.7.1
 --------------------
 

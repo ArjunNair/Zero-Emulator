@@ -468,6 +468,10 @@ namespace Speccy
                         } else {
                             soundOut = MAX_SOUND_VOL;
                         }
+
+                        if ((val & MIC_BIT) != 0)   //Boost slightly if MIC is on
+                            soundOut += (short)(MAX_SOUND_VOL * 0.2f);
+
                         lastSoundOut = beepVal;
                     }
                 }
