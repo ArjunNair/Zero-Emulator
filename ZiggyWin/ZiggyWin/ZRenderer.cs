@@ -14,6 +14,7 @@ using Microsoft.DirectX.Direct3D;
 
 namespace ZeroWin
 {
+
     public partial class ZRenderer : UserControl
     {
         [System.Runtime.InteropServices.DllImportAttribute("gdi32.dll")]
@@ -596,20 +597,10 @@ namespace ZeroWin
         #region DIRECTX_RENDERER
 
         private Device dxDevice;
-        private Microsoft.DirectX.Direct3D.Font text;
-        private Texture dxDisplay;
-        private Texture spriteTexture;
-        private Texture interlaceOverlay;
+        private PresentParameters currentParams;
 
-        //private Texture playIcon;
-        //private Texture indicators;
-        private Surface displaySurface;
-
-        private Sprite sprite;
-        private Sprite interlaceSprite;
-
-        //private Sprite rzxIndicator;
-        private GraphicsStream surfRect;
+        private DisplaySprite displaySprite = new DisplaySprite();
+        private InterlaceSprite scanlineSprite = new InterlaceSprite();
 
         private Rectangle screenRect;
         private Rectangle displayRect;
@@ -617,19 +608,9 @@ namespace ZeroWin
         private System.Drawing.Bitmap gdiDisplay;
         private System.Drawing.Bitmap interlaceDisplay;
 
-        private PresentParameters currentParams;
-
-        //Visual status indicators
-        /*
-        Bitmap tapeIcon;
-        Bitmap diskIcon;
-        Bitmap downloadIcon;
-        Bitmap pauseIcon;
-        //Bitmap playIcon;
-        Bitmap recordIcon;
-        */
         private int displayWidth = 256 + 48 + 48;
         private int displayHeight = 192 + 48 + 56;
+
         private Vector3 pauseLedPos = Vector3.Empty;
         private Vector3 tapeLedPos = Vector3.Empty;
         private Vector3 diskLedPos = Vector3.Empty;
@@ -656,26 +637,11 @@ namespace ZeroWin
         }
 
         private void DestroyDX() {
-            if (interlaceSprite != null)
-                interlaceSprite.Dispose();
-            interlaceSprite = null;
-            if (interlaceOverlay != null)
-                interlaceOverlay.Dispose();
-            interlaceOverlay = null;
-            if (spriteTexture != null)
-                spriteTexture.Dispose();
-            spriteTexture = null;
-            if (sprite != null)
-                sprite.Dispose();
-            sprite = null;
+            scanlineSprite.Destroy();
+            displaySprite.Destroy();
 
             if (gdiDisplay != null)
                 gdiDisplay.Dispose();
-
-            if (displaySurface != null)
-                displaySurface.Dispose();
-            if (dxDisplay != null)
-                dxDisplay.Dispose();
 
             if (dxDevice != null)
                 dxDevice.Dispose();
@@ -692,26 +658,15 @@ namespace ZeroWin
             ScreenHeight = height;
             screenRect = new System.Drawing.Rectangle(0, 0, ScreenWidth, ScreenHeight);
             gdiDisplay = new System.Drawing.Bitmap(ScreenWidth, ScreenHeight, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
-            // Create the device.
-            dxDisplay = new Texture(dxDevice, ScreenWidth, ScreenHeight, 1, Usage.None, currentParams.BackBufferFormat, Pool.Managed);
-            displaySurface = dxDisplay.GetSurfaceLevel(0);
+          
         }
 
         public void SetSize(int width, int height) {
-            if (dxDevice != null) {
-                if (spriteTexture != null)
-                    spriteTexture.Dispose();
-                if (sprite != null)
-                    sprite.Dispose();
-                if (dxDevice != null)
-                    dxDevice.Dispose();
-
-                if (dxDisplay != null)
-                    dxDisplay.Dispose();
-                if (interlaceOverlay != null)
-                    interlaceOverlay.Dispose();
-                if (interlaceSprite != null)
-                    interlaceSprite.Dispose();
+            if (dxDevice != null)
+            {
+                displaySprite.Destroy();
+                scanlineSprite.Destroy();
+                dxDevice.Dispose();
             }
 
             displayHeight = height;
@@ -775,9 +730,9 @@ namespace ZeroWin
                     return false;
                 }
             }
-
-            sprite = new Sprite(dxDevice);
-            interlaceSprite = new Sprite(dxDevice);
+        
+            //sprite = new Sprite(dxDevice);
+            //interlaceSprite = new Sprite(dxDevice);
             SetSpeccyScreenSize(ziggyWin.zx.GetTotalScreenWidth(), ziggyWin.zx.GetTotalScreenHeight());
 
             float scaleX = ((float)displayWidth / (float)(ScreenWidth));
@@ -792,7 +747,7 @@ namespace ZeroWin
                     scaleX = (scaleX * aspectXScale);
                     int newWidth = (int)(displayWidth * aspectXScale);
                     //displayRect = new Rectangle(0, 0, newWidth, displayHeight);
-                    spritePos = new Vector3(((displayWidth - newWidth)) / (scaleX * 2.0f), 0, 0);
+                    spritePos = new Vector3((((displayWidth - newWidth)) / (scaleX * 2.0f)), 0, 0);
                 }
                 else //Not tested!!!
                 {
@@ -811,22 +766,26 @@ namespace ZeroWin
             if (scaleY < 1.0f)
                 scaleY = 1.0f;
 
-            Matrix scaling = Matrix.Scaling(scaleX, scaleY, 0);
-            sprite.Transform = scaling;
+            Matrix scaling = Matrix.Scaling(scaleX, scaleY, 1.0f);
+            //sprite.Transform = scaling;
+            System.Console.WriteLine("scaleX " + scaleX + "     scaleY " + scaleY);
+            System.Console.WriteLine("pos " + spritePos);
+            Texture displayTexture = new Texture(dxDevice, ScreenWidth, ScreenHeight, 1, Usage.None, currentParams.BackBufferFormat, Pool.Managed);
+
+            displaySprite.Init(dxDevice, displayTexture, new Rectangle((int)spritePos.X, (int)spritePos.Y, ScreenWidth, ScreenHeight), scaling);
 
             using (System.IO.MemoryStream stream = new System.IO.MemoryStream()) {
                 ZeroWin.Properties.Resources.scanlines2.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                 stream.Position = 0;
-                interlaceOverlay = Texture.FromStream(dxDevice, stream, Usage.None, Pool.Managed);
+                Texture interlaceTexture = Texture.FromStream(dxDevice, stream, Usage.None, Pool.Managed);
+                Surface interlaceSurface = interlaceTexture.GetSurfaceLevel(0);
+
+                //Why 1.5f? Because it works very well. 
+                //Trying to use displayHeight/texture_width (which would seem logical) leads to strange banding on the screen.
+                scanlineSprite.Init(dxDevice, interlaceTexture, new Rectangle((int)spritePos.X, (int)spritePos.Y, ScreenWidth, ScreenHeight), scaling, 1.0f, displayHeight / 1.5f); 
             }
-            /*
-            using (System.IO.MemoryStream stream = new System.IO.MemoryStream()) {
-                ZeroWin.Properties.Resources.zeroIndicators.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                stream.Position = 0;
-                spriteTexture = Texture.FromStream(dxDevice, stream, Usage.None, Pool.Managed);
-            }*/
+
             System.Drawing.Font systemfont = new System.Drawing.Font(System.Drawing.SystemFonts.MessageBoxFont.FontFamily, 10f, FontStyle.Regular);
-            text = new Microsoft.DirectX.Direct3D.Font(dxDevice, systemfont);
             isSuspended = false;
             lastTime = PrecisionTimer.TimeInMilliseconds();
             directXAvailable = true;
@@ -882,19 +841,24 @@ namespace ZeroWin
         }
 
         private void RenderDDSurface() {
-            surfRect = displaySurface.LockRectangle(screenRect, LockFlags.None);
-
             lock (ziggyWin.zx) {
-                surfRect.Write(ziggyWin.zx.ScreenBuffer);
+                displaySprite.CopySurface(screenRect,ziggyWin.zx.ScreenBuffer);
             }
-            displaySurface.UnlockRectangle();
+
             if (fullScreenMode)
                 dxDevice.Clear(Microsoft.DirectX.Direct3D.ClearFlags.Target, Color.Black, 1.0f, 0);
 
             dxDevice.BeginScene();
+            dxDevice.RenderState.Lighting = false;
 
+            displaySprite.Render(dxDevice, (pixelSmoothing ? TextureFilter.Linear : TextureFilter.None), TextureAddress.Border);
+
+            if (showScanlines)
+                scanlineSprite.Render(dxDevice, TextureFilter.Linear, TextureAddress.Wrap);
+/*
             sprite.Begin(SpriteFlags.None);
             dxDisplay.AutoGenerateFilterType = TextureFilter.Linear;
+
 
             if (!pixelSmoothing) {
                 dxDevice.SamplerState[0].MinFilter = TextureFilter.None;
@@ -913,6 +877,7 @@ namespace ZeroWin
             }
 
             interlaceSprite.End();
+ */ 
             dxDevice.EndScene();
             int coopLevel;
             dxDevice.CheckCooperativeLevel(out coopLevel);
@@ -986,10 +951,12 @@ namespace ZeroWin
 
         public Bitmap GetScreen() {
             Bitmap saveBmp;
-            if (useDirectX) {
-                GraphicsStream gs = SurfaceLoader.SaveToStream(ImageFileFormat.Bmp, dxDisplay.GetSurfaceLevel(0));
+           /* if (useDirectX) {
+                GraphicsStream gs = SurfaceLoader.SaveToStream(ImageFileFormat.Bmp, displaySprite.GetSurface());
                 saveBmp = new Bitmap(gs);
-            } else {
+            } 
+            else*/ 
+            {
                 System.Drawing.Imaging.BitmapData bmpData = gdiDisplay.LockBits(
                                                screenRect,
                                               System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
@@ -1001,6 +968,17 @@ namespace ZeroWin
                 //Unlock the pixels
                 gdiDisplay.UnlockBits(bmpData);
                 Graphics g1 = this.CreateGraphics();
+
+               /* if (useDirectX)
+                {
+                    Surface s = dxDevice.CreateOffscreenPlainSurface(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, Format.A8R8G8B8, Pool.SystemMemory);
+                    dxDevice.GetFrontBufferData(0, s);
+                    
+                    g1 = s.GetGraphics();
+                }
+                else */
+                    
+
                 saveBmp = new Bitmap(this.Width, this.Height, g1);
                 Graphics g2 = Graphics.FromImage(saveBmp);
                 System.IntPtr hdc = g2.GetHdc();

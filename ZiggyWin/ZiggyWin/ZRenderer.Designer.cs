@@ -36,6 +36,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.CausesValidation = false;
+            this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "ZRenderer";
             this.ResumeLayout(false);
 
