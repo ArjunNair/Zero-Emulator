@@ -32,6 +32,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
+Source: ".\Managed DirectX Setup\*";  DestDir: "{tmp}\Managed DirectX Setup"; Flags: dontcopy;
 Source: ".\Run\Zero.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\Run\roms\*"; DestDir: "{app}\roms"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
 Source: ".\Run\programs\*"; DestDir: "{app}\programs"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
@@ -70,6 +71,25 @@ slimdxmissing =This setup requires the Slim DX Runtime Feb 2010.%nPlease downloa
 dotnetmissing =This setup requires .NET Framework 3.5.%nPlease download and install it and then run this setup again.%n%nDo you want to download .NET Framework 3.5 now?
 
 [Code]
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  InstallerResult: integer;
+begin
+    ExtractTemporaryFiles('{tmp}\Managed DirectX Setup\*');
+    if Exec(ExpandConstant('{tmp}\Managed DirectX Setup\DXSETUP.exe'), '/silent', '', SW_SHOW, ewWaitUntilTerminated, InstallerResult) then begin
+      case InstallerResult of
+        0: begin
+          //It installed successfully (Or already was), we can continue
+        end;
+        else begin
+          //Some other error                                                                          Flags: ignoreversion
+          result := 'DirectX installation failed. Exit code ' + IntToStr(InstallerResult);
+        end;
+      end;
+    end else begin
+      result := 'DirectX installation failed. ' + SysErrorMessage(InstallerResult);
+    end;
+end;
 // function InitializeSetup(): Boolean;
 // var
 //    ErrorCode: Integer;
