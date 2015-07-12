@@ -59,6 +59,16 @@ namespace ZeroWin
             }
         }
 
+        public bool DoTapeInstaLoad {
+            get {
+                return instaLoadToolStripMenuItem.Checked;
+            }
+
+            set {
+                instaLoadToolStripMenuItem.Checked = value;
+            }
+        }
+
         public bool TapeIsInserted {
             get { return tapeIsInserted; }
         }
@@ -81,9 +91,10 @@ namespace ZeroWin
 
         public void RegisterEventHooks() {
             ziggyWin.zx.TapeEvent += new TapeEventHandler(Deck_TapeEvent);
-            ziggyWin.zx.edgeLoadTapes = edgeLoadToolStripMenuItem.Checked;
+            ziggyWin.zx.tape_edgeLoad = edgeLoadToolStripMenuItem.Checked;
             ziggyWin.zx.tape_AutoPlay = autoPlayStopToolStripMenuItem.Checked;
             ziggyWin.zx.tape_readToPlay = tapeIsInserted;
+            ziggyWin.zx.tape_flashLoad = instaLoadToolStripMenuItem.Checked;
         }
 
         public void UnRegisterEventHooks() {
@@ -408,9 +419,9 @@ namespace ZeroWin
 
         private void edgeLoadCheckBox_CheckedChanged(object sender, EventArgs e) {
             if (edgeLoadToolStripMenuItem.Checked) {
-                ziggyWin.zx.edgeLoadTapes = true;
+                ziggyWin.zx.tape_edgeLoad = true;
             } else {
-                ziggyWin.zx.edgeLoadTapes = false;
+                ziggyWin.zx.tape_edgeLoad = false;
                 autoPlayStopToolStripMenuItem.Checked = false;
             }
         }
@@ -484,6 +495,13 @@ namespace ZeroWin
         private void infoToolStripMenuItem_Click(object sender, EventArgs e) {
             if (tapeInfo != null)
                 tapeInfo.Show();
+        }
+
+        private void instaLoadToolStripMenuItem_CheckedChanged(object sender, EventArgs e) {
+            if (instaLoadToolStripMenuItem.Checked)
+                ziggyWin.zx.tape_flashLoad = true;
+            else
+                ziggyWin.zx.tape_flashLoad = false;
         }
     }
 }

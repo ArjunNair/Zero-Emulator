@@ -730,5 +730,17 @@ namespace ZeroWin.Properties {
                 this["MaintainAspectRatioInFullScreen"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool TapeInstaLoad {
+            get {
+                return ((bool)(this["TapeInstaLoad"]));
+            }
+            set {
+                this["TapeInstaLoad"] = value;
+            }
+        }
     }
 }

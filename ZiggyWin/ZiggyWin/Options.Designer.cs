@@ -1300,19 +1300,19 @@
             this.label28.AutoSize = true;
             this.label28.Location = new System.Drawing.Point(65, 16);
             this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(271, 39);
+            this.label28.Size = new System.Drawing.Size(269, 39);
             this.label28.TabIndex = 20;
             this.label28.Text = "The arrow keys on the PC keyboard can be used to \r\nemulate one of the popular joy" +
-    "stick interfaces. The ALT \r\nkey works as the fire button.\r\n";
+    "stick interfaces. The TAB\r\nkey works as the fire button.\r\n";
             // 
             // label29
             // 
             this.label29.AutoSize = true;
             this.label29.Location = new System.Drawing.Point(65, 108);
             this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(120, 13);
+            this.label29.Size = new System.Drawing.Size(121, 13);
             this.label29.TabIndex = 21;
-            this.label29.Text = "Arrows + ALT Emulates:";
+            this.label29.Text = "Arrows + TAB Emulates:";
             // 
             // key2joyComboBox
             // 

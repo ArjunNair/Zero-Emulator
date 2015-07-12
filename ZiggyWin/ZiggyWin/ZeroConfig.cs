@@ -349,6 +349,13 @@
             set { tapeAccelerateLoad = value; }
         }
 
+        private bool tapeInstaLoad = true;
+
+        public bool TapeInstaLoad {
+            get { return tapeInstaLoad; }
+            set { tapeInstaLoad = value; }
+        }
+
         private bool enableKempstonMouse = false;
 
         public bool EnableKempstonMouse {
@@ -495,6 +502,7 @@
             tapeAutoLoad = Properties.Settings.Default.TapeAutoLoad;
             tapeEdgeLoad = Properties.Settings.Default.TapeEdgeLoad;
             tapeAccelerateLoad = Properties.Settings.Default.TapeAccelerateLoad;
+            tapeInstaLoad = Properties.Settings.Default.TapeInstaLoad;
             enableKempstonMouse = Properties.Settings.Default.KempstonMouse;
             mouseSensitivity = (int)Properties.Settings.Default.MouseSensitivity;
             key2joyEnabled = Properties.Settings.Default.Key2Joy;
@@ -690,6 +698,7 @@
             Properties.Settings.Default.TapeAutoLoad = tapeAutoLoad;
             Properties.Settings.Default.TapeEdgeLoad = tapeEdgeLoad;
             Properties.Settings.Default.TapeAccelerateLoad = tapeAccelerateLoad;
+            Properties.Settings.Default.TapeInstaLoad = tapeInstaLoad;
             Properties.Settings.Default.KempstonMouse = enableKempstonMouse;
             Properties.Settings.Default.MouseSensitivity = (byte)mouseSensitivity;
             Properties.Settings.Default.Key2Joy = key2joyEnabled;

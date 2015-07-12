@@ -67,6 +67,7 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.instaLoadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -257,7 +258,8 @@
             this.autoLoadTapesToolStripMenuItem,
             this.autoPlayStopToolStripMenuItem,
             this.fastLoadToolStripMenuItem,
-            this.edgeLoadToolStripMenuItem});
+            this.edgeLoadToolStripMenuItem,
+            this.instaLoadToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -268,12 +270,14 @@
             this.autoLoadTapesToolStripMenuItem.Name = "autoLoadTapesToolStripMenuItem";
             this.autoLoadTapesToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.autoLoadTapesToolStripMenuItem.Text = "Auto Load";
+            this.autoLoadTapesToolStripMenuItem.ToolTipText = "Enable this to automatically load in a tape when a tape file is opened.";
             // 
             // autoPlayStopToolStripMenuItem
             // 
             this.autoPlayStopToolStripMenuItem.Name = "autoPlayStopToolStripMenuItem";
             this.autoPlayStopToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.autoPlayStopToolStripMenuItem.Text = "Auto Play && Stop";
+            this.autoPlayStopToolStripMenuItem.ToolTipText = "Will automatically start or stop playing the tape. Requires Edge Load.";
             this.autoPlayStopToolStripMenuItem.CheckedChanged += new System.EventHandler(this.autoStartCheckBox_CheckedChanged);
             this.autoPlayStopToolStripMenuItem.Click += new System.EventHandler(this.autoStartCheckBox_Click);
             // 
@@ -282,7 +286,8 @@
             this.fastLoadToolStripMenuItem.CheckOnClick = true;
             this.fastLoadToolStripMenuItem.Name = "fastLoadToolStripMenuItem";
             this.fastLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
-            this.fastLoadToolStripMenuItem.Text = "Fast Load";
+            this.fastLoadToolStripMenuItem.Text = "Fast-Load";
+            this.fastLoadToolStripMenuItem.ToolTipText = "Will try to load in a tape faster by boosting the emulation speed.";
             this.fastLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // edgeLoadToolStripMenuItem
@@ -290,7 +295,9 @@
             this.edgeLoadToolStripMenuItem.CheckOnClick = true;
             this.edgeLoadToolStripMenuItem.Name = "edgeLoadToolStripMenuItem";
             this.edgeLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
-            this.edgeLoadToolStripMenuItem.Text = "Edge Load";
+            this.edgeLoadToolStripMenuItem.Text = "Edge-Load";
+            this.edgeLoadToolStripMenuItem.ToolTipText = "This should be enabled for  Auto Play/Stop. It also provides a bit of a speed boo" +
+    "st.";
             this.edgeLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.edgeLoadCheckBox_CheckedChanged);
             // 
             // statusStrip1
@@ -395,6 +402,17 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.ejectButton_Click);
             // 
+            // instaLoadToolStripMenuItem
+            // 
+            this.instaLoadToolStripMenuItem.Checked = true;
+            this.instaLoadToolStripMenuItem.CheckOnClick = true;
+            this.instaLoadToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.instaLoadToolStripMenuItem.Name = "instaLoadToolStripMenuItem";
+            this.instaLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.instaLoadToolStripMenuItem.Text = "Insta-Load";
+            this.instaLoadToolStripMenuItem.ToolTipText = "WIll instantly load any tape using the standard loader (ROM).";
+            this.instaLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.instaLoadToolStripMenuItem_CheckedChanged);
+            // 
             // TapeDeck
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -463,5 +481,6 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripMenuItem instaLoadToolStripMenuItem;
     }
 }

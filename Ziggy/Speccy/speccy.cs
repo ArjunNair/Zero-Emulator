@@ -531,8 +531,7 @@ namespace Speccy
         private int tape_tstatesSinceLastIn = 0;
         private int tape_tstatesStep, tape_diff;
         private int tape_A, tape_B, tape_C, tape_D, tape_E, tape_H, tape_L;
-        public bool edgeLoadTapes = false;
-        public bool flashLoadTapes = true;
+        public bool tape_edgeLoad = false;
         public bool tapeBitWasFlipped = false;
         public bool tapeBitFlipAck = false;
         public bool tape_AutoPlay = false;
@@ -551,6 +550,7 @@ namespace Speccy
         public const int PULSE_HIGH = 1;
         public int blockCounter = 0;
         public bool tapePresent = false;
+        public bool tape_flashLoad = true;
         public bool isPlaying = false;
         private int pulseCounter = 0;
         private int repeatCount = 0;
@@ -560,6 +560,8 @@ namespace Speccy
         private int currentBit = 0;
         private int pulse = 0;
         private bool isPauseBlockPreproccess = false; //To ensure previous edge is finished correctly
+        private bool isProcessingPauseBlock = false;  //Signals if the current pause block is currently being serviced.
+        private int pauseCounter = 0;
         public PZXLoader.Block currentBlock;
 
         //AY support
@@ -970,7 +972,7 @@ namespace Speccy
         }
 
         protected void FlashLoadTape() {
-            if (!flashLoadTapes)
+            if (!tape_flashLoad)
                 return;
 
             //if (TapeEvent != null)
@@ -1130,7 +1132,7 @@ namespace Speccy
                         tape_AutoStarted = true;
                     }
 
-                    if (edgeLoadTapes) {
+                    if (tape_edgeLoad) {
                         if (tapeBitWasFlipped) {
                             tapeBitFlipAck = true;
                             tapeBitWasFlipped = false;
@@ -1331,7 +1333,7 @@ namespace Speccy
         private int NO_PAINT_REP = 100;
 
         public void Run() {
-            for (int rep = 0; rep < (tapeIsPlaying && edgeLoadTapes ? NO_PAINT_REP : 1); rep++)
+            for (int rep = 0; rep < (tapeIsPlaying && tape_edgeLoad ? NO_PAINT_REP : 1); rep++)
             {
                 while (doRun)
                 {
@@ -2673,10 +2675,18 @@ namespace Speccy
             //UpdateTape
             if (tapeIsPlaying && !tape_edgeDetectorRan) {
                 tapeTStates += deltaTStates;
-                while (tapeTStates >= edgeDuration) {
-                    tapeTStates = (int)(tapeTStates - edgeDuration);
-                    DoTapeEvent(new TapeEventArgs(TapeEventType.EDGE_LOAD));
-                }
+           
+
+                    if (!isProcessingPauseBlock) {
+                        while (tapeTStates >= edgeDuration) {
+                        tapeTStates = (int)(tapeTStates - edgeDuration);
+
+                        DoTapeEvent(new TapeEventArgs(TapeEventType.EDGE_LOAD));
+                         }
+                    }
+                    else
+                        FlashLoad();
+               // }
             }
             tape_edgeDetectorRan = false;
 
@@ -2959,7 +2969,7 @@ namespace Speccy
                     // Log("DEC A");
                     A = Dec(A);
                     //Deck DEC A short circuit (from SpecEmu's source with permission from Woody)
-                    if (tapeIsPlaying && edgeLoadTapes)
+                    if (tapeIsPlaying && tape_edgeLoad)
                         if (PeekByteNoContend(PC) == 0x20)
                             if (PeekByteNoContend(PC + 1) == 0xfd) {
                                 if (A != 0) {
@@ -10983,6 +10993,26 @@ namespace Speccy
 
             PZXLoader.Block currBlock = PZXLoader.blocks[blockCounter];
 
+
+            if (currBlock is PZXLoader.PAUS_Block) {
+                if (!isProcessingPauseBlock) {
+                    isProcessingPauseBlock = true;
+                    edgeDuration = ((PZXLoader.PAUS_Block)currBlock).duration;
+                    pauseCounter = (int)edgeDuration;
+                    //tapeTStates = 0;
+                    return;
+                }
+                else {
+                    pauseCounter -= tapeTStates;
+                    if (pauseCounter > 0)
+                        return;
+                    else {
+                        pauseCounter = 0;
+                        isProcessingPauseBlock = false;
+                    }
+                }
+            }
+
             if (!(currBlock is PZXLoader.PULS_Block))
                 blockCounter++;
 
@@ -11041,8 +11071,11 @@ namespace Speccy
                     DE--;
                 }
             }
+
+            //Simulate RET
             PC = PopStack();
             MemPtr = PC;
+
             blockCounter++;
             if (blockCounter >= PZXLoader.blocks.Count)
             {

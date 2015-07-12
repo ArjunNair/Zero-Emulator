@@ -680,7 +680,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                             zx.keyBuffer[(int)keyCode._6] = true;
                         break;
 
-                    case (255): //proxy for alt
+                    case (255): //proxy for Fire
                         if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.KEMPSTON)
                             zx.joystickState[config.Key2JoystickType] |= zxmachine.JOYSTICK_BUTTON_1;
                         else if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.SINCLAIR2)
@@ -1154,10 +1154,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             ctrlIsPressed = (((keyEvent.Modifiers & Keys.Control) != 0)); //((Native.GetAsyncKeyState(VK_RSHIFT) & 0x8000) != 0) ||
             altIsPressed = (keyEvent.Modifiers & Keys.Alt) != 0;
 
-            if (!zx.keyBuffer[(int)keyCode.ALT] && altIsPressed)
-                if (config.EnableKey2Joy)
-                    HandleKey2Joy(255, true);
-
             zx.keyBuffer[(int)keyCode.SHIFT] = shiftIsPressed;
             zx.keyBuffer[(int)keyCode.CTRL] = ctrlIsPressed;
             zx.keyBuffer[(int)keyCode.ALT] = altIsPressed;
@@ -1385,6 +1381,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                 case Keys.Back:
                     zx.keyBuffer[(int)keyCode.BACK] = true;
+                    break;
+
+                case Keys.Tab:
+                    zx.keyBuffer[(int)keyCode.TAB] = true;
+
+                    if (config.EnableKey2Joy)
+                        HandleKey2Joy(255, true);
                     break;
 
                 #region Convenience Key Press Emulation
@@ -1802,6 +1805,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     zx.keyBuffer[(int)keyCode.BACK] = false;
                     break;
 
+                case Keys.Tab:
+                    zx.keyBuffer[(int)keyCode.TAB] = false;
+
+                    if (config.EnableKey2Joy)
+                        HandleKey2Joy(255, false);
+                    break;
+
                 case Keys.CapsLock:
                     zx.keyBuffer[(int)keyCode.CAPS] = true;
                     capsLockOn = !capsLockOn;
@@ -1902,9 +1912,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             altIsPressed = (keyEvent.Modifiers & Keys.Alt) != 0;
             zx.keyBuffer[(int)keyCode.SHIFT] = shiftIsPressed;
             // zx.keyBuffer[(int)keyCode.CTRL] = ctrlIsPressed;
-            if (zx.keyBuffer[(int)keyCode.ALT] && !altIsPressed)
-                if (config.EnableKey2Joy)
-                    HandleKey2Joy(255, false);
+           
             zx.keyBuffer[(int)keyCode.ALT] = altIsPressed;
         }
 
@@ -1983,6 +1991,25 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 config.TapeAutoLoad = tapeDeck.DoAutoTapeLoad;
                 config.TapeEdgeLoad = tapeDeck.DoTapeEdgeLoad;
                 config.TapeAccelerateLoad = tapeDeck.DoTapeAccelerateLoad;
+                config.TapeInstaLoad = tapeDeck.DoTapeInstaLoad;
+                
+                if (joystick1Index >= 0 && joystick1.isInitialized) {
+                    config.Joystick1Name = joystick1.name;
+                    config.Joystick1ToEmulate = joystick1MapIndex;
+                }
+                else {
+                    config.Joystick1Name = "";
+                    config.Joystick1ToEmulate = 0;
+                }
+
+                if (joystick2Index >= 0 && joystick2.isInitialized) {
+                    config.Joystick2Name = joystick2.name;
+                    config.Joystick2ToEmulate = joystick2MapIndex;
+                }
+                else {
+                    config.Joystick2Name = "";
+                    config.Joystick2ToEmulate = 0;
+                }
 
                 config.Save();
             }
@@ -2182,6 +2209,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             tapeDeck.DoAutoTapeLoad = config.TapeAutoLoad;
             tapeDeck.DoTapeEdgeLoad = config.TapeEdgeLoad;
             tapeDeck.DoTapeAccelerateLoad = config.TapeAccelerateLoad;
+            tapeDeck.DoTapeInstaLoad = config.TapeInstaLoad;
 
             zx.DiskEvent += new DiskEventHandler(DiskMotorEvent);
             try
@@ -2235,23 +2263,31 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     normalToolStripMenuItem_Click_1(this, null);
                     break;
             }
+
+            
+               
             JoystickController.EnumerateJosticks();
             string[] joysticks = JoystickController.GetDeviceNames();
 
-            for (int f = 0; f < joysticks.Length; f++)
-            {
-                if (string.IsNullOrEmpty(Properties.Settings.Default.joystick1) && Properties.Settings.Default.joystick1 == joysticks[f])
-                {
-                    joystick1.InitJoystick(this, f);
-                    joystick1Index = f;
-                }
+            if (!string.IsNullOrEmpty(config.Joystick1Name)) {
+                int i = Array.IndexOf(joysticks, config.Joystick1Name);
 
-                if (string.IsNullOrEmpty(Properties.Settings.Default.joystick2) && Properties.Settings.Default.joystick2 == joysticks[f])
-                {
-                    joystick2.InitJoystick(this, f);
-                    joystick2Index = f;
+                if (i >= 0) {
+                    joystick1Index = i;
+                    joystick1MapIndex = config.Joystick1ToEmulate;
                 }
             }
+
+            if (!string.IsNullOrEmpty(config.Joystick2Name)) {
+                int i = Array.IndexOf(joysticks, config.Joystick2Name);
+
+                if (i >= 0) {
+                    joystick2Index = i;
+                    joystick2MapIndex = config.Joystick2ToEmulate;
+                }
+            }
+
+            SetupJoysticks();
 
             //Any command line parameter will override the restore last state on start functionality
             if (commandLineLaunch)
@@ -2583,6 +2619,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             else
                 zx.HasKempstonJoystick = false;
 
+
+            if ((config.EnableKey2Joy) && (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.KEMPSTON)) {
+                zx.HasKempstonJoystick = true;
+            }
+
             ChangeZXPalette(config.PaletteMode);
 
             if (!config.EnableSound)
@@ -2716,6 +2757,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             config.HighCompatibilityMode = optionWindow.HighCompatibilityMode;
             config.EnableKey2Joy = optionWindow.EnableKey2Joy;
             config.Key2JoystickType = optionWindow.Key2JoyStickType + 1;
+
             config.RestoreLastStateOnStart = optionWindow.RestoreLastState;
             config.ShowOnscreenIndicators = optionWindow.ShowOnScreenLEDS;
             config.MaintainAspectRatioInFullScreen = optionWindow.MaintainAspectRatioInFullScreen;
@@ -2804,23 +2846,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             zx.SetStereoSound(config.StereoSoundOption); //Also sets ACB/ABC config internally
             zx.EnableAY(config.EnableAYFor48K);
+
             joystick1Index = optionWindow.Joystick1Choice - 1;
-
-            if (joystick1Index >= 0)
-                joystick1.InitJoystick(this, joystick1Index);
-
             joystick2Index = optionWindow.Joystick2Choice - 1;
-            if (joystick2Index >= 0)
-                joystick2.InitJoystick(this, joystick2Index);
 
             joystick1MapIndex = optionWindow.Joystick1EmulationChoice;
             joystick2MapIndex = optionWindow.Joystick2EmulationChoice;
 
-            if ((joystick2MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON) || (joystick1MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON))
-                zx.HasKempstonJoystick = true;
-            else
-                zx.HasKempstonJoystick = false;
 
+            SetupJoysticks();
             //zx.HasKempstonMouse = config.EnableKempstonMouse;
             //dxWindow.Suspend();
             CheckFileAssociations();
@@ -4743,6 +4777,28 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private void Form1_ResizeEnd(object sender, EventArgs e)
         {
             isResizing = false;
+        }
+
+        private void SetupJoysticks() {
+            if (joystick1Index >= 0) {
+                joystick1.Release();
+                joystick1.InitJoystick(this, joystick1Index);
+            }
+
+            if (joystick2Index >= 0) {
+                joystick2.Release();
+                joystick2.InitJoystick(this, joystick2Index);
+            }
+
+            if ((joystick2MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON) || (joystick1MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON))
+                zx.HasKempstonJoystick = true;
+            else
+                zx.HasKempstonJoystick = false;
+
+            if ((config.EnableKey2Joy) && (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.KEMPSTON)) {
+                zx.HasKempstonJoystick = true;
+            }
+
         }
     }
 }
