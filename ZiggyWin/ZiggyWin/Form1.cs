@@ -666,7 +666,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         else if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.SINCLAIR1)
                             zx.keyBuffer[(int)keyCode._8] = true;
                         else if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.CURSOR)
-                            zx.keyBuffer[(int)keyCode._7] = true;
+                            zx.keyBuffer[(int)keyCode._6] = true;
                         break;
 
                     case ((int)keyCode.UP):
@@ -677,7 +677,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         else if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.SINCLAIR1)
                             zx.keyBuffer[(int)keyCode._9] = true;
                         else if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.CURSOR)
-                            zx.keyBuffer[(int)keyCode._6] = true;
+                            zx.keyBuffer[(int)keyCode._7] = true;
                         break;
 
                     case (255): //proxy for Fire
@@ -726,7 +726,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         else if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.SINCLAIR1)
                             zx.keyBuffer[(int)keyCode._8] = false;
                         else if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.CURSOR)
-                            zx.keyBuffer[(int)keyCode._7] = false;
+                            zx.keyBuffer[(int)keyCode._6] = false;
                         break;
 
                     case ((int)keyCode.UP):
@@ -737,7 +737,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         else if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.SINCLAIR1)
                             zx.keyBuffer[(int)keyCode._9] = false;
                         else if (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.CURSOR)
-                            zx.keyBuffer[(int)keyCode._6] = false;
+                            zx.keyBuffer[(int)keyCode._7] = false;
                         break;
 
                     case (255): //proxy for alt
