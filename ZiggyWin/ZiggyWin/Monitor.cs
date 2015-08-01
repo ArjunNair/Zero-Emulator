@@ -873,9 +873,9 @@ namespace ZeroWin
 
                     if (!foundSysVars) {
                         if (monitorRef.useHexNumbers) {
-                            opcodes = opcodes.Replace(":D2", ":x2");
+                            opcodes = opcodes.Replace(":D", ":x");
                         } else {
-                            opcodes = opcodes.Replace(":x2", ":D2");
+                            opcodes = opcodes.Replace(":x", ":D");
                         }
                         
                         if (param2 != int.MaxValue) {
@@ -1295,7 +1295,7 @@ namespace ZeroWin
         }
 
         private void dataGridView1_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e) {
-            if (e.RowIndex == -1)
+            if (e.RowIndex == -1 || e.ColumnIndex != 2)
                 return;
 
             if (!string.IsNullOrEmpty(disassemblyList[e.RowIndex].toolTipText)) {
