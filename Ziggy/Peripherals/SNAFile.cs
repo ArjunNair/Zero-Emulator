@@ -33,7 +33,7 @@ namespace Peripherals
         public byte[][] RAM_BANK = new byte[16][];        //Contents of the 8192*16 ram banks
     }
 
-    public class SNALoader
+    public class SNAFile
     {
         // SNA_HEADER header = new SNA_HEADER();
 

@@ -63,21 +63,21 @@ namespace Speccy
 
             PageReadPointer[0] = ROMpage[0];
             PageReadPointer[1] = ROMpage[1];
-            PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1]; //Bank 5
-            PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2]; //Bank 5
-            PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_1]; //Bank 2
-            PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_2]; //Bank 2
-            PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_1]; //Bank 0
-            PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_2]; //Bank 0
+            PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW]; //Bank 5
+            PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH]; //Bank 5
+            PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW]; //Bank 2
+            PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH]; //Bank 2
+            PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW]; //Bank 0
+            PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH]; //Bank 0
 
             PageWritePointer[0] = JunkMemory[0];
             PageWritePointer[1] = JunkMemory[1];
-            PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1]; //Bank 5
-            PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2]; //Bank 5
-            PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_1]; //Bank 2
-            PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_2]; //Bank 2
-            PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1]; //Bank 0
-            PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2]; //Bank 0
+            PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW]; //Bank 5
+            PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH]; //Bank 5
+            PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW]; //Bank 2
+            PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH]; //Bank 2
+            PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW]; //Bank 0
+            PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH]; //Bank 0
 
             Random rand = new Random();
             //Fill memory with random stuff to simulate hard reset
@@ -227,11 +227,12 @@ namespace Speccy
             base.In(port);
 
             if (isPlayingRZX) {
-                if (rzxInputCount < rzxFrame.inputCount) {
-                    rzxIN = rzxFrame.inputs[rzxInputCount++];
+                if (rzx.inputCount < rzx.frame.inputCount) {
+                    rzxIN = rzx.frame.inputs[rzx.inputCount++];
                 }
                 return rzxIN;
-            }
+             }
+            
             int result = 0xff;
             //bool portIsContended = IsContended(port);
             bool lowBitReset = (port & 0x01) == 0;
@@ -649,25 +650,25 @@ namespace Speccy
             }
         }
 
-        public override void UseSZX(SZXLoader szx) {
+        public override void UseSZX(SZXFile szx) {
             lock (lockThis) {
                 base.UseSZX(szx);
                 Out(0x0ffe, szx.specRegs.Fe);
                 borderColour = szx.specRegs.Border;
                 LateTiming = szx.header.Flags & 0x1;
-                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
-                PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-                PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
+                PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+                PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
-                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
-                PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-                PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
+                PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+                PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
                 if (szx.paletteLoaded) {
                     if (szx.palette.flags == 1) {
@@ -740,19 +741,19 @@ namespace Speccy
                     Array.Copy(z80.RAM_BANK[f], 0, RAMpage[f], 0, 8192);
                 }
 
-                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
-                PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-                PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
+                PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+                PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
-                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
-                PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-                PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
+                PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+                PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
                 totalTStates = z80.TSTATES;
             }

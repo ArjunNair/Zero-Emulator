@@ -56,5 +56,22 @@ namespace ZeroWin
 
             return enumValList;
         }
+
+        public static int ConvertToInt(string input) {
+            bool validInput = false;
+            int number = -1;
+
+            if (input[0] == '$')
+                validInput = System.Int32.TryParse(input.Substring(1, input.Length - 1), System.Globalization.NumberStyles.HexNumber, null, out number);
+            else
+                validInput = System.Int32.TryParse(input, out number);
+
+            if (!validInput) {
+                System.Windows.Forms.MessageBox.Show("Your input doesn't seem to be a valid number.", "Invalid input", System.Windows.Forms.MessageBoxButtons.OK);
+                number = -1;
+            }
+
+            return number;
+        }
     }
 }

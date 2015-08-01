@@ -6,7 +6,7 @@ using zlib;
 namespace Peripherals
 {
     //Supports SZX 1.4 specification
-    public class SZXLoader
+    public class SZXFile
     {
         public enum ZXTYPE
         {

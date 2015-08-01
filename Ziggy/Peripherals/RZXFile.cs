@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using zlib;
 
 namespace Peripherals
 {
-    public class RZXLoader
+    public class RZXFile
     {
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct RZX_Header
@@ -49,6 +50,12 @@ namespace Peripherals
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct RZX_SnapshotDescriptor 
+        {
+            public uint checksum;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct RZX_Record
         {
             public uint numFrames;
@@ -70,24 +77,28 @@ namespace Peripherals
         public RZX_Creator creator;
         public RZX_Record record;
         public RZX_Snapshot snap;
+        public char[][] snapshotExtension = new char[2][];
         public byte[][] snapshotData = new byte[2][];
 
         private byte snapIndex = 0;
         private const string rzxSessionContinue = "Zero RZX Continue\0";
         private const string rzxSessionFinal = "Zero RZX Final   \0";
 
-        public System.Collections.Generic.List<RZX_Frame> frames = new System.Collections.Generic.List<RZX_Frame>();
+        //RZX Playback & Recording
+        protected class RollbackBookmark {
+            public SZXFile snapshot;
+            public int frameIndex;
+        };
 
-        public byte GetInput() {
-            return 0;
-        }
+        public int frameCount;
+        public int fetchCount;
+        public int inputCount;
+        public RZX_Frame frame;
+        protected int currentBookmark = 0;
+        protected List<RollbackBookmark> bookmarks = new List<RollbackBookmark>();
+        protected List<byte> inputs = new List<byte>();
 
-        public void AddFrame() {
-        }
-
-        public int Update() {
-            return 0;
-        }
+        public List<RZX_Frame> frames = new List<RZX_Frame>();
 
         public bool LoadRZX(Stream fs) {
             using (BinaryReader r = new BinaryReader(fs, System.Text.Encoding.UTF8)) {
@@ -123,41 +134,38 @@ namespace Peripherals
                         case 0x10:
                             creator = (RZX_Creator)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
                                                                          typeof(RZX_Creator));
-                            /* if (block.size != 52) {
-                                 //custom data of the creator.
-                                 if (new string(creator.info) == rzxSessionContinue) {
-                                     doContinueRecording = true;
-                                     snapIndex++;
-                                 }
-                             } else
-                                 bufferCounter--;*/
                             break;
 
                         case 0x30:
                             snap = (RZX_Snapshot)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
                                                                          typeof(RZX_Snapshot));
+
+                            int offset = bufferCounter + Marshal.SizeOf(snap);
+
                             if ((snap.flags & 0x2) != 0) {
-                                int offset = bufferCounter + Marshal.SizeOf(snap);
                                 int snapSize = (int)block.size - Marshal.SizeOf(snap) - Marshal.SizeOf(block);
-                                if (snapSize != snap.uncompressedSize) {
-                                    MemoryStream compressedData = new MemoryStream(buffer, offset, snapSize);
-                                    MemoryStream uncompressedData = new MemoryStream();
-                                    using (ZInputStream zipStream = new ZInputStream(compressedData)) {
-                                        byte[] tempBuffer = new byte[2048];
-                                        int bytesUnzipped = 0;
-                                        while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
-                                            uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
-                                        }
-                                        snapshotData[snapIndex] = uncompressedData.ToArray();
-                                        compressedData.Close();
-                                        uncompressedData.Close();
+                                MemoryStream compressedData = new MemoryStream(buffer, offset, snapSize);
+                                MemoryStream uncompressedData = new MemoryStream();
+
+                                using (ZInputStream zipStream = new ZInputStream(compressedData)) {
+                                    byte[] tempBuffer = new byte[2048];
+                                    int bytesUnzipped = 0;
+
+                                    while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
+                                        uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
                                     }
-                                } else {
-                                    snapshotData[snapIndex] = new byte[snapSize];
-                                    Array.Copy(buffer, offset, snapshotData[snapIndex], 0, snapSize);
+                                    snapshotData[snapIndex] = uncompressedData.ToArray();
+                                    compressedData.Close();
+                                    uncompressedData.Close();
                                 }
-                                snapIndex += (byte)(snapIndex < 1 ? 1 : 0);
                             }
+                            else {
+                                snapshotData[snapIndex] = new byte[snap.uncompressedSize];
+                                Array.Copy(buffer, offset, snapshotData[snapIndex], 0, snap.uncompressedSize);
+                            }
+
+                            snapshotExtension[snapIndex] = snap.extension;
+                            snapIndex += (byte)(snapIndex < 1 ? 1 : 0);
                             break;
 
                         case 0x80:
@@ -242,7 +250,7 @@ namespace Peripherals
             output.Flush();
         }
 
-        public void SaveRZX(string filename, bool doFinalise) {
+        public void SaveRZX(string filename) {
             header = new RZX_Header();
             header.majorVersion = 0;
             header.minorVersion = 12;
@@ -274,6 +282,7 @@ namespace Peripherals
                         snap.flags |= 0x2;
                         byte[] rawSZXData;
                         snap.uncompressedSize = (uint)snapshotData[f].Length;
+
                         using (MemoryStream outMemoryStream = new MemoryStream())
                         using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream, zlibConst.Z_DEFAULT_COMPRESSION))
                         using (Stream inMemoryStream = new MemoryStream(snapshotData[f])) {
@@ -330,6 +339,107 @@ namespace Peripherals
             Marshal.Copy(buffer, rawdatas, 0, rawsize);
             Marshal.FreeHGlobal(buffer);
             return rawdatas;
+        }
+
+        public void InitPlayback() {
+            frameCount = 0;
+            fetchCount = 0;
+            inputCount = 0;
+            frame = frames[0];
+        }
+
+        public void ContinueRecording() {
+            inputs = new List<byte>();
+            frameCount = 0;
+            fetchCount = 0;
+            inputCount = 0;
+        }
+
+        public void InsertBookmark(SZXFile szx, List<byte> inputList ) {
+            frame = new RZXFile.RZX_Frame();
+            frame.inputCount = (ushort)inputList.Count;
+            frame.instructionCount = (ushort)fetchCount;
+            frame.inputs = inputList.ToArray();
+            frames.Add(frame);
+            fetchCount = 0;
+            inputCount = 0;
+         
+            RollbackBookmark bookmark = new RollbackBookmark();
+            bookmark.frameIndex = frames.Count;
+            bookmark.snapshot = szx;
+            bookmarks.Add(bookmark);
+            currentBookmark = bookmarks.Count - 1;
+        }
+
+        public SZXFile Rollback() {
+            if (bookmarks.Count > 0) {
+                RollbackBookmark bookmark = bookmarks[currentBookmark];
+                //if less than 2 seconds have passed since last bookmark, revert to an even earlier bookmark
+                if ((frames.Count - bookmark.frameIndex) / 50 < 2) {
+                    if (currentBookmark > 0) {
+                        bookmarks.Remove(bookmark);
+                        currentBookmark--;
+                    }
+                    bookmark = bookmarks[currentBookmark];
+                }
+                frames.RemoveRange(bookmark.frameIndex, frames.Count - bookmark.frameIndex);
+                fetchCount = 0;
+                inputCount = 0;
+                inputs = new List<byte>();
+                return bookmark.snapshot;
+            }
+            return null;
+        }
+
+        public void Discard() {
+            bookmarks.Clear();
+            inputs.Clear();
+        }
+
+        public void Save(string fileName, byte[] data) {
+                snapshotData[1] = data;
+                bookmarks.Clear();
+                SaveRZX(fileName);
+        }
+
+        public void StartRecording(byte[] data, int totalTStates) {
+            record.tstatesAtStart = (uint)totalTStates;
+            record.flags |= 0x2; //Frames are compressed.
+            snapshotData[0] = data;
+        }
+
+        public bool IsValidSession() {
+            if (snapshotData[1] == null)
+                return false;
+
+            return true;
+        }
+
+        public bool NextPlaybackFrame() {
+            frameCount++;
+            fetchCount = 0;
+            inputCount = 0;
+
+            if (frameCount < frames.Count) {
+                frame = frames[frameCount];
+                return true;
+            }
+
+            return false;
+        }
+
+        public void RecordFrame(List<byte> inputList) {
+            frame = new RZXFile.RZX_Frame();
+            frame.inputCount = (ushort)inputList.Count;
+            frame.instructionCount = (ushort)fetchCount;
+            frame.inputs = inputList.ToArray();
+            frames.Add(frame);
+            fetchCount = 0;
+            inputCount = 0;
+        }
+
+        public int GetPlaybackPercentage() {
+            return frameCount * 100 / frames.Count;
         }
     }
 }

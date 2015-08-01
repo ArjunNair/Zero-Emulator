@@ -25,7 +25,7 @@ namespace Peripherals
         public byte[][] RAM_BANK = new byte[16][];       //Contents of the 8192*16 ram banks
     }
 
-    public class Z80Loader
+    public class Z80File
     {
         private static void GetPage(byte[] buffer, int counter, byte[] bank, int dataLength) {
             if (dataLength == 0xffff) {

@@ -110,7 +110,8 @@ namespace ZeroWin
                 if ((String)row.Cells[2].Value != "-")
                     _val = Convert.ToInt32(row.Cells[2].Value);
 
-                kv = new KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition>(Utilities.GetEnumFromString<SPECCY_EVENT>((string)row.Cells[0].Value,SPECCY_EVENT.OPCODE_PC), new Monitor.BreakPointCondition(Utilities.GetEnumFromString <SPECCY_EVENT>((string)row.Cells[0].Value, SPECCY_EVENT.OPCODE_PC), _addr, _val));
+                SPECCY_EVENT speccyEvent = Utilities.GetEnumFromString<SPECCY_EVENT>((string)row.Cells[0].Value, SPECCY_EVENT.OPCODE_PC);
+                kv = new KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition>(speccyEvent, new Monitor.BreakPointCondition(speccyEvent, _addr, _val));
                 monitor.RemoveBreakpoint(kv);
             }
         }
@@ -125,79 +126,25 @@ namespace ZeroWin
 
             int addr = -1;
             int val = -1;
-            bool validInput = true;
+
+            SPECCY_EVENT speccyEvent = Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC);
 
             if (comboBox2.SelectedIndex < 14) {
-                if (maskedTextBox2.Text[0] == '$') {
-                    for (int t = 1; t < maskedTextBox2.Text.Length; t++) {
-                        if (!(maskedTextBox2.Text[t] >= '0' && maskedTextBox2.Text[t] <= '9') &&
-                            !(maskedTextBox2.Text[t] >= 'a' && maskedTextBox2.Text[t] <= 'f') &&
-                            !(maskedTextBox2.Text[t] >= 'A' && maskedTextBox2.Text[t] <= 'F')) {
-                            validInput = false;
-                            break;
-                        }
-                    }
-                    if (!validInput || (maskedTextBox2.Text.Length < 2)) {
-                        System.Windows.Forms.MessageBox.Show("Invalid hex number!", "Invalid input", MessageBoxButtons.OK);
-                        return;
-                    }
+                addr = Utilities.ConvertToInt(maskedTextBox2.Text);
 
-                    addr = Int32.Parse(maskedTextBox2.Text.Substring(1, maskedTextBox2.Text.Length - 1), System.Globalization.NumberStyles.HexNumber);
-                } else {
-                    for (int t = 1; t < maskedTextBox2.Text.Length; t++) {
-                        if (!(maskedTextBox2.Text[t] >= '0' && maskedTextBox2.Text[t] <= '9')) {
-                            System.Windows.Forms.MessageBox.Show("Invalid decimal number!", "Invalid input", MessageBoxButtons.OK);
-                            validInput = false;
-                            break;
-                        }
-                    }
-
-                    if (!validInput)
-                        return;
-
-                    addr = Convert.ToInt32(maskedTextBox2.Text);
-                }
-
-                if (addr > 65535 || addr < 0) {
+                if (addr > 65535) {
                     System.Windows.Forms.MessageBox.Show("The address is not within 0 to 65535!", "Invalid input", MessageBoxButtons.OK);
                     return;
                 }
-            } else if (Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text,SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.ULA_WRITE || Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.ULA_READ)
+            } else if (speccyEvent == SPECCY_EVENT.ULA_WRITE || speccyEvent == SPECCY_EVENT.ULA_READ)
                 addr = 254; //0xfe
 
-            validInput = true;
+
             if (maskedTextBox3.Text.Length > 0) {
-                if (maskedTextBox3.Text[0] == '$') {
-                    for (int t = 1; t < maskedTextBox3.Text.Length; t++) {
-                        if (!(maskedTextBox3.Text[t] >= '0' && maskedTextBox3.Text[t] <= '9') &&
-                            !(maskedTextBox3.Text[t] >= 'a' && maskedTextBox3.Text[t] <= 'f') &&
-                            !(maskedTextBox3.Text[t] >= 'A' && maskedTextBox3.Text[t] <= 'F')) {
-                            validInput = false;
-                            break;
-                        }
-                    }
-                    if (!validInput || (maskedTextBox3.Text.Length < 2)) {
-                        System.Windows.Forms.MessageBox.Show("Invalid hex number!", "Invalid input", MessageBoxButtons.OK);
-                        return;
-                    }
 
-                    val = Int32.Parse(maskedTextBox3.Text.Substring(1, maskedTextBox3.Text.Length - 1), System.Globalization.NumberStyles.HexNumber);
-                } else {
-                    for (int t = 1; t < maskedTextBox3.Text.Length; t++) {
-                        if (!(maskedTextBox3.Text[t] >= '0' && maskedTextBox3.Text[t] <= '9')) {
-                            System.Windows.Forms.MessageBox.Show("Invalid decimal number!", "Invalid input", MessageBoxButtons.OK);
-                            validInput = false;
-                            break;
-                        }
-                    }
+                val = Utilities.ConvertToInt(maskedTextBox3.Text);
 
-                    if (!validInput)
-                        return;
-
-                    val = Convert.ToInt32(maskedTextBox3.Text);
-                }
-
-                if (val > 255 || val < 0) {
+                if (val > 255) {
                     System.Windows.Forms.MessageBox.Show("The value is not within 0 to 255!", "Invalid input", MessageBoxButtons.OK);
                     return;
                 }
@@ -205,20 +152,23 @@ namespace ZeroWin
                 val = -1;
 
             string _str = comboBox2.SelectedItem.ToString();// +"@" + addr.ToString();
-            KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition> kv = new KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition>(Utilities.GetEnumFromString<SPECCY_EVENT>(_str, SPECCY_EVENT.OPCODE_PC), new Monitor.BreakPointCondition(Utilities.GetEnumFromString<SPECCY_EVENT>(_str, SPECCY_EVENT.OPCODE_PC), addr, val));
+            SPECCY_EVENT speccEventFromString = Utilities.GetEnumFromString<SPECCY_EVENT>(_str, SPECCY_EVENT.OPCODE_PC);
+
+            KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition> kv = new KeyValuePair<SPECCY_EVENT, Monitor.BreakPointCondition>(speccEventFromString, new Monitor.BreakPointCondition(speccEventFromString, addr, val));
 
             monitor.AddBreakpoint(kv);
         }
 
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e) {
             maskedTextBox3.Text = "";
-            if (Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.ULA_WRITE || Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.ULA_READ)
+            SPECCY_EVENT speccyEvent = Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC);
+            if (speccyEvent == SPECCY_EVENT.ULA_WRITE || speccyEvent == SPECCY_EVENT.ULA_READ)
             {
                 maskedTextBox2.Text = "$fe";
                 maskedTextBox2.ReadOnly = true;
                 maskedTextBox3.ReadOnly = false;
             }
-            else if (Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.INTTERUPT || Utilities.GetEnumFromString<SPECCY_EVENT>(comboBox2.Text, SPECCY_EVENT.OPCODE_PC) == SPECCY_EVENT.RE_INTTERUPT)
+            else if (speccyEvent == SPECCY_EVENT.INTERRUPT || speccyEvent == SPECCY_EVENT.RE_INTERRUPT)
             {
                 maskedTextBox2.Text = "";
 

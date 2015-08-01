@@ -495,6 +495,13 @@ namespace ZeroWin
                 BreakPointCondition val = kv.Value;
 
                 switch (kv.Key) {
+                    case SPECCY_EVENT.OPCODE_A:
+                        if (ziggyWin.zx.A == val.Address) {
+                            pauseEmulation = true;
+                            breakPointStatus = String.Format("A = {0} (${0:x})", val.Address);
+                        }
+                        break;
+
                     case SPECCY_EVENT.OPCODE_PC:
                         if (pc == val.Address) {
                             pauseEmulation = true;
@@ -520,13 +527,6 @@ namespace ZeroWin
                         if (ziggyWin.zx.DE == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("DE = {0} (${0:x})", val.Address);
-                        }
-                        break;
-
-                    case SPECCY_EVENT.OPCODE_A:
-                        if (ziggyWin.zx.A == val.Address) {
-                            pauseEmulation = true;
-                            breakPointStatus = String.Format("A = {0} (${0:x})", val.Address);
                         }
                         break;
 
@@ -7234,39 +7234,9 @@ namespace ZeroWin
 
             int addr = -1;
 
-            bool validInput = true;
+            addr = Utilities.ConvertToInt(jumpAddrTextBox4.Text);
 
-            if (jumpAddrTextBox4.Text[0] == '$') {
-                for (int t = 1; t < jumpAddrTextBox4.Text.Length; t++) {
-                    if (!(jumpAddrTextBox4.Text[t] >= '0' && jumpAddrTextBox4.Text[t] <= '9') &&
-                        !(jumpAddrTextBox4.Text[t] >= 'a' && jumpAddrTextBox4.Text[t] <= 'f') &&
-                        !(jumpAddrTextBox4.Text[t] >= 'A' && jumpAddrTextBox4.Text[t] <= 'F')) {
-                        validInput = false;
-                        break;
-                    }
-                }
-                if (!validInput || (jumpAddrTextBox4.Text.Length < 2)) {
-                    System.Windows.Forms.MessageBox.Show("Invalid hex number!", "Invalid input", MessageBoxButtons.OK);
-                    return;
-                }
-
-                addr = Int32.Parse(jumpAddrTextBox4.Text.Substring(1, jumpAddrTextBox4.Text.Length - 1), System.Globalization.NumberStyles.HexNumber);
-            } else {
-                for (int t = 1; t < jumpAddrTextBox4.Text.Length; t++) {
-                    if (!(jumpAddrTextBox4.Text[t] >= '0' && jumpAddrTextBox4.Text[t] <= '9')) {
-                        System.Windows.Forms.MessageBox.Show("Invalid decimal number!", "Invalid input", MessageBoxButtons.OK);
-                        validInput = false;
-                        break;
-                    }
-                }
-
-                if (!validInput)
-                    return;
-
-                addr = Convert.ToInt32(jumpAddrTextBox4.Text);
-            }
-
-            if (addr > 65535 || addr < 0) {
+            if (addr > 65535) {
                 System.Windows.Forms.MessageBox.Show("The address is not within 0 to 65535!", "Invalid input", MessageBoxButtons.OK);
                 return;
             }

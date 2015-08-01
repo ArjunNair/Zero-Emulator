@@ -190,9 +190,24 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private String ZeroSessionSnapshotName = "_z0_session.szx";
 
         //LED Indicator states
-        public bool showTapeIndicator = false;
+        private bool showTapeIndicator = false;
+        public bool ShowTapeIndicator {
+            get { return showTapeIndicator; }
+            set { 
+                showTapeIndicator = value;
+                tapeStatusLabel.Enabled = showDiskIndicator;
+            }
+        }
 
-        public bool showDiskIndicator = false;
+        private bool showDiskIndicator = false;
+        public bool ShowDiskIndicator {
+            get { return showDiskIndicator;}
+            set {
+                showDiskIndicator = value;
+                diskStatusLable.Enabled = showDiskIndicator;
+            }
+        }
+        
         public bool showDownloadIndicator = false;
         private int downloadIndicatorTimeout = 0;
 
@@ -429,27 +444,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         public void DiskMotorEvent(Object sender, DiskEventArgs e)
         {
             int driveState = e.EventType;
-            /*
-            if ((driveState & 0x1) != 0)
-                insertDiskAToolStripMenuItem.Text = "A: Eject ";
-            else
-                insertDiskAToolStripMenuItem.Text = "A: -- Empty --";
-
-            if ((driveState & 0x2) != 0)
-                insertDiskBToolStripMenuItem.Text = "B: Eject";
-            else
-                insertDiskBToolStripMenuItem.Text = "B: -- Empty --";
-
-            if ((driveState & 0x4) != 0)
-                insertDiskCToolStripMenuItem.Text = "C: Eject";
-            else
-                insertDiskCToolStripMenuItem.Text = "C: -- Empty --";
-
-            if ((driveState & 0x8) != 0)
-                insertDiskDToolStripMenuItem.Text = "D: Eject";
-            else
-                insertDiskDToolStripMenuItem.Text = "D: -- Empty --";
-            */
+      
             if ((driveState & 0x10) == 0)
             {
                 showDiskIndicator = false;
@@ -968,7 +963,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 //Start the auto load process only if we aren't in the middle of a reset
                 if (zx.isResetOver)
                 {
-                    state = EMULATOR_STATE.IDLE;
+                    //state = EMULATOR_STATE.IDLE;
 
                     if (doAutoLoadTape)
                         AutoTapeLoad();
@@ -1024,8 +1019,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         fileDownloadStatusLabel.Enabled = true;
                 }
 
-                tapeStatusLabel.Enabled = showTapeIndicator;
-                diskStatusLable.Enabled = showDiskIndicator;
+                //tapeStatusLabel.Enabled = showTapeIndicator;
+                //diskStatusLable.Enabled = showDiskIndicator;
                 rzxPlaybackStatusLabel.Enabled = zx.isPlayingRZX;
                 rzxRecordStatusLabel.Enabled = zx.isRecordingRZX;
 
@@ -1034,23 +1029,22 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 else
                     soundStatusLabel.Image = Properties.Resources.sound_mute;
 
-                if (!dxWindow.EnableFullScreen)
+                if (!dxWindow.EnableFullScreen && totalFrameTime > 1000.0f)
                 {
                     switch (state)
                     {
-                        case EMULATOR_STATE.IDLE:
-                            if (totalFrameTime > 1000.0f)
-                            {
-                                frameCount = 0;
-                                totalFrameTime = 0;
-                                statusLabelText.Text = "FPS: " + Math.Max(0, dxWindow.averageFPS);
-                            }
-                            break;
+                        
                         case EMULATOR_STATE.PLAYING_RZX:
-                            statusLabelText.Text = "RZX Played: " + (zx.rzxFrameCount * 100 / zx.rzx.frames.Count) + "%";
+                            //statusLabelText.Text = "RZX Played: " + (zx.rzxFrameCount * 100 / zx.rzx.frames.Count) + "%";
+                            statusLabelText.Text = "RZX Played: " + zx.GetPlaybackPercentageRZX() + "%";
                             break;
                         case EMULATOR_STATE.RECORDING_RZX:
                             statusLabelText.Text = "Recording RZX ...";
+                            break;
+                        default:
+                            frameCount = 0;
+                            totalFrameTime = 0;
+                            statusLabelText.Text = "FPS: " + Math.Max(0, dxWindow.averageFPS);
                             break;
                     }
                 }
@@ -1556,6 +1550,17 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                     break;
 
+                case Keys.Insert:
+                    if (zx.isRecordingRZX)
+                        insertBookmarkToolStripMenuItem_Click(this, null);
+
+                    break;
+
+                case Keys.Delete:
+                    if (zx.isRecordingRZX)
+                        rollbackToolStripMenuItem_Click(this, null);
+
+                    break;
                 case Keys.F7:
                     /*
                     if (zx.isRecordingRZX)
@@ -2539,7 +2544,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         {
             zx.Pause();
 
-            state = EMULATOR_STATE.RESET;
+            state = EMULATOR_STATE.IDLE;
             didPlayRZX = false;
             dxWindow.Suspend();
 
@@ -3047,7 +3052,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void hardResetToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            state = EMULATOR_STATE.RESET;
+            state = EMULATOR_STATE.IDLE;
 
             if (didPlayRZX)
             {
@@ -3273,9 +3278,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
-        private void UseSZX(SZXLoader szx)
+        private void UseSZX(SZXFile szx)
         {
-            if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_48K)
+            if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_48K)
             {
                 if (config.HighCompatibilityMode)
                 {
@@ -3287,7 +3292,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 else
                     zx48ktoolStripMenuItem1_Click(this, null);
             }
-            else if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_128K)
+            else if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_128K)
             {
                 if (config.HighCompatibilityMode)
                     zXSpectrumToolStripMenuItem_Click(this, null);
@@ -3296,11 +3301,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 //else
                 //    zXSpectrumToolStripMenuItem_Click(this, null);
             }
-            else if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_PENTAGON128)
+            else if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_PENTAGON128)
             {
                 pentagon128KToolStripMenuItem_Click(this, null);
             }
-            else if (szx.header.MachineId == (int)SZXLoader.ZXTYPE.ZXSTMID_PLUS3)
+            else if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_PLUS3)
             {
                 zxSpectrum3ToolStripMenuItem_Click(this, null);
             }
@@ -3369,7 +3374,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public bool LoadSZX(Stream fs)
         {
-            SZXLoader szx = new SZXLoader();
+            SZXFile szx = new SZXFile();
             bool success = szx.LoadSZX(fs);
             if (success)
                 UseSZX(szx);
@@ -3379,7 +3384,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public bool LoadSZX(string filename)
         {
-            SZXLoader szx = new SZXLoader();
+            SZXFile szx = new SZXFile();
             bool success = szx.LoadSZX(filename);
             if (success)
                 UseSZX(szx);
@@ -3418,53 +3423,58 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public void LoadSNA(Stream fs)
         {
-            SNA_SNAPSHOT sna = SNALoader.LoadSNA(fs);
+            SNA_SNAPSHOT sna = SNAFile.LoadSNA(fs);
             UseSNA(sna);
         }
 
         public void LoadSNA(string filename)
         {
-            SNA_SNAPSHOT sna = SNALoader.LoadSNA(filename);
+            SNA_SNAPSHOT sna = SNAFile.LoadSNA(filename);
             UseSNA(sna);
         }
 
-        private void UseRZX(RZXLoader rzx, bool isRecording)
+        private void UseRZX(RZXFile rzx, bool isRecording)
         {
-
             previousMachine = zx.model;
-            String ext = new String(rzx.snap.extension).ToLower();
             byte index = 0;
-            if (rzx.snapshotData[1] != null)
+
+            if (isRecording && rzx.snapshotData[1] != null)
                 index = 1;
 
-            if (ext == "sna\0")
-                LoadSNA(new MemoryStream(rzx.snapshotData[index]));
-            else if (ext == "z80\0")
-                LoadZ80(new MemoryStream(rzx.snapshotData[index]));
-            else if (ext == "szx\0")
-                LoadSZX(new MemoryStream(rzx.snapshotData[index]));
-            else
-                return;
+            if (rzx.snapshotData[index] != null) {
+                String ext = new String(rzx.snapshotExtension[index]).ToLower();
 
-            if (!isRecording)
-            {
+                if (ext == "sna\0")
+                    LoadSNA(new MemoryStream(rzx.snapshotData[index]));
+                else if (ext == "z80\0")
+                    LoadZ80(new MemoryStream(rzx.snapshotData[index]));
+                else if (ext == "szx\0")
+                    LoadSZX(new MemoryStream(rzx.snapshotData[index]));
+                else
+                    return;
+            }
+
+            if (!isRecording) {
                 didPlayRZX = true;
                 zx.PlaybackRZX(rzx);
+                state = EMULATOR_STATE.PLAYING_RZX;
             }
-            else
-                zx.RecordRZX(rzx);
+            else {
+                zx.ContinueRecordingRZX(rzx);
+                state = EMULATOR_STATE.RECORDING_RZX;
+            }
         }
 
         public void LoadRZX(Stream fs, bool isRecording)
         {
-            RZXLoader rzx = new RZXLoader();
+            RZXFile rzx = new RZXFile();
             rzx.LoadRZX(fs);
             UseRZX(rzx, isRecording);
         }
 
         public void LoadRZX(string filename, bool isRecording)
         {
-            RZXLoader rzx = new RZXLoader();
+            RZXFile rzx = new RZXFile();
             rzx.LoadRZX(filename);
             UseRZX(rzx, isRecording);
         }
@@ -3496,13 +3506,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public void LoadZ80(Stream fs)
         {
-            Z80_SNAPSHOT z80 = Z80Loader.LoadZ80(fs);
+            Z80_SNAPSHOT z80 = Z80File.LoadZ80(fs);
             UseZ80(z80);
         }
 
         public void LoadZ80(string filename)
         {
-            Z80_SNAPSHOT z80 = Z80Loader.LoadZ80(filename);
+            Z80_SNAPSHOT z80 = Z80File.LoadZ80(filename);
             UseZ80(z80);
         }
 
@@ -4629,7 +4639,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             rzxRecordToolStripMenuItem.Enabled = false;
             rzxContinueSessionToolStripMenuItem.Enabled = false;
             rzxPlaybackToolStripMenuItem.Enabled = false;
-            PauseEmulation(true);
+            state = EMULATOR_STATE.RECORDING_RZX;
+            //PauseEmulation(true);
         }
 
         private void rzxContinueSessionToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4639,11 +4650,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             openFileDialog1.Title = "Choose a file";
             openFileDialog1.FileName = "";
             openFileDialog1.Filter = "Action Replay (*.rzx)|*.rzx";
+
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
                 LoadRZX(openFileDialog1.FileName, true);
-                if (!zx.ContinueRecordingRZX())
+
+                if (!zx.IsValidSessionRZX())
                 {
                     MessageBox.Show("This is not a valid or recognized recording session.", "Invalid RZX Session", MessageBoxButtons.OK);
                 }
@@ -4657,7 +4670,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     rzxPlaybackToolStripMenuItem.Enabled = false;
                     rzxRecordButton.Enabled = false;
                     ForceScreenUpdate(true);
-                    PauseEmulation(true);
+                    state = EMULATOR_STATE.RECORDING_RZX;
+                    //  PauseEmulation(true);
                 }
             }
             dxWindow.Resume();

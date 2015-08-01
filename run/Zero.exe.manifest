@@ -42,26 +42,6 @@
   </dependency>
   <dependency>
     <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
-      <assemblyIdentity name="Microsoft.DirectX" version="1.0.2902.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
-    </dependentAssembly>
-  </dependency>
-  <dependency>
-    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
-      <assemblyIdentity name="Microsoft.DirectX.Direct3D" version="1.0.2902.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
-    </dependentAssembly>
-  </dependency>
-  <dependency>
-    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
-      <assemblyIdentity name="Microsoft.DirectX.DirectInput" version="1.0.2902.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
-    </dependentAssembly>
-  </dependency>
-  <dependency>
-    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
-      <assemblyIdentity name="Microsoft.DirectX.DirectSound" version="1.0.2902.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
-    </dependentAssembly>
-  </dependency>
-  <dependency>
-    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
       <assemblyIdentity name="Sentinel.v3.5Client" version="3.5.0.0" publicKeyToken="b03f5f7f11d50a3a" language="neutral" processorArchitecture="msil" />
     </dependentAssembly>
   </dependency>
@@ -76,26 +56,74 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="35840">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Microsoft.DirectX.dll" size="223232">
+      <assemblyIdentity name="Microsoft.DirectX" version="1.0.2902.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>xMfgNHc6JAkJMygU9JlzBXWhzXE=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Microsoft.DirectX.Direct3D.dll" size="473600">
+      <assemblyIdentity name="Microsoft.DirectX.Direct3D" version="1.0.2902.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>wdzd2G+fxjDMAjGs17cy/VXcX2M=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Microsoft.DirectX.DirectInput.dll" size="159232">
+      <assemblyIdentity name="Microsoft.DirectX.DirectInput" version="1.0.2902.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>HJjaOdfuo21zs2HdskBUA4wrgzE=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Microsoft.DirectX.DirectSound.dll" size="178176">
+      <assemblyIdentity name="Microsoft.DirectX.DirectSound" version="1.0.2902.0" publicKeyToken="31BF3856AD364E35" language="neutral" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>h3/993uc3BvhQTXP8LdWojFAFhc=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="39424">
       <assemblyIdentity name="Peripherals" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>p//ZlNZAO0TpyFDMH7sZosZBBvM=</dsig:DigestValue>
+        <dsig:DigestValue>/iOh1g8P6lgOA+D1xloBeezLsMk=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="140800">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="158208">
       <assemblyIdentity name="Speccy" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>7e3ZXxa2nVVF8toLj6/Wev+OZBc=</dsig:DigestValue>
+        <dsig:DigestValue>mNEDRbEcaPfJw/Lv5YrTSM2Jhuo=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -112,14 +140,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2353664">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2370560">
       <assemblyIdentity name="Zero" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>kwwPXYYzgkA0iF4AcPKD4iSe85o=</dsig:DigestValue>
+        <dsig:DigestValue>MTFbHT/VUexvOtll6sHyT9Ee5R4=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -131,7 +159,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>ZAAWrSEd1RpjZm2Z2yARxr9ZEhY=</dsig:DigestValue>
+        <dsig:DigestValue>tti07HVKUIlatyokXAJdPEFynDQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -143,7 +171,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>QrFunyFqC0TkFPDeKynC3Ub3fy0=</dsig:DigestValue>
+        <dsig:DigestValue>A8XbsAm3cs3MFUQntk7Gnj8eqUM=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

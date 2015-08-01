@@ -19,7 +19,7 @@ namespace Peripherals
         }
     }
 
-    public static class PZXLoader
+    public static class PZXFile
     {
         public class Block
         {
@@ -333,21 +333,21 @@ namespace Peripherals
         }
 
         public static void ReadTapeInfo(String filename) {
-            for (int f = 0; f < PZXLoader.blocks.Count; f++) {
+            for (int f = 0; f < PZXFile.blocks.Count; f++) {
                 PZX_TapeInfo info = new PZX_TapeInfo();
 
-                if (PZXLoader.blocks[f] is PZXLoader.BRWS_Block) {
-                    info.Info = ((PZXLoader.BRWS_Block)PZXLoader.blocks[f]).text;
-                } else if (PZXLoader.blocks[f] is PZXLoader.PAUS_Block) {
-                    info.Info = ((PZXLoader.PAUS_Block)PZXLoader.blocks[f]).duration.ToString() + " t-states   (" +
-                                 Math.Ceiling(((double)(((PZXLoader.PAUS_Block)PZXLoader.blocks[f]).duration) / (double)(69888 * 50))).ToString() + " secs)";
-                } else if (PZXLoader.blocks[f] is PZXLoader.PULS_Block) {
-                    info.Info = ((PZXLoader.PULS_Block)PZXLoader.blocks[f]).pulse[0].duration.ToString() + " t-states   ";
-                } else if (PZXLoader.blocks[f] is PZXLoader.STOP_Block) {
+                if (PZXFile.blocks[f] is PZXFile.BRWS_Block) {
+                    info.Info = ((PZXFile.BRWS_Block)PZXFile.blocks[f]).text;
+                } else if (PZXFile.blocks[f] is PZXFile.PAUS_Block) {
+                    info.Info = ((PZXFile.PAUS_Block)PZXFile.blocks[f]).duration.ToString() + " t-states   (" +
+                                 Math.Ceiling(((double)(((PZXFile.PAUS_Block)PZXFile.blocks[f]).duration) / (double)(69888 * 50))).ToString() + " secs)";
+                } else if (PZXFile.blocks[f] is PZXFile.PULS_Block) {
+                    info.Info = ((PZXFile.PULS_Block)PZXFile.blocks[f]).pulse[0].duration.ToString() + " t-states   ";
+                } else if (PZXFile.blocks[f] is PZXFile.STOP_Block) {
                     info.Info = "Stop the tape.";
-                } else if (PZXLoader.blocks[f] is PZXLoader.DATA_Block) {
+                } else if (PZXFile.blocks[f] is PZXFile.DATA_Block) {
 
-                    PZXLoader.DATA_Block _data = (PZXLoader.DATA_Block)PZXLoader.blocks[f];
+                    PZXFile.DATA_Block _data = (PZXFile.DATA_Block)PZXFile.blocks[f];
                     int d = (int)(_data.count / 8);
 
                     //Determine if it's a standard data block suitable for flashloading
@@ -389,19 +389,19 @@ namespace Peripherals
                                 ushort _length = System.BitConverter.ToUInt16(_data.data.ToArray(), 12);
                                 info.Info += " CODE " + _start.ToString() + "," + _length.ToString();
                             } else {
-                                info.Info = ((PZXLoader.DATA_Block)PZXLoader.blocks[f]).count.ToString() + " bits  (" + Math.Ceiling((double)(((PZXLoader.DATA_Block)PZXLoader.blocks[f]).count) / (double)8).ToString() + " bytes)";
+                                info.Info = ((PZXFile.DATA_Block)PZXFile.blocks[f]).count.ToString() + " bits  (" + Math.Ceiling((double)(((PZXFile.DATA_Block)PZXFile.blocks[f]).count) / (double)8).ToString() + " bytes)";
                             }
                         } else
                             info.Info = "";
                     } else
-                        info.Info = ((PZXLoader.DATA_Block)PZXLoader.blocks[f]).count.ToString() + " bits  (" + Math.Ceiling((double)(((PZXLoader.DATA_Block)PZXLoader.blocks[f]).count) / (double)8).ToString() + " bytes)";
+                        info.Info = ((PZXFile.DATA_Block)PZXFile.blocks[f]).count.ToString() + " bits  (" + Math.Ceiling((double)(((PZXFile.DATA_Block)PZXFile.blocks[f]).count) / (double)8).ToString() + " bytes)";
                 }
-                else if (PZXLoader.blocks[f] is PZXLoader.PZXT_Header) {
-                    //info.Info = ((PZXLoader.PZXT_Header)(PZXLoader.blocks[f])).Title;
+                else if (PZXFile.blocks[f] is PZXFile.PZXT_Header) {
+                    //info.Info = ((PZXFile.PZXT_Header)(PZXFile.blocks[f])).Title;
                     continue;
                 }
 
-                info.Block = PZXLoader.blocks[f].tag;
+                info.Block = PZXFile.blocks[f].tag;
                 tapeBlockInfo.Add(info);
             }
         }

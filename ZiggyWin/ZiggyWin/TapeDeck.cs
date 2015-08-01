@@ -116,7 +116,7 @@ namespace ZeroWin
                 ejectButton_Click(this, null);
 
             if (!tapFileOpen) {
-                ziggyWin.showTapeIndicator = true;
+                ziggyWin.ShowTapeIndicator = true;
                 saveFileDialog1.FileName = "";
                 saveFileDialog1.Title = "Save TAP file";
                 saveFileDialog1.Filter = "TAP Tape|*.tap";
@@ -153,7 +153,7 @@ namespace ZeroWin
                         r.Write((byte)(checksum));
                         if (blockID == 0xff) {
                             //tapFileOpen = false;
-                            ziggyWin.showTapeIndicator = false;
+                            ziggyWin.ShowTapeIndicator = false;
                         }
                     }
                 }
@@ -172,7 +172,7 @@ namespace ZeroWin
             if (e.EventType == Speccy.TapeEventType.STOP_TAPE) //stop
             {
                 ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.EmulationSpeed);
-                ziggyWin.showTapeIndicator = false;
+                ziggyWin.ShowTapeIndicator = false;
                 ziggyWin.zx.MuteSound(!ziggyWin.config.EnableSound);
                 progressBar1.Value = 0;
                 progressBar1.Maximum = 100;
@@ -194,7 +194,7 @@ namespace ZeroWin
                     return;
 
                 isPlaying = true;
-                ziggyWin.showTapeIndicator = true;
+                ziggyWin.ShowTapeIndicator = true;
                 ziggyWin.zx.tapeIsPlaying = true;
                 ziggyWin.zx.tapeTStates = 0;
                 ziggyWin.zx.tape_readToPlay = true;
@@ -212,17 +212,17 @@ namespace ZeroWin
                 progressBar1.Maximum = 100;
                 progressStep = 10;
 
-                if (ziggyWin.zx.currentBlock is PZXLoader.PULS_Block) {
+                if (ziggyWin.zx.currentBlock is PZXFile.PULS_Block) {
                     //Prepare progress bar
                     int tcount = 1;
-                    for (int i = 0; i < ((PZXLoader.PULS_Block)ziggyWin.zx.currentBlock).pulse.Count; ++i) {
-                        for (int g = 0; g < ((PZXLoader.PULS_Block)ziggyWin.zx.currentBlock).pulse[i].count; g++)
+                    for (int i = 0; i < ((PZXFile.PULS_Block)ziggyWin.zx.currentBlock).pulse.Count; ++i) {
+                        for (int g = 0; g < ((PZXFile.PULS_Block)ziggyWin.zx.currentBlock).pulse[i].count; g++)
                             tcount++;
                     }
                     progressBar1.Maximum = tcount + 1;
                     progressStep = 1;
-                } else if (ziggyWin.zx.currentBlock is PZXLoader.DATA_Block) {
-                    progressBar1.Maximum = (int)((PZXLoader.DATA_Block)ziggyWin.zx.currentBlock).count + 1;
+                } else if (ziggyWin.zx.currentBlock is PZXFile.DATA_Block) {
+                    progressBar1.Maximum = (int)((PZXFile.DATA_Block)ziggyWin.zx.currentBlock).count + 1;
                     progressStep = 1;
 
                 }
@@ -238,16 +238,16 @@ namespace ZeroWin
         }
 
         private void ReadTape(String filename) {
-            PZXLoader.ReadTapeInfo(filename);
-            dataGridView1.DataSource = PZXLoader.tapeBlockInfo;
+            PZXFile.ReadTapeInfo(filename);
+            dataGridView1.DataSource = PZXFile.tapeBlockInfo;
             dataGridView1.AutoGenerateColumns = true;
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridView1.Columns[0].FillWeight = 0.25f;
             dataGridView1.Columns[1].FillWeight = 0.75f;
             statusStrip1.Items[0].Text = "Ready to play";
-            for (int i = 0; i < PZXLoader.blocks.Count; i++) {
-                if (PZXLoader.blocks[i] is PZXLoader.PZXT_Header) {
-                    PZXLoader.PZXT_Header info = (PZXLoader.PZXT_Header)PZXLoader.blocks[i];
+            for (int i = 0; i < PZXFile.blocks.Count; i++) {
+                if (PZXFile.blocks[i] is PZXFile.PZXT_Header) {
+                    PZXFile.PZXT_Header info = (PZXFile.PZXT_Header)PZXFile.blocks[i];
 
                     string tapeText = String.Format("Publisher\t: {0}\r\nAuthor(s)\t: ", info.Publisher);
    
@@ -279,7 +279,7 @@ namespace ZeroWin
         public void InsertTape(string filename, System.IO.Stream fs) {
             ejectButton_Click(this, null);
             ziggyWin.zx.tapeIsPlaying = false;
-            PZXLoader.LoadPZX(fs);
+            PZXFile.LoadPZX(fs);
             ReadTape(filename);
             tapeIsInserted = true;
             ziggyWin.zx.tape_readToPlay = true;
@@ -290,7 +290,7 @@ namespace ZeroWin
         public void InsertTape(string filename) {
             ejectButton_Click(this, null);
             ziggyWin.zx.tapeIsPlaying = false;
-            PZXLoader.LoadPZX(filename);
+            PZXFile.LoadPZX(filename);
             ReadTape(filename);
             tapeIsInserted = true;
             ziggyWin.zx.tape_readToPlay = true;
@@ -308,7 +308,7 @@ namespace ZeroWin
                 return;
 
             isPlaying = true;
-            ziggyWin.showTapeIndicator = true;
+            ziggyWin.ShowTapeIndicator = true;
             ziggyWin.zx.tapeIsPlaying = true;
             ziggyWin.zx.tapeTStates = 0;
             ziggyWin.zx.tape_readToPlay = true;
@@ -341,8 +341,8 @@ namespace ZeroWin
             if (!tapeIsInserted)
                 return;
             dataGridView1.DataSource = null;
-            PZXLoader.blocks.Clear();
-            PZXLoader.tapeBlockInfo.Clear();
+            PZXFile.blocks.Clear();
+            PZXFile.tapeBlockInfo.Clear();
             ziggyWin.zx.blockCounter = 0;
             statusStrip1.Items[0].Text = "No tape inserted";
             tapeInfo.SetText("");
@@ -361,7 +361,7 @@ namespace ZeroWin
                 ziggyWin.zx.blockCounter = dataGridView1.Rows[ziggyWin.zx.blockCounter - 1].Index;
             ziggyWin.zx.TapeStopped(true);
             ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.EmulationSpeed);
-            ziggyWin.showTapeIndicator = false;
+            ziggyWin.ShowTapeIndicator = false;
             if (ziggyWin.tapeFastLoad && ziggyWin.config.EnableSound)
                 ziggyWin.zx.MuteSound(false);
             ziggyWin.zx.tape_readToPlay = false;
@@ -394,7 +394,7 @@ namespace ZeroWin
             progressBar1.Maximum = 100;
             progressStep = 0;
 
-            if (ziggyWin.zx.blockCounter < PZXLoader.tapeBlockInfo.Count - 1) {
+            if (ziggyWin.zx.blockCounter < PZXFile.tapeBlockInfo.Count - 1) {
                 ziggyWin.zx.blockCounter++;
                 dataGridView1.Rows[ziggyWin.zx.blockCounter].Selected = true;
                 dataGridView1.CurrentCell = dataGridView1.Rows[ziggyWin.zx.blockCounter].Cells[0];
@@ -406,7 +406,7 @@ namespace ZeroWin
                 return;
             ziggyWin.zx.TapeStopped(true);
             ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.EmulationSpeed);
-            ziggyWin.showTapeIndicator = false;
+            ziggyWin.ShowTapeIndicator = false;
             if (ziggyWin.tapeFastLoad && ziggyWin.config.EnableSound)
                 ziggyWin.zx.MuteSound(false);
             ziggyWin.zx.blockCounter = 0;
@@ -455,7 +455,7 @@ namespace ZeroWin
             using (System.IO.FileStream file = new System.IO.FileStream(filename, System.IO.FileMode.Create)) {
                 using (System.IO.BinaryWriter r = new System.IO.BinaryWriter(file)) {
                     try {
-                        foreach (PZXLoader.Block block in PZXLoader.blocks) {
+                        foreach (PZXFile.Block block in PZXFile.blocks) {
                             byte[] data = RawSerialize(block);
                             r.Write(data);
                         }

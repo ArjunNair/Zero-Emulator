@@ -16,21 +16,11 @@ namespace ZeroWin
         }
 
         private void button1_Click(object sender, System.EventArgs e) {
-            int addr = -1;
-            int val = -1;
-
-            if (textBox1.Text[0] == '$')
-                addr = System.Int32.Parse(textBox1.Text.Substring(1, textBox1.Text.Length - 1), System.Globalization.NumberStyles.HexNumber);
-            else
-                addr = System.Convert.ToInt32(textBox1.Text);
-
-            if (textBox2.Text[0] == '$')
-                val = (System.Int32.Parse(textBox2.Text.Substring(1, textBox2.Text.Length - 1), System.Globalization.NumberStyles.HexNumber)) & 0xff;
-            else
-                val = (System.Convert.ToInt32(textBox2.Text)) & 0xff;
-
+            int addr = Utilities.ConvertToInt(textBox1.Text);
+            int val = Utilities.ConvertToInt(textBox2.Text);
+            
             if (addr > -1 && val > -1) {
-                monitorRef.PokeByte(addr, val);
+                monitorRef.PokeByte(addr, val & 0xff);
                 this.Close();
             }
         }

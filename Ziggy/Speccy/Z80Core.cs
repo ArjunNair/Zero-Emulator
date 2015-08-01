@@ -1,45 +1,38 @@
 ﻿//Z80Core.cs
-//(c) Arjun Nair 2009-2011
+//(c) Arjun Nair 2009
 
 namespace Speccy
 {
     public class Z80Core
     {
-
         public bool loggingEnabled = false;
         public bool runningInterrupt = false;   //true if interrupts are active
         public bool and_32_Or_64 = false;       //used for edge loading
         public bool resetOver = false;
-        public bool HaltOn = false;            //true if HALT instruction is being processed
-        
-        protected int frameCount;
-        public byte lastOpcodeWasEI = 0;   //used for re-triggered interrupts
-
-        protected int disp = 0; //used later on to calculate relative jumps in Execute()
-        protected int deltaTStates = 0;
+        public bool HaltOn = false;             //true if HALT instruction is being processed
+        public byte lastOpcodeWasEI = 0;        //used for re-triggered interrupts
         public int tstates = 0;                 //opcode t-states
         public int totalTStates = 0;
         public int oldTStates = 0;
         public int interruptMode;               //0 = IM0, 1 = IM1, 2 = IM2
-        protected int timeToOutSound = 0;
-        //private int contendTStates = 0;         //number of t-states in contention period
+        public bool IFF1, IFF2;
 
+        protected int frameCount;
+        protected int disp = 0;                 //used later on to calculate relative jumps in Execute()
+        protected int deltaTStates = 0;
+        protected int timeToOutSound = 0;
+        
         //All registers
         protected int a = 0, f = 0, bc = 0, hl = 0, de = 0, sp = 0, pc = 0, ix = 0, iy = 0;
-
         protected int i = 0, r = 0;
 
         //All alternate registers
         protected int _af = 0, _bc = 0, _de = 0, _hl = 0;
-
-        protected int _r = 0; //not really a real z80 alternate reg,
-        //but used here to store the value for R temporarily
+        protected int _r = 0;                   //not really a real z80 alternate reg, but used here to store the value for R temporarily
 
         //MEMPTR register - internal cpu register
         //Bits 3 and 5 of Flag for Bit n, (HL) instruction, are copied from bits 11 & 13 of MemPtr.
-
         protected int memPtr = 0;
-
         public int MemPtr {
             get {
                 return memPtr;
@@ -51,7 +44,6 @@ namespace Speccy
 
         protected const int MEMPTR_11 = 0x800;
         protected const int MEMPTR_13 = 0x2000;
-
         protected const int F_CARRY = 0x01;
         protected const int F_NEG = 0x02;
         protected const int F_PARITY = 0x04;
@@ -60,7 +52,6 @@ namespace Speccy
         protected const int F_5 = 0x020;
         protected const int F_ZERO = 0x040;
         protected const int F_SIGN = 0x080;
-        public bool IFF1, IFF2;
 
         //Tables for parity and flags. Pretty much taken from Fuse.
         protected byte[] parity = new byte[256];
@@ -459,6 +450,7 @@ namespace Speccy
             sz53p[0] |= (byte)F_ZERO;
         }
 
+        #region old Functions
         /*
                 public virtual int PeekByte(int addr)
                 {
@@ -503,6 +495,7 @@ namespace Speccy
                    //  Out(port, val);
                 }
         */
+        #endregion
 
         public void exx() {
             int temp;
@@ -535,27 +528,6 @@ namespace Speccy
                return b;
            }
    */
-
-        private void LogRegisters() {
-            //logWriter.Write("#{0,-5:X} #{1,-5:X} #{2,-5:X} #{3,-5:X} #{4,-5:X} #{5,-5}", SP, HL, BC, DE, A, PC);
-        }
-
-        protected void Log(System.String op) {
-            // logWriter.Write("{0, -17} ", op);
-        }
-
-        private void LogTStates() {
-            //logWriter.Write("{0,-18}", totalTStates);
-            //logWriter.Write((F & F_SIGN) != 0 ? 1 : 0);
-            //logWriter.Write((F & F_ZERO) != 0 ? 1 : 0);
-            //logWriter.Write((F & F_5) != 0 ? 1 : 0);
-            //logWriter.Write((F & F_HALF) != 0 ? 1 : 0);
-            //logWriter.Write((F & F_3) != 0 ? 1 : 0);
-            //logWriter.Write((F & F_PARITY) != 0 ? 1 : 0);
-            //logWriter.Write((F & F_NEG) != 0 ? 1 : 0);
-            //logWriter.Write((F & F_CARRY) != 0 ? 1 : 0);
-            //logWriter.WriteLine();
-        }
 
         public int Inc(int reg) {
             /*

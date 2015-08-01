@@ -40,6 +40,8 @@ namespace Speccy
     //Handy enum for Monitor
     public enum SPECCY_EVENT
     {
+        [Description("A")]
+        OPCODE_A,
         [Description("PC")]
         OPCODE_PC,
         [Description("HL")]
@@ -48,8 +50,6 @@ namespace Speccy
         OPCODE_BC,
         [Description("DE")]
         OPCODE_DE,
-        [Description("A")]
-        OPCODE_A,
         [Description("IX")]
         OPCODE_IX,
         [Description("IY")]
@@ -71,9 +71,9 @@ namespace Speccy
         [Description("ULA Read")]
         ULA_READ,
         [Description("Retriggered Interrupt")]
-        RE_INTTERUPT,
+        RE_INTERRUPT,
         [Description("Interrupt")]
-        INTTERUPT,
+        INTERRUPT,
         [Description("Frame Start")]
         FRAME_START,
         [Description("Frame End")]
@@ -92,26 +92,27 @@ namespace Speccy
         NEXT_BLOCK
     }
 
+    //Each RAM bank consists of 2 8k halves.
     public enum RAM_BANK
     {
-        ZERO_1 = 0,
-        ZERO_2,
-        ONE_1,
-        ONE_2,
-        TWO_1,
-        TWO_2,
-        THREE_1,
-        THREE_2,
-        FOUR_1,
-        FOUR_2,
-        FIVE_1,
-        FIVE_2,
-        SIX_1,
-        SIX_2,
-        SEVEN_1,
-        SEVEN_2,
-        EIGHT_1,
-        EIGHT_2
+        ZERO_LOW,
+        ZERO_HIGH,
+        ONE_LOW,
+        ONE_HIGH,
+        TWO_LOW,
+        TWO_HIGH,
+        THREE_LOW,
+        THREE_HIGH,
+        FOUR_LOW,
+        FOUR_HIGH,
+        FIVE_LOW,
+        FIVE_HIGH,
+        SIX_LOW,
+        SIX_HIGH,
+        SEVEN_LOW,
+        SEVEN_HIGH,
+        EIGHT_LOW,
+        EIGHT_HIGH
     }
 
     #region Delegates and args for speccy related events (used by monitor)
@@ -562,7 +563,7 @@ namespace Speccy
         private bool isPauseBlockPreproccess = false; //To ensure previous edge is finished correctly
         private bool isProcessingPauseBlock = false;  //Signals if the current pause block is currently being serviced.
         private int pauseCounter = 0;
-        public PZXLoader.Block currentBlock;
+        public PZXFile.Block currentBlock;
 
         //AY support
         protected bool ayIsAvailable = true;
@@ -648,21 +649,21 @@ namespace Speccy
         //RZX Playback & Recording
         protected class RollbackBookmark
         {
-            public SZXLoader snapshot;
+            public SZXFile snapshot;
             public int frameIndex;
         };
 
-        public int rzxFrameCount;
-        protected int rzxFetchCount;
-        protected int rzxInputCount;
+       // public int rzxFrameCount;
+       // protected int rzxFetchCount;
+       // protected int rzxInputCount;
         protected byte rzxIN;
-        public RZXLoader rzx;
-        protected RZXLoader.RZX_Frame rzxFrame;
-        protected System.Collections.Generic.List<RollbackBookmark> rzxBookmarks = new System.Collections.Generic.List<RollbackBookmark>();
+        public RZXFile rzx;
+       // protected RZXFile.RZX_Frame rzxFrame;
+       // protected System.Collections.Generic.List<RollbackBookmark> rzxBookmarks = new System.Collections.Generic.List<RollbackBookmark>();
         protected System.Collections.Generic.List<byte> rzxInputs = new System.Collections.Generic.List<byte>();
         public bool isPlayingRZX = false;
         public bool isRecordingRZX = false;
-        protected int rzxCurrentBookmark = 0;
+       // protected int rzxCurrentBookmark = 0;
 
         //Disk related stuff
         protected int diskDriveState = 0;
@@ -755,46 +756,53 @@ namespace Speccy
             return 0;
         }
 
-        public void PlaybackRZX(RZXLoader _rzx) {
+        public void PlaybackRZX(RZXFile _rzx) {
             isRecordingRZX = false;
             rzx = _rzx;
-            rzxFrameCount = 0;
-            rzxFetchCount = 0;
-            rzxInputCount = 0;
-            rzxFrame = rzx.frames[0];
+            //rzxFrameCount = 0;
+            //rzxFetchCount = 0;
+            //rzxInputCount = 0;
+            //rzxFrame = rzx.frames[0];
+            rzx.InitPlayback();
             isPlayingRZX = true;
             totalTStates = (int)rzx.record.tstatesAtStart;
         }
 
-        public void RecordRZX(RZXLoader _rzx) {
+        public void ContinueRecordingRZX(RZXFile _rzx) {
             isRecordingRZX = true;
             isPlayingRZX = false;
             rzx = _rzx;
+            rzx.ContinueRecording();
             rzxInputs = new System.Collections.Generic.List<byte>();
-            rzxFrameCount = 0;
-            rzxFetchCount = 0;
-            rzxInputCount = 0;
+            //rzxFrameCount = 0;
+            //rzxFetchCount = 0;
+            //rzxInputCount = 0;
         }
 
         public void InsertBookmark() {
             if (isRecordingRZX) {
-                rzxFrame = new RZXLoader.RZX_Frame();
-                rzxFrame.inputCount = (ushort)rzxInputs.Count;
-                rzxFrame.instructionCount = (ushort)rzxFetchCount;
-                rzxFrame.inputs = rzxInputs.ToArray();
-                rzx.frames.Add(rzxFrame);
-                rzxFetchCount = 0;
-                rzxInputCount = 0;
+                /*
+                    rzxFrame = new RZXFile.RZX_Frame();
+                    rzxFrame.inputCount = (ushort)rzxInputs.Count;
+                    rzxFrame.instructionCount = (ushort)rzxFetchCount;
+                    rzxFrame.inputs = rzxInputs.ToArray();
+                    rzx.frames.Add(rzxFrame);
+                    rzxFetchCount = 0;
+                    rzxInputCount = 0;
+                    
+                    RollbackBookmark bookmark = new RollbackBookmark();
+                    bookmark.frameIndex = rzx.frames.Count;
+                    bookmark.snapshot = CreateSZX();
+                    rzxBookmarks.Add(bookmark);
+                    rzxCurrentBookmark = rzxBookmarks.Count - 1;
+                */
+                rzx.InsertBookmark(CreateSZX(), rzxInputs);
                 rzxInputs = new System.Collections.Generic.List<byte>();
-                RollbackBookmark bookmark = new RollbackBookmark();
-                bookmark.frameIndex = rzx.frames.Count;
-                bookmark.snapshot = CreateSZX();
-                rzxBookmarks.Add(bookmark);
-                rzxCurrentBookmark = rzxBookmarks.Count - 1;
             }
         }
 
         public void RollbackRZX() {
+            /*
             if (rzxBookmarks.Count > 0) {
                 RollbackBookmark bookmark = rzxBookmarks[rzxCurrentBookmark];
                 //if less than 2 seconds have passed since last bookmark, revert to an even earlier bookmark
@@ -810,17 +818,23 @@ namespace Speccy
                 rzxFetchCount = 0;
                 rzxInputCount = 0;
                 rzxInputs = new System.Collections.Generic.List<byte>();
-            }
+            }*/
+            SZXFile snapshot = rzx.Rollback();
+            rzxInputs = new System.Collections.Generic.List<byte>();
+            if (snapshot != null)
+                UseSZX(snapshot);
         }
 
         public void DiscardRZX() {
             isRecordingRZX = false;
             isPlayingRZX = false;
-            rzxBookmarks.Clear();
-            rzxInputs.Clear();
+            //rzxBookmarks.Clear();
+            //rzxInputs.Clear();
+            rzx.Discard();
         }
 
         public void SaveRZX(string filename, bool doFinalise) {
+            /*
             if (isRecordingRZX) {
                 if (doFinalise) {
                     if (rzx.snapshotData.Length > 1)
@@ -832,22 +846,30 @@ namespace Speccy
                 isRecordingRZX = false;
                 rzxBookmarks.Clear();
                 rzx.SaveRZX(filename, doFinalise);
+            }*/
+            if (isRecordingRZX) {
+                isPlayingRZX = false;
+                isRecordingRZX = false;
+                rzx.Save(filename, (doFinalise ? null : CreateSZX().GetSZXData()));
             }
         }
 
         public void StartRecordingRZX() {
+            rzx = new RZXFile();
+            rzx.StartRecording(CreateSZX().GetSZXData(), totalTStates);
             isPlayingRZX = false;
-
-            rzx = new RZXLoader();
-            rzx.record.tstatesAtStart = (uint)totalTStates;
-            rzx.record.flags |= 0x2; //Frames are compressed.
-            rzx.snapshotData[0] = CreateSZX().GetSZXData();
             isRecordingRZX = true;
+
+            //rzx.record.tstatesAtStart = (uint)totalTStates;
+            //rzx.record.flags |= 0x2; //Frames are compressed.
+            //rzx.snapshotData[0] = CreateSZX().GetSZXData();
+
         }
 
-        public bool ContinueRecordingRZX() {
-            if (rzx.snapshotData[1] == null)
+        public bool IsValidSessionRZX() {
+            if (!rzx.IsValidSession())
                 return false;
+
             isPlayingRZX = false;
             isRecordingRZX = true;
             return true;
@@ -982,9 +1004,13 @@ namespace Speccy
         //Reads next instruction from address pointed to by PC
         public int FetchInstruction() {
             R++;
-            if (isPlayingRZX || isRecordingRZX) {
-                rzxFetchCount++;
-            }
+
+            //if (isPlayingRZX || isRecordingRZX) {
+            //    rzxFetchCount++;
+            //}
+            if (isPlayingRZX || isRecordingRZX)
+                rzx.fetchCount++;
+
             int b = GetOpcode(PC);
             PC = (PC + 1) & 0xffff;
             totalTStates++; //effectively, totalTStates + 4 because PeekByte does the other 3
@@ -2161,12 +2187,10 @@ namespace Speccy
 
                 aySound.EndSampleAY();
             }
-            // byte[] tmp = System.BitConverter.GetBytes(aySound.averagedChannelSamples[0]);
+
             soundSamples[soundSampleCounter++] = (short)(aySound.averagedChannelSamples[0] + averagedSound);
             soundSamples[soundSampleCounter++] = (short)(aySound.averagedChannelSamples[1] + averagedSound);
-            //tmp = System.BitConverter.GetBytes(aySound.averagedChannelSamples[1]);
-            //soundSamples[soundSampleCounter++] = tmp[0];
-            //soundSamples[soundSampleCounter++] = tmp[1];
+
             aySound.averagedChannelSamples[0] = 0;
             aySound.averagedChannelSamples[1] = 0;
             aySound.averagedChannelSamples[2] = 0;
@@ -2200,7 +2224,7 @@ namespace Speccy
         public abstract void UseSNA(SNA_SNAPSHOT sna);
 
         //Sets the speccy state to that of the SNA file
-        public virtual void UseSZX(SZXLoader szx) {
+        public virtual void UseSZX(SZXFile szx) {
             I = szx.z80Regs.I;
             _HL = szx.z80Regs.HL1;
             _DE = szx.z80Regs.DE1;
@@ -2217,9 +2241,9 @@ namespace Speccy
             SP = szx.z80Regs.SP;
             interruptMode = szx.z80Regs.IM;
             PC = szx.z80Regs.PC;
-            lastOpcodeWasEI = (byte)((szx.z80Regs.Flags & SZXLoader.ZXSTZF_EILAST) != 0 ? 2 : 0);
-            HaltOn = (szx.z80Regs.Flags & SZXLoader.ZXSTZF_HALTED) != 0;
-            Issue2Keyboard = (szx.keyboard.Flags & SZXLoader.ZXSTKF_ISSUE2) != 0;
+            lastOpcodeWasEI = (byte)((szx.z80Regs.Flags & SZXFile.ZXSTZF_EILAST) != 0 ? 2 : 0);
+            HaltOn = (szx.z80Regs.Flags & SZXFile.ZXSTZF_HALTED) != 0;
+            Issue2Keyboard = (szx.keyboard.Flags & SZXFile.ZXSTKF_ISSUE2) != 0;
             
             if (szx.paletteLoaded)
             {
@@ -2276,13 +2300,13 @@ namespace Speccy
             CreateSZX().SaveSZX(filename);
         }
 
-        private SZXLoader CreateSZX() {
-            SZXLoader szx = new SZXLoader();
-            szx.header = new SZXLoader.ZXST_Header();
-            szx.creator = new SZXLoader.ZXST_Creator();
-            szx.z80Regs = new SZXLoader.ZXST_Z80Regs();
-            szx.specRegs = new SZXLoader.ZXST_SpecRegs();
-            szx.keyboard = new SZXLoader.ZXST_Keyboard();
+        private SZXFile CreateSZX() {
+            SZXFile szx = new SZXFile();
+            szx.header = new SZXFile.ZXST_Header();
+            szx.creator = new SZXFile.ZXST_Creator();
+            szx.z80Regs = new SZXFile.ZXST_Z80Regs();
+            szx.specRegs = new SZXFile.ZXST_SpecRegs();
+            szx.keyboard = new SZXFile.ZXST_Keyboard();
 
             for (int f = 0; f < 16; f++)
                 szx.RAM_BANK[f] = new byte[8192];
@@ -2292,10 +2316,10 @@ namespace Speccy
             szx.header.MinorVersion = 4;
             szx.header.Flags |= (byte)LateTiming;
             szx.creator.CreatorName = "Zero Spectrum Emulator by Arjun ".ToCharArray();
-            szx.creator.MajorVersion = SZXLoader.SZX_VERSION_SUPPORTED_MAJOR;
-            szx.creator.MinorVersion = SZXLoader.SZX_VERSION_SUPPORTED_MINOR;
+            szx.creator.MajorVersion = SZXFile.SZX_VERSION_SUPPORTED_MAJOR;
+            szx.creator.MinorVersion = SZXFile.SZX_VERSION_SUPPORTED_MINOR;
             if (Issue2Keyboard)
-                szx.keyboard.Flags |= SZXLoader.ZXSTKF_ISSUE2;
+                szx.keyboard.Flags |= SZXFile.ZXSTKF_ISSUE2;
             szx.keyboard.KeyboardJoystick |= 8;
             szx.z80Regs.AF = (ushort)AF;
             szx.z80Regs.AF1 = (ushort)_AF;
@@ -2306,9 +2330,9 @@ namespace Speccy
             szx.z80Regs.DE = (ushort)DE;
             szx.z80Regs.DE1 = (ushort)_DE;
             if (lastOpcodeWasEI != 0)
-                szx.z80Regs.Flags |= SZXLoader.ZXSTZF_EILAST;
+                szx.z80Regs.Flags |= SZXFile.ZXSTZF_EILAST;
             else if (HaltOn)
-                szx.z80Regs.Flags |= SZXLoader.ZXSTZF_HALTED;
+                szx.z80Regs.Flags |= SZXFile.ZXSTZF_HALTED;
             szx.z80Regs.HL = (ushort)HL;
             szx.z80Regs.HL1 = (ushort)_HL;
             szx.z80Regs.I = (byte)I;
@@ -2326,7 +2350,7 @@ namespace Speccy
             szx.specRegs.x7ffd = (byte)last7ffdOut;
 
             if (ayIsAvailable) {
-                szx.ayState = new SZXLoader.ZXST_AYState();
+                szx.ayState = new SZXFile.ZXST_AYState();
                 szx.ayState.cFlags = 0;
                 szx.ayState.currentRegister = (byte)aySound.SelectedRegister;
                 szx.ayState.chRegs = aySound.GetRegisters();
@@ -2341,7 +2365,7 @@ namespace Speccy
                 szx.externalTapeFile = tapeFilename;
             }
             if (ULAPlusEnabled) {
-                szx.palette = new SZXLoader.ZXST_PaletteBlock();
+                szx.palette = new SZXFile.ZXST_PaletteBlock();
                 szx.palette.paletteRegs = new byte[64];
                 szx.paletteLoaded = true;
                 szx.palette.flags = (byte)(ULAPaletteEnabled ? 1 : 0);
@@ -2476,15 +2500,25 @@ namespace Speccy
             }
         }
 
+        public int GetPlaybackPercentageRZX() {
+            if (isPlayingRZX)
+                return rzx.GetPlaybackPercentage();
+
+            return 0;
+        }
+
         public void NextRZXFrame() {
-            rzxFrameCount++;
-            rzxFetchCount = 0;
-            rzxInputCount = 0;
+            /* rzxFrameCount++;
+             rzxFetchCount = 0;
+             rzxInputCount = 0;
+             totalTStates = 0;
+             if (rzxFrameCount < rzx.frames.Count) {
+                 rzxFrame = rzx.frames[rzxFrameCount];
+             } else
+                 isPlayingRZX = false; */
+
             totalTStates = 0;
-            if (rzxFrameCount < rzx.frames.Count) {
-                rzxFrame = rzx.frames[rzxFrameCount];
-            } else
-                isPlayingRZX = false;
+            isPlayingRZX = rzx.NextPlaybackFrame();
         }
 
         public void EndRZXFrame() {
@@ -2493,8 +2527,8 @@ namespace Speccy
                 Interrupt();
             }
 
-            if (rzxInputCount < rzxFrame.inputCount)
-                rzxInputCount = 0;
+            //if (rzx.inputCount < rzx.frame.inputCount)
+            //    rzx.inputCount = 0;
 
             if (totalTStates >= FrameLength) {
                 int deltaSoundT = FrameLength - totalTStates;
@@ -2511,6 +2545,7 @@ namespace Speccy
                 flashOn = !flashOn;
                 frameCount = 0;
             }
+
             ULAUpdateStart();
             NextRZXFrame();
         }
@@ -2518,11 +2553,12 @@ namespace Speccy
         public void ProcessRZX() {
             R++;
 
-            if (rzxFetchCount > rzx.frames[rzxFrameCount].instructionCount - 1) {
+            if (rzx.fetchCount > rzx.frames[rzx.frameCount].instructionCount - 1) {
                 EndRZXFrame();
             }
 
-            rzxFetchCount++;
+            rzx.fetchCount++;
+
             oldTStates = totalTStates;
             opcode = GetOpcode(PC);
             PC = (PC + 1) & 0xffff;
@@ -2591,18 +2627,20 @@ namespace Speccy
             //Handle re-triggered interrupts!
             if (IFF1 && (lastOpcodeWasEI == 0) && (totalTStates < InterruptPeriod)) {
                 if (isRecordingRZX) {
-                    rzxFrame = new RZXLoader.RZX_Frame();
-                    rzxFrame.inputCount = (ushort)rzxInputs.Count;
-                    rzxFrame.instructionCount = (ushort)rzxFetchCount;
-                    rzxFrame.inputs = rzxInputs.ToArray();
-                    rzx.frames.Add(rzxFrame);
-                    rzxFetchCount = 0;
-                    rzxInputCount = 0;
+                    /* rzxFrame = new RZXFile.RZX_Frame();
+                     rzxFrame.inputCount = (ushort)rzxInputs.Count;
+                     rzxFrame.instructionCount = (ushort)rzxFetchCount;
+                     rzxFrame.inputs = rzxInputs.ToArray();
+                     rzx.frames.Add(rzxFrame);
+                     rzxFetchCount = 0;
+                     rzxInputCount = 0;*/
+                    rzx.RecordFrame(rzxInputs);
                     rzxInputs = new System.Collections.Generic.List<byte>();
                 }
 
                 if (StateChangeEvent != null)
-                    OnStateChangeEvent(new StateChangeEventArgs(SPECCY_EVENT.RE_INTTERUPT));
+                    OnStateChangeEvent(new StateChangeEventArgs(SPECCY_EVENT.RE_INTERRUPT));
+
                 Interrupt();
             }
 
@@ -2649,8 +2687,8 @@ namespace Speccy
             R++;
 
             if (isRecordingRZX)
-                rzxFetchCount++;
-
+                rzx.fetchCount++;
+           
             oldTStates = totalTStates;
             opcode = GetOpcode(PC);
 
@@ -2676,18 +2714,17 @@ namespace Speccy
             if (tapeIsPlaying && !tape_edgeDetectorRan) {
                 tapeTStates += deltaTStates;
            
-
-                    if (!isProcessingPauseBlock) {
-                        while (tapeTStates >= edgeDuration) {
+                if (!isProcessingPauseBlock) {
+                    while (tapeTStates >= edgeDuration) {
                         tapeTStates = (int)(tapeTStates - edgeDuration);
 
                         DoTapeEvent(new TapeEventArgs(TapeEventType.EDGE_LOAD));
-                         }
-                    }
-                    else
-                        FlashLoad();
-               // }
+                        }
+                }
+                else
+                    FlashLoad();
             }
+
             tape_edgeDetectorRan = false;
 
             //Update Sound
@@ -2760,13 +2797,14 @@ namespace Speccy
                 UpdateInput();
 
                 if (isRecordingRZX) {
-                    rzxFrame = new RZXLoader.RZX_Frame();
-                    rzxFrame.inputCount = (ushort)rzxInputs.Count;
-                    rzxFrame.instructionCount = (ushort)rzxFetchCount;
-                    rzxFrame.inputs = rzxInputs.ToArray();
-                    rzx.frames.Add(rzxFrame);
-                    rzxFetchCount = 0;
-                    rzxInputCount = 0;
+                    /*  rzxFrame = new RZXFile.RZX_Frame();
+                      rzxFrame.inputCount = (ushort)rzxInputs.Count;
+                      rzxFrame.instructionCount = (ushort)rzxFetchCount;
+                      rzxFrame.inputs = rzxInputs.ToArray();
+                      rzx.frames.Add(rzxFrame);
+                      rzxFetchCount = 0;
+                      rzxInputCount = 0;*/
+                    rzx.RecordFrame(rzxInputs);
                     rzxInputs = new System.Collections.Generic.List<byte>();
                 }
 
@@ -2775,7 +2813,7 @@ namespace Speccy
                     R++;
 
                     if (StateChangeEvent != null)
-                        OnStateChangeEvent(new StateChangeEventArgs(SPECCY_EVENT.INTTERUPT));
+                        OnStateChangeEvent(new StateChangeEventArgs(SPECCY_EVENT.INTERRUPT));
 
                     Interrupt();
                 }
@@ -10811,16 +10849,16 @@ namespace Speccy
         public void NextPZXBlock() {
             while (true) {
                 blockCounter++;
-                if (blockCounter >= PZXLoader.blocks.Count) {
+                if (blockCounter >= PZXFile.blocks.Count) {
                     blockCounter--;
                     tape_readToPlay = false;
                     TapeStopped();
                     return;
                 }
 
-                currentBlock = PZXLoader.blocks[blockCounter];
+                currentBlock = PZXFile.blocks[blockCounter];
                
-                if (currentBlock is PZXLoader.PULS_Block) {
+                if (currentBlock is PZXFile.PULS_Block) {
                     //Initialise for PULS loading
                     pulseCounter = -1;
                     repeatCount = -1;
@@ -10834,18 +10872,18 @@ namespace Speccy
                         continue; //No? Next block please!
                     } else
                         break;
-                } else if (currentBlock is PZXLoader.DATA_Block) {
+                } else if (currentBlock is PZXFile.DATA_Block) {
                     pulseCounter = 0;
                     bitCounter = -1;
                     dataCounter = -1;
-                    if (pulse != (((PZXLoader.DATA_Block)currentBlock).initialPulseLevel))
+                    if (pulse != (((PZXFile.DATA_Block)currentBlock).initialPulseLevel))
                         FlipTapeBit();
 
                     if (!NextDataBit()) {
                         continue;
                     } else
                         break;
-                } else if (currentBlock is PZXLoader.PAUS_Block) {
+                } else if (currentBlock is PZXFile.PAUS_Block) {
                     //Would have been nice to skip PAUS blocks when doing fast loading
                     //but some loaders like Auf Wiedersehen Monty (Kixx) rely on the pause
                     //length to do processing during loading. In this case, fill in the
@@ -10854,7 +10892,7 @@ namespace Speccy
                     //Ensure previous edge is finished correctly by flipping the edge one last time
                     //edgeDuration = (35000 * 2);
                     //isPauseBlockPreproccess = true;
-                     PZXLoader.PAUS_Block block = (PZXLoader.PAUS_Block)currentBlock;
+                     PZXFile.PAUS_Block block = (PZXFile.PAUS_Block)currentBlock;
                     if (block.initialPulseLevel != pulse)
                         FlipTapeBit();
                    
@@ -10869,7 +10907,7 @@ namespace Speccy
                         tapeTStates = -diff;
                     }
                     continue;
-                } else if ((currentBlock is PZXLoader.STOP_Block)) {
+                } else if ((currentBlock is PZXFile.STOP_Block)) {
                     TapeStopped();
                    // if (ziggyWin.zx.keyBuffer[(int)ZeroWin.Form1.keyCode.ALT])
                    //     ziggyWin.saveSnapshotMenuItem_Click(this, null);
@@ -10883,7 +10921,7 @@ namespace Speccy
         }
 
         public bool NextPULS() {
-            PZXLoader.PULS_Block block = (PZXLoader.PULS_Block)currentBlock;
+            PZXFile.PULS_Block block = (PZXFile.PULS_Block)currentBlock;
 
             while (pulseCounter < block.pulse.Count - 1) {
                 pulseCounter++; //b'cos pulseCounter is -1 when it reaches here initially
@@ -10915,7 +10953,7 @@ namespace Speccy
         }
 
         public bool NextDataBit() {
-            PZXLoader.DATA_Block block = (PZXLoader.DATA_Block)currentBlock;
+            PZXFile.DATA_Block block = (PZXFile.DATA_Block)currentBlock;
 
             //Bits left for processing?
             while (bitCounter < block.count - 1) {
@@ -10976,7 +11014,7 @@ namespace Speccy
                 //HACK: Sometimes a tape might have it's last tail pulse missing.
                 //In case it's the last block in the tape, it's best to flip the tape bit
                 //a last time to ensure that the process is terminated properly.
-                if (blockCounter == PZXLoader.blocks.Count - 1) {
+                if (blockCounter == PZXFile.blocks.Count - 1) {
                     currentBit = -1;
                     edgeDuration = (3500 * 2);
                     return true;
@@ -10991,13 +11029,13 @@ namespace Speccy
             if (blockCounter < 0)
                 blockCounter = 0;
 
-            PZXLoader.Block currBlock = PZXLoader.blocks[blockCounter];
+            PZXFile.Block currBlock = PZXFile.blocks[blockCounter];
 
 
-            if (currBlock is PZXLoader.PAUS_Block) {
+            if (currBlock is PZXFile.PAUS_Block) {
                 if (!isProcessingPauseBlock) {
                     isProcessingPauseBlock = true;
-                    edgeDuration = ((PZXLoader.PAUS_Block)currBlock).duration;
+                    edgeDuration = ((PZXFile.PAUS_Block)currBlock).duration;
                     pauseCounter = (int)edgeDuration;
                     //tapeTStates = 0;
                     return;
@@ -11013,10 +11051,10 @@ namespace Speccy
                 }
             }
 
-            if (!(currBlock is PZXLoader.PULS_Block))
+            if (!(currBlock is PZXFile.PULS_Block))
                 blockCounter++;
 
-            if (blockCounter >= PZXLoader.tapeBlockInfo.Count)
+            if (blockCounter >= PZXFile.tapeBlockInfo.Count)
             {
                 blockCounter--;
                 tape_readToPlay = false;
@@ -11024,14 +11062,14 @@ namespace Speccy
                 return;
             }
 
-            if (!PZXLoader.tapeBlockInfo[blockCounter].IsStandardBlock)
+            if (!PZXFile.tapeBlockInfo[blockCounter].IsStandardBlock)
             {
-                if (!(currBlock is PZXLoader.PULS_Block))
+                if (!(currBlock is PZXFile.PULS_Block))
                     blockCounter--;
                 return;
             }
 
-            PZXLoader.DATA_Block dataBlock = (PZXLoader.DATA_Block)PZXLoader.blocks[blockCounter + 1];
+            PZXFile.DATA_Block dataBlock = (PZXFile.DATA_Block)PZXFile.blocks[blockCounter + 1];
             edgeDuration = (1000);
             //if (pulse != dataBlock.initialPulseLevel)
             //    FlipTapeBit();
@@ -11077,7 +11115,7 @@ namespace Speccy
             MemPtr = PC;
 
             blockCounter++;
-            if (blockCounter >= PZXLoader.blocks.Count)
+            if (blockCounter >= PZXFile.blocks.Count)
             {
                 blockCounter--;
                 tape_readToPlay = false;
@@ -11095,8 +11133,8 @@ namespace Speccy
 
                 #region PULS
 
-                if (currentBlock is PZXLoader.PULS_Block) {
-                    PZXLoader.PULS_Block block = (PZXLoader.PULS_Block)currentBlock;
+                if (currentBlock is PZXFile.PULS_Block) {
+                    PZXFile.PULS_Block block = (PZXFile.PULS_Block)currentBlock;
                     repeatCount--;
                     //progressBar1.Value += progressStep;
                     //Need to repeat?
@@ -11115,8 +11153,8 @@ namespace Speccy
                 #endregion PULS
 
                 #region DATA
- else if (currentBlock is PZXLoader.DATA_Block) {
-                    PZXLoader.DATA_Block block = (PZXLoader.DATA_Block)currentBlock;
+ else if (currentBlock is PZXFile.DATA_Block) {
+                    PZXFile.DATA_Block block = (PZXFile.DATA_Block)currentBlock;
 
                     //Are we done with pulses for a certain sequence?
                     if (currentBit == 0) {
@@ -11152,15 +11190,15 @@ namespace Speccy
                 #endregion DATA
 
                 #region PAUS
- else if (currentBlock is PZXLoader.PAUS_Block) {
+ else if (currentBlock is PZXFile.PAUS_Block) {
                     isPauseBlockPreproccess = false;
                     NextPZXBlock();
                     return;
                 }
 /*
- else if (currentBlock is PZXLoader.PAUS_Block) {
+ else if (currentBlock is PZXFile.PAUS_Block) {
                     if (isPauseBlockPreproccess) {
-                        PZXLoader.PAUS_Block block = (PZXLoader.PAUS_Block)currentBlock;
+                        PZXFile.PAUS_Block block = (PZXFile.PAUS_Block)currentBlock;
                         isPauseBlockPreproccess = false;
                         edgeDuration = (block.duration);
                         if (pulse != block.initialPulseLevel)

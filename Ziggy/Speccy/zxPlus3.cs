@@ -66,21 +66,21 @@ namespace Speccy
 
                 PageReadPointer[0] = ROMpage[0];
                 PageReadPointer[1] = ROMpage[1];
-                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_1];   //Bank 2
-                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_2];   //Bank 2
-                PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];   //Bank 0
-                PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];   //Bank 0
+                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];  //Bank 5
+                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];  //Bank 5
+                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];   //Bank 2
+                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];   //Bank 2
+                PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];   //Bank 0
+                PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];   //Bank 0
 
                 PageWritePointer[0] = JunkMemory[0];
                 PageWritePointer[1] = JunkMemory[1];
-                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];   //Bank 2
-                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];   //Bank 2
-                PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];   //Bank 0
-                PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];   //Bank 0
+                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];  //Bank 5
+                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];  //Bank 5
+                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];   //Bank 2
+                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];   //Bank 2
+                PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];   //Bank 0
+                PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];   //Bank 0
 
                 BankInPage0 = ROM_128_BAS;
                 BankInPage1 = "Bank 5";
@@ -229,9 +229,10 @@ namespace Speccy
 
         public override int In(int port) {
             base.In(port);
+
             if (isPlayingRZX) {
-                if (rzxInputCount < rzxFrame.inputCount) {
-                    rzxIN = rzxFrame.inputs[rzxInputCount++];
+                if (rzx.inputCount < rzx.frame.inputCount) {
+                    rzxIN = rzx.frame.inputs[rzx.inputCount++];
                 }
                 return rzxIN;
             }
@@ -335,81 +336,81 @@ namespace Speccy
             //Bits 0 to 2 select the RAM page
             switch (val & 0x07) {
                 case 0: //Bank 0
-                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
-                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
                     BankInPage3 = "Bank 0";
                     contendedBankPagedIn = false;
                     break;
 
                 case 1: //Bank 1
-                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.ONE_1];
-                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.ONE_2];
+                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.ONE_LOW];
+                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.ONE_HIGH];
 
-                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.ONE_1];
-                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.ONE_2];
+                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.ONE_LOW];
+                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.ONE_HIGH];
                     BankInPage3 = "Bank 1";
                     contendedBankPagedIn = false;
                     break;
 
                 case 2: //Bank 2
-                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.TWO_1];
-                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.TWO_2];
+                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.TWO_HIGH];
 
-                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.TWO_1];
-                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.TWO_2];
+                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.TWO_HIGH];
                     BankInPage3 = "Bank 2";
                     contendedBankPagedIn = false;
                     break;
 
                 case 3: //Bank 3
-                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_1];
-                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_2];
+                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];
+                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];
 
-                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_1];
-                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_2];
+                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];
+                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];
                     BankInPage3 = "Bank 3";
                     contendedBankPagedIn = false;
                     break;
 
                 case 4: //Bank 4
-                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.FOUR_1];
-                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.FOUR_2];
+                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.FOUR_LOW];
+                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.FOUR_HIGH];
 
-                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.FOUR_1];
-                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.FOUR_2];
+                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.FOUR_LOW];
+                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.FOUR_HIGH];
                     BankInPage3 = "Bank 4";
                     contendedBankPagedIn = true;
                     break;
 
                 case 5: //Bank 5
-                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.FIVE_1];
-                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.FIVE_2];
+                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
 
-                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.FIVE_1];
-                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.FIVE_2];
+                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
                     BankInPage3 = "Bank 5";
                     contendedBankPagedIn = true;
                     break;
 
                 case 6: //Bank 6
-                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.SIX_1];
-                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.SIX_2];
+                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.SIX_LOW];
+                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.SIX_HIGH];
 
-                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.SIX_1];
-                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.SIX_2];
+                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.SIX_LOW];
+                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.SIX_HIGH];
                     BankInPage3 = "Bank 6";
                     contendedBankPagedIn = true;
                     break;
 
                 case 7: //Bank 7
-                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.SEVEN_1];
-                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.SEVEN_2];
+                    PageReadPointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];
+                    PageReadPointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];
 
-                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.SEVEN_1];
-                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.SEVEN_2];
+                    PageWritePointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];
+                    PageWritePointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];
                     BankInPage3 = "Bank 7";
                     contendedBankPagedIn = true;
                     break;
@@ -467,23 +468,23 @@ namespace Speccy
                 int mapSelect = (val & 0x6) >> 1;
                 switch (mapSelect) {
                     case 0:
-                        PageReadPointer[0] = RAMpage[(int)RAM_BANK.ZERO_1];   //Bank 0
-                        PageReadPointer[1] = RAMpage[(int)RAM_BANK.ZERO_2];   //Bank 0
-                        PageReadPointer[2] = RAMpage[(int)RAM_BANK.ONE_1];  //Bank 1
-                        PageReadPointer[3] = RAMpage[(int)RAM_BANK.ONE_2];  //Bank 1
-                        PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_1];   //Bank 2
-                        PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_2];   //Bank 2
-                        PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_1];   //Bank 3
-                        PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_2];   //Bank 3
+                        PageReadPointer[0] = RAMpage[(int)RAM_BANK.ZERO_LOW];   //Bank 0
+                        PageReadPointer[1] = RAMpage[(int)RAM_BANK.ZERO_HIGH];   //Bank 0
+                        PageReadPointer[2] = RAMpage[(int)RAM_BANK.ONE_LOW];  //Bank 1
+                        PageReadPointer[3] = RAMpage[(int)RAM_BANK.ONE_HIGH];  //Bank 1
+                        PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];   //Bank 2
+                        PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];   //Bank 2
+                        PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];   //Bank 3
+                        PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];   //Bank 3
 
-                        PageWritePointer[0] = RAMpage[(int)RAM_BANK.ZERO_1];   //Bank 0
-                        PageWritePointer[1] = RAMpage[(int)RAM_BANK.ZERO_2];   //Bank 0
-                        PageWritePointer[2] = RAMpage[(int)RAM_BANK.ONE_1];  //Bank 1
-                        PageWritePointer[3] = RAMpage[(int)RAM_BANK.ONE_2];  //Bank 1
-                        PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];   //Bank 2
-                        PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];   //Bank 2
-                        PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_1];   //Bank 3
-                        PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_2];   //Bank 3
+                        PageWritePointer[0] = RAMpage[(int)RAM_BANK.ZERO_LOW];   //Bank 0
+                        PageWritePointer[1] = RAMpage[(int)RAM_BANK.ZERO_HIGH];   //Bank 0
+                        PageWritePointer[2] = RAMpage[(int)RAM_BANK.ONE_LOW];  //Bank 1
+                        PageWritePointer[3] = RAMpage[(int)RAM_BANK.ONE_HIGH];  //Bank 1
+                        PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];   //Bank 2
+                        PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];   //Bank 2
+                        PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];   //Bank 3
+                        PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];   //Bank 3
                         BankInPage0 = "Bank 0";
                         BankInPage1 = "Bank 1";
                         BankInPage2 = "Bank 2";
@@ -493,23 +494,23 @@ namespace Speccy
                         break;
 
                     case 1:
-                        PageReadPointer[0] = RAMpage[(int)RAM_BANK.FOUR_1];  //Bank 4
-                        PageReadPointer[1] = RAMpage[(int)RAM_BANK.FOUR_2];  //Bank 4
-                        PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-                        PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-                        PageReadPointer[4] = RAMpage[(int)RAM_BANK.SIX_1];   //Bank 6
-                        PageReadPointer[5] = RAMpage[(int)RAM_BANK.SIX_2];   //Bank 6
-                        PageReadPointer[6] = RAMpage[(int)RAM_BANK.SEVEN_1];   //Bank 7
-                        PageReadPointer[7] = RAMpage[(int)RAM_BANK.SEVEN_2];   //Bank 7
+                        PageReadPointer[0] = RAMpage[(int)RAM_BANK.FOUR_LOW];  //Bank 4
+                        PageReadPointer[1] = RAMpage[(int)RAM_BANK.FOUR_HIGH];  //Bank 4
+                        PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];  //Bank 5
+                        PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];  //Bank 5
+                        PageReadPointer[4] = RAMpage[(int)RAM_BANK.SIX_LOW];   //Bank 6
+                        PageReadPointer[5] = RAMpage[(int)RAM_BANK.SIX_HIGH];   //Bank 6
+                        PageReadPointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];   //Bank 7
+                        PageReadPointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];   //Bank 7
 
-                        PageWritePointer[0] = RAMpage[(int)RAM_BANK.FOUR_1];  //Bank 4
-                        PageWritePointer[1] = RAMpage[(int)RAM_BANK.FOUR_2];  //Bank 4
-                        PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-                        PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-                        PageWritePointer[4] = RAMpage[(int)RAM_BANK.SIX_1];   //Bank 6
-                        PageWritePointer[5] = RAMpage[(int)RAM_BANK.SIX_2];   //Bank 6
-                        PageWritePointer[6] = RAMpage[(int)RAM_BANK.SEVEN_1];   //Bank 7
-                        PageWritePointer[7] = RAMpage[(int)RAM_BANK.SEVEN_2];   //Bank 7
+                        PageWritePointer[0] = RAMpage[(int)RAM_BANK.FOUR_LOW];  //Bank 4
+                        PageWritePointer[1] = RAMpage[(int)RAM_BANK.FOUR_HIGH];  //Bank 4
+                        PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];  //Bank 5
+                        PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];  //Bank 5
+                        PageWritePointer[4] = RAMpage[(int)RAM_BANK.SIX_LOW];   //Bank 6
+                        PageWritePointer[5] = RAMpage[(int)RAM_BANK.SIX_HIGH];   //Bank 6
+                        PageWritePointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];   //Bank 7
+                        PageWritePointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];   //Bank 7
                         BankInPage0 = "Bank 4";
                         BankInPage1 = "Bank 5";
                         BankInPage2 = "Bank 6";
@@ -519,23 +520,23 @@ namespace Speccy
                         break;
 
                     case 2:
-                        PageReadPointer[0] = RAMpage[(int)RAM_BANK.FOUR_1];  //Bank 4
-                        PageReadPointer[1] = RAMpage[(int)RAM_BANK.FOUR_2];  //Bank 4
-                        PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-                        PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-                        PageReadPointer[4] = RAMpage[(int)RAM_BANK.SIX_1];   //Bank 6
-                        PageReadPointer[5] = RAMpage[(int)RAM_BANK.SIX_2];   //Bank 6
-                        PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_1];   //Bank 3
-                        PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_2];   //Bank 3
+                        PageReadPointer[0] = RAMpage[(int)RAM_BANK.FOUR_LOW];  //Bank 4
+                        PageReadPointer[1] = RAMpage[(int)RAM_BANK.FOUR_HIGH];  //Bank 4
+                        PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];  //Bank 5
+                        PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];  //Bank 5
+                        PageReadPointer[4] = RAMpage[(int)RAM_BANK.SIX_LOW];   //Bank 6
+                        PageReadPointer[5] = RAMpage[(int)RAM_BANK.SIX_HIGH];   //Bank 6
+                        PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];   //Bank 3
+                        PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];   //Bank 3
 
-                        PageWritePointer[0] = RAMpage[(int)RAM_BANK.FOUR_1];  //Bank 4
-                        PageWritePointer[1] = RAMpage[(int)RAM_BANK.FOUR_2];  //Bank 4
-                        PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-                        PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-                        PageWritePointer[4] = RAMpage[(int)RAM_BANK.SIX_1];   //Bank 6
-                        PageWritePointer[5] = RAMpage[(int)RAM_BANK.SIX_2];   //Bank 6
-                        PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_1];   //Bank 3
-                        PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_2];   //Bank 3
+                        PageWritePointer[0] = RAMpage[(int)RAM_BANK.FOUR_LOW];  //Bank 4
+                        PageWritePointer[1] = RAMpage[(int)RAM_BANK.FOUR_HIGH];  //Bank 4
+                        PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];  //Bank 5
+                        PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];  //Bank 5
+                        PageWritePointer[4] = RAMpage[(int)RAM_BANK.SIX_LOW];   //Bank 6
+                        PageWritePointer[5] = RAMpage[(int)RAM_BANK.SIX_HIGH];   //Bank 6
+                        PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];   //Bank 3
+                        PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];   //Bank 3
                         BankInPage0 = "Bank 4";
                         BankInPage1 = "Bank 5";
                         BankInPage2 = "Bank 6";
@@ -545,23 +546,23 @@ namespace Speccy
                         break;
 
                     case 3:
-                        PageReadPointer[0] = RAMpage[(int)RAM_BANK.FOUR_1];  //Bank 4
-                        PageReadPointer[1] = RAMpage[(int)RAM_BANK.FOUR_2];  //Bank 4
-                        PageReadPointer[2] = RAMpage[(int)RAM_BANK.SEVEN_1];  //Bank 7
-                        PageReadPointer[3] = RAMpage[(int)RAM_BANK.SEVEN_2];  //Bank 7
-                        PageReadPointer[4] = RAMpage[(int)RAM_BANK.SIX_1];   //Bank 6
-                        PageReadPointer[5] = RAMpage[(int)RAM_BANK.SIX_2];   //Bank 6
-                        PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_1];   //Bank 3
-                        PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_2];   //Bank 3
+                        PageReadPointer[0] = RAMpage[(int)RAM_BANK.FOUR_LOW];  //Bank 4
+                        PageReadPointer[1] = RAMpage[(int)RAM_BANK.FOUR_HIGH];  //Bank 4
+                        PageReadPointer[2] = RAMpage[(int)RAM_BANK.SEVEN_LOW];  //Bank 7
+                        PageReadPointer[3] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];  //Bank 7
+                        PageReadPointer[4] = RAMpage[(int)RAM_BANK.SIX_LOW];   //Bank 6
+                        PageReadPointer[5] = RAMpage[(int)RAM_BANK.SIX_HIGH];   //Bank 6
+                        PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];   //Bank 3
+                        PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];   //Bank 3
 
-                        PageWritePointer[0] = RAMpage[(int)RAM_BANK.FOUR_1];  //Bank 4
-                        PageWritePointer[1] = RAMpage[(int)RAM_BANK.FOUR_2];  //Bank 4
-                        PageWritePointer[2] = RAMpage[(int)RAM_BANK.SEVEN_1];  //Bank 7
-                        PageWritePointer[3] = RAMpage[(int)RAM_BANK.SEVEN_2];  //Bank 7
-                        PageWritePointer[4] = RAMpage[(int)RAM_BANK.SIX_1];   //Bank 6
-                        PageWritePointer[5] = RAMpage[(int)RAM_BANK.SIX_2];   //Bank 6
-                        PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_1];   //Bank 3
-                        PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_2];   //Bank 3
+                        PageWritePointer[0] = RAMpage[(int)RAM_BANK.FOUR_LOW];  //Bank 4
+                        PageWritePointer[1] = RAMpage[(int)RAM_BANK.FOUR_HIGH];  //Bank 4
+                        PageWritePointer[2] = RAMpage[(int)RAM_BANK.SEVEN_LOW];  //Bank 7
+                        PageWritePointer[3] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];  //Bank 7
+                        PageWritePointer[4] = RAMpage[(int)RAM_BANK.SIX_LOW];   //Bank 6
+                        PageWritePointer[5] = RAMpage[(int)RAM_BANK.SIX_HIGH];   //Bank 6
+                        PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];   //Bank 3
+                        PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];   //Bank 3
                         BankInPage0 = "Bank 4";
                         BankInPage1 = "Bank 7";
                         BankInPage2 = "Bank 6";
@@ -577,15 +578,15 @@ namespace Speccy
                 //int romSelect = ((val & 0x04) >> 1) | ((last7ffdOut & 0x10) >> 4);
                 //PagePointer[0] = ROMpage[romSelect * 2];
                 //PagePointer[1] = ROMpage[romSelect * 2 + 1];
-                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_1];   //Bank 2
-                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_2];   //Bank 2
+                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];  //Bank 5
+                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];  //Bank 5
+                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];   //Bank 2
+                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];   //Bank 2
 
-                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];  //Bank 5
-                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];  //Bank 5
-                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];   //Bank 2
-                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];   //Bank 2
+                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];  //Bank 5
+                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];  //Bank 5
+                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];   //Bank 2
+                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];   //Bank 2
                 BankInPage1 = "Bank 5";
                 BankInPage2 = "Bank 2";
 
@@ -782,40 +783,40 @@ namespace Speccy
                     Array.Copy(((SNA_128K)sna).RAM_BANK[f], 0, RAMpage[f], 0, 8192);
                 }
 
-                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
+                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
 
-                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
+                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
 
                 Out(0x7ffd, val); //Perform a dummy Out to setup the remaining stuff!
             }
         }
 
-        public override void UseSZX(SZXLoader szx) {
+        public override void UseSZX(SZXFile szx) {
             lock (lockThis) {
                 base.UseSZX(szx);
                 aySound.SelectedRegister = szx.ayState.currentRegister;
                 aySound.SetRegisters(szx.ayState.chRegs);
                 Out(0x0ffe, szx.specRegs.Fe);
 
-                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
-                PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-                PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+                PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+                PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
+                PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+                PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
-                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
-                PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-                PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+                PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+                PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+                PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+                PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
+                PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+                PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
                 contendedBankPagedIn = false;
                 Out(0x7ffd, szx.specRegs.x7ffd); //Perform a dummy Out to setup the remaining stuff!
                 Out(0x1ffd, szx.specRegs.pagePort);
@@ -849,19 +850,19 @@ namespace Speccy
                 Array.Copy(z80.RAM_BANK[f], 0, RAMpage[f], 0, 8192);
             }
 
-            PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-            PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-            PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-            PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
-            PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-            PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+            PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+            PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+            PageReadPointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+            PageReadPointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
+            PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+            PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
-            PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_1];
-            PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_2];
-            PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_1];
-            PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_2];
-            PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_1];
-            PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_2];
+            PageWritePointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
+            PageWritePointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
+            PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
+            PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
+            PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
+            PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
             contendedBankPagedIn = false;
             for (int f = 0; f < 16; f++)
                 aySound.SetRegisters(z80.AY_REGS);

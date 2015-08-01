@@ -70,13 +70,14 @@ namespace ZeroWin
             get { return ledIndicatorPos; }
             set {
                 ledIndicatorPos = value;
-                pauseLedPos = new Vector3(ledIndicatorPos.X - 32 - 10, ledIndicatorPos.Y - 16 - 10, 0);
+                /*pauseLedPos = new Vector3(ledIndicatorPos.X - 32 - 10, ledIndicatorPos.Y - 16 - 10, 0);
                 tapeLedPos = new Vector3(ledIndicatorPos.X - 32 - 10, ledIndicatorPos.Y - 32, 0);
                 diskLedPos = new Vector3(ledIndicatorPos.X - 32 - 10, ledIndicatorPos.Y - 32, 0);
                 downloadLedPos = new Vector3(ledIndicatorPos.X - 32 - 10, ledIndicatorPos.Y - 32, 0);
                 videoLedPos = new Vector3(ledIndicatorPos.X - 84, ledIndicatorPos.Y - 32, 0);
                 playLedPos = new Vector3(ledIndicatorPos.X - 78, ledIndicatorPos.Y - 16 - 8, 0);
                 recordLedPos = new Vector3(ledIndicatorPos.X - 76, ledIndicatorPos.Y - 16 - 6, 0);
+                */
             }
         }
         public bool EnableVsync {
@@ -611,15 +612,15 @@ namespace ZeroWin
         private int displayWidth = 256 + 48 + 48;
         private int displayHeight = 192 + 48 + 56;
 
-        private Vector3 pauseLedPos = Vector3.Empty;
+      /*  private Vector3 pauseLedPos = Vector3.Empty;
         private Vector3 tapeLedPos = Vector3.Empty;
         private Vector3 diskLedPos = Vector3.Empty;
         private Vector3 downloadLedPos = Vector3.Empty;
         private Vector3 videoLedPos = Vector3.Empty;
         private Vector3 playLedPos = Vector3.Empty;
-        private Vector3 recordLedPos = Vector3.Empty;
+        private Vector3 recordLedPos = Vector3.Empty;*/
         private Vector3 spritePos = Vector3.Empty;
-
+        
         //int screenWidth = 256 + 48 + 48;
         public int ScreenWidth {
             get;
