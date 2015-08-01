@@ -890,7 +890,13 @@ namespace ZeroWin
                 SetSize(Width, Height);
                 return;
             }
-            dxDevice.Present();
+
+            try {
+                dxDevice.Present();
+            }
+            catch (DeviceLostException de) {
+                System.Threading.Thread.Sleep(1);
+            }
         }
 
         public void RenderDX() {
