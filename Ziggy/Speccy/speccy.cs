@@ -1,4 +1,7 @@
-﻿using System;
+﻿
+#define NEW_RZX_METHODS
+
+using System;
 using System.ComponentModel;
 using Peripherals;
 
@@ -757,68 +760,37 @@ namespace Speccy
         }
 
         public void PlaybackRZX(RZXFile _rzx) {
+            rzx = _rzx;
             isRecordingRZX = false;
             rzx = _rzx;
-            //rzxFrameCount = 0;
-            //rzxFetchCount = 0;
-            //rzxInputCount = 0;
-            //rzxFrame = rzx.frames[0];
+            isPlayingRZX = true;
+        }
+        /*
+        public void PlaybackRZX(RZXFile _rzx) {
+            isRecordingRZX = false;
+            rzx = _rzx;
             rzx.InitPlayback();
             isPlayingRZX = true;
             totalTStates = (int)rzx.record.tstatesAtStart;
         }
-
+        */
         public void ContinueRecordingRZX(RZXFile _rzx) {
             isRecordingRZX = true;
             isPlayingRZX = false;
             rzx = _rzx;
             rzx.ContinueRecording();
             rzxInputs = new System.Collections.Generic.List<byte>();
-            //rzxFrameCount = 0;
-            //rzxFetchCount = 0;
-            //rzxInputCount = 0;
         }
 
         public void InsertBookmark() {
             if (isRecordingRZX) {
-                /*
-                    rzxFrame = new RZXFile.RZX_Frame();
-                    rzxFrame.inputCount = (ushort)rzxInputs.Count;
-                    rzxFrame.instructionCount = (ushort)rzxFetchCount;
-                    rzxFrame.inputs = rzxInputs.ToArray();
-                    rzx.frames.Add(rzxFrame);
-                    rzxFetchCount = 0;
-                    rzxInputCount = 0;
-                    
-                    RollbackBookmark bookmark = new RollbackBookmark();
-                    bookmark.frameIndex = rzx.frames.Count;
-                    bookmark.snapshot = CreateSZX();
-                    rzxBookmarks.Add(bookmark);
-                    rzxCurrentBookmark = rzxBookmarks.Count - 1;
-                */
                 rzx.InsertBookmark(CreateSZX(), rzxInputs);
                 rzxInputs = new System.Collections.Generic.List<byte>();
             }
         }
 
         public void RollbackRZX() {
-            /*
-            if (rzxBookmarks.Count > 0) {
-                RollbackBookmark bookmark = rzxBookmarks[rzxCurrentBookmark];
-                //if less than 2 seconds have passed since last bookmark, revert to an even earlier bookmark
-                if ((rzx.frames.Count - bookmark.frameIndex) / 50 < 2) {
-                    if (rzxCurrentBookmark > 0) {
-                        rzxBookmarks.Remove(bookmark);
-                        rzxCurrentBookmark--;
-                    }
-                    bookmark = rzxBookmarks[rzxCurrentBookmark];
-                }
-                UseSZX(bookmark.snapshot);
-                rzx.frames.RemoveRange(bookmark.frameIndex, rzx.frames.Count - bookmark.frameIndex);
-                rzxFetchCount = 0;
-                rzxInputCount = 0;
-                rzxInputs = new System.Collections.Generic.List<byte>();
-            }*/
+
             SZXFile snapshot = rzx.Rollback();
             rzxInputs = new System.Collections.Generic.List<byte>();
             if (snapshot != null)
@@ -828,35 +800,30 @@ namespace Speccy
         public void DiscardRZX() {
             isRecordingRZX = false;
             isPlayingRZX = false;
-            //rzxBookmarks.Clear();
-            //rzxInputs.Clear();
             rzx.Discard();
         }
 
         public void SaveRZX(string filename, bool doFinalise) {
-            /*
-            if (isRecordingRZX) {
-                if (doFinalise) {
-                    if (rzx.snapshotData.Length > 1)
-                        rzx.snapshotData[1] = null;
-                } else
-                    rzx.snapshotData[1] = CreateSZX().GetSZXData();
 
-                isPlayingRZX = false;
-                isRecordingRZX = false;
-                rzxBookmarks.Clear();
-                rzx.SaveRZX(filename, doFinalise);
-            }*/
             if (isRecordingRZX) {
                 isPlayingRZX = false;
                 isRecordingRZX = false;
+#if NEW_RZX_METHODS
+                rzx.Close();
+#else
                 rzx.Save(filename, (doFinalise ? null : CreateSZX().GetSZXData()));
+#endif
             }
         }
 
         public void StartRecordingRZX() {
             rzx = new RZXFile();
+#if NEW_RZX_METHODS
+            rzx.Record("newrzxrecord.rzx");
+            rzx.AddSnapshot(CreateSZX().GetSZXData());
+#else
             rzx.StartRecording(CreateSZX().GetSZXData(), totalTStates);
+#endif
             isPlayingRZX = false;
             isRecordingRZX = true;
 
@@ -1377,7 +1344,7 @@ namespace Speccy
 
                     lock (lockThis)
                     {
-                        #region Tape Save Trap
+#region Tape Save Trap
                         //Tape Save trap
                         if (PC == 0x04d1)
                         {
@@ -1392,7 +1359,7 @@ namespace Speccy
                                 ResetKeyboard();
                             }
                         }
-                        #endregion Tape Deck events
+#endregion Tape Deck events
 
                         if (isPlayingRZX && doRun)
                             ProcessRZX();
@@ -1404,7 +1371,7 @@ namespace Speccy
 
                     if (needsPaint)
                     {
-                        #region Tape Deck event for stopping tape on tape play timeout
+#region Tape Deck event for stopping tape on tape play timeout
 
                         if (tapeIsPlaying)
                         {
@@ -1425,7 +1392,7 @@ namespace Speccy
                             }
                         }
 
-                        #endregion Tape Deck event for stopping tape on tape play timeout
+#endregion Tape Deck event for stopping tape on tape play timeout
                         FrameCount++;
                         if (FrameCount > 50)
                         {
@@ -1847,7 +1814,7 @@ namespace Speccy
         //Updates the state of all inputs from the user
         public void UpdateInput() {
 
-            #region Row 0: fefe - CAPS SHIFT, Z, X, C , V
+#region Row 0: fefe - CAPS SHIFT, Z, X, C , V
 
             if (keyBuffer[(int)keyCode.SHIFT]) {
                 keyLine[0] = keyLine[0] & ~(0x1);
@@ -1879,9 +1846,9 @@ namespace Speccy
                 keyLine[0] = keyLine[0] | (0x10);
             }
 
-            #endregion Row 0: fefe - CAPS SHIFT, Z, X, C , V
+#endregion Row 0: fefe - CAPS SHIFT, Z, X, C , V
 
-            #region Row 1: fdfe - A, S, D, F, G
+#region Row 1: fdfe - A, S, D, F, G
 
             if (keyBuffer[(int)keyCode.A]) {
                 keyLine[1] = keyLine[1] & ~(0x1);
@@ -1913,9 +1880,9 @@ namespace Speccy
                 keyLine[1] = keyLine[1] | (0x10);
             }
 
-            #endregion Row 1: fdfe - A, S, D, F, G
+#endregion Row 1: fdfe - A, S, D, F, G
 
-            #region Row 2: fbfe - Q, W, E, R, T
+#region Row 2: fbfe - Q, W, E, R, T
 
             if (keyBuffer[(int)keyCode.Q]) {
                 keyLine[2] = keyLine[2] & ~(0x1);
@@ -1947,9 +1914,9 @@ namespace Speccy
                 keyLine[2] = keyLine[2] | (0x10);
             }
 
-            #endregion Row 2: fbfe - Q, W, E, R, T
+#endregion Row 2: fbfe - Q, W, E, R, T
 
-            #region Row 3: f7fe - 1, 2, 3, 4, 5
+#region Row 3: f7fe - 1, 2, 3, 4, 5
 
             if (keyBuffer[(int)keyCode._1]) {
                 keyLine[3] = keyLine[3] & ~(0x1);
@@ -1981,9 +1948,9 @@ namespace Speccy
                 keyLine[3] = keyLine[3] | (0x10);
             }
 
-            #endregion Row 3: f7fe - 1, 2, 3, 4, 5
+#endregion Row 3: f7fe - 1, 2, 3, 4, 5
 
-            #region Row 4: effe - 0, 9, 8, 7, 6
+#region Row 4: effe - 0, 9, 8, 7, 6
 
             if (keyBuffer[(int)keyCode._0]) {
                 keyLine[4] = keyLine[4] & ~(0x1);
@@ -2015,9 +1982,9 @@ namespace Speccy
                 keyLine[4] = keyLine[4] | (0x10);
             }
 
-            #endregion Row 4: effe - 0, 9, 8, 7, 6
+#endregion Row 4: effe - 0, 9, 8, 7, 6
 
-            #region Row 5: dffe - P, O, I, U, Y
+#region Row 5: dffe - P, O, I, U, Y
 
             if (keyBuffer[(int)keyCode.P]) {
                 keyLine[5] = keyLine[5] & ~(0x1);
@@ -2049,9 +2016,9 @@ namespace Speccy
                 keyLine[5] = keyLine[5] | (0x10);
             }
 
-            #endregion Row 5: dffe - P, O, I, U, Y
+#endregion Row 5: dffe - P, O, I, U, Y
 
-            #region Row 6: bffe - ENTER, L, K, J, H
+#region Row 6: bffe - ENTER, L, K, J, H
 
             if (keyBuffer[(int)keyCode.ENTER]) {
                 keyLine[6] = keyLine[6] & ~(0x1);
@@ -2083,9 +2050,9 @@ namespace Speccy
                 keyLine[6] = keyLine[6] | (0x10);
             }
 
-            #endregion Row 6: bffe - ENTER, L, K, J, H
+#endregion Row 6: bffe - ENTER, L, K, J, H
 
-            #region Row 7: 7ffe - SPACE, SYMBOL SHIFT, M, N, B
+#region Row 7: 7ffe - SPACE, SYMBOL SHIFT, M, N, B
 
             if (keyBuffer[(int)keyCode.SPACE]) {
                 keyLine[7] = keyLine[7] & ~(0x1);
@@ -2117,9 +2084,9 @@ namespace Speccy
                 keyLine[7] = keyLine[7] | (0x010);
             }
 
-            #endregion Row 7: 7ffe - SPACE, SYMBOL SHIFT, M, N, B
+#endregion Row 7: 7ffe - SPACE, SYMBOL SHIFT, M, N, B
 
-            #region Misc utility key functions
+#region Misc utility key functions
 
             //Check for caps lock key
             if (keyBuffer[(int)keyCode.CAPS]) {
@@ -2161,11 +2128,11 @@ namespace Speccy
                 keyLine[4] = keyLine[4] & ~(0x10);
             }
 
-            #endregion Misc utility key functions
+#endregion Misc utility key functions
 
-            #region Function key presses
+#region Function key presses
 
-            #endregion Function key presses
+#endregion Function key presses
         }
 
         //Resets the state of all the keys
@@ -2220,6 +2187,8 @@ namespace Speccy
             soundCounter++;
         }
 
+        public virtual void SaveSNA(string filename) {}
+        
         //Sets the speccy state to that of the SNA file
         public abstract void UseSNA(SNA_SNAPSHOT sna);
 
@@ -2508,17 +2477,9 @@ namespace Speccy
         }
 
         public void NextRZXFrame() {
-            /* rzxFrameCount++;
-             rzxFetchCount = 0;
-             rzxInputCount = 0;
-             totalTStates = 0;
-             if (rzxFrameCount < rzx.frames.Count) {
-                 rzxFrame = rzx.frames[rzxFrameCount];
-             } else
-                 isPlayingRZX = false; */
-
             totalTStates = 0;
-            isPlayingRZX = rzx.NextPlaybackFrame();
+            //isPlayingRZX = rzx.NextPlaybackFrame();
+            isPlayingRZX = rzx.UpdatePlayback();
         }
 
         public void EndRZXFrame() {
@@ -2526,9 +2487,6 @@ namespace Speccy
                 R++;
                 Interrupt();
             }
-
-            //if (rzx.inputCount < rzx.frame.inputCount)
-            //    rzx.inputCount = 0;
 
             if (totalTStates >= FrameLength) {
                 int deltaSoundT = FrameLength - totalTStates;
@@ -2553,9 +2511,9 @@ namespace Speccy
         public void ProcessRZX() {
             R++;
 
-            if (rzx.fetchCount > rzx.frames[rzx.frameCount].instructionCount - 1) {
+           // if (rzx.fetchCount > rzx.frames[rzx.frameCount].instructionCount - 1) 
+           if (rzx.fetchCount > rzx.frame.instructionCount - 1)
                 EndRZXFrame();
-            }
 
             rzx.fetchCount++;
 
@@ -2634,7 +2592,11 @@ namespace Speccy
                      rzx.frames.Add(rzxFrame);
                      rzxFetchCount = 0;
                      rzxInputCount = 0;*/
+#if NEW_RZX_METHODS
+                    rzx.UpdateRecording(rzxInputs, totalTStates);
+#else
                     rzx.RecordFrame(rzxInputs);
+#endif
                     rzxInputs = new System.Collections.Generic.List<byte>();
                 }
 
@@ -2719,7 +2681,7 @@ namespace Speccy
                         tapeTStates = (int)(tapeTStates - edgeDuration);
 
                         DoTapeEvent(new TapeEventArgs(TapeEventType.EDGE_LOAD));
-                        }
+                    }
                 }
                 else
                     FlashLoad();
@@ -2804,7 +2766,11 @@ namespace Speccy
                       rzx.frames.Add(rzxFrame);
                       rzxFetchCount = 0;
                       rzxInputCount = 0;*/
+#if NEW_RZX_METHODS
+                    rzx.UpdateRecording(rzxInputs, totalTStates);
+#else
                     rzx.RecordFrame(rzxInputs);
+#endif
                     rzxInputs = new System.Collections.Generic.List<byte>();
                 }
 
@@ -2826,15 +2792,15 @@ namespace Speccy
             //Massive switch-case to decode the instructions!
             switch (opcode) {
 
-                #region NOP
+#region NOP
 
                 case 0x00: //NOP
                     // Log("NOP");
                     break;
 
-                #endregion NOP
+#endregion NOP
 
-                # region 16 bit load operations (LD rr, nn)
+#region 16 bit load operations (LD rr, nn)
                 /** LD rr, nn (excluding DD prefix) **/
                 case 0x01: //LD BC, nn
                     BC = PeekWord(PC);
@@ -2876,9 +2842,9 @@ namespace Speccy
                     // Log("LD SP, HL");
                     SP = HL;
                     break;
-                #endregion
+#endregion
 
-                #region 16 bit increments (INC rr)
+#region 16 bit increments (INC rr)
                 /** INC rr **/
                 case 0x03:  //INC BC
                     //if (model == MachineModel._plus3)
@@ -2915,9 +2881,9 @@ namespace Speccy
                     // Log("INC SP");
                     SP++;
                     break;
-                #endregion INC rr
+#endregion INC rr
 
-                #region 8 bit increments (INC r)
+#region 8 bit increments (INC r)
                 /** INC r + INC (HL) **/
                 case 0x04:  //INC B
                     B = Inc(B);
@@ -2961,9 +2927,9 @@ namespace Speccy
                     // Log("INC A");
                     A = Inc(A);
                     break;
-                #endregion
+#endregion
 
-                #region 8 bit decrement (DEC r)
+#region 8 bit decrement (DEC r)
                 /** DEC r + DEC (HL)**/
                 case 0x05: //DEC B
                     // Log("DEC B");
@@ -3022,9 +2988,9 @@ namespace Speccy
                                 }
                     }
                     break;
-                #endregion
+#endregion
 
-                #region 16 bit decrements
+#region 16 bit decrements
                 /** DEC rr **/
                 case 0x0B:  //DEC BC
                     // Log("DEC BC");
@@ -3061,9 +3027,9 @@ namespace Speccy
                     Contend(IR, 1, 2);
                     SP--;
                     break;
-                #endregion
+#endregion
 
-                #region Immediate load operations (LD (nn), r)
+#region Immediate load operations (LD (nn), r)
                 /** LD (rr), r + LD (nn), HL  + LD (nn), A **/
                 case 0x02: //LD (BC), A
                     // Log("LD (BC), A");
@@ -3102,9 +3068,9 @@ namespace Speccy
                     PokeByte(HL, val);
                     PC += 1;
                     break;
-                #endregion
+#endregion
 
-                #region Indirect load operations (LD r, r)
+#region Indirect load operations (LD r, r)
                 /** LD r, r **/
                 case 0x06: //LD B, n
                     B = PeekByte(PC);
@@ -3490,9 +3456,9 @@ namespace Speccy
                     // Log("LD A, A");
                     A = A;
                     break;
-                #endregion
+#endregion
 
-                #region Rotates on Accumulator
+#region Rotates on Accumulator
                 /** Accumulator Rotates **/
                 case 0x07: //RLCA
                     // Log("RLCA");
@@ -3562,9 +3528,9 @@ namespace Speccy
                     SetHalf(false);
                     SetNeg(false);
                     break;
-                #endregion
+#endregion
 
-                #region Exchange operations (EX)
+#region Exchange operations (EX)
                 /** Exchange operations **/
                 case 0x08:     //EX AF, AF'
                     // Log("EX AF, AF'");
@@ -3594,9 +3560,9 @@ namespace Speccy
                     DE = HL;
                     HL = temp;
                     break;
-                #endregion
+#endregion
 
-                #region 16 bit addition to HL (Add HL, rr)
+#region 16 bit addition to HL (Add HL, rr)
                 /** Add HL, rr **/
                 case 0x09:     //ADD HL, BC
                     // Log("ADD HL, BC");
@@ -3640,9 +3606,9 @@ namespace Speccy
                     MemPtr = HL + 1;
                     HL = Add_RR(HL, SP);
                     break;
-                #endregion
+#endregion
 
-                #region 8 bit addition to accumulator (Add r, r)
+#region 8 bit addition to accumulator (Add r, r)
                 /*** ADD r, r ***/
                 case 0x80:  //ADD A,B
                     // Log("ADD A, B");
@@ -3690,9 +3656,9 @@ namespace Speccy
                     Add_R(disp);
                     PC++;
                     break;
-                #endregion
+#endregion
 
-                #region Add to accumulator with carry (Adc A, r)
+#region Add to accumulator with carry (Adc A, r)
                 /** Adc a, r **/
                 case 0x88:  //ADC A,B
                     // Log("ADC A, B");
@@ -3740,9 +3706,9 @@ namespace Speccy
                     Adc_R(disp);
                     PC += 1;
                     break;
-                #endregion
+#endregion
 
-                #region 8 bit subtraction from accumulator(SUB r)
+#region 8 bit subtraction from accumulator(SUB r)
                 case 0x90:  //SUB B
                     // Log("SUB B");
                     Sub_R(B);
@@ -3789,9 +3755,9 @@ namespace Speccy
                     Sub_R(disp);
                     PC += 1;
                     break;
-                #endregion
+#endregion
 
-                #region 8 bit subtraction from accumulator with carry(SBC A, r)
+#region 8 bit subtraction from accumulator with carry(SBC A, r)
                 case 0x98:  //SBC A, B
                     // Log("SBC A, B");
                     Sbc_R(B);
@@ -3838,9 +3804,9 @@ namespace Speccy
                     Sbc_R(disp);
                     PC += 1;
                     break;
-                #endregion
+#endregion
 
-                #region Relative Jumps (JR / DJNZ)
+#region Relative Jumps (JR / DJNZ)
                 /*** Relative Jumps ***/
                 case 0x10:  //DJNZ n
                     Contend(IR, 1, 1);
@@ -3911,9 +3877,9 @@ namespace Speccy
                     }
                     PC++;
                     break;
-                #endregion
+#endregion
 
-                #region Direct jumps (JP)
+#region Direct jumps (JP)
                 /*** Direct jumps ***/
                 case 0xC2:  //JPNZ nn
                     disp = PeekWord(PC);
@@ -4016,9 +3982,9 @@ namespace Speccy
                     }
                     MemPtr = disp;
                     break;
-                #endregion
+#endregion
 
-                #region Compare instructions (CP)
+#region Compare instructions (CP)
                 /*** Compare instructions **/
                 case 0xB8:  //CP B
                     // Log("CP B");
@@ -4070,9 +4036,9 @@ namespace Speccy
                     Cp_R(disp);
                     PC += 1;
                     break;
-                #endregion
+#endregion
 
-                #region Carry Flag operations
+#region Carry Flag operations
                 /*** Carry Flag operations ***/
                 case 0x37:  //SCF
                     // Log("SCF");
@@ -4093,9 +4059,9 @@ namespace Speccy
                     SetCarry(((F & F_CARRY) != 0) ? false : true);
 
                     break;
-                #endregion
+#endregion
 
-                #region Bitwise AND (AND r)
+#region Bitwise AND (AND r)
                 case 0xA0:  //AND B
                     // Log("AND B");
                     And_R(B);
@@ -4143,9 +4109,9 @@ namespace Speccy
 
                     PC++;
                     break;
-                #endregion
+#endregion
 
-                #region Bitwise XOR (XOR r)
+#region Bitwise XOR (XOR r)
                 case 0xA8: //XOR B
                     // Log("XOR B");
                     Xor_R(B);
@@ -4193,9 +4159,9 @@ namespace Speccy
                     PC++;
                     break;
 
-                #endregion
+#endregion
 
-                #region Bitwise OR (OR r)
+#region Bitwise OR (OR r)
                 case 0xB0:  //OR B
                     // Log("OR B");
                     Or_R(B);
@@ -4242,9 +4208,9 @@ namespace Speccy
                     Or_R(disp);
                     PC++;
                     break;
-                #endregion
+#endregion
 
-                #region Return instructions
+#region Return instructions
                 case 0xC0:  //RET NZ
                     // Log("RET NZ");
                     Contend(IR, 1, 1);
@@ -4322,9 +4288,9 @@ namespace Speccy
                         MemPtr = PC;
                     }
                     break;
-                #endregion
+#endregion
 
-                #region POP/PUSH instructions
+#region POP/PUSH instructions
                 case 0xC1:  //POP BC
                     // Log("POP BC");
                     BC = PopStack();
@@ -4369,9 +4335,9 @@ namespace Speccy
                     Contend(IR, 1, 1);
                     PushStack(AF);
                     break;
-                #endregion
+#endregion
 
-                #region CALL instructions
+#region CALL instructions
                 case 0xC4:  //CALL NZ, nn
                     disp = PeekWord(PC);
                     MemPtr = disp;
@@ -4484,9 +4450,9 @@ namespace Speccy
                         PC += 2;
                     }
                     break;
-                #endregion
+#endregion
 
-                #region Restart instructions (RST n)
+#region Restart instructions (RST n)
                 case 0xC7:  //RST 0x00
                     // Log("RST 00");
                     Contend(IR, 1, 1);
@@ -4550,9 +4516,9 @@ namespace Speccy
                     PC = 0x38;
                     MemPtr = PC;
                     break;
-                #endregion
+#endregion
 
-                #region IN A, (n)
+#region IN A, (n)
                 case 0xDB:  //IN A, (n)
                     
                     disp = PeekByte(PC);
@@ -4569,9 +4535,9 @@ namespace Speccy
                     and_32_Or_64 = false;
                     PC++;
                     break;
-                #endregion
+#endregion
 
-                #region OUT (n), A
+#region OUT (n), A
                 case 0xD3:  //OUT (n), A
                     disp = PeekByte(PC);
                     // Log(String.Format("OUT ({0:X}), A", disp));
@@ -4579,16 +4545,16 @@ namespace Speccy
                     MemPtr = ((disp + 1) & 0xff) | (A << 8);
                     PC++;
                     break;
-                #endregion
+#endregion
 
-                #region Decimal Adjust Accumulator (DAA)
+#region Decimal Adjust Accumulator (DAA)
                 case 0x27:  //DAA
                     // Log("DAA");
                     DAA();
                     break;
-                #endregion
+#endregion
 
-                #region Complement (CPL)
+#region Complement (CPL)
                 case 0x2f:  //CPL
                     // Log("CPL");
                     A = A ^ 0xff;
@@ -4597,17 +4563,17 @@ namespace Speccy
                     SetNeg(true);
                     SetHalf(true);
                     break;
-                #endregion
+#endregion
 
-                #region Halt (HALT) - TO BE CHECKED!
+#region Halt (HALT) - TO BE CHECKED!
                 case 0x76:  //HALT
                     // Log("HALT");
                     HaltOn = true;
                     PC--;
                     break;
-                #endregion
+#endregion
 
-                #region Interrupts
+#region Interrupts
                 case 0xF3:  //DI
                     // Log("DI");
                     IFF1 = false;
@@ -4621,12 +4587,12 @@ namespace Speccy
                     lastOpcodeWasEI = 1;
 
                     break;
-                #endregion
+#endregion
 
-                #region Opcodes with CB prefix
+#region Opcodes with CB prefix
                 case 0xCB:
                     switch (opcode = FetchInstruction()) {
-                        #region Rotate instructions
+#region Rotate instructions
                         case 0x00: //RLC B
                             // Log("RLC B");
                             B = Rlc_R(B);
@@ -4794,9 +4760,9 @@ namespace Speccy
                             // Log("RR A");
                             A = Rr_R(A);
                             break;
-                        #endregion
+#endregion
 
-                        #region Register shifts
+#region Register shifts
                         case 0x20:  //SLA B
                             // Log("SLA B");
                             B = Sla_R(B);
@@ -4971,9 +4937,9 @@ namespace Speccy
                             // Log("SRL A");
                             A = Srl_R(A);
                             break;
-                        #endregion
+#endregion
 
-                        #region Bit test operation (BIT b, r)
+#region Bit test operation (BIT b, r)
                         case 0x40:  //BIT 0, B
                             // Log("BIT 0, B");
                             Bit_R(0, B);
@@ -5317,9 +5283,9 @@ namespace Speccy
                             // Log("BIT 7, A");
                             Bit_R(7, A);
                             break;
-                        #endregion
+#endregion
 
-                        #region Reset bit operation (RES b, r)
+#region Reset bit operation (RES b, r)
                         case 0x80:  //RES 0, B
                             // Log("RES 0, B");
                             B = Res_R(0, B);
@@ -5656,9 +5622,9 @@ namespace Speccy
                             // Log("RES 7, A");
                             A = Res_R(7, A);
                             break;
-                        #endregion
+#endregion
 
-                        #region Set bit operation (SET b, r)
+#region Set bit operation (SET b, r)
                         case 0xC0:  //SET 0, B
                             // Log("SET 0, B");
                             B = Set_R(0, B);
@@ -5994,7 +5960,7 @@ namespace Speccy
                             // Log("SET 7, A");
                             A = Set_R(7, A);
                             break;
-                        #endregion
+#endregion
 
                         //  default:
                         //      String msg = "ERROR: Could not handle DD " + opcode.ToString();
@@ -6003,12 +5969,12 @@ namespace Speccy
                         //      break;
                     }
                     break;
-                #endregion
+#endregion
 
-                #region Opcodes with DD prefix (includes DDCB)
+#region Opcodes with DD prefix (includes DDCB)
                 case 0xDD:
                     switch (opcode = FetchInstruction()) {
-                        #region Addition instructions
+#region Addition instructions
                         case 0x09:  //ADD IX, BC
                             // Log("ADD IX, BC");
                             Contend(IR, 1, 7);
@@ -6082,9 +6048,9 @@ namespace Speccy
                             MemPtr = offset;
                             PC++;
                             break;
-                        #endregion
+#endregion
 
-                        #region Subtraction instructions
+#region Subtraction instructions
                         case 0x94:  //SUB A, IXH
                             // Log("SUB A, IXH");
                             Sub_R(IXH);
@@ -6130,9 +6096,9 @@ namespace Speccy
                             Sbc_R(PeekByte(offset));
                             PC++;
                             break;
-                        #endregion
+#endregion
 
-                        #region Increment/Decrements
+#region Increment/Decrements
                         case 0x23:  //INC IX
                             // Log("INC IX");
                             //if (model == MachineModel._plus3)
@@ -6194,9 +6160,9 @@ namespace Speccy
                             MemPtr = offset;
                             PC++;
                             break;
-                        #endregion
+#endregion
 
-                        #region Bitwise operators
+#region Bitwise operators
 
                         case 0xA4:  //AND IXH
                             // Log("AND IXH");
@@ -6268,9 +6234,9 @@ namespace Speccy
                             MemPtr = offset;
                             PC++;
                             break;
-                        #endregion
+#endregion
 
-                        #region Compare operator
+#region Compare operator
                         case 0xBC:  //CP IXH
                             // Log("CP IXH");
                             Cp_R(IXH);
@@ -6294,9 +6260,9 @@ namespace Speccy
                             MemPtr = offset;
                             PC++;
                             break;
-                        #endregion
+#endregion
 
-                        #region Load instructions
+#region Load instructions
                         case 0x21:  //LD IX, nn
                             // Log(string.Format("LD IX, {0,-6:X}", PeekWord(PC)));
                             IX = PeekWord(PC);
@@ -6685,9 +6651,9 @@ namespace Speccy
                             Contend(IR, 1, 2);
                             SP = IX;
                             break;
-                        #endregion
+#endregion
 
-                        #region All DDCB instructions
+#region All DDCB instructions
                         case 0xCB:
                             disp = GetDisplacement(PeekByte(PC));
                             offset = IX + disp; //The displacement required
@@ -7948,9 +7914,9 @@ namespace Speccy
                                     break;
                             }
                             break;
-                        #endregion
+#endregion
 
-                        #region Pop/Push instructions
+#region Pop/Push instructions
                         case 0xE1:  //POP IX
                             // Log("POP IX");
                             IX = PopStack();
@@ -7961,9 +7927,9 @@ namespace Speccy
                             Contend(IR, 1, 1);
                             PushStack(IX);
                             break;
-                        #endregion
+#endregion
 
-                        #region Exchange instruction
+#region Exchange instruction
                         case 0xE3:  //EX (SP), IX
                             // Log("EX (SP), IX");
                             //disp = IX;
@@ -7975,14 +7941,14 @@ namespace Speccy
                             IX = addr;
                             MemPtr = IX;
                             break;
-                        #endregion
+#endregion
 
-                        #region Jump instruction
+#region Jump instruction
                         case 0xE9:  //JP (IX)
                             // Log("JP (IX)");
                             PC = IX;
                             break;
-                        #endregion
+#endregion
 
                         //  case 0xED:
                         //     MessageBox.Show("DD ED encountered!", "Opcode handler",
@@ -7998,9 +7964,9 @@ namespace Speccy
                             break;
                     }
                     break;
-                #endregion
+#endregion
 
-                #region Opcodes with ED prefix
+#region Opcodes with ED prefix
                 case 0xED:
                     opcode = FetchInstruction();
                     if (opcode < 0x40) {
@@ -8786,12 +8752,12 @@ namespace Speccy
                                 break;  //Carry on to next instruction then
                         }
                     break;
-                #endregion
+#endregion
 
-                #region Opcodes with FD prefix (includes FDCB)
+#region Opcodes with FD prefix (includes FDCB)
                 case 0xFD:
                     switch (opcode = FetchInstruction()) {
-                        #region Addition instructions
+#region Addition instructions
                         case 0x09:  //ADD IY, BC
                             // Log("ADD IY, BC");
                             Contend(IR, 1, 7);
@@ -8865,9 +8831,9 @@ namespace Speccy
                             PC++;
                             MemPtr = offset;
                             break;
-                        #endregion
+#endregion
 
-                        #region Subtraction instructions
+#region Subtraction instructions
                         case 0x94:  //SUB A, IYH
                             // Log("SUB A, IYH");
                             Sub_R(IYH);
@@ -8913,9 +8879,9 @@ namespace Speccy
                             PC++;
                             MemPtr = offset;
                             break;
-                        #endregion
+#endregion
 
-                        #region Increment/Decrements
+#region Increment/Decrements
                         case 0x23:  //INC IY
                             // Log("INC IY");
                             //if (model == MachineModel._plus3)
@@ -8977,9 +8943,9 @@ namespace Speccy
                             PC++;
                             MemPtr = offset;
                             break;
-                        #endregion
+#endregion
 
-                        #region Bitwise operators
+#region Bitwise operators
 
                         case 0xA4:  //AND IYH
                             // Log("AND IYH");
@@ -9051,9 +9017,9 @@ namespace Speccy
                             PC++;
                             MemPtr = offset;
                             break;
-                        #endregion
+#endregion
 
-                        #region Compare operator
+#region Compare operator
                         case 0xBC:  //CP IYH
                             // Log("CP IYH");
                             Cp_R(IYH);
@@ -9077,9 +9043,9 @@ namespace Speccy
                             PC++;
                             MemPtr = offset;
                             break;
-                        #endregion
+#endregion
 
-                        #region Load instructions
+#region Load instructions
                         case 0x21:  //LD IY, nn
                             // Log(string.Format("LD IY, {0,-6:X}", PeekWord(PC)));
                             IY = PeekWord(PC);
@@ -9468,9 +9434,9 @@ namespace Speccy
                             Contend(IR, 1, 2);
                             SP = IY;
                             break;
-                        #endregion
+#endregion
 
-                        #region All FDCB instructions
+#region All FDCB instructions
                         case 0xCB:
                             disp = GetDisplacement(PeekByte(PC));
                             offset = IY + disp; //The displacement required
@@ -10731,9 +10697,9 @@ namespace Speccy
                                     break;
                             }
                             break;
-                        #endregion
+#endregion
 
-                        #region Pop/Push instructions
+#region Pop/Push instructions
                         case 0xE1:  //POP IY
                             // Log("POP IY");
                             IY = PopStack();
@@ -10744,9 +10710,9 @@ namespace Speccy
                             Contend(IR, 1, 1);
                             PushStack(IY);
                             break;
-                        #endregion
+#endregion
 
-                        #region Exchange instruction
+#region Exchange instruction
                         case 0xE3:  //EX (SP), IY
                             {
                                 // Log("EX (SP), IY");
@@ -10759,14 +10725,14 @@ namespace Speccy
                                 MemPtr = IY;
                                 break;
                             }
-                        #endregion
+#endregion
 
-                        #region Jump instruction
+#region Jump instruction
                         case 0xE9:  //JP (IY)
                             // Log("JP (IY)");
                             PC = IY;
                             break;
-                        #endregion
+#endregion
 
                         default:
                             //According to Sean's doc: http://z80.info/z80sean.txt
@@ -10777,7 +10743,7 @@ namespace Speccy
                             break;
                     }
                     break;
-                #endregion
+#endregion
             }
         }
 
@@ -11131,7 +11097,7 @@ namespace Speccy
             if (e.EventType == Speccy.TapeEventType.EDGE_LOAD) {
                 FlipTapeBit();
 
-                #region PULS
+#region PULS
 
                 if (currentBlock is PZXFile.PULS_Block) {
                     PZXFile.PULS_Block block = (PZXFile.PULS_Block)currentBlock;
@@ -11150,9 +11116,9 @@ namespace Speccy
                     }
                     return;
                 }
-                #endregion PULS
+#endregion PULS
 
-                #region DATA
+#region DATA
  else if (currentBlock is PZXFile.DATA_Block) {
                     PZXFile.DATA_Block block = (PZXFile.DATA_Block)currentBlock;
 
@@ -11187,9 +11153,9 @@ namespace Speccy
                     return;
                 }
 
-                #endregion DATA
+#endregion DATA
 
-                #region PAUS
+#region PAUS
  else if (currentBlock is PZXFile.PAUS_Block) {
                     isPauseBlockPreproccess = false;
                     NextPZXBlock();
@@ -11209,7 +11175,7 @@ namespace Speccy
                     return;
                 }
                 */
-                #endregion PAUS
+#endregion PAUS
             } else if (e.EventType == Speccy.TapeEventType.STOP_TAPE) //stop
             {
                 TapeStopped();

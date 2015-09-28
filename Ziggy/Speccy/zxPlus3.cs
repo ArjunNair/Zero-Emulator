@@ -231,9 +231,9 @@ namespace Speccy
             base.In(port);
 
             if (isPlayingRZX) {
-                if (rzx.inputCount < rzx.frame.inputCount) {
+                if (rzx.inputCount < rzx.frame.inputCount)
                     rzxIN = rzx.frame.inputs[rzx.inputCount++];
-                }
+                //rzxIN = rzx.frame.inputs[rzx.inputCount++];
                 return rzxIN;
             }
 

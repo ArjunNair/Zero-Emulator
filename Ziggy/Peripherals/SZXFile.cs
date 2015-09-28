@@ -5,6 +5,33 @@ using zlib;
 
 namespace Peripherals
 {
+
+    public class ByteUtililty {
+        public static byte[] RawSerialize(object anything) {
+            int rawsize = Marshal.SizeOf(anything);
+            IntPtr buffer = Marshal.AllocHGlobal(rawsize);
+            Marshal.StructureToPtr(anything, buffer, false);
+            byte[] rawdatas = new byte[rawsize];
+            Marshal.Copy(buffer, rawdatas, 0, rawsize);
+            Marshal.FreeHGlobal(buffer);
+            return rawdatas;
+        }
+
+        /// <summary>
+        /// converts byte[] to struct
+        /// </summary>
+        public static T RawDeserialize<T>(byte[] rawData, int position) {
+            int rawsize = Marshal.SizeOf(typeof(T));
+            if (rawsize > rawData.Length - position)
+                throw new ArgumentException("Not enough data to fill struct. Array length from position: " + (rawData.Length - position) + ", Struct length: " + rawsize);
+            IntPtr buffer = Marshal.AllocHGlobal(rawsize);
+            Marshal.Copy(rawData, position, buffer, rawsize);
+            T retobj = (T)Marshal.PtrToStructure(buffer, typeof(T));
+            Marshal.FreeHGlobal(buffer);
+            return retobj;
+        }
+    }
+
     //Supports SZX 1.4 specification
     public class SZXFile
     {
@@ -227,8 +254,8 @@ namespace Peripherals
                                                                          typeof(ZXST_Block));
 
                     bufferCounter += Marshal.SizeOf(block);
-
-                    switch (GetID(block.Id)) {
+                    string blockID = GetID(block.Id);
+                    switch (blockID) {
                         case "SPCR":
                             //Read the ZXST_SpecRegs structure
                             specRegs = (ZXST_SpecRegs)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
@@ -386,51 +413,51 @@ namespace Peripherals
                     byte[] buf;
                     ZXST_Block block = new ZXST_Block();
 
-                    buf = RawSerialize(header); //header is filled in by the callee machine
+                    buf = ByteUtililty.RawSerialize(header); //header is filled in by the callee machine
                     r.Write(buf);
 
                     block.Id = GetUIntFromString("CRTR");
                     block.Size = (uint)Marshal.SizeOf(creator);
-                    buf = RawSerialize(block);
+                    buf = ByteUtililty.RawSerialize(block);
                     r.Write(buf);
-                    buf = RawSerialize(creator);
+                    buf = ByteUtililty.RawSerialize(creator);
                     r.Write(buf);
 
                     block.Id = GetUIntFromString("Z80R");
                     block.Size = (uint)Marshal.SizeOf(z80Regs);
-                    buf = RawSerialize(block);
+                    buf = ByteUtililty.RawSerialize(block);
                     r.Write(buf);
-                    buf = RawSerialize(z80Regs);
+                    buf = ByteUtililty.RawSerialize(z80Regs);
                     r.Write(buf);
 
                     block.Id = GetUIntFromString("SPCR");
                     block.Size = (uint)Marshal.SizeOf(specRegs);
-                    buf = RawSerialize(block);
+                    buf = ByteUtililty.RawSerialize(block);
                     r.Write(buf);
-                    buf = RawSerialize(specRegs);
+                    buf = ByteUtililty.RawSerialize(specRegs);
                     r.Write(buf);
 
                     block.Id = GetUIntFromString("KEYB");
                     block.Size = (uint)Marshal.SizeOf(keyboard);
-                    buf = RawSerialize(block);
+                    buf = ByteUtililty.RawSerialize(block);
                     r.Write(buf);
-                    buf = RawSerialize(keyboard);
+                    buf = ByteUtililty.RawSerialize(keyboard);
                     r.Write(buf);
 
                     if (paletteLoaded) {
                         block.Id = GetUIntFromString("PLTT");
                         block.Size = (uint)Marshal.SizeOf(palette);
-                        buf = RawSerialize(block);
+                        buf = ByteUtililty.RawSerialize(block);
                         r.Write(buf);
-                        buf = RawSerialize(palette);
+                        buf = ByteUtililty.RawSerialize(palette);
                         r.Write(buf);
                     }
                     if (header.MachineId > (byte)ZXTYPE.ZXSTMID_48K) {
                         block.Id = GetUIntFromString("AY\0\0");
                         block.Size = (uint)Marshal.SizeOf(ayState);
-                        buf = RawSerialize(block);
+                        buf = ByteUtililty.RawSerialize(block);
                         r.Write(buf);
-                        buf = RawSerialize(ayState);
+                        buf = ByteUtililty.RawSerialize(ayState);
                         r.Write(buf);
                         byte[] ram = new byte[16384];
                         for (int f = 0; f < 8; f++) {
@@ -439,9 +466,9 @@ namespace Peripherals
                             ramPage.wFlags = 0; //not compressed
                             block.Id = GetUIntFromString("RAMP");
                             block.Size = (uint)(Marshal.SizeOf(ramPage) + 16384);
-                            buf = RawSerialize(block);
+                            buf = ByteUtililty.RawSerialize(block);
                             r.Write(buf);
-                            buf = RawSerialize(ramPage);
+                            buf = ByteUtililty.RawSerialize(ramPage);
                             r.Write(buf);
                             for (int g = 0; g < 8192; g++) {
                                 ram[g] = (byte)(RAM_BANK[f * 2][g] & 0xff);
@@ -458,12 +485,13 @@ namespace Peripherals
                         ramPage.wFlags = 0; //not compressed
                         block.Id = GetUIntFromString("RAMP");
                         block.Size = (uint)(Marshal.SizeOf(ramPage) + 16384);
-                        buf = RawSerialize(block);
+                        buf = ByteUtililty.RawSerialize(block);
                         r.Write(buf);
-                        buf = RawSerialize(ramPage);
+                        buf = ByteUtililty.RawSerialize(ramPage);
                         r.Write(buf);
                         for (int g = 0; g < 8192; g++) {
                             //me am angry.. poda thendi... saree vangi tharamattaaai?? poda! nonsense! style moonji..madiyan changu..malayalam ariyatha
+                            //Lol! That's my wife cursing me for spending my time on this crap instead of her. Such a sweetie pie!
                             ram[g] = (byte)(RAM_BANK[0][g] & 0xff);
                             ram[g + 8192] = (byte)(RAM_BANK[1][g] & 0xff);
                         }
@@ -477,9 +505,9 @@ namespace Peripherals
                         //Array.Copy(RAM_BANK[2 * 2 + 1], 0, ramPage.chData, 8192, 8192);
                         block.Id = GetUIntFromString("RAMP");
                         block.Size = (uint)(Marshal.SizeOf(ramPage) + 16384);
-                        buf = RawSerialize(block);
+                        buf = ByteUtililty.RawSerialize(block);
                         r.Write(buf);
-                        buf = RawSerialize(ramPage);
+                        buf = ByteUtililty.RawSerialize(ramPage);
                         r.Write(buf);
                         for (int g = 0; g < 8192; g++) {
                             ram[g] = (byte)(RAM_BANK[ramPage.chPageNo * 2][g] & 0xff);
@@ -492,9 +520,9 @@ namespace Peripherals
                         ramPage.wFlags = 0; //not compressed
                         block.Id = GetUIntFromString("RAMP");
                         block.Size = (uint)(Marshal.SizeOf(ramPage) + 16384);
-                        buf = RawSerialize(block);
+                        buf = ByteUtililty.RawSerialize(block);
                         r.Write(buf);
-                        buf = RawSerialize(ramPage);
+                        buf = ByteUtililty.RawSerialize(ramPage);
                         r.Write(buf);
                         for (int g = 0; g < 8192; g++) {
                             ram[g] = (byte)(RAM_BANK[ramPage.chPageNo * 2][g] & 0xff);
@@ -517,13 +545,12 @@ namespace Peripherals
                         tape.compressedSize = externalTapeFile.Length;
                         tape.uncompressedSize = externalTapeFile.Length;
                         block.Size = (uint)Marshal.SizeOf(tape) + (uint)tape.uncompressedSize;
-                        buf = RawSerialize(block);
+                        buf = ByteUtililty.RawSerialize(block);
                         r.Write(buf);
-                        buf = RawSerialize(tape);
+                        buf = ByteUtililty.RawSerialize(tape);
                         r.Write(buf);
-                        //System.Text.ASCIIEncoding encode = new System.Text.ASCIIEncoding();
-                        //System.Text.UTF8Encoding encode = new System.Text.UTF8Encoding();
-                        char[] tapeName = externalTapeFile.ToCharArray(); ;// encode.GetBytes(externalTapeFile);
+                     
+                        char[] tapeName = externalTapeFile.ToCharArray();
 
                         r.Write(tapeName);
                     }
@@ -534,14 +561,5 @@ namespace Peripherals
             return szxData;
         }
 
-        private static byte[] RawSerialize(object anything) {
-            int rawsize = Marshal.SizeOf(anything);
-            IntPtr buffer = Marshal.AllocHGlobal(rawsize);
-            Marshal.StructureToPtr(anything, buffer, false);
-            byte[] rawdatas = new byte[rawsize];
-            Marshal.Copy(buffer, rawdatas, 0, rawsize);
-            Marshal.FreeHGlobal(buffer);
-            return rawdatas;
-        }
     }
 }

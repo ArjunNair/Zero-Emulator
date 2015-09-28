@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.InteropServices;
 
 namespace Peripherals
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SNA_HEADER
     {
         public byte I;                  //I Register
@@ -20,11 +23,14 @@ namespace Peripherals
         public SNA_HEADER HEADER;              //The above header
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public class SNA_48K : SNA_SNAPSHOT
     {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 49152)]
         public byte[] RAM;              //Contents of the RAM
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public class SNA_128K : SNA_SNAPSHOT
     {
         public int PC;                                  //PC Register
@@ -35,8 +41,6 @@ namespace Peripherals
 
     public class SNAFile
     {
-        // SNA_HEADER header = new SNA_HEADER();
-
         //Will return a filled snapshot structure from buffer
         public static SNA_SNAPSHOT LoadSNA(System.IO.Stream fs) {
             SNA_SNAPSHOT snapshot;
@@ -133,6 +137,29 @@ namespace Peripherals
                 sna = LoadSNA(fs);
             }
             return sna;
+        }
+
+        public static void SaveSNA(string filename, SNA_SNAPSHOT sna) {
+
+            using (System.IO.FileStream fs = new System.IO.FileStream(filename, System.IO.FileMode.Open)) {
+
+                if (sna is SNA_48K) {
+                    BinaryFormatter b = new BinaryFormatter();
+                    using (System.IO.MemoryStream stream = new System.IO.MemoryStream()) {
+                        b.Serialize(stream, sna.HEADER);
+                        byte[] bytes = stream.ToArray();
+                        fs.Write(bytes, 0, bytes.Length);
+                    }
+
+                    using (System.IO.MemoryStream stream = new System.IO.MemoryStream()) {
+                        b.Serialize(stream, ((SNA_48K)sna).RAM);
+                        byte[] bytes = stream.ToArray();
+                        fs.Write(bytes, 0, bytes.Length);
+                    }
+                    
+                    //b.Serialize(fs, ((SNA_48K)sna).RAM);
+                }
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 namespace ZeroWin
 {

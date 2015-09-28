@@ -455,6 +455,28 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
         }
 
+        public void RZXCallback(RZXFileEventArgs rzxArgs) {
+
+            switch (rzxArgs.blockID) {
+                case RZX_BlockType.CREATOR:
+                    Console.WriteLine(rzxArgs.info);
+                    break;
+
+                case RZX_BlockType.SNAPSHOT:
+                    if (rzxArgs.snapData.extension == "sna\0")
+                        LoadSNA(new MemoryStream(rzxArgs.snapData.data));
+                    else if (rzxArgs.snapData.extension == "z80\0")
+                        LoadZ80(new MemoryStream(rzxArgs.snapData.data));
+                    else if (rzxArgs.snapData.extension == "szx\0")
+                        LoadSZX(new MemoryStream(rzxArgs.snapData.data));
+
+                    break;
+                case RZX_BlockType.RECORD:
+                    zx.tstates = rzxArgs.tstates;
+                    break;
+            }
+        }
+
         public Form1()
         {
             InitializeComponent();
@@ -3436,9 +3458,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private void UseRZX(RZXFile rzx, bool isRecording)
         {
             previousMachine = zx.model;
+
             byte index = 0;
 
-            if (isRecording && rzx.snapshotData[1] != null)
+            if (!isRecording && rzx.snapshotData[1] != null)
                 index = 1;
 
             if (rzx.snapshotData[index] != null) {
@@ -3475,8 +3498,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         public void LoadRZX(string filename, bool isRecording)
         {
             RZXFile rzx = new RZXFile();
-            rzx.LoadRZX(filename);
-            UseRZX(rzx, isRecording);
+            rzx.RZXFileEventHandler += RZXCallback;
+            rzx.Playback(filename);
+            zx.PlaybackRZX(rzx);
+            //rzx.LoadRZX(filename);
+            //UseRZX(rzx, isRecording);
         }
 
         private void UseZ80(Z80_SNAPSHOT z80)
@@ -4136,11 +4162,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             saveFileDialog1.Title = "Save Snapshot";
             saveFileDialog1.FileName = "";
-            saveFileDialog1.Filter = "SZX snapshot|*.szx";
+            saveFileDialog1.Filter = "SZX | *.szx| SNA | *.sna";
 
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                zx.SaveSZX(saveFileDialog1.FileName);
+                if (saveFileDialog1.FilterIndex == 1)
+                    zx.SaveSZX(saveFileDialog1.FileName);
+                else
+                    zx.SaveSNA(saveFileDialog1.FileName);
+
                 MessageBox.Show("Snapshot saved successfully!", "File saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -4617,6 +4647,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             openFileDialog1.Title = "Choose a file";
             openFileDialog1.FileName = "";
             openFileDialog1.Filter = "Action Replay (*.rzx)|*.rzx";
+
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
