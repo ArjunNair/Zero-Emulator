@@ -809,6 +809,9 @@ namespace Speccy
                 isPlayingRZX = false;
                 isRecordingRZX = false;
 #if NEW_RZX_METHODS
+                if (doFinalise)
+                    rzx.SaveSession(CreateSZX().GetSZXData(), doFinalise);
+
                 rzx.Close();
 #else
                 rzx.Save(filename, (doFinalise ? null : CreateSZX().GetSZXData()));
