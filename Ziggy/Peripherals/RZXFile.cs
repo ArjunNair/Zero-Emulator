@@ -1,8 +1,12 @@
-﻿using System;
+﻿#define NEW_RZX_METHODS
+
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using zlib;
+
+
 
 namespace Peripherals
 {
@@ -107,6 +111,7 @@ namespace Peripherals
     }
 
     public class RZXFileEventArgs {
+        public bool hasEnded;
         public RZX_BlockType blockID;
         public RZXInfo info;
         public RZXSnapshotData snapData;
@@ -145,7 +150,7 @@ namespace Peripherals
             public uint tstates;
         };
 
-        private List<byte> inputs = new List<byte>();
+        public List<byte> inputs = new List<byte>();
         private List<byte> oldInputs = new List<byte>();
         private const int ZBUFLEN = 16384;
         private byte[] zBuffer;
@@ -531,12 +536,12 @@ namespace Peripherals
         }
 
         public int GetPlaybackPercentage() {
-            return frameCount * 100 / frames.Count;
+            return (frames.Count > 0 ? frameCount * 100 / frames.Count : 0);
         }
         #endregion
 
-        private bool OpenFile(string filename) {
-            rzxFile = new FileStream(filename, FileMode.Open);
+        private bool OpenFile(FileStream fs) {
+            rzxFile = fs;
             binaryReader = new BinaryReader(rzxFile);
             int bytesToRead = (int)rzxFile.Length;
 
@@ -563,6 +568,11 @@ namespace Peripherals
             return true;
         }
 
+        private bool OpenFile(string filename) {
+            FileStream fs  = new FileStream(filename, FileMode.Open);
+            return OpenFile(fs);
+        }
+
         public void SaveSession(byte[] szxData, bool isFinalise) {
             if (isRecordingBlock)
                 CloseIRB();
@@ -578,12 +588,12 @@ namespace Peripherals
             if (isRecordingBlock)
                 CloseIRB();
 
-            if (!isReading) {
+            if (!isReading && binaryWriter != null) {
                 binaryWriter.Flush();
                 binaryWriter.Close();
                 binaryWriter = null;
             }
-            else {
+            else if (binaryReader != null) {
                 if (pinnedBuffer.IsAllocated)
                     pinnedBuffer.Free();
 
@@ -591,7 +601,9 @@ namespace Peripherals
                 binaryReader = null;
             }
 
-            rzxFile.Close();
+            if (rzxFile != null)
+                rzxFile.Close();
+
             rzxFile = null;
         }
 
@@ -668,7 +680,7 @@ namespace Peripherals
             rzxFile.Seek(currentPos, SeekOrigin.Begin);
             currentRecordFilePos = currentPos;
             isRecordingBlock = false;
-
+            inputs = new List<byte>();
         }
 
         private RZX_Snapshot ReadSnapshot(int dataSize, out byte[] snapdata) {
@@ -678,7 +690,7 @@ namespace Peripherals
                                                          typeof(RZX_Snapshot));
             int snapDataOffset = Marshal.SizeOf(snap);
 
-            if ((snap.flags & 0x2) != 0) {
+            if ((snapshot.flags & 0x2) != 0) {
                 int snapSize = dataSize - snapDataOffset;
 
                 MemoryStream compressedData = new MemoryStream(fileBuffer, snapDataOffset, snapSize);
@@ -697,8 +709,8 @@ namespace Peripherals
                 }
             }
             else {
-                snapdata = new byte[snap.uncompressedSize];
-                Array.Copy(fileBuffer, snapDataOffset, snapdata, 0, snap.uncompressedSize);
+                snapdata = new byte[snapshot.uncompressedSize];
+                Array.Copy(fileBuffer, snapDataOffset, snapdata, 0, snapshot.uncompressedSize);
             }
 
             return snapshot;
@@ -756,10 +768,9 @@ namespace Peripherals
 
                             if (isCompressedFrames) {
                                 currentRecordFilePos = rzxFile.Position;
-                                OpenZStream(currentRecordFilePos, true);
+                                OpenZStream(currentRecordFilePos, blockDataSize, true);
                             }
 
-                            readBlockIndex += blockDataSize;
                         }
                         return true;
 
@@ -790,8 +801,8 @@ namespace Peripherals
             zStream.next_out = buffer;
             zStream.avail_out = numBytesToRead;
             zStream.next_out_index = 0;
-
-            while (zStream.avail_out > 0) {
+            int err = zlibConst.Z_OK;
+            while (zStream.avail_out > 0 && err == zlibConst.Z_OK) {
 
                 if (zStream.avail_in == 0) {
                     zStream.avail_in = binaryReader.Read(zBuffer, 0, ZBUFLEN);
@@ -803,18 +814,19 @@ namespace Peripherals
                     zStream.next_in_index = 0;
                 }
 
-                zStream.inflate(zlibConst.Z_NO_FLUSH);
+               err = zStream.inflate(zlibConst.Z_FINISH);
             }
+            Console.WriteLine(err);
             return numBytesToRead - zStream.avail_out;
         }
 
         private int WriteToZStream(byte[] buffer, int numBytesToWrite) {
-            int err;
+            int err = zlibConst.Z_OK;
             zStream.avail_in = numBytesToWrite;
             zStream.next_in = buffer;
             zStream.next_in_index = 0;
             
-            while (zStream.avail_in > 0) {
+            while (zStream.avail_in > 0 && err == zlibConst.Z_OK) {
 
                 if (zStream.avail_out == 0) {
                     binaryWriter.Write(zBuffer, 0, ZBUFLEN);
@@ -855,7 +867,7 @@ namespace Peripherals
             return 0;
         }
 
-        private bool OpenZStream(long offset, bool isRead) {
+        private bool OpenZStream(long offset, int numBytesToRead, bool isRead) {
             int err;
             zBuffer = new byte[ZBUFLEN];
             zStream = new ZStream();
@@ -954,6 +966,7 @@ namespace Peripherals
                 RZXFileEventHandler(rzxArgs);
             }
 
+            inputs = new List<byte>();
             return true;
 
         }
@@ -993,14 +1006,11 @@ namespace Peripherals
             catch {
                 return false;
             }
-
+            inputs = new List<byte>();
             return true;
         }
 
-        public bool Playback(string filename) {
-            if (!OpenFile(filename))
-                return false;
-
+        private bool ReadFile() {
             Scan();
             isReading = true;
 
@@ -1014,6 +1024,20 @@ namespace Peripherals
             return true;
         }
 
+        public bool Playback(FileStream fs) {
+            if (!OpenFile(fs))
+                return false;
+
+            return ReadFile();
+        }
+
+        public bool Playback(string filename) {
+            if (!OpenFile(filename))
+                return false;
+
+            return ReadFile();
+        }
+
         public bool UpdatePlayback() {
             if (state != RZX_State.PLAYBACK)
                 return false;
@@ -1025,24 +1049,53 @@ namespace Peripherals
                 if (!SeekIRB()) {
                     Close();
                     state = RZX_State.NONE;
+
+                    if (RZXFileEventHandler != null) {
+                        RZXFileEventArgs rzxArgs = new RZXFileEventArgs();
+                        rzxArgs.hasEnded = true;
+                        RZXFileEventHandler(rzxArgs);
+                        RZXFileEventHandler = null;
+                    }
+
                     return false;
                 }
             }
 
             if (isCompressedFrames) {
                 byte[] buffer = new byte[4];
-                ReadFromZStream(ref buffer, 4);
-                RZX_Frame newFrame = new RZX_Frame();
-                newFrame.instructionCount = BitConverter.ToUInt16(buffer, 0);
-                newFrame.inputCount = BitConverter.ToUInt16(buffer, 2);
+                bool err = false;
+                err = ReadFromZStream(ref buffer, 4) <= 0;
 
-                if (newFrame.inputCount > 0 && (newFrame.inputCount != 0xffff)) {
-                    frame = newFrame;
-                    frame.inputs = new byte[frame.inputCount];
-                    ReadFromZStream(ref frame.inputs, frame.inputCount);
+                if (!err) {
+                    RZX_Frame newFrame = new RZX_Frame();
+                    newFrame.instructionCount = BitConverter.ToUInt16(buffer, 0);
+                    newFrame.inputCount = BitConverter.ToUInt16(buffer, 2);
+
+                    if (newFrame.inputCount > 0 && (newFrame.inputCount != 0xffff)) {
+                        frame = newFrame;
+                        frame.inputs = new byte[frame.inputCount];
+                        err = ReadFromZStream(ref frame.inputs, frame.inputCount) <= 0;
+                    }
+                    else
+                        frame.instructionCount = newFrame.instructionCount;
                 }
-                else
-                    frame.instructionCount = newFrame.instructionCount;
+
+                if (err) {
+                    /*
+                    Close();
+                    state = RZX_State.NONE;
+
+                    if (RZXFileEventHandler != null) {
+                        RZXFileEventArgs rzxArgs = new RZXFileEventArgs();
+                        rzxArgs.hasEnded = true;
+                        RZXFileEventHandler(rzxArgs);
+                        RZXFileEventHandler = null;
+                    }
+
+                    return false;*/
+                    isReadingIRB = false;
+
+                }
             }
             inputCount = 0;
             fetchCount = 0;
@@ -1051,7 +1104,7 @@ namespace Peripherals
             return true;
         }
 
-        public bool UpdateRecording(List<byte> inputList, int tstates) {
+        public bool UpdateRecording(int tstates) {
             if (state != RZX_State.RECORDING)
                 return false;
 
@@ -1081,22 +1134,22 @@ namespace Peripherals
                 frameCount = 0;
 
                 if (isCompressedFrames) 
-                    OpenZStream(rzxFile.Position, false);
+                    OpenZStream(rzxFile.Position, 0, false);
             }
 
             ushort inCount = 65535;
                     
-            if (oldInputs.Count == inputList.Count) {
+            if (oldInputs.Count == inputs.Count) {
 
-                for (int i = 0; i < inputList.Count; i++) {
-                    if (inputList[i] != oldInputs[i]) { 
-                        inCount = (ushort)inputList.Count;
+                for (int i = 0; i < inputs.Count; i++) {
+                    if (inputs[i] != oldInputs[i]) { 
+                        inCount = (ushort)inputs.Count;
                         break;
                     }
                 }
             }
             else
-                inCount = (ushort)inputList.Count;
+                inCount = (ushort)inputs.Count;
 
             byte[] frameHeader = new byte[4];
             frameHeader[0] = (byte)(fetchCount & 0xff);
@@ -1108,11 +1161,12 @@ namespace Peripherals
                 WriteToZStream(frameHeader, 4);
 
             if ((inCount > 0) && (inCount != 65535))
-                WriteToZStream(inputList.ToArray(), inputList.Count);
+                WriteToZStream(inputs.ToArray(), inputs.Count);
 
             fetchCount = 0;
             oldInputs.Clear();
-            oldInputs = new List<byte>(inputList);
+            oldInputs = new List<byte>(inputs);
+            inputs = new List<byte>();
             frameCount++;
 
             return true;
@@ -1177,6 +1231,8 @@ namespace Peripherals
                     }
                     bookmark = bookmarks[currentBookmark];
                 }
+                bookmarks.Remove(bookmark);
+                currentBookmark--;
 
                 //The current record block is invalid now, so we save it out but we will set it up to be overwritten by subsequent file writes
                 CloseIRB();

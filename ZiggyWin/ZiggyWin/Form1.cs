@@ -175,9 +175,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private double frameTime = 0;
         private double totalFrameTime = 0;
         private int averageFPS = 50;
-
+        private bool softResetOnly = false;
         private bool isResizing = false;
-        private bool didPlayRZX = false;
+        private bool isPlayingRZX = false;
         public bool invokeMonitor = false;
         public bool pauseEmulation = false;
         public bool tapeFastLoad = false;
@@ -457,12 +457,19 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public void RZXCallback(RZXFileEventArgs rzxArgs) {
 
+            if (rzxArgs.hasEnded) {
+                SetEmulationState(EMULATOR_STATE.IDLE);
+                UpdateRZXInterface();
+                return;
+            }
+
             switch (rzxArgs.blockID) {
                 case RZX_BlockType.CREATOR:
                     Console.WriteLine(rzxArgs.info);
                     break;
 
                 case RZX_BlockType.SNAPSHOT:
+                    softResetOnly = true;
                     if (rzxArgs.snapData.extension == "sna\0")
                         LoadSNA(new MemoryStream(rzxArgs.snapData.data));
                     else if (rzxArgs.snapData.extension == "z80\0")
@@ -472,7 +479,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                     break;
                 case RZX_BlockType.RECORD:
-                    zx.tstates = rzxArgs.tstates;
+                    zx.tstates = (int)rzxArgs.tstates;
                     break;
             }
         }
@@ -617,6 +624,46 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 zx.UpdateScreenBuffer(zx.FrameLength);
             zx.needsPaint = true;
             System.Threading.Thread.Sleep(1);
+        }
+
+        private void SetEmulationState(EMULATOR_STATE newState) {
+            if (newState == state)
+                return;
+
+            state = newState;
+
+            switch (state) {
+                  
+                case EMULATOR_STATE.IDLE:
+                    statusLabelText.Text = "Ready";
+                    zx.Resume();
+                    break;
+
+                case EMULATOR_STATE.PAUSED:
+                    statusLabelText.Text = "Emulation Paused";
+                    zx.Pause();
+                    break;
+
+                case EMULATOR_STATE.PLAYING_RZX:
+                    UpdateRZXInterface();
+                    break;
+
+                case EMULATOR_STATE.RECORDING_RZX:
+                    UpdateRZXInterface();
+                    statusLabelText.Text = "Recording RZX ...";
+                    break;
+            }
+        }
+
+        private void UpdateRZXInterface() {
+            rzxRecordButton.Enabled = !(state == EMULATOR_STATE.PLAYING_RZX || state == EMULATOR_STATE.RECORDING_RZX);
+            rzxStopToolStripMenuItem1.Enabled = (state == EMULATOR_STATE.PLAYING_RZX || state == EMULATOR_STATE.RECORDING_RZX);
+            rzxFinaliseToolStripMenuItem.Enabled = (state == EMULATOR_STATE.RECORDING_RZX);
+            rzxDiscardToolStripMenuItem.Enabled = (state == EMULATOR_STATE.RECORDING_RZX);
+            rzxRecordToolStripMenuItem.Enabled = !(state == EMULATOR_STATE.PLAYING_RZX || state == EMULATOR_STATE.RECORDING_RZX);
+            rzxContinueSessionToolStripMenuItem.Enabled = !(state == EMULATOR_STATE.PLAYING_RZX || state == EMULATOR_STATE.RECORDING_RZX);
+            rzxPlaybackToolStripMenuItem.Enabled = !(state == EMULATOR_STATE.PLAYING_RZX || state == EMULATOR_STATE.RECORDING_RZX);
+            rzxInsertBookmarkToolStripMenuItem.Enabled = (state == EMULATOR_STATE.RECORDING_RZX);
         }
 
         private int GetSpectrumModelIndex(string speccyModel)
@@ -2566,24 +2613,30 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         {
             zx.Pause();
 
-            state = EMULATOR_STATE.IDLE;
-            didPlayRZX = false;
-            dxWindow.Suspend();
+            if (!softResetOnly) {
+                SetEmulationState(EMULATOR_STATE.IDLE);
+                UpdateRZXInterface();
+                isPlayingRZX = false;
 
-            if (debugger != null)
-            {
-                debugger.DeRegisterAllEvents();
-                debugger.DeSyncWithZX();
+                if (debugger != null) {
+                    debugger.DeRegisterAllEvents();
+                    debugger.DeSyncWithZX();
+                }
+
+                if (tapeDeck != null)
+                    tapeDeck.UnRegisterEventHooks();
             }
 
-            if (tapeDeck != null)
-                tapeDeck.UnRegisterEventHooks();
+            softResetOnly = false;
+            dxWindow.Suspend();
 
             showDiskIndicator = false;
             zx.DiskEvent -= new DiskEventHandler(DiskMotorEvent);
             zx.Shutdown();
             zx = null;
+
             System.GC.Collect();
+
             config.Model = _model;
             Directory.SetCurrentDirectory(Application.StartupPath);
 
@@ -2639,7 +2692,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             zx.SetEmulationSpeed(config.EmulationSpeed);
             zx.EnableAY(config.EnableAYFor48K);
             zx.SetStereoSound(config.StereoSoundOption);
-            //zx.Reset();
 
             if ((joystick2MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON) || (joystick1MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON))
                 zx.HasKempstonJoystick = true;
@@ -3074,9 +3126,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void hardResetToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            state = EMULATOR_STATE.IDLE;
+            SetEmulationState(EMULATOR_STATE.IDLE);
+            UpdateRZXInterface();
 
-            if (didPlayRZX)
+            if (isPlayingRZX)
             {
                 showTapeIndicator = false;
                 switch (previousMachine)
@@ -3234,17 +3287,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             toolStripMenuItem6.Checked = val;
             toolStripButton4.Checked = val;
 
-            if (pauseEmulation)
-            {
-                statusLabelText.Text = "Emulation Paused";
-                zx.Pause();
-
-            }
-            else
-            {
-                statusLabelText.Text = "Ready";
-                zx.Resume();
-            }
+            SetEmulationState((pauseEmulation ? EMULATOR_STATE.PAUSED : EMULATOR_STATE.IDLE));
+         
         }
 
         
@@ -3302,89 +3346,76 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void UseSZX(SZXFile szx)
         {
-            if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_48K)
-            {
-                if (config.HighCompatibilityMode)
-                {
-                    zXSpectrumToolStripMenuItem_Click(this, null);
-                    zx.Out(0x7ffd, 0x10);
-                    zx.Out(0x1ffd, 0x04);
-                    zx.pagingDisabled = true;
-                }
-                else
-                    zx48ktoolStripMenuItem1_Click(this, null);
-            }
-            else if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_128K)
-            {
-                if (config.HighCompatibilityMode)
-                    zXSpectrumToolStripMenuItem_Click(this, null);
-                else //if (config.Model == MachineModel._128k)
-                    zXSpectrum128KToolStripMenuItem_Click(this, null);
-                //else
-                //    zXSpectrumToolStripMenuItem_Click(this, null);
-            }
-            else if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_PENTAGON128)
-            {
-                pentagon128KToolStripMenuItem_Click(this, null);
-            }
-            else if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_PLUS3)
-            {
-                zxSpectrum3ToolStripMenuItem_Click(this, null);
-            }
-
-            //Check if file is required in tape deck
-            if (szx.InsertTape)
-            {
-                //External tape file?
-                if (szx.tape.flags == 0)
-                {
-                    //Try to load the tape silently.
-                    //With any luck the externalTapeFile holds the full path to the tape.
-                    if (File.Exists(szx.externalTapeFile))
-                    {
-                        LoadZXFile(szx.externalTapeFile);
+            if (!softResetOnly) {
+                if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_48K) {
+                    if (config.HighCompatibilityMode) {
+                        zXSpectrumToolStripMenuItem_Click(this, null);
+                        zx.Out(0x7ffd, 0x10);
+                        zx.Out(0x1ffd, 0x04);
+                        zx.pagingDisabled = true;
                     }
-                    else //Nope, not found. Ask the user what to do.
-                    {
-                        String s = "The following tape is expected in the tape deck:\n" + szx.externalTapeFile + "\n\nDo you wish to browse for this file?";
-                        if (MessageBox.Show(s, "File request", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    else
+                        zx48ktoolStripMenuItem1_Click(this, null);
+                }
+                else if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_128K) {
+                    if (config.HighCompatibilityMode)
+                        zXSpectrumToolStripMenuItem_Click(this, null);
+                    else //if (config.Model == MachineModel._128k)
+                        zXSpectrum128KToolStripMenuItem_Click(this, null);
+                    //else
+                    //    zXSpectrumToolStripMenuItem_Click(this, null);
+                }
+                else if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_PENTAGON128) {
+                    pentagon128KToolStripMenuItem_Click(this, null);
+                }
+                else if (szx.header.MachineId == (int)SZXFile.ZXTYPE.ZXSTMID_PLUS3) {
+                    zxSpectrum3ToolStripMenuItem_Click(this, null);
+                }
+
+                //Check if file is required in tape deck
+                if (szx.InsertTape) {
+                    //External tape file?
+                    if (szx.tape.flags == 0) {
+                        //Try to load the tape silently.
+                        //With any luck the externalTapeFile holds the full path to the tape.
+                        if (File.Exists(szx.externalTapeFile)) {
+                            LoadZXFile(szx.externalTapeFile);
+                        }
+                        else //Nope, not found. Ask the user what to do.
                         {
-                            openFileDialog1.InitialDirectory = recentFolder;
-                            openFileDialog1.FileName = "";
-                            openFileDialog1.Filter = "Tapes (*.pzx, *.tap, *.tzx, *.csw)|*.pzx;*.tap;*.tzx;*.csw|ZIP Archive (*.zip)|*.zip";
-                            if (openFileDialog1.ShowDialog() == DialogResult.OK)
-                            {
-                                LoadZXFile(openFileDialog1.FileName);
-                                recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
+                            String s = "The following tape is expected in the tape deck:\n" + szx.externalTapeFile + "\n\nDo you wish to browse for this file?";
+                            if (MessageBox.Show(s, "File request", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
+                                openFileDialog1.InitialDirectory = recentFolder;
+                                openFileDialog1.FileName = "";
+                                openFileDialog1.Filter = "Tapes (*.pzx, *.tap, *.tzx, *.csw)|*.pzx;*.tap;*.tzx;*.csw|ZIP Archive (*.zip)|*.zip";
+                                if (openFileDialog1.ShowDialog() == DialogResult.OK) {
+                                    LoadZXFile(openFileDialog1.FileName);
+                                    recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    System.IO.Stream s = new System.IO.MemoryStream(szx.embeddedTapeData);
-                    tapeDeck.InsertTape("", s);
-                }
-            }
-
-            //Check if any disks needs to be inserted
-            for (int f = 0; f < szx.numDrivesPresent; f++)
-            {
-                if (szx.InsertDisk[f])
-                {
-                    //Try to load the tape silently.
-                    //With any luck the externalTapeFile holds the full path to the tape.
-                    if (File.Exists(szx.externalDisk[f]))
-                    {
-                        InsertDisk(szx.externalDisk[f], (byte)f);
-                        zx.DiskInsert(szx.externalDisk[f], (byte)f);
+                    else {
+                        System.IO.Stream s = new System.IO.MemoryStream(szx.embeddedTapeData);
+                        tapeDeck.InsertTape("", s);
                     }
-                    else //No disk found. Ask user what to do.
-                    {
-                        String s = String.Format("The following disk is expected in drive {0}:\n{1}\n\nDo you wish to browse for this file?", f, szx.externalDisk[f]);
-                        if (MessageBox.Show(s, "File request", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                }
+
+                //Check if any disks needs to be inserted
+                for (int f = 0; f < szx.numDrivesPresent; f++) {
+                    if (szx.InsertDisk[f]) {
+                        //Try to load the tape silently.
+                        //With any luck the externalTapeFile holds the full path to the tape.
+                        if (File.Exists(szx.externalDisk[f])) {
+                            InsertDisk(szx.externalDisk[f], (byte)f);
+                            zx.DiskInsert(szx.externalDisk[f], (byte)f);
+                        }
+                        else //No disk found. Ask user what to do.
                         {
-                            OpenDiskFile((byte)f);
+                            String s = String.Format("The following disk is expected in drive {0}:\n{1}\n\nDo you wish to browse for this file?", f, szx.externalDisk[f]);
+                            if (MessageBox.Show(s, "File request", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes) {
+                                OpenDiskFile((byte)f);
+                            }
                         }
                     }
                 }
@@ -3392,12 +3423,14 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             config.UseLateTimings = (szx.header.Flags & 0x1) != 0;
             zx.UseSZX(szx);
             szx = null;
+            softResetOnly = false;
         }
 
         public bool LoadSZX(Stream fs)
         {
             SZXFile szx = new SZXFile();
             bool success = szx.LoadSZX(fs);
+
             if (success)
                 UseSZX(szx);
 
@@ -3412,10 +3445,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 UseSZX(szx);
 
             return success;
-        }
-
-        public void SaveSZX()
-        {
         }
 
         private void UseSNA(SNA_SNAPSHOT sna)
@@ -3478,29 +3507,40 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
 
             if (!isRecording) {
-                didPlayRZX = true;
-                zx.PlaybackRZX(rzx);
-                state = EMULATOR_STATE.PLAYING_RZX;
+                isPlayingRZX = true;
+                rzx.RZXFileEventHandler += RZXCallback;
+                zx.StartPlaybackRZX(rzx);
+                SetEmulationState(EMULATOR_STATE.PLAYING_RZX);
             }
             else {
                 zx.ContinueRecordingRZX(rzx);
-                state = EMULATOR_STATE.RECORDING_RZX;
+                SetEmulationState(EMULATOR_STATE.RECORDING_RZX);
             }
         }
 
         public void LoadRZX(Stream fs, bool isRecording)
         {
+            /*
+            isPlayingRZX = true;
             RZXFile rzx = new RZXFile();
             rzx.LoadRZX(fs);
+            rzx.RZXFileEventHandler += RZXCallback;
+            rzx.Playback(fs);
+            zx.StartPlaybackRZX(rzx);
+            SetEmulationState(EMULATOR_STATE.PLAYING_RZX);
             UseRZX(rzx, isRecording);
+            */
         }
 
-        public void LoadRZX(string filename, bool isRecording)
+        public void LoadRZX(string filename)
         {
+            isPlayingRZX = true;
             RZXFile rzx = new RZXFile();
+            rzx.LoadRZX(filename);
             rzx.RZXFileEventHandler += RZXCallback;
             rzx.Playback(filename);
-            zx.PlaybackRZX(rzx);
+            zx.StartPlaybackRZX(rzx);
+            SetEmulationState(EMULATOR_STATE.PLAYING_RZX);
             //rzx.LoadRZX(filename);
             //UseRZX(rzx, isRecording);
         }
@@ -3991,7 +4031,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             else
                 if (ext == ".rzx")
                 {
-                    LoadRZX(filename, false);
+                    LoadRZX(filename);
                     if (tapeDeck.Visible)
                         tapeDeck.Hide();
                 }
@@ -4652,7 +4692,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             {
                 recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
                 LoadZXFile(openFileDialog1.FileName);
-                rzxStopToolStripMenuItem1.Enabled = true;
             }
 
             dxWindow.Resume();
@@ -4660,18 +4699,17 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.Focus();
         }
 
-        private void rzxRecordToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            zx.StartRecordingRZX();
-            rzxRecordButton.Enabled = false;
-            rzxStopToolStripMenuItem1.Enabled = true;
-            rzxFinaliseToolStripMenuItem.Enabled = true;
-            rzxDiscardToolStripMenuItem.Enabled = true;
-            rzxRecordToolStripMenuItem.Enabled = false;
-            rzxContinueSessionToolStripMenuItem.Enabled = false;
-            rzxPlaybackToolStripMenuItem.Enabled = false;
-            state = EMULATOR_STATE.RECORDING_RZX;
-            //PauseEmulation(true);
+        private void rzxRecordToolStripMenuItem_Click(object sender, EventArgs e) {
+            ShouldExitFullscreen();
+
+            saveFileDialog1.Title = "Save Action Replay";
+            saveFileDialog1.FileName = "";
+            saveFileDialog1.Filter = "Action Replay|*.rzx";
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK) {
+                zx.StartRecordingRZX(saveFileDialog1.FileName, RZXCallback);
+                SetEmulationState(EMULATOR_STATE.RECORDING_RZX);
+            }
         }
 
         private void rzxContinueSessionToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4685,23 +4723,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 recentFolder = Path.GetDirectoryName(openFileDialog1.FileName);
-                LoadRZX(openFileDialog1.FileName, true);
+                //LoadRZX(openFileDialog1.FileName, true);
 
-                if (!zx.IsValidSessionRZX())
-                {
+                //if (!zx.IsValidSessionRZX())
+                if (!zx.ContinueRZXSession(openFileDialog1.FileName))
                     MessageBox.Show("This is not a valid or recognized recording session.", "Invalid RZX Session", MessageBoxButtons.OK);
-                }
                 else
                 {
-                    rzxStopToolStripMenuItem1.Enabled = true;
-                    rzxFinaliseToolStripMenuItem.Enabled = true;
-                    rzxRecordToolStripMenuItem.Enabled = false;
-                    rzxContinueSessionToolStripMenuItem.Enabled = false;
-                    rzxDiscardToolStripMenuItem.Enabled = true;
-                    rzxPlaybackToolStripMenuItem.Enabled = false;
-                    rzxRecordButton.Enabled = false;
                     ForceScreenUpdate(true);
-                    state = EMULATOR_STATE.RECORDING_RZX;
+                    SetEmulationState(EMULATOR_STATE.RECORDING_RZX);
                     //  PauseEmulation(true);
                 }
             }
@@ -4713,8 +4743,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         {
             if (zx.isRecordingRZX)
                 SaveRZXRecording(false);
-            else if (zx.isPlayingRZX)
-                zx.isPlayingRZX = false;
+            else if (zx.isPlayingRZX) {
+                zx.StopPlaybackRZX();
+                SetEmulationState(EMULATOR_STATE.IDLE);
+                UpdateRZXInterface();
+            }
         }
 
         private void rzxFinaliseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4725,37 +4758,17 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         private void SaveRZXRecording(bool finalise)
         {
-            ShouldExitFullscreen();
-
-            saveFileDialog1.Title = "Save Action Replay";
-            saveFileDialog1.FileName = "";
-            saveFileDialog1.Filter = "Action Replay|*.rzx";
-
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                zx.SaveRZX(saveFileDialog1.FileName, finalise);
-                MessageBox.Show("RZX recording saved successfully!", "File saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                rzxStopToolStripMenuItem1.Enabled = false;
-                rzxFinaliseToolStripMenuItem.Enabled = false;
-                rzxDiscardToolStripMenuItem.Enabled = false;
-                rzxRecordToolStripMenuItem.Enabled = true;
-                rzxContinueSessionToolStripMenuItem.Enabled = true;
-                rzxPlaybackToolStripMenuItem.Enabled = true;
-            }
-            rzxRecordButton.Enabled = true;
-
+            zx.SaveRZX(finalise);
+            MessageBox.Show("RZX recording saved successfully!", "File saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            SetEmulationState(EMULATOR_STATE.IDLE);
+            UpdateRZXInterface();
         }
 
         private void rzxDiscardToolStripMenuItem_Click(object sender, EventArgs e)
         {
             zx.DiscardRZX();
-            rzxStopToolStripMenuItem1.Enabled = false;
-            rzxFinaliseToolStripMenuItem.Enabled = false;
-            rzxDiscardToolStripMenuItem.Enabled = false;
-            rzxRecordToolStripMenuItem.Enabled = true;
-            rzxRecordButton.Enabled = true;
-            rzxContinueSessionToolStripMenuItem.Enabled = true;
-            rzxPlaybackToolStripMenuItem.Enabled = true;
+            SetEmulationState(EMULATOR_STATE.IDLE);
+            UpdateRZXInterface();
         }
 
         private void insertBookmarkToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4769,7 +4782,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             ((System.Timers.Timer)sender).Enabled = false;
             zx.RollbackRZX();
             ForceScreenUpdate(true);
-            PauseEmulation(true);
+            //PauseEmulation(true);
         }
 
         private void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
