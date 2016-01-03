@@ -2487,9 +2487,9 @@ namespace Speccy
             }
         }
 
-        public int GetPlaybackPercentageRZX() {
+        public int GetNumRZXFramesPlayed() {
             if (isPlayingRZX)
-                return rzx.GetPlaybackPercentage();
+                return rzx.GetNumFramesPlayed();
 
             return 0;
         }
@@ -2529,8 +2529,8 @@ namespace Speccy
         public void ProcessRZX() {
             R++;
 
-           // if (rzx.fetchCount > rzx.frames[rzx.frameCount].instructionCount - 1) 
-           if (rzx.fetchCount > rzx.frame.instructionCount - 1)
+            // if (rzx.fetchCount > rzx.frames[rzx.frameCount].instructionCount - 1) 
+            if (rzx.fetchCount > rzx.frame.instructionCount - 1)
                 EndRZXFrame();
 
             rzx.fetchCount++;
