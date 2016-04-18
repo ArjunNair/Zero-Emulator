@@ -544,7 +544,7 @@
             this.executionLogToolStripMenuItem,
             this.pokeMemoryToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
             // 
             // breakpointsEditorToolStripMenuItem
@@ -621,7 +621,7 @@
             // 
             this.aSCIICharactersToolStripMenuItem.CheckOnClick = true;
             this.aSCIICharactersToolStripMenuItem.Name = "aSCIICharactersToolStripMenuItem";
-            this.aSCIICharactersToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.aSCIICharactersToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.aSCIICharactersToolStripMenuItem.Text = "ASCII characters";
             this.aSCIICharactersToolStripMenuItem.CheckedChanged += new System.EventHandler(this.aSCIICharactersToolStripMenuItem_CheckedChanged);
             // 
@@ -629,7 +629,7 @@
             // 
             this.numbersInHexToolStripMenuItem.CheckOnClick = true;
             this.numbersInHexToolStripMenuItem.Name = "numbersInHexToolStripMenuItem";
-            this.numbersInHexToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.numbersInHexToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.numbersInHexToolStripMenuItem.Text = "Hex Numbers";
             this.numbersInHexToolStripMenuItem.CheckedChanged += new System.EventHandler(this.numbersInHexToolStripMenuItem_CheckedChanged);
             // 
@@ -639,14 +639,14 @@
             this.systemVariablesToolStripMenuItem.CheckOnClick = true;
             this.systemVariablesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.systemVariablesToolStripMenuItem.Name = "systemVariablesToolStripMenuItem";
-            this.systemVariablesToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.systemVariablesToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.systemVariablesToolStripMenuItem.Text = "System Variables";
             this.systemVariablesToolStripMenuItem.CheckedChanged += new System.EventHandler(this.systemVariablesToolStripMenuItem_CheckedChanged);
             // 
             // heatMapToolStripMenuItem
             // 
             this.heatMapToolStripMenuItem.Name = "heatMapToolStripMenuItem";
-            this.heatMapToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.heatMapToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.heatMapToolStripMenuItem.Text = "Heat Map";
             this.heatMapToolStripMenuItem.Visible = false;
             this.heatMapToolStripMenuItem.Click += new System.EventHandler(this.heatMapToolStripMenuItem_Click);

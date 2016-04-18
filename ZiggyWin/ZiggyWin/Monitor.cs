@@ -276,7 +276,7 @@ namespace ZeroWin
                 //Check for null and compare run-time types.
                 if (obj == null || GetType() != obj.GetType()) return false;
                 BreakPointCondition p = (BreakPointCondition)obj;
-                return (address == p.address) && (data == p.data);
+                return (address == p.address) && (data == p.data) && (condition == p.condition);
             }
 
             public override int GetHashCode() {
@@ -7124,12 +7124,11 @@ namespace ZeroWin
                         if (index >= 0) {
                             breakpointRowList.Remove(index);
                             dataGridView1.Refresh();
-                            //dataGridView1.Rows[index].HeaderCell.Style.BackColor = Control.DefaultBackColor;
                         }
                     }
+
                     breakPointConditions.Remove(_kv.Value);
                     breakPointList.Remove(_kv);
-
                     break;
                 }
             }

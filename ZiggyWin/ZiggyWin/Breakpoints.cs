@@ -26,7 +26,7 @@ namespace ZeroWin
             //Define Header Style
             dataGridViewCellStyle2.Alignment =
                 System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle2.BackColor = Control.DefaultBackColor;
+            dataGridViewCellStyle2.BackColor =  Control.DefaultBackColor;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Consolas",
                 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
