@@ -759,12 +759,18 @@ namespace Speccy
             return 0;
         }
 
-        public void PlaybackRZX(RZXFile _rzx) {
+        public void StartPlaybackRZX(RZXFile _rzx) {
             rzx = _rzx;
             isRecordingRZX = false;
-            rzx = _rzx;
             isPlayingRZX = true;
         }
+
+        public void StopPlaybackRZX() {
+            isPlayingRZX = false;
+            rzx.Close();
+            rzx = null;
+        }
+
         /*
         public void PlaybackRZX(RZXFile _rzx) {
             isRecordingRZX = false;
@@ -782,19 +788,27 @@ namespace Speccy
             rzxInputs = new System.Collections.Generic.List<byte>();
         }
 
+        public bool ContinueRZXSession(string filename) {
+            isRecordingRZX = true;
+            isPlayingRZX = false;
+            return rzx.ContinueRecording(filename);
+        }
+
         public void InsertBookmark() {
             if (isRecordingRZX) {
-                rzx.InsertBookmark(CreateSZX(), rzxInputs);
-                rzxInputs = new System.Collections.Generic.List<byte>();
+                //rzx.InsertBookmark(CreateSZX(), rzxInputs);
+                rzx.UpdateRecording(totalTStates);
+                rzx.Bookmark(CreateSZX());
             }
         }
 
         public void RollbackRZX() {
 
-            SZXFile snapshot = rzx.Rollback();
-            rzxInputs = new System.Collections.Generic.List<byte>();
-            if (snapshot != null)
-                UseSZX(snapshot);
+            //SZXFile snapshot = rzx.Rollback();
+            rzx.UpdateRecording(totalTStates);
+            rzx.Rollback();
+            //if (snapshot != null)
+            //    UseSZX(snapshot);
         }
 
         public void DiscardRZX() {
@@ -803,12 +817,15 @@ namespace Speccy
             rzx.Discard();
         }
 
-        public void SaveRZX(string filename, bool doFinalise) {
+        public void SaveRZX(bool doFinalise) {
 
             if (isRecordingRZX) {
                 isPlayingRZX = false;
                 isRecordingRZX = false;
+                rzx.UpdateRecording(totalTStates);
 #if NEW_RZX_METHODS
+                rzx.SaveSession(CreateSZX().GetSZXData(), doFinalise);
+
                 rzx.Close();
 #else
                 rzx.Save(filename, (doFinalise ? null : CreateSZX().GetSZXData()));
@@ -816,10 +833,11 @@ namespace Speccy
             }
         }
 
-        public void StartRecordingRZX() {
+        public void StartRecordingRZX(string filename, System.Action<RZXFileEventArgs> callback) {
             rzx = new RZXFile();
 #if NEW_RZX_METHODS
-            rzx.Record("newrzxrecord.rzx");
+            rzx.RZXFileEventHandler += callback;
+            rzx.Record(filename);
             rzx.AddSnapshot(CreateSZX().GetSZXData());
 #else
             rzx.StartRecording(CreateSZX().GetSZXData(), totalTStates);
@@ -834,8 +852,8 @@ namespace Speccy
         }
 
         public bool IsValidSessionRZX() {
-            if (!rzx.IsValidSession())
-                return false;
+            //if (!rzx.IsValidSession())
+            //    return false;
 
             isPlayingRZX = false;
             isRecordingRZX = true;
@@ -1602,7 +1620,7 @@ namespace Speccy
                 OnPortEvent(new PortIOEventArgs(port, val, false));
 
             if (isRecordingRZX) {
-                rzxInputs.Add((byte)val);
+                rzx.inputs.Add((byte)val);
             }
         }
 
@@ -2469,9 +2487,9 @@ namespace Speccy
             }
         }
 
-        public int GetPlaybackPercentageRZX() {
+        public int GetNumRZXFramesPlayed() {
             if (isPlayingRZX)
-                return rzx.GetPlaybackPercentage();
+                return rzx.GetNumFramesPlayed();
 
             return 0;
         }
@@ -2511,8 +2529,8 @@ namespace Speccy
         public void ProcessRZX() {
             R++;
 
-           // if (rzx.fetchCount > rzx.frames[rzx.frameCount].instructionCount - 1) 
-           if (rzx.fetchCount > rzx.frame.instructionCount - 1)
+            // if (rzx.fetchCount > rzx.frames[rzx.frameCount].instructionCount - 1) 
+            if (rzx.fetchCount > rzx.frame.instructionCount - 1)
                 EndRZXFrame();
 
             rzx.fetchCount++;
@@ -2593,11 +2611,11 @@ namespace Speccy
                      rzxFetchCount = 0;
                      rzxInputCount = 0;*/
 #if NEW_RZX_METHODS
-                    rzx.UpdateRecording(rzxInputs, totalTStates);
+                    rzx.UpdateRecording(totalTStates);
 #else
                     rzx.RecordFrame(rzxInputs);
 #endif
-                    rzxInputs = new System.Collections.Generic.List<byte>();
+                    //rzxInputs = new System.Collections.Generic.List<byte>();
                 }
 
                 if (StateChangeEvent != null)
@@ -2767,11 +2785,11 @@ namespace Speccy
                       rzxFetchCount = 0;
                       rzxInputCount = 0;*/
 #if NEW_RZX_METHODS
-                    rzx.UpdateRecording(rzxInputs, totalTStates);
+                    rzx.UpdateRecording(totalTStates);
 #else
                     rzx.RecordFrame(rzxInputs);
 #endif
-                    rzxInputs = new System.Collections.Generic.List<byte>();
+                    //rzxInputs = new System.Collections.Generic.List<byte>();
                 }
 
                 //Need interrupt?
