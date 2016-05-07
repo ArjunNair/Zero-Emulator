@@ -100,6 +100,7 @@ namespace ZeroWin
                 monitor.isTraceOn = true;
                 traceButton.Image = Properties.Resources.logStop;
                 traceButton.Text = "Stop";
+                MessageBox.Show("Logging of calls will start once you press Play in the debugger window.", "Ready to trace", MessageBoxButtons.OK);
             }
         }
 
