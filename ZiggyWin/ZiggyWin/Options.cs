@@ -333,6 +333,11 @@ namespace ZeroWin
             set { aspectRatioFullscreenCheckBox.Checked = value; }
         }
 
+        public bool DisableTapeTraps
+        {
+            get { return disableTapeTrapCheckbox.Checked; }
+            set { disableTapeTrapCheckbox.Checked = value; }
+        }
         #endregion Accessors
 
         public Options(Form1 parentRef) {
@@ -362,8 +367,11 @@ namespace ZeroWin
             openFileDialog1.Title = "Choose a ROM";
             openFileDialog1.FileName = "";
             openFileDialog1.Filter = "All supported files|*.rom;";
+
             if (openFileDialog1.ShowDialog() == DialogResult.OK) {
                 romTextBox.Text = openFileDialog1.SafeFileName;
+                RomPath = System.IO.Path.GetDirectoryName(openFileDialog1.FileName);
+
                 switch (currentModelIndex) {
                     case 0:
                         current48kRom = romTextBox.Text;

@@ -617,7 +617,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
         public bool AppHasFocus()
         {
-            if ((Native.GetForegroundWindow() == this.Handle) || (Native.GetForegroundWindow() == tapeDeck.Handle))
+            if ((Native.GetForegroundWindow() == this.Handle) || (tapeDeck != null && Native.GetForegroundWindow() == tapeDeck.Handle))
                 return true;
             else
                 if ((debugger != null) && (!debugger.IsDisposed))
@@ -1202,16 +1202,49 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             }
             while (!romLoaded)
             {
-                System.Windows.Forms.MessageBox.Show("Zero couldn't find a valid ROM file.\nSelect a folder to look for ROMs.",
+                System.Windows.Forms.MessageBox.Show("Zero couldn't find a valid ROM file.\nSelect a " + config.CurrentSpectrumModel + " ROM file to use.",
                             "ROM file missing!", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
 
-                if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+                /*if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
                 {
                     config.PathRoms = folderBrowserDialog1.SelectedPath;
                     romLoaded = zx.LoadROM(config.PathRoms, romName);
+                }*/
+                openFileDialog1.InitialDirectory = config.PathRoms;
+                openFileDialog1.Title = "Choose a ROM";
+                openFileDialog1.FileName = "";
+                openFileDialog1.Filter = "All supported files|*.rom;";
+
+                if (openFileDialog1.ShowDialog() == DialogResult.OK) {
+                    romName = "\\" + openFileDialog1.SafeFileName;
+                    config.PathRoms = Path.GetDirectoryName(openFileDialog1.FileName);
+                    romLoaded = zx.LoadROM(config.PathRoms, romName);
+
+                    if (romLoaded) {
+                        switch (GetSpectrumModelIndex(config.CurrentSpectrumModel)) {
+                            case 0:
+                                config.Current48kROM = openFileDialog1.SafeFileName;
+                                break;
+
+                            case 1:
+                                config.Current128kROM = openFileDialog1.SafeFileName;
+                                break;
+
+                            case 2:
+                                config.Current128keROM = openFileDialog1.SafeFileName;
+                                break;
+
+                            case 3:
+                                config.CurrentPlus3ROM = openFileDialog1.SafeFileName;
+                                break;
+
+                            case 4:
+                                config.CurrentPentagonROM = openFileDialog1.SafeFileName;
+                                break;
+                        }
+                    }
                 }
-                else
-                {
+                else {
                     System.Windows.Forms.MessageBox.Show("Unfortunately, Zero cannot work without a valid ROM file.\nIt will now exit.",
                             "Unable to continue!", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
                     break;
@@ -2797,6 +2830,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             optionWindow.PixelSmoothing = dxWindow.PixelSmoothing;
             optionWindow.EnableVSync = config.EnableVSync;
             optionWindow.MaintainAspectRatioInFullScreen = config.MaintainAspectRatioInFullScreen;
+            optionWindow.DisableTapeTraps = config.DisableTapeTraps;
 
             switch (config.PaletteMode)
             {
@@ -2849,7 +2883,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             config.HighCompatibilityMode = optionWindow.HighCompatibilityMode;
             config.EnableKey2Joy = optionWindow.EnableKey2Joy;
             config.Key2JoystickType = optionWindow.Key2JoyStickType + 1;
-
+            config.DisableTapeTraps = optionWindow.DisableTapeTraps;
             config.RestoreLastStateOnStart = optionWindow.RestoreLastState;
             config.ShowOnscreenIndicators = optionWindow.ShowOnScreenLEDS;
             config.MaintainAspectRatioInFullScreen = optionWindow.MaintainAspectRatioInFullScreen;
@@ -2931,6 +2965,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 }
             }
 
+            zx.tapeTrapsDisabled = config.DisableTapeTraps;
             zx.Issue2Keyboard = config.UseIssue2Keyboard;
             zx.LateTiming = (config.UseLateTimings ? 1 : 0);
             config.ConfirmOnExit = optionWindow.ConfirmOnExit;

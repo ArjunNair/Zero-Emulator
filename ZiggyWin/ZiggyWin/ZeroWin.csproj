@@ -20,7 +20,7 @@
     <ApplicationIcon>
     </ApplicationIcon>
     <TargetZone>Custom</TargetZone>
-    <Win32Resource>E:\Projects\Speccy\Zero Vanilla\zero-vanilla\ZiggyWin\ZiggyWin\zeroIconResource.res</Win32Resource>
+    <Win32Resource>C:\Users\arjun\Documents\Zero-Emulator\ZiggyWin\ZiggyWin\zeroIconResource.res</Win32Resource>
     <SignAssembly>false</SignAssembly>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileUpgradeFlags>
@@ -100,7 +100,7 @@
     </Reference>
     <Reference Include="Microsoft.DirectX.DirectInput, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.DirectInput.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.DirectInput.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualC" />
     <Reference Include="Peripherals, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">

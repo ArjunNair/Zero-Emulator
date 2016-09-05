@@ -555,6 +555,7 @@ namespace Speccy
         public int blockCounter = 0;
         public bool tapePresent = false;
         public bool tape_flashLoad = true;
+        public bool tapeTrapsDisabled = false;
         public bool isPlaying = false;
         private int pulseCounter = 0;
         private int repeatCount = 0;
@@ -1364,7 +1365,7 @@ namespace Speccy
                     {
 #region Tape Save Trap
                         //Tape Save trap
-                        if (PC == 0x04d1)
+                        if (PC == 0x04d1 && !tapeTrapsDisabled)
                         {
                             //Trap the tape only if lower ROM is 48k!
                             if (lowROMis48K)
@@ -4043,7 +4044,9 @@ namespace Speccy
                 case 0xBF:  //CP A
                     // Log("CP A");
                     Cp_R(A);
-                    if (tape_readToPlay)
+
+                    //Tape trap
+                    if (tape_readToPlay && !tapeTrapsDisabled)
                         if (PC == 0x56b)
                             FlashLoadTape();
                     break;
