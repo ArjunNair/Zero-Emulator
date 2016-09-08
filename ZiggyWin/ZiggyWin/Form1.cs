@@ -4275,7 +4275,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 else
                     zx.SaveSNA(saveFileDialog1.FileName);
 
-                MessageBox.Show("Snapshot saved successfully!", "File saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Snapshot saved!", "File saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 

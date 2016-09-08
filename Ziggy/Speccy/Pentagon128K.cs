@@ -764,7 +764,7 @@ namespace Speccy
                 PageWritePointer[4] = RAMpage[(int)RAM_BANK.TWO_LOW];
                 PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
 
-                if (((SNA_128K)sna).TR_DOS) {
+                if (((SNA_128K)sna).TR_DOS != 0) {
                     PageReadPointer[0] = ROMpage[4];
                     PageReadPointer[1] = ROMpage[5];
                     PageWritePointer[0] = JunkMemory[0];

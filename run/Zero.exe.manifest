@@ -111,19 +111,19 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>w4+gJmKiTzglUk1k2AZDatFioWA=</dsig:DigestValue>
+        <dsig:DigestValue>eh2bQJIup00BxbT2pkq3LD2jye8=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="157696">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="158720">
       <assemblyIdentity name="Speccy" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>lY8WelNbdF4JrWZ0NmXD+n5y3qI=</dsig:DigestValue>
+        <dsig:DigestValue>/4RmkCllILSQoKFZVNpgyF5OJV8=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -147,7 +147,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>A0W0lLY3Z0PxuczHBCm61YCg7ww=</dsig:DigestValue>
+        <dsig:DigestValue>qPWWoaesnoCx0PGD3fdcuzYTzzs=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -159,7 +159,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>Fe8tqJES2OFBpqstiMYZdPFGvj8=</dsig:DigestValue>
+        <dsig:DigestValue>s8QyMg7trSDs3/O66Tt/N3fIbFM=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -171,7 +171,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>ui6YFsSEnaJIiKnuCXc6JOdIEfI=</dsig:DigestValue>
+        <dsig:DigestValue>jOfDbqnwByFc2N05nZnmWXvnGgE=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

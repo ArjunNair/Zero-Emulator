@@ -651,38 +651,7 @@ namespace Speccy
                 }
             }
         }
-
-        public override void SaveSNA(string filename) {
-            PushStack(PC);
-            SNA_48K sna = new SNA_48K();
-            sna.TYPE = 0;
-            sna.HEADER.AF = AF;
-            sna.HEADER.AF_ = _AF;
-            sna.HEADER.BC = BC;
-            sna.HEADER.BC_ = _BC;
-            sna.HEADER.BORDER = (byte)borderColour;
-            sna.HEADER.DE = DE;
-            sna.HEADER.DE_ = _DE;
-            sna.HEADER.HL = HL;
-            sna.HEADER.HL_ = _HL;
-            sna.HEADER.I = (byte)I;
-            sna.HEADER.IFF2 = (byte)(IFF1 ? 1 << 2 : 0);
-            sna.HEADER.IM = (byte)interruptMode;
-            sna.HEADER.IX = IX;
-            sna.HEADER.IY = IY;
-            sna.HEADER.R = (byte)R;
-            sna.HEADER.SP = SP;
-            sna.RAM = new byte[49152];
-
-            int screenAddr = DisplayStart;
-
-            for (int f = 0; f < 49152; f++) {
-                sna.RAM[f] = PeekByteNoContend(screenAddr + f);
-            }
-
-            SNAFile.SaveSNA(filename, sna);
-            PC = PopStack();
-        }
+  
         public override void UseSZX(SZXFile szx) {
             lock (lockThis) {
                 base.UseSZX(szx);

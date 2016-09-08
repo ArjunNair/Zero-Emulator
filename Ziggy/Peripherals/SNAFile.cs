@@ -8,15 +8,16 @@ namespace Peripherals
     public struct SNA_HEADER
     {
         public byte I;                  //I Register
-        public int HL_, DE_, BC_, AF_;  //Alternate registers
-        public int HL, DE, BC, IX, IY;  //16 bit main registers
+        public ushort HL_, DE_, BC_, AF_;  //Alternate registers
+        public ushort HL, DE, BC, IY, IX;  //16 bit main registers
         public byte IFF2;               //Interrupt enabled? (bit 2 on/off)
         public byte R;                  //R Register
-        public int AF, SP;              //AF and SP register
+        public ushort AF, SP;              //AF and SP register
         public byte IM;                 //Interupt Mode
         public byte BORDER;             //Border colour
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public class SNA_SNAPSHOT
     {
         public byte TYPE;                      //0 = 48k, 1 = 128;
@@ -33,9 +34,9 @@ namespace Peripherals
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public class SNA_128K : SNA_SNAPSHOT
     {
-        public int PC;                                  //PC Register
+        public ushort PC;                                  //PC Register
         public byte PORT_7FFD;                          //Current state of port 7ffd
-        public bool TR_DOS;                             //Is TR DOS ROM paged in?
+        public byte TR_DOS;                             //Is TR DOS ROM paged in?
         public byte[][] RAM_BANK = new byte[16][];        //Contents of the 8192*16 ram banks
     }
 
@@ -68,21 +69,21 @@ namespace Peripherals
                     return null;
 
                 snapshot.HEADER.I = buffer[0];
-                snapshot.HEADER.HL_ = buffer[1] | (buffer[2] << 8);
-                snapshot.HEADER.DE_ = buffer[3] | (buffer[4] << 8);
-                snapshot.HEADER.BC_ = buffer[5] | (buffer[6] << 8);
-                snapshot.HEADER.AF_ = buffer[7] | (buffer[8] << 8);
+                snapshot.HEADER.HL_ = (ushort)(buffer[1] | (buffer[2] << 8));
+                snapshot.HEADER.DE_ = (ushort)(buffer[3] | (buffer[4] << 8));
+                snapshot.HEADER.BC_ = (ushort)(buffer[5] | (buffer[6] << 8));
+                snapshot.HEADER.AF_ = (ushort)(buffer[7] | (buffer[8] << 8));
 
-                snapshot.HEADER.HL = buffer[9] | (buffer[10] << 8);
-                snapshot.HEADER.DE = buffer[11] | (buffer[12] << 8);
-                snapshot.HEADER.BC = buffer[13] | (buffer[14] << 8);
-                snapshot.HEADER.IY = buffer[15] | (buffer[16] << 8);
-                snapshot.HEADER.IX = buffer[17] | (buffer[18] << 8);
+                snapshot.HEADER.HL = (ushort)(buffer[9] | (buffer[10] << 8));
+                snapshot.HEADER.DE = (ushort)(buffer[11] | (buffer[12] << 8));
+                snapshot.HEADER.BC = (ushort)(buffer[13] | (buffer[14] << 8));
+                snapshot.HEADER.IY = (ushort)(buffer[15] | (buffer[16] << 8));
+                snapshot.HEADER.IX = (ushort)(buffer[17] | (buffer[18] << 8));
 
                 snapshot.HEADER.IFF2 = buffer[19];
                 snapshot.HEADER.R = buffer[20];
-                snapshot.HEADER.AF = buffer[21] | (buffer[22] << 8);
-                snapshot.HEADER.SP = buffer[23] | (buffer[24] << 8);
+                snapshot.HEADER.AF = (ushort)(buffer[21] | (buffer[22] << 8));
+                snapshot.HEADER.SP = (ushort)(buffer[23] | (buffer[24] << 8));
                 snapshot.HEADER.IM = buffer[25];
                 snapshot.HEADER.BORDER = (byte)(buffer[26] & 0x07);
 
@@ -112,9 +113,9 @@ namespace Peripherals
                     Array.Copy(buffer, 27 + 16384 + 16384, ((SNA_128K)snapshot).RAM_BANK[BankInPage4 * 2], 0, 8192);
                     Array.Copy(buffer, 27 + 16384 + 16384 + 8192, ((SNA_128K)snapshot).RAM_BANK[BankInPage4 * 2 + 1], 0, 8192);
 
-                    ((SNA_128K)snapshot).PC = buffer[49179] | (buffer[49180] << 8);
+                    ((SNA_128K)snapshot).PC = (ushort)(buffer[49179] | (buffer[49180] << 8));
 
-                    ((SNA_128K)snapshot).TR_DOS = (buffer[49182] != 0);
+                    ((SNA_128K)snapshot).TR_DOS = buffer[49182];
 
                     int t = 0;
                     for (int f = 0; f < 8; f++) {
@@ -141,23 +142,26 @@ namespace Peripherals
 
         public static void SaveSNA(string filename, SNA_SNAPSHOT sna) {
 
-            using (System.IO.FileStream fs = new System.IO.FileStream(filename, System.IO.FileMode.Open)) {
+            using (System.IO.FileStream fs = new System.IO.FileStream(filename, System.IO.FileMode.Create)) {
 
-                if (sna is SNA_48K) {
-                    BinaryFormatter b = new BinaryFormatter();
-                    using (System.IO.MemoryStream stream = new System.IO.MemoryStream()) {
-                        b.Serialize(stream, sna.HEADER);
-                        byte[] bytes = stream.ToArray();
-                        fs.Write(bytes, 0, bytes.Length);
-                    }
+                byte[] bytes = ByteUtililty.RawSerialize(sna.HEADER);
+                fs.Write(bytes, 0, bytes.Length);
 
-                    using (System.IO.MemoryStream stream = new System.IO.MemoryStream()) {
-                        b.Serialize(stream, ((SNA_48K)sna).RAM);
-                        byte[] bytes = stream.ToArray();
+                if (sna is SNA_48K)
+                        fs.Write(((SNA_48K)sna).RAM, 0, ((SNA_48K)sna).RAM.Length);
+                else {
+                        //Write speccy banks 5, 2 and n which are pre-prepared in snapshot ram 0 to 5
+                        for (int f = 0; f < 6; f++)
+                            fs.Write(((SNA_128K)sna).RAM_BANK[f], 0, 8192);
+
+                        bytes = ByteUtililty.RawSerialize(((SNA_128K)sna).PC);
                         fs.Write(bytes, 0, bytes.Length);
-                    }
-                    
-                    //b.Serialize(fs, ((SNA_48K)sna).RAM);
+                        fs.WriteByte(((SNA_128K)sna).PORT_7FFD);
+                        fs.WriteByte(((SNA_128K)sna).TR_DOS);
+
+                        //Write remaining banks
+                        for (int f = 6; f < 16; f++)
+                            fs.Write(((SNA_128K)sna).RAM_BANK[f], 0, 8192);
                 }
             }
         }

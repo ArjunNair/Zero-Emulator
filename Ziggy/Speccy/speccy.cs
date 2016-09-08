@@ -2206,7 +2206,79 @@ namespace Speccy
             soundCounter++;
         }
 
-        public virtual void SaveSNA(string filename) {}
+        public virtual void SaveSNA(string filename) {
+            SNA_SNAPSHOT snapshot;
+
+            if (model == MachineModel._48k || model == MachineModel._NTSC48k)
+                snapshot = new SNA_48K();
+            else
+                snapshot = new SNA_128K();
+                
+            snapshot.HEADER.I = (byte)I;
+            snapshot.HEADER.HL_ = (ushort)_HL;
+            snapshot.HEADER.DE_ = (ushort)_DE;
+            snapshot.HEADER.BC_ = (ushort)_BC;
+            snapshot.HEADER.AF_ = (ushort)_AF;
+
+            snapshot.HEADER.HL = (ushort)HL;
+            snapshot.HEADER.DE = (ushort)DE;
+            snapshot.HEADER.BC = (ushort)BC;
+            snapshot.HEADER.IY = (ushort)IY;
+            snapshot.HEADER.IX = (ushort)IX;
+
+            snapshot.HEADER.IFF2 = (byte)(IFF1 ? 1 << 2 : 0);
+            snapshot.HEADER.R = (byte)R;
+            snapshot.HEADER.AF = (ushort)AF;
+        
+            snapshot.HEADER.IM = (byte)interruptMode;
+            snapshot.HEADER.BORDER = (byte)borderColour;
+
+            if (model == MachineModel._48k || model == MachineModel._NTSC48k) {
+                PushStack(PC);
+                snapshot.HEADER.SP = (ushort)SP;
+
+                ((SNA_48K)snapshot).RAM = new byte[49152];
+
+                int screenAddr = DisplayStart;
+
+                for (int f = 0; f < 49152; ++f)
+                    ((SNA_48K)snapshot).RAM[f] = PeekByteNoContend(screenAddr +f);
+
+                PC = PopStack();
+            }
+            else {
+                snapshot.HEADER.SP = (ushort)SP;
+                ((SNA_128K)snapshot).PC = (ushort)PC;
+                ((SNA_128K)snapshot).PORT_7FFD = (byte)last7ffdOut;
+                ((SNA_128K)snapshot).TR_DOS = (byte)(trDosPagedIn ? 1 : 0);
+                
+                for (int f = 0; f < 16; f++)
+                    ((SNA_128K)snapshot).RAM_BANK[f] = new byte[8192];
+
+                Array.Copy(RAMpage[(int)RAM_BANK.FIVE_LOW], 0, ((SNA_128K)snapshot).RAM_BANK[0], 0, 8192);
+                Array.Copy(RAMpage[(int)RAM_BANK.FIVE_HIGH], 0, ((SNA_128K)snapshot).RAM_BANK[1], 0, 8192);
+
+                Array.Copy(RAMpage[(int)RAM_BANK.TWO_LOW], 0, ((SNA_128K)snapshot).RAM_BANK[2], 0, 8192);
+                Array.Copy(RAMpage[(int)RAM_BANK.TWO_HIGH], 0, ((SNA_128K)snapshot).RAM_BANK[3], 0, 8192);
+
+                int BankInPage4 = ((SNA_128K)snapshot).PORT_7FFD & 0x07;
+
+                Array.Copy(RAMpage[BankInPage4 * 2], 0, ((SNA_128K)snapshot).RAM_BANK[4], 0, 8192);
+                Array.Copy(RAMpage[BankInPage4 * 2 + 1], 0, ((SNA_128K)snapshot).RAM_BANK[5], 0, 8192);
+
+                int t = 3;
+                for (int f = 0; f < 8; f++) {
+                    if (f == 5 || f == 2 || f == BankInPage4)
+                        continue;
+
+                    Array.Copy(RAMpage[f * 2], 0, ((SNA_128K)snapshot).RAM_BANK[t * 2], 0, 8192);
+                    Array.Copy(RAMpage[f * 2 + 1], 0, ((SNA_128K)snapshot).RAM_BANK[t * 2 + 1], 0, 8192);
+                    t++;
+                }
+            }
+
+            SNAFile.SaveSNA(filename, snapshot);
+        }
         
         //Sets the speccy state to that of the SNA file
         public abstract void UseSNA(SNA_SNAPSHOT sna);
