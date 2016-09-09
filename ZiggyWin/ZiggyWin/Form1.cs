@@ -1190,26 +1190,22 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             //First try to load from the path saved in the config file
             romLoaded = zx.LoadROM(config.PathRoms, romName);
-            logger.Log("Booting the speccy ROM...");
+            logger.Log("Booting ROM: " + romName);
             //Next try the application startup path (useful if running off USB)
             if (!romLoaded)
             {
-                romLoaded = zx.LoadROM(Application.StartupPath + "\\roms\\", romName);
+                romLoaded = zx.LoadROM(Application.StartupPath + "\\roms", romName);
 
                 //Aha! This worked so update the path in config file
                 if (romLoaded)
-                    config.PathRoms = Application.StartupPath + "\\roms\\";
+                    config.PathRoms = Application.StartupPath + "\\roms";
             }
             while (!romLoaded)
             {
-                System.Windows.Forms.MessageBox.Show("Zero couldn't find a valid ROM file.\nSelect a " + config.CurrentSpectrumModel + " ROM file to use.",
-                            "ROM file missing!", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+                MessageBox.Show("Zero couldn't find the '" + romName.Substring(1, romName.Length - 1) + "' file for the " +
+                                Utilities.GetStringFromEnum(zx.model) + ".\nSelect a valid ROM to continue.", "Missing ROM",
+                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
-                /*if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
-                {
-                    config.PathRoms = folderBrowserDialog1.SelectedPath;
-                    romLoaded = zx.LoadROM(config.PathRoms, romName);
-                }*/
                 openFileDialog1.InitialDirectory = config.PathRoms;
                 openFileDialog1.Title = "Choose a ROM";
                 openFileDialog1.FileName = "";
@@ -1221,31 +1217,31 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     romLoaded = zx.LoadROM(config.PathRoms, romName);
 
                     if (romLoaded) {
-                        switch (GetSpectrumModelIndex(config.CurrentSpectrumModel)) {
-                            case 0:
+                        switch (zx.model) {
+                            case MachineModel._48k:
                                 config.Current48kROM = openFileDialog1.SafeFileName;
                                 break;
 
-                            case 1:
+                            case MachineModel._128k:
                                 config.Current128kROM = openFileDialog1.SafeFileName;
                                 break;
 
-                            case 2:
+                            case MachineModel._128ke:
                                 config.Current128keROM = openFileDialog1.SafeFileName;
                                 break;
 
-                            case 3:
+                            case MachineModel._plus3:
                                 config.CurrentPlus3ROM = openFileDialog1.SafeFileName;
                                 break;
 
-                            case 4:
+                            case MachineModel._pentagon:
                                 config.CurrentPentagonROM = openFileDialog1.SafeFileName;
                                 break;
                         }
                     }
                 }
                 else {
-                    System.Windows.Forms.MessageBox.Show("Unfortunately, Zero cannot work without a valid ROM file.\nIt will now exit.",
+                    MessageBox.Show("Unfortunately, Zero cannot work without a valid ROM file.\nIt will now exit.",
                             "Unable to continue!", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
                     break;
                 }
@@ -2673,8 +2669,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             if (tapeDeck != null)
                 tapeDeck.UnRegisterEventHooks();
-
-
 
             showDiskIndicator = false;
             zx.DiskEvent -= new DiskEventHandler(DiskMotorEvent);
