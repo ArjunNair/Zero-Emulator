@@ -338,6 +338,12 @@ namespace ZeroWin
             get { return disableTapeTrapCheckbox.Checked; }
             set { disableTapeTrapCheckbox.Checked = value; }
         }
+
+        public bool KempstonUsesPort1F
+        {
+            get { return port1FCheckbox.Checked; }
+            set { port1FCheckbox.Checked = value; }
+        }
         #endregion Accessors
 
         public Options(Form1 parentRef) {

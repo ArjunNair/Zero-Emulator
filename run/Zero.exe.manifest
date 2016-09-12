@@ -111,7 +111,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>eh2bQJIup00BxbT2pkq3LD2jye8=</dsig:DigestValue>
+        <dsig:DigestValue>aAeMNIjXbqdF9Gk/HUA+zMHqxIY=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -123,7 +123,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>PtERW8Q1R/3vKgV0mj1LxoiG714=</dsig:DigestValue>
+        <dsig:DigestValue>PyT3kJHAUyp8Q0XsvaFu6vt211M=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -140,14 +140,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2376704">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2377728">
       <assemblyIdentity name="Zero" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>PhYpSCHv61To5jcBMiHmI4t2UFQ=</dsig:DigestValue>
+        <dsig:DigestValue>Ua1IV+zF6bjVChxl803p3qVFJFs=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -159,7 +159,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>d9TfPdQB71ItlohzkvaCf/8Fwsk=</dsig:DigestValue>
+        <dsig:DigestValue>NoK+P8q7CBQKpXcBs/VpSgjWUXI=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -171,7 +171,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>jOfDbqnwByFc2N05nZnmWXvnGgE=</dsig:DigestValue>
+        <dsig:DigestValue>PRJ72yx066Xy2m3MLoChqvcWM+M=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -199,13 +199,13 @@
       </hash>
     </dependentAssembly>
   </dependency>
-  <file name="Zero.exe.config" size="7227">
+  <file name="Zero.exe.config" size="7339">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-      <dsig:DigestValue>Of8u4uOhPRleUeoUU/vS152Prg0=</dsig:DigestValue>
+      <dsig:DigestValue>GMfjmDuRvIlCOk0Z93am3pvORWY=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Ziggy Emulator.ico" size="86358">

@@ -37,6 +37,7 @@
             this.pictureBox6 = new System.Windows.Forms.PictureBox();
             this.timingCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.disableTapeTrapCheckbox = new System.Windows.Forms.CheckBox();
             this.romBrowseButton = new System.Windows.Forms.Button();
             this.romTextBox = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
@@ -159,7 +160,7 @@
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.disableTapeTrapCheckbox = new System.Windows.Forms.CheckBox();
+            this.port1FCheckbox = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.hwPage.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -212,7 +213,7 @@
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Location = new System.Drawing.Point(11, 11);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(555, 516);
@@ -224,9 +225,9 @@
             this.hwPage.Controls.Add(this.groupBox6);
             this.hwPage.Controls.Add(this.groupBox1);
             this.hwPage.Location = new System.Drawing.Point(4, 25);
-            this.hwPage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.hwPage.Margin = new System.Windows.Forms.Padding(4);
             this.hwPage.Name = "hwPage";
-            this.hwPage.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.hwPage.Padding = new System.Windows.Forms.Padding(4);
             this.hwPage.Size = new System.Drawing.Size(547, 487);
             this.hwPage.TabIndex = 0;
             this.hwPage.Text = "Hardware";
@@ -238,9 +239,9 @@
             this.groupBox6.Controls.Add(this.pictureBox6);
             this.groupBox6.Controls.Add(this.timingCheckBox);
             this.groupBox6.Location = new System.Drawing.Point(12, 212);
-            this.groupBox6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox6.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox6.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox6.Size = new System.Drawing.Size(517, 155);
             this.groupBox6.TabIndex = 7;
             this.groupBox6.TabStop = false;
@@ -259,7 +260,7 @@
             // 
             this.pictureBox6.Image = global::ZeroWin.Properties.Resources.time;
             this.pictureBox6.Location = new System.Drawing.Point(8, 23);
-            this.pictureBox6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox6.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox6.Name = "pictureBox6";
             this.pictureBox6.Size = new System.Drawing.Size(55, 57);
             this.pictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -270,7 +271,7 @@
             // 
             this.timingCheckBox.AutoSize = true;
             this.timingCheckBox.Location = new System.Drawing.Point(84, 110);
-            this.timingCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.timingCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.timingCheckBox.Name = "timingCheckBox";
             this.timingCheckBox.Size = new System.Drawing.Size(279, 21);
             this.timingCheckBox.TabIndex = 2;
@@ -289,18 +290,32 @@
             this.groupBox1.Controls.Add(this.pictureBox1);
             this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.groupBox1.Location = new System.Drawing.Point(13, 14);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(516, 190);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Model";
             // 
+            // disableTapeTrapCheckbox
+            // 
+            this.disableTapeTrapCheckbox.AutoSize = true;
+            this.disableTapeTrapCheckbox.Location = new System.Drawing.Point(137, 149);
+            this.disableTapeTrapCheckbox.Margin = new System.Windows.Forms.Padding(4);
+            this.disableTapeTrapCheckbox.Name = "disableTapeTrapCheckbox";
+            this.disableTapeTrapCheckbox.Size = new System.Drawing.Size(149, 21);
+            this.disableTapeTrapCheckbox.TabIndex = 7;
+            this.disableTapeTrapCheckbox.Text = "Disable tape traps.";
+            this.toolTip1.SetToolTip(this.disableTapeTrapCheckbox, "Check this if you\'re using a non-standard ROM,\r\notherwise it may cause tape trapp" +
+        "ing routines\r\n(used to save/load TAP\'s by the emulator) to\r\naccidentally trigger" +
+        " when using the ROM.");
+            this.disableTapeTrapCheckbox.UseVisualStyleBackColor = true;
+            // 
             // romBrowseButton
             // 
             this.romBrowseButton.Location = new System.Drawing.Point(303, 101);
-            this.romBrowseButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.romBrowseButton.Margin = new System.Windows.Forms.Padding(4);
             this.romBrowseButton.Name = "romBrowseButton";
             this.romBrowseButton.Size = new System.Drawing.Size(100, 28);
             this.romBrowseButton.TabIndex = 6;
@@ -311,7 +326,7 @@
             // romTextBox
             // 
             this.romTextBox.Location = new System.Drawing.Point(137, 103);
-            this.romTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.romTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.romTextBox.Name = "romTextBox";
             this.romTextBox.Size = new System.Drawing.Size(156, 22);
             this.romTextBox.TabIndex = 5;
@@ -340,7 +355,7 @@
             "ZX Spectrum +3",
             "Pentagon 128K"});
             this.modelComboBox.Location = new System.Drawing.Point(137, 59);
-            this.modelComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.modelComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.modelComboBox.Name = "modelComboBox";
             this.modelComboBox.Size = new System.Drawing.Size(260, 24);
             this.modelComboBox.TabIndex = 3;
@@ -372,7 +387,7 @@
             // 
             this.pictureBox1.Image = global::ZeroWin.Properties.Resources.spectrumIcon2;
             this.pictureBox1.Location = new System.Drawing.Point(12, 22);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(49, 52);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -385,9 +400,9 @@
             this.tabPage2.Controls.Add(this.groupBox4);
             this.tabPage2.Controls.Add(this.groupBox3);
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage2.Size = new System.Drawing.Size(547, 487);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Display";
@@ -403,9 +418,9 @@
             this.groupBox5.Controls.Add(this.label9);
             this.groupBox5.Controls.Add(this.pictureBox5);
             this.groupBox5.Location = new System.Drawing.Point(12, 276);
-            this.groupBox5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox5.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox5.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox5.Size = new System.Drawing.Size(517, 198);
             this.groupBox5.TabIndex = 9;
             this.groupBox5.TabStop = false;
@@ -417,7 +432,7 @@
             this.aspectRatioFullscreenCheckBox.Checked = true;
             this.aspectRatioFullscreenCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.aspectRatioFullscreenCheckBox.Location = new System.Drawing.Point(83, 154);
-            this.aspectRatioFullscreenCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.aspectRatioFullscreenCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.aspectRatioFullscreenCheckBox.Name = "aspectRatioFullscreenCheckBox";
             this.aspectRatioFullscreenCheckBox.Size = new System.Drawing.Size(245, 21);
             this.aspectRatioFullscreenCheckBox.TabIndex = 8;
@@ -462,7 +477,7 @@
             "450%",
             "500%"});
             this.windowSizeComboBox.Location = new System.Drawing.Point(236, 64);
-            this.windowSizeComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.windowSizeComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.windowSizeComboBox.Name = "windowSizeComboBox";
             this.windowSizeComboBox.Size = new System.Drawing.Size(164, 24);
             this.windowSizeComboBox.TabIndex = 13;
@@ -478,7 +493,7 @@
             "Medium Border",
             "Mini Border"});
             this.borderSizeComboBox.Location = new System.Drawing.Point(236, 107);
-            this.borderSizeComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.borderSizeComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.borderSizeComboBox.Name = "borderSizeComboBox";
             this.borderSizeComboBox.Size = new System.Drawing.Size(164, 24);
             this.borderSizeComboBox.TabIndex = 10;
@@ -497,7 +512,7 @@
             // 
             this.pictureBox5.Image = global::ZeroWin.Properties.Resources.application_double;
             this.pictureBox5.Location = new System.Drawing.Point(8, 26);
-            this.pictureBox5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox5.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.Size = new System.Drawing.Size(53, 44);
             this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -511,9 +526,9 @@
             this.groupBox4.Controls.Add(this.pictureBox4);
             this.groupBox4.Controls.Add(this.label3);
             this.groupBox4.Location = new System.Drawing.Point(12, 143);
-            this.groupBox4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox4.Size = new System.Drawing.Size(517, 126);
             this.groupBox4.TabIndex = 8;
             this.groupBox4.TabStop = false;
@@ -530,7 +545,7 @@
             "Grayscale (B\\W TV)",
             "ULA Plus (64 colour)"});
             this.paletteComboBox.Location = new System.Drawing.Point(144, 79);
-            this.paletteComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.paletteComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.paletteComboBox.Name = "paletteComboBox";
             this.paletteComboBox.Size = new System.Drawing.Size(160, 24);
             this.paletteComboBox.TabIndex = 9;
@@ -549,7 +564,7 @@
             // 
             this.pictureBox4.Image = global::ZeroWin.Properties.Resources.palette;
             this.pictureBox4.Location = new System.Drawing.Point(8, 26);
-            this.pictureBox4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox4.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox4.Name = "pictureBox4";
             this.pictureBox4.Size = new System.Drawing.Size(48, 38);
             this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -577,9 +592,9 @@
             this.groupBox3.Controls.Add(this.directXRadioButton);
             this.groupBox3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.groupBox3.Location = new System.Drawing.Point(12, 12);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox3.Size = new System.Drawing.Size(517, 123);
             this.groupBox3.TabIndex = 3;
             this.groupBox3.TabStop = false;
@@ -589,7 +604,7 @@
             // 
             this.vsyncCheckbox.AutoSize = true;
             this.vsyncCheckbox.Location = new System.Drawing.Point(87, 86);
-            this.vsyncCheckbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.vsyncCheckbox.Margin = new System.Windows.Forms.Padding(4);
             this.vsyncCheckbox.Name = "vsyncCheckbox";
             this.vsyncCheckbox.Size = new System.Drawing.Size(118, 21);
             this.vsyncCheckbox.TabIndex = 7;
@@ -602,7 +617,7 @@
             // 
             this.pixelSmoothingCheckBox.AutoSize = true;
             this.pixelSmoothingCheckBox.Location = new System.Drawing.Point(357, 86);
-            this.pixelSmoothingCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pixelSmoothingCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.pixelSmoothingCheckBox.Name = "pixelSmoothingCheckBox";
             this.pixelSmoothingCheckBox.Size = new System.Drawing.Size(146, 21);
             this.pixelSmoothingCheckBox.TabIndex = 6;
@@ -615,7 +630,7 @@
             // 
             this.interlaceCheckBox.AutoSize = true;
             this.interlaceCheckBox.Location = new System.Drawing.Point(216, 86);
-            this.interlaceCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.interlaceCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.interlaceCheckBox.Name = "interlaceCheckBox";
             this.interlaceCheckBox.Size = new System.Drawing.Size(129, 21);
             this.interlaceCheckBox.TabIndex = 5;
@@ -627,7 +642,7 @@
             // 
             this.pictureBox3.Image = global::ZeroWin.Properties.Resources.monitor;
             this.pictureBox3.Location = new System.Drawing.Point(8, 23);
-            this.pictureBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox3.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(53, 59);
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -649,7 +664,7 @@
             this.gdiRadioButton.AutoSize = true;
             this.gdiRadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.gdiRadioButton.Location = new System.Drawing.Point(188, 53);
-            this.gdiRadioButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.gdiRadioButton.Margin = new System.Windows.Forms.Padding(4);
             this.gdiRadioButton.Name = "gdiRadioButton";
             this.gdiRadioButton.Size = new System.Drawing.Size(52, 21);
             this.gdiRadioButton.TabIndex = 1;
@@ -664,7 +679,7 @@
             this.directXRadioButton.Checked = true;
             this.directXRadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.directXRadioButton.Location = new System.Drawing.Point(87, 53);
-            this.directXRadioButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.directXRadioButton.Margin = new System.Windows.Forms.Padding(4);
             this.directXRadioButton.Name = "directXRadioButton";
             this.directXRadioButton.Size = new System.Drawing.Size(73, 21);
             this.directXRadioButton.TabIndex = 2;
@@ -679,9 +694,9 @@
             this.tabPage4.Controls.Add(this.groupBox11);
             this.tabPage4.Controls.Add(this.groupBox10);
             this.tabPage4.Location = new System.Drawing.Point(4, 25);
-            this.tabPage4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage4.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage4.Size = new System.Drawing.Size(547, 487);
             this.tabPage4.TabIndex = 4;
             this.tabPage4.Text = "Sound";
@@ -694,9 +709,9 @@
             this.groupBox11.Controls.Add(this.label20);
             this.groupBox11.Controls.Add(this.pictureBox10);
             this.groupBox11.Location = new System.Drawing.Point(16, 228);
-            this.groupBox11.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox11.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox11.Name = "groupBox11";
-            this.groupBox11.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox11.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox11.Size = new System.Drawing.Size(504, 145);
             this.groupBox11.TabIndex = 1;
             this.groupBox11.TabStop = false;
@@ -706,7 +721,7 @@
             // 
             this.abcRadioButton.AutoSize = true;
             this.abcRadioButton.Location = new System.Drawing.Point(197, 101);
-            this.abcRadioButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.abcRadioButton.Margin = new System.Windows.Forms.Padding(4);
             this.abcRadioButton.Name = "abcRadioButton";
             this.abcRadioButton.Size = new System.Drawing.Size(56, 21);
             this.abcRadioButton.TabIndex = 6;
@@ -718,7 +733,7 @@
             this.acbRadioButton.AutoSize = true;
             this.acbRadioButton.Checked = true;
             this.acbRadioButton.Location = new System.Drawing.Point(81, 101);
-            this.acbRadioButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.acbRadioButton.Margin = new System.Windows.Forms.Padding(4);
             this.acbRadioButton.Name = "acbRadioButton";
             this.acbRadioButton.Size = new System.Drawing.Size(56, 21);
             this.acbRadioButton.TabIndex = 5;
@@ -741,7 +756,7 @@
             // 
             this.pictureBox10.Image = global::ZeroWin.Properties.Resources.soundIcon;
             this.pictureBox10.Location = new System.Drawing.Point(13, 31);
-            this.pictureBox10.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox10.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox10.Name = "pictureBox10";
             this.pictureBox10.Size = new System.Drawing.Size(49, 49);
             this.pictureBox10.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -756,9 +771,9 @@
             this.groupBox10.Controls.Add(this.pictureBox11);
             this.groupBox10.Controls.Add(this.label19);
             this.groupBox10.Location = new System.Drawing.Point(16, 16);
-            this.groupBox10.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox10.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox10.Name = "groupBox10";
-            this.groupBox10.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox10.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox10.Size = new System.Drawing.Size(505, 193);
             this.groupBox10.TabIndex = 0;
             this.groupBox10.TabStop = false;
@@ -768,7 +783,7 @@
             // 
             this.ayFor48kCheckbox.AutoSize = true;
             this.ayFor48kCheckbox.Location = new System.Drawing.Point(81, 146);
-            this.ayFor48kCheckbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ayFor48kCheckbox.Margin = new System.Windows.Forms.Padding(4);
             this.ayFor48kCheckbox.Name = "ayFor48kCheckbox";
             this.ayFor48kCheckbox.Size = new System.Drawing.Size(279, 21);
             this.ayFor48kCheckbox.TabIndex = 5;
@@ -782,7 +797,7 @@
             // 
             this.monoRadioButton.AutoSize = true;
             this.monoRadioButton.Location = new System.Drawing.Point(197, 101);
-            this.monoRadioButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.monoRadioButton.Margin = new System.Windows.Forms.Padding(4);
             this.monoRadioButton.Name = "monoRadioButton";
             this.monoRadioButton.Size = new System.Drawing.Size(64, 21);
             this.monoRadioButton.TabIndex = 4;
@@ -795,7 +810,7 @@
             this.stereoRadioButton.AutoSize = true;
             this.stereoRadioButton.Checked = true;
             this.stereoRadioButton.Location = new System.Drawing.Point(81, 101);
-            this.stereoRadioButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.stereoRadioButton.Margin = new System.Windows.Forms.Padding(4);
             this.stereoRadioButton.Name = "stereoRadioButton";
             this.stereoRadioButton.Size = new System.Drawing.Size(71, 21);
             this.stereoRadioButton.TabIndex = 3;
@@ -808,7 +823,7 @@
             // 
             this.pictureBox11.Image = global::ZeroWin.Properties.Resources.music;
             this.pictureBox11.Location = new System.Drawing.Point(13, 33);
-            this.pictureBox11.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox11.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox11.Name = "pictureBox11";
             this.pictureBox11.Size = new System.Drawing.Size(49, 49);
             this.pictureBox11.TabIndex = 0;
@@ -829,9 +844,9 @@
             this.tabPage1.Controls.Add(this.groupBox13);
             this.tabPage1.Controls.Add(this.groupBox7);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage1.Size = new System.Drawing.Size(547, 487);
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "Emulation";
@@ -846,9 +861,9 @@
             this.groupBox13.Controls.Add(this.label30);
             this.groupBox13.Controls.Add(this.pictureBox15);
             this.groupBox13.Location = new System.Drawing.Point(13, 276);
-            this.groupBox13.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox13.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox13.Name = "groupBox13";
-            this.groupBox13.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox13.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox13.Size = new System.Drawing.Size(517, 190);
             this.groupBox13.TabIndex = 5;
             this.groupBox13.TabStop = false;
@@ -890,7 +905,7 @@
             this.emulationSpeedTrackBar.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.emulationSpeedTrackBar.LargeChange = 50;
             this.emulationSpeedTrackBar.Location = new System.Drawing.Point(87, 106);
-            this.emulationSpeedTrackBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.emulationSpeedTrackBar.Margin = new System.Windows.Forms.Padding(4);
             this.emulationSpeedTrackBar.Maximum = 500;
             this.emulationSpeedTrackBar.Minimum = 10;
             this.emulationSpeedTrackBar.Name = "emulationSpeedTrackBar";
@@ -916,7 +931,7 @@
             // 
             this.pictureBox15.Image = global::ZeroWin.Properties.Resources.frequency;
             this.pictureBox15.Location = new System.Drawing.Point(8, 23);
-            this.pictureBox15.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox15.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox15.Name = "pictureBox15";
             this.pictureBox15.Size = new System.Drawing.Size(59, 49);
             this.pictureBox15.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -925,6 +940,7 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Controls.Add(this.port1FCheckbox);
             this.groupBox7.Controls.Add(this.onScreenLEDCheckbox);
             this.groupBox7.Controls.Add(this.lastStateCheckbox);
             this.groupBox7.Controls.Add(this.Use128keCheckbox);
@@ -932,9 +948,9 @@
             this.groupBox7.Controls.Add(this.pauseCheckBox);
             this.groupBox7.Controls.Add(this.pictureBox7);
             this.groupBox7.Location = new System.Drawing.Point(8, 18);
-            this.groupBox7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox7.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox7.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox7.Size = new System.Drawing.Size(517, 235);
             this.groupBox7.TabIndex = 4;
             this.groupBox7.TabStop = false;
@@ -945,8 +961,8 @@
             this.onScreenLEDCheckbox.AutoSize = true;
             this.onScreenLEDCheckbox.Checked = true;
             this.onScreenLEDCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.onScreenLEDCheckbox.Location = new System.Drawing.Point(92, 112);
-            this.onScreenLEDCheckbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.onScreenLEDCheckbox.Location = new System.Drawing.Point(92, 142);
+            this.onScreenLEDCheckbox.Margin = new System.Windows.Forms.Padding(4);
             this.onScreenLEDCheckbox.Name = "onScreenLEDCheckbox";
             this.onScreenLEDCheckbox.Size = new System.Drawing.Size(200, 21);
             this.onScreenLEDCheckbox.TabIndex = 5;
@@ -958,8 +974,8 @@
             // lastStateCheckbox
             // 
             this.lastStateCheckbox.AutoSize = true;
-            this.lastStateCheckbox.Location = new System.Drawing.Point(92, 84);
-            this.lastStateCheckbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lastStateCheckbox.Location = new System.Drawing.Point(92, 113);
+            this.lastStateCheckbox.Margin = new System.Windows.Forms.Padding(4);
             this.lastStateCheckbox.Name = "lastStateCheckbox";
             this.lastStateCheckbox.Size = new System.Drawing.Size(204, 21);
             this.lastStateCheckbox.TabIndex = 4;
@@ -976,7 +992,7 @@
             this.Use128keCheckbox.Checked = true;
             this.Use128keCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.Use128keCheckbox.Location = new System.Drawing.Point(92, 27);
-            this.Use128keCheckbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Use128keCheckbox.Margin = new System.Windows.Forms.Padding(4);
             this.Use128keCheckbox.Name = "Use128keCheckbox";
             this.Use128keCheckbox.Size = new System.Drawing.Size(368, 21);
             this.Use128keCheckbox.TabIndex = 3;
@@ -989,8 +1005,8 @@
             this.exitConfirmCheckBox.AutoSize = true;
             this.exitConfirmCheckBox.Checked = true;
             this.exitConfirmCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.exitConfirmCheckBox.Location = new System.Drawing.Point(92, 139);
-            this.exitConfirmCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.exitConfirmCheckBox.Location = new System.Drawing.Point(91, 171);
+            this.exitConfirmCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.exitConfirmCheckBox.Name = "exitConfirmCheckBox";
             this.exitConfirmCheckBox.Size = new System.Drawing.Size(180, 21);
             this.exitConfirmCheckBox.TabIndex = 2;
@@ -1002,8 +1018,8 @@
             this.pauseCheckBox.AutoSize = true;
             this.pauseCheckBox.Checked = true;
             this.pauseCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.pauseCheckBox.Location = new System.Drawing.Point(92, 55);
-            this.pauseCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pauseCheckBox.Location = new System.Drawing.Point(91, 84);
+            this.pauseCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.pauseCheckBox.Name = "pauseCheckBox";
             this.pauseCheckBox.Size = new System.Drawing.Size(300, 21);
             this.pauseCheckBox.TabIndex = 1;
@@ -1014,7 +1030,7 @@
             // 
             this.pictureBox7.Image = global::ZeroWin.Properties.Resources.options;
             this.pictureBox7.Location = new System.Drawing.Point(8, 23);
-            this.pictureBox7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox7.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox7.Name = "pictureBox7";
             this.pictureBox7.Size = new System.Drawing.Size(59, 49);
             this.pictureBox7.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -1026,9 +1042,9 @@
             this.tabPage3.Controls.Add(this.groupBox9);
             this.tabPage3.Controls.Add(this.groupBox8);
             this.tabPage3.Location = new System.Drawing.Point(4, 25);
-            this.tabPage3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage3.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage3.Size = new System.Drawing.Size(547, 487);
             this.tabPage3.TabIndex = 3;
             this.tabPage3.Text = "Files";
@@ -1052,9 +1068,9 @@
             this.groupBox9.Controls.Add(this.label15);
             this.groupBox9.Controls.Add(this.pictureBox9);
             this.groupBox9.Location = new System.Drawing.Point(15, 204);
-            this.groupBox9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox9.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox9.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox9.Size = new System.Drawing.Size(516, 257);
             this.groupBox9.TabIndex = 1;
             this.groupBox9.TabStop = false;
@@ -1064,7 +1080,7 @@
             // 
             this.sclCheckBox.AutoSize = true;
             this.sclCheckBox.Location = new System.Drawing.Point(345, 210);
-            this.sclCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.sclCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.sclCheckBox.Name = "sclCheckBox";
             this.sclCheckBox.Size = new System.Drawing.Size(60, 21);
             this.sclCheckBox.TabIndex = 27;
@@ -1076,7 +1092,7 @@
             // 
             this.trdCheckBox.AutoSize = true;
             this.trdCheckBox.Location = new System.Drawing.Point(261, 210);
-            this.trdCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.trdCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.trdCheckBox.Name = "trdCheckBox";
             this.trdCheckBox.Size = new System.Drawing.Size(63, 21);
             this.trdCheckBox.TabIndex = 26;
@@ -1098,7 +1114,7 @@
             // 
             this.dskCheckBox.AutoSize = true;
             this.dskCheckBox.Location = new System.Drawing.Point(175, 210);
-            this.dskCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dskCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.dskCheckBox.Name = "dskCheckBox";
             this.dskCheckBox.Size = new System.Drawing.Size(62, 21);
             this.dskCheckBox.TabIndex = 24;
@@ -1119,7 +1135,7 @@
             // 
             this.tapCheckBox.AutoSize = true;
             this.tapCheckBox.Location = new System.Drawing.Point(345, 171);
-            this.tapCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tapCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.tapCheckBox.Name = "tapCheckBox";
             this.tapCheckBox.Size = new System.Drawing.Size(61, 21);
             this.tapCheckBox.TabIndex = 21;
@@ -1130,7 +1146,7 @@
             // 
             this.tzxCheckBox.AutoSize = true;
             this.tzxCheckBox.Location = new System.Drawing.Point(261, 170);
-            this.tzxCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tzxCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.tzxCheckBox.Name = "tzxCheckBox";
             this.tzxCheckBox.Size = new System.Drawing.Size(61, 21);
             this.tzxCheckBox.TabIndex = 20;
@@ -1152,7 +1168,7 @@
             // 
             this.pzxCheckBox.AutoSize = true;
             this.pzxCheckBox.Location = new System.Drawing.Point(175, 171);
-            this.pzxCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pzxCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.pzxCheckBox.Name = "pzxCheckBox";
             this.pzxCheckBox.Size = new System.Drawing.Size(61, 21);
             this.pzxCheckBox.TabIndex = 18;
@@ -1163,7 +1179,7 @@
             // 
             this.snaCheckBox.AutoSize = true;
             this.snaCheckBox.Location = new System.Drawing.Point(345, 129);
-            this.snaCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.snaCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.snaCheckBox.Name = "snaCheckBox";
             this.snaCheckBox.Size = new System.Drawing.Size(62, 21);
             this.snaCheckBox.TabIndex = 17;
@@ -1175,7 +1191,7 @@
             // 
             this.z80CheckBox.AutoSize = true;
             this.z80CheckBox.Location = new System.Drawing.Point(261, 129);
-            this.z80CheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.z80CheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.z80CheckBox.Name = "z80CheckBox";
             this.z80CheckBox.Size = new System.Drawing.Size(59, 21);
             this.z80CheckBox.TabIndex = 16;
@@ -1197,7 +1213,7 @@
             // 
             this.szxCheckBox.AutoSize = true;
             this.szxCheckBox.Location = new System.Drawing.Point(175, 129);
-            this.szxCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.szxCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.szxCheckBox.Name = "szxCheckBox";
             this.szxCheckBox.Size = new System.Drawing.Size(61, 21);
             this.szxCheckBox.TabIndex = 14;
@@ -1218,7 +1234,7 @@
             // 
             this.pictureBox9.Image = global::ZeroWin.Properties.Resources.application_link;
             this.pictureBox9.Location = new System.Drawing.Point(19, 31);
-            this.pictureBox9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox9.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox9.Name = "pictureBox9";
             this.pictureBox9.Size = new System.Drawing.Size(45, 41);
             this.pictureBox9.TabIndex = 12;
@@ -1235,9 +1251,9 @@
             this.groupBox8.Controls.Add(this.romPathTextBox);
             this.groupBox8.Controls.Add(this.label12);
             this.groupBox8.Location = new System.Drawing.Point(15, 12);
-            this.groupBox8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox8.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox8.Name = "groupBox8";
-            this.groupBox8.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox8.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox8.Size = new System.Drawing.Size(516, 159);
             this.groupBox8.TabIndex = 0;
             this.groupBox8.TabStop = false;
@@ -1246,7 +1262,7 @@
             // gamePathButton
             // 
             this.gamePathButton.Location = new System.Drawing.Point(423, 107);
-            this.gamePathButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.gamePathButton.Margin = new System.Windows.Forms.Padding(4);
             this.gamePathButton.Name = "gamePathButton";
             this.gamePathButton.Size = new System.Drawing.Size(71, 28);
             this.gamePathButton.TabIndex = 14;
@@ -1257,7 +1273,7 @@
             // gamePathTextBox
             // 
             this.gamePathTextBox.Location = new System.Drawing.Point(161, 110);
-            this.gamePathTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.gamePathTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.gamePathTextBox.Name = "gamePathTextBox";
             this.gamePathTextBox.ReadOnly = true;
             this.gamePathTextBox.Size = new System.Drawing.Size(236, 22);
@@ -1278,7 +1294,7 @@
             // 
             this.pictureBox8.Image = global::ZeroWin.Properties.Resources.folder_link;
             this.pictureBox8.Location = new System.Drawing.Point(19, 32);
-            this.pictureBox8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox8.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox8.Name = "pictureBox8";
             this.pictureBox8.Size = new System.Drawing.Size(45, 41);
             this.pictureBox8.TabIndex = 11;
@@ -1296,7 +1312,7 @@
             // romPathButton
             // 
             this.romPathButton.Location = new System.Drawing.Point(423, 64);
-            this.romPathButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.romPathButton.Margin = new System.Windows.Forms.Padding(4);
             this.romPathButton.Name = "romPathButton";
             this.romPathButton.Size = new System.Drawing.Size(71, 28);
             this.romPathButton.TabIndex = 9;
@@ -1307,7 +1323,7 @@
             // romPathTextBox
             // 
             this.romPathTextBox.Location = new System.Drawing.Point(161, 66);
-            this.romPathTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.romPathTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.romPathTextBox.Name = "romPathTextBox";
             this.romPathTextBox.ReadOnly = true;
             this.romPathTextBox.Size = new System.Drawing.Size(236, 22);
@@ -1328,9 +1344,9 @@
             // 
             this.tabPage5.Controls.Add(this.tabControl2);
             this.tabPage5.Location = new System.Drawing.Point(4, 25);
-            this.tabPage5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage5.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage5.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage5.Size = new System.Drawing.Size(547, 487);
             this.tabPage5.TabIndex = 5;
             this.tabPage5.Text = "Input Devices";
@@ -1344,7 +1360,7 @@
             this.tabControl2.Controls.Add(this.tabPage7);
             this.tabControl2.Controls.Add(this.tabPage6);
             this.tabControl2.Location = new System.Drawing.Point(4, 7);
-            this.tabControl2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl2.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl2.Multiline = true;
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.SelectedIndex = 0;
@@ -1357,9 +1373,9 @@
             this.tabPage8.Controls.Add(this.groupBox12);
             this.tabPage8.Controls.Add(this.groupBox2);
             this.tabPage8.Location = new System.Drawing.Point(4, 28);
-            this.tabPage8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage8.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage8.Name = "tabPage8";
-            this.tabPage8.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage8.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage8.Size = new System.Drawing.Size(524, 437);
             this.tabPage8.TabIndex = 2;
             this.tabPage8.Text = "Keyboard";
@@ -1373,9 +1389,9 @@
             this.groupBox12.Controls.Add(this.label29);
             this.groupBox12.Controls.Add(this.key2joyComboBox);
             this.groupBox12.Location = new System.Drawing.Point(16, 20);
-            this.groupBox12.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox12.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox12.Name = "groupBox12";
-            this.groupBox12.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox12.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox12.Size = new System.Drawing.Size(489, 183);
             this.groupBox12.TabIndex = 25;
             this.groupBox12.TabStop = false;
@@ -1385,7 +1401,7 @@
             // 
             this.key2joyCheckBox.AutoSize = true;
             this.key2joyCheckBox.Location = new System.Drawing.Point(91, 89);
-            this.key2joyCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.key2joyCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.key2joyCheckBox.Name = "key2joyCheckBox";
             this.key2joyCheckBox.Size = new System.Drawing.Size(132, 21);
             this.key2joyCheckBox.TabIndex = 25;
@@ -1397,7 +1413,7 @@
             // 
             this.pictureBox14.Image = global::ZeroWin.Properties.Resources.cursor;
             this.pictureBox14.Location = new System.Drawing.Point(15, 23);
-            this.pictureBox14.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox14.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox14.Name = "pictureBox14";
             this.pictureBox14.Size = new System.Drawing.Size(49, 44);
             this.pictureBox14.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -1435,7 +1451,7 @@
             "Sinclair 2",
             "Cursor"});
             this.key2joyComboBox.Location = new System.Drawing.Point(259, 129);
-            this.key2joyComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.key2joyComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.key2joyComboBox.Name = "key2joyComboBox";
             this.key2joyComboBox.Size = new System.Drawing.Size(147, 24);
             this.key2joyComboBox.TabIndex = 13;
@@ -1448,9 +1464,9 @@
             this.groupBox2.Controls.Add(this.issue2RadioButton);
             this.groupBox2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.groupBox2.Location = new System.Drawing.Point(16, 228);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox2.Size = new System.Drawing.Size(491, 123);
             this.groupBox2.TabIndex = 22;
             this.groupBox2.TabStop = false;
@@ -1460,7 +1476,7 @@
             // 
             this.pictureBox2.Image = global::ZeroWin.Properties.Resources.keyboard;
             this.pictureBox2.Location = new System.Drawing.Point(13, 23);
-            this.pictureBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox2.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(49, 44);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -1486,7 +1502,7 @@
             this.issue3radioButton.Checked = true;
             this.issue3radioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.issue3radioButton.Location = new System.Drawing.Point(91, 82);
-            this.issue3radioButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.issue3radioButton.Margin = new System.Windows.Forms.Padding(4);
             this.issue3radioButton.Name = "issue3radioButton";
             this.issue3radioButton.Size = new System.Drawing.Size(134, 21);
             this.issue3radioButton.TabIndex = 4;
@@ -1499,7 +1515,7 @@
             this.issue2RadioButton.AutoSize = true;
             this.issue2RadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.issue2RadioButton.Location = new System.Drawing.Point(268, 82);
-            this.issue2RadioButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.issue2RadioButton.Margin = new System.Windows.Forms.Padding(4);
             this.issue2RadioButton.Name = "issue2RadioButton";
             this.issue2RadioButton.Size = new System.Drawing.Size(134, 21);
             this.issue2RadioButton.TabIndex = 3;
@@ -1522,9 +1538,9 @@
             this.tabPage7.Controls.Add(this.joystickComboBox2);
             this.tabPage7.Controls.Add(this.label24);
             this.tabPage7.Location = new System.Drawing.Point(4, 28);
-            this.tabPage7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage7.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage7.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage7.Size = new System.Drawing.Size(524, 437);
             this.tabPage7.TabIndex = 1;
             this.tabPage7.Text = "Joystick";
@@ -1534,7 +1550,7 @@
             // 
             this.button2.Enabled = false;
             this.button2.Location = new System.Drawing.Point(115, 289);
-            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button2.Margin = new System.Windows.Forms.Padding(4);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(148, 28);
             this.button2.TabIndex = 20;
@@ -1545,7 +1561,7 @@
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(113, 155);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(148, 28);
             this.button1.TabIndex = 19;
@@ -1556,10 +1572,10 @@
             // 
             // label26
             // 
-            this.label26.Location = new System.Drawing.Point(109, 37);
+            this.label26.Location = new System.Drawing.Point(109, 36);
             this.label26.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(404, 32);
+            this.label26.Size = new System.Drawing.Size(404, 43);
             this.label26.TabIndex = 18;
             this.label26.Text = "Up to two controllers can be used on the PC to emulate some of the popular joysti" +
     "ck interfaces. ";
@@ -1568,7 +1584,7 @@
             // 
             this.pictureBox12.Image = global::ZeroWin.Properties.Resources.joystick;
             this.pictureBox12.Location = new System.Drawing.Point(25, 37);
-            this.pictureBox12.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox12.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox12.Name = "pictureBox12";
             this.pictureBox12.Size = new System.Drawing.Size(45, 42);
             this.pictureBox12.TabIndex = 17;
@@ -1596,7 +1612,7 @@
             "Cursor",
             "Custom"});
             this.joystick2ComboBox2.Location = new System.Drawing.Point(343, 244);
-            this.joystick2ComboBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.joystick2ComboBox2.Margin = new System.Windows.Forms.Padding(4);
             this.joystick2ComboBox2.Name = "joystick2ComboBox2";
             this.joystick2ComboBox2.Size = new System.Drawing.Size(147, 24);
             this.joystick2ComboBox2.TabIndex = 16;
@@ -1616,7 +1632,7 @@
             this.joystick2ComboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.joystick2ComboBox1.FormattingEnabled = true;
             this.joystick2ComboBox1.Location = new System.Drawing.Point(115, 244);
-            this.joystick2ComboBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.joystick2ComboBox1.Margin = new System.Windows.Forms.Padding(4);
             this.joystick2ComboBox1.Name = "joystick2ComboBox1";
             this.joystick2ComboBox1.Size = new System.Drawing.Size(197, 24);
             this.joystick2ComboBox1.TabIndex = 15;
@@ -1627,7 +1643,7 @@
             this.joystickComboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.joystickComboBox1.FormattingEnabled = true;
             this.joystickComboBox1.Location = new System.Drawing.Point(113, 108);
-            this.joystickComboBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.joystickComboBox1.Margin = new System.Windows.Forms.Padding(4);
             this.joystickComboBox1.Name = "joystickComboBox1";
             this.joystickComboBox1.Size = new System.Drawing.Size(197, 24);
             this.joystickComboBox1.TabIndex = 11;
@@ -1655,7 +1671,7 @@
             "Cursor",
             "Custom"});
             this.joystickComboBox2.Location = new System.Drawing.Point(343, 108);
-            this.joystickComboBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.joystickComboBox2.Margin = new System.Windows.Forms.Padding(4);
             this.joystickComboBox2.Name = "joystickComboBox2";
             this.joystickComboBox2.Size = new System.Drawing.Size(147, 24);
             this.joystickComboBox2.TabIndex = 12;
@@ -1680,9 +1696,9 @@
             this.tabPage6.Controls.Add(this.mouseCheckBox);
             this.tabPage6.Controls.Add(this.label25);
             this.tabPage6.Location = new System.Drawing.Point(4, 28);
-            this.tabPage6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage6.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage6.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage6.Size = new System.Drawing.Size(524, 437);
             this.tabPage6.TabIndex = 0;
             this.tabPage6.Text = "Mouse";
@@ -1690,10 +1706,10 @@
             // 
             // label34
             // 
-            this.label34.Location = new System.Drawing.Point(97, 78);
+            this.label34.Location = new System.Drawing.Point(97, 75);
             this.label34.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label34.Name = "label34";
-            this.label34.Size = new System.Drawing.Size(376, 32);
+            this.label34.Size = new System.Drawing.Size(376, 51);
             this.label34.TabIndex = 14;
             this.label34.Text = "Note: press F6 to acquire the mouse in the emulator, and Alt+F6 to release it.";
             // 
@@ -1712,7 +1728,7 @@
             this.mouseTrackBar.AutoSize = false;
             this.mouseTrackBar.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.mouseTrackBar.Location = new System.Drawing.Point(188, 174);
-            this.mouseTrackBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.mouseTrackBar.Margin = new System.Windows.Forms.Padding(4);
             this.mouseTrackBar.Minimum = 1;
             this.mouseTrackBar.Name = "mouseTrackBar";
             this.mouseTrackBar.Size = new System.Drawing.Size(308, 39);
@@ -1724,7 +1740,7 @@
             // 
             this.pictureBox13.Image = global::ZeroWin.Properties.Resources.mouse;
             this.pictureBox13.Location = new System.Drawing.Point(23, 34);
-            this.pictureBox13.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox13.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox13.Name = "pictureBox13";
             this.pictureBox13.Size = new System.Drawing.Size(45, 42);
             this.pictureBox13.TabIndex = 9;
@@ -1734,7 +1750,7 @@
             // 
             this.mouseCheckBox.AutoSize = true;
             this.mouseCheckBox.Location = new System.Drawing.Point(101, 133);
-            this.mouseCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.mouseCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.mouseCheckBox.Name = "mouseCheckBox";
             this.mouseCheckBox.Size = new System.Drawing.Size(187, 21);
             this.mouseCheckBox.TabIndex = 11;
@@ -1746,7 +1762,7 @@
             this.label25.Location = new System.Drawing.Point(97, 34);
             this.label25.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(376, 32);
+            this.label25.Size = new System.Drawing.Size(376, 42);
             this.label25.TabIndex = 10;
             this.label25.Text = "Zero can emulate a two button Kempston mouse using the mouse attached to your PC." +
     " ";
@@ -1756,7 +1772,7 @@
             this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button4.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.button4.Location = new System.Drawing.Point(464, 539);
-            this.button4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button4.Margin = new System.Windows.Forms.Padding(4);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(100, 28);
             this.button4.TabIndex = 1;
@@ -1768,7 +1784,7 @@
             this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button5.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button5.Location = new System.Drawing.Point(352, 539);
-            this.button5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button5.Margin = new System.Windows.Forms.Padding(4);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(100, 28);
             this.button5.TabIndex = 2;
@@ -1778,7 +1794,7 @@
             // defaultSettingsButton
             // 
             this.defaultSettingsButton.Location = new System.Drawing.Point(11, 539);
-            this.defaultSettingsButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.defaultSettingsButton.Margin = new System.Windows.Forms.Padding(4);
             this.defaultSettingsButton.Name = "defaultSettingsButton";
             this.defaultSettingsButton.Size = new System.Drawing.Size(185, 28);
             this.defaultSettingsButton.TabIndex = 3;
@@ -1790,19 +1806,17 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // disableTapeTrapCheckbox
+            // port1FCheckbox
             // 
-            this.disableTapeTrapCheckbox.AutoSize = true;
-            this.disableTapeTrapCheckbox.Location = new System.Drawing.Point(137, 149);
-            this.disableTapeTrapCheckbox.Margin = new System.Windows.Forms.Padding(4);
-            this.disableTapeTrapCheckbox.Name = "disableTapeTrapCheckbox";
-            this.disableTapeTrapCheckbox.Size = new System.Drawing.Size(149, 21);
-            this.disableTapeTrapCheckbox.TabIndex = 7;
-            this.disableTapeTrapCheckbox.Text = "Disable tape traps.";
-            this.toolTip1.SetToolTip(this.disableTapeTrapCheckbox, "Check this if you\'re using a non-standard ROM,\r\notherwise it may cause tape trapp" +
-        "ing routines\r\n(used to save/load TAP\'s by the emulator) to\r\naccidentally trigger" +
-        " when using the ROM.");
-            this.disableTapeTrapCheckbox.UseVisualStyleBackColor = true;
+            this.port1FCheckbox.AutoSize = true;
+            this.port1FCheckbox.Location = new System.Drawing.Point(92, 56);
+            this.port1FCheckbox.Margin = new System.Windows.Forms.Padding(4);
+            this.port1FCheckbox.Name = "port1FCheckbox";
+            this.port1FCheckbox.Size = new System.Drawing.Size(320, 21);
+            this.port1FCheckbox.TabIndex = 6;
+            this.port1FCheckbox.Text = "Use port $1F decoding for Kempston Joystick.";
+            this.toolTip1.SetToolTip(this.port1FCheckbox, resources.GetString("port1FCheckbox.ToolTip"));
+            this.port1FCheckbox.UseVisualStyleBackColor = true;
             // 
             // Options
             // 
@@ -1820,7 +1834,7 @@
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Options";
@@ -2019,5 +2033,6 @@
         private System.Windows.Forms.CheckBox vsyncCheckbox;
         private System.Windows.Forms.CheckBox aspectRatioFullscreenCheckBox;
         private System.Windows.Forms.CheckBox disableTapeTrapCheckbox;
+        private System.Windows.Forms.CheckBox port1FCheckbox;
     }
 }

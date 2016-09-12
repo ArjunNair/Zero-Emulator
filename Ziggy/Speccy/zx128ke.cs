@@ -209,14 +209,13 @@ namespace Speccy
             totalTStates++; //T2
 
             //Kempston joystick
-            if ((port & 0xe0) == 0) {
-                if (HasKempstonJoystick && !externalSingleStep) {
+            if (HasKempstonJoystick && IsKempstonActive(port)) {
+                if (!externalSingleStep) {
                     Contend(port, 1, 3);
                     result = joystickState[(int)JoysticksEmulated.KEMPSTON];
                 }
-            } else
-                if (lowBitReset)    //Even address, so get input
-                {
+            }
+            else if (lowBitReset) {   //Even address, so get input
                     totalTStates += contentionTable[totalTStates]; //C:3
                     totalTStates += 3;
 
@@ -250,36 +249,32 @@ namespace Speccy
                     result = result | 0xa0; //set bit 5 & 7 to 1
 
                     if (tapeIsPlaying) {
-                        if (tapeBit == 0) {
+                        if (tapeBit == 0)
                             result &= ~(TAPE_BIT);    //reset is EAR ON
-                        } else {
+                        else
                             result |= (TAPE_BIT); //set is EAR Off
-                        }
-                    } else
-                        if ((lastFEOut & 0x10) == 0) {
+                    }
+                    else if ((lastFEOut & 0x10) == 0)
                             result &= ~(0x40);
-                        } else
+                         else
                             result |= 0x40;
-                } else {
+                }
+                else {
                     Contend(port, 1, 3); //T2, T3
 
                     if ((port & 0xc002) == 0xc000) //AY register activate on Port FFFD
-                    {
                         result = aySound.PortRead();
-                    } else
-                        if ((port & 0xc002) == 0x8000) //Port BFFD also activates AY on the +3/2A
-                        {
+                    else if ((port & 0xc002) == 0x8000) //Port BFFD also activates AY on the +3/2A
                             result = aySound.PortRead();
-                        } else if (HasKempstonMouse)//Kempston Mouse
-                        {
+                    else if (HasKempstonMouse) {//Kempston Mouse
                             if (port == 64479)
                                 result = MouseX % 0xff;     //X ranges from 0 to 255
                             else if (port == 65503)
                                 result = MouseY % 0xff;     //Y ranges from 0 to 255
                             else if (port == 64223)
                                 result = MouseButton;// MouseButton;
-                        } else //return floating bus (also handles port 0x7ffd)
-                        {
+                    }
+                    else {//return floating bus (also handles port 0x7ffd)
                             int _tstates = totalTStates - 1;
 
                             //if we're on the top or bottom border return 0xff
@@ -291,7 +286,7 @@ namespace Speccy
                                 else
                                     result = PeekByteNoContend(floatingBusTable[_tstates]);
                             }
-                        }
+                     }
                 }
 
             base.In(port, result & 0xff);

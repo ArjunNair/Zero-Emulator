@@ -754,5 +754,17 @@ namespace ZeroWin.Properties {
                 this["DisableTapeTraps"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool KempstonUsesPort1F {
+            get {
+                return ((bool)(this["KempstonUsesPort1F"]));
+            }
+            set {
+                this["KempstonUsesPort1F"] = value;
+            }
+        }
     }
 }

@@ -217,14 +217,13 @@ namespace Speccy
             totalTStates++; //T2
 
             //Kempston joystick
-            if ((port & 0xe0) == 0) {
-                if (HasKempstonJoystick && !externalSingleStep) {
+            if (HasKempstonJoystick && IsKempstonActive(port)) {
+                if (!externalSingleStep) {
                     Contend(port, 1, 3);
                     result = joystickState[(int)JoysticksEmulated.KEMPSTON];
                 }
-            } else
-                if (lowBitReset)    //Even address, so get input
-                {
+            }
+            else if (lowBitReset) {   //Even address, so get input
                     totalTStates += contentionTable[totalTStates]; //C:3
 
                     if (!externalSingleStep) {
@@ -262,27 +261,27 @@ namespace Speccy
                         } else {
                             result |= (TAPE_BIT); //set is EAR Off
                         }
-                    } else
-                        if ((lastFEOut & 0x10) == 0) {
+                    }
+                    else if ((lastFEOut & 0x10) == 0) {
                             result &= ~(0x40);
-                        } else
+                        }
+                        else
                             result |= 0x40;
-                } else {
+                }
+                else {
                     Contend(port, 1, 3); //T2, T3
+
                     if ((port & 0xc002) == 0xc000) //AY register activate
-                    {
-                        //totalTStates += 2;
                         result = aySound.PortRead();
-                    } else if (HasKempstonMouse)//Kempston Mouse
-                    {
+                    else if (HasKempstonMouse) {//Kempston Mouse
                         if (port == 64479)
                             result = MouseX % 0xff;     //X ranges from 0 to 255
                         else if (port == 65503)
                             result = MouseY % 0xff;     //Y ranges from 0 to 255
                         else if (port == 64223)
                             result = MouseButton;// MouseButton;
-                    } else //return floating bus (also handles port 0x7ffd)
-                    {
+                    }
+                    else {          //return floating bus (also handles port 0x7ffd)
                         int _tstates = totalTStates - 1; //floating bus is sampled on the last cycle
 
                         //if we're on the top or bottom border return 0xff
@@ -318,7 +317,8 @@ namespace Speccy
 
                 showShadowScreen = true;
                 screen = GetPageData(7); //Bank 7
-            } else {
+            }
+            else {
                 if (showShadowScreen)
                     UpdateScreenBuffer(totalTStates);
 
@@ -423,7 +423,8 @@ namespace Speccy
                 PageWritePointer[1] = JunkMemory[1];
                 BankInPage0 = ROM_48_BAS;
                 lowROMis48K = true;
-            } else {
+            }
+            else {
                 //128k basic
                 PageReadPointer[0] = ROMpage[0];
                 PageReadPointer[1] = ROMpage[1];
@@ -463,11 +464,11 @@ namespace Speccy
 
                 if (!tapeIsPlaying) {
                     if (beepVal != lastSoundOut) {
-                        if ((beepVal) == 0) {
+
+                        if ((beepVal) == 0)
                             soundOut = MIN_SOUND_VOL;
-                        } else {
+                        else
                             soundOut = MAX_SOUND_VOL;
-                        }
 
                         if ((val & MIC_BIT) != 0)   //Boost slightly if MIC is on
                             soundOut += (short)(MAX_SOUND_VOL * 0.2f);
@@ -531,7 +532,8 @@ namespace Speccy
                 //mode group
                 if (mode == 1) {
                     ULAGroupMode = 1;
-                } else if (mode == 0) //palette group
+                }
+                else if (mode == 0) //palette group
                 {
                     ULAGroupMode = 0;
                     ULAPaletteGroup = val & 0x3f;
@@ -556,7 +558,8 @@ namespace Speccy
 
                 if (ULAGroupMode == 1) {
                     ULAPaletteEnabled = (val & 0x01) != 0;
-                } else {
+                }
+                else {
                     int bl = val & 0x01;
                     int bm = bl;
                     int bh = (val & 0x02) >> 1;
@@ -584,11 +587,11 @@ namespace Speccy
                 totalTStates = tempTStates;
             }
 
-            if (portIsContended && !lowBitReset) {
+            if (portIsContended && !lowBitReset)
                 Contend(port, 1, 3);
-            } else {
+            else
                 totalTStates += 3;
-            }
+            
 
             if (totalTStates > highestTStates)
                 highestTStates = totalTStates;
@@ -604,11 +607,13 @@ namespace Speccy
             //Check if we can find the ROM file!
             try {
                 fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
-            } catch {
+            }
+            catch {
                 return false;
             }
 
             fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
+
             using (BinaryReader r = new BinaryReader(fs)) {
                 //int bytesRead = ReadBytes(r, mem, 0, 16384);
                 byte[] buffer = new byte[16384 * 2];
@@ -618,9 +623,8 @@ namespace Speccy
                     return false; //something bad happened!
 
                 for (int g = 0; g < 4; g++)
-                    for (int f = 0; f < 8192; ++f) {
+                    for (int f = 0; f < 8192; ++f)
                         ROMpage[g][f] = (buffer[f + 8192 * g]);
-                    }
             }
             fs.Close();
             return true;
@@ -653,9 +657,8 @@ namespace Speccy
 
                 int val = ((SNA_128K)sna).PORT_7FFD;
 
-                for (int f = 0; f < 16; f++) {
+                for (int f = 0; f < 16; f++)
                     Array.Copy(((SNA_128K)sna).RAM_BANK[f], 0, RAMpage[f], 0, 8192);
-                }
 
                 PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];
                 PageReadPointer[3] = RAMpage[(int)RAM_BANK.FIVE_HIGH];

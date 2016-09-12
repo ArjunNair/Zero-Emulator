@@ -229,12 +229,10 @@ namespace Speccy
             if (isPlayingRZX) {
                 if (rzx.inputCount < rzx.frame.inputCount)
                     rzxIN = rzx.frame.inputs[rzx.inputCount++];
-                    //rzxIN = rzx.frame.inputs[rzx.inputCount++];
                 return rzxIN;
              }
             
             int result = 0xff;
-            //bool portIsContended = IsContended(port);
             bool lowBitReset = (port & 0x01) == 0;
             //T1
             //Contend(port); //N:1 || C:1
@@ -242,99 +240,105 @@ namespace Speccy
             totalTStates++; //T2
 
             //Kempston joystick
-            if (HasKempstonJoystick && ((port & 0xe0) == 0)) {
+            //Respond to top 3 bits (11100000 = port $1f decoding) or bit 5 (port $d4 decoding) being reset.
+            if (HasKempstonJoystick && IsKempstonActive(port)) {
                 if (!externalSingleStep) {
                     Contend(port, 1, 3);
                     result = joystickState[(int)JoysticksEmulated.KEMPSTON];
                 }
-            } else //ULA Plus
-                if (ULAPlusEnabled && (port == 0xff3b)) {
-                    Contend(port, 3, 1); //Contend once;  add 3 tstates
-                    result = lastULAPlusOut;
-                } else
-                    if (lowBitReset)    //Even address, so get input
-                    {
-                        totalTStates += contentionTable[totalTStates]; //C:3
-                        //Contend(port, 3, 1); //Contend once;  add 3 tstates
-                        if (!externalSingleStep) {
-                            if ((port & 0x8000) == 0)
-                                result &= keyLine[7];
+            }
+            //ULA Plus
+            else if (ULAPlusEnabled && (port == 0xff3b)) {
+                Contend(port, 3, 1); //Contend once;  add 3 tstates
+                result = lastULAPlusOut;
+            }
+            else if (lowBitReset) {                 //Even address, so get input
+                totalTStates += contentionTable[totalTStates]; //C:3
+                                                               //Contend(port, 3, 1); //Contend once;  add 3 tstates
+                if (!externalSingleStep) {
+                    if ((port & 0x8000) == 0)
+                        result &= keyLine[7];
 
-                            if ((port & 0x4000) == 0)
-                                result &= keyLine[6];
+                    if ((port & 0x4000) == 0)
+                        result &= keyLine[6];
 
-                            if ((port & 0x2000) == 0)
-                                result &= keyLine[5];
+                    if ((port & 0x2000) == 0)
+                        result &= keyLine[5];
 
-                            if ((port & 0x1000) == 0)
-                                result &= keyLine[4];
+                    if ((port & 0x1000) == 0)
+                        result &= keyLine[4];
 
-                            if ((port & 0x800) == 0)
-                                result &= keyLine[3];
+                    if ((port & 0x800) == 0)
+                        result &= keyLine[3];
 
-                            if ((port & 0x400) == 0)
-                                result &= keyLine[2];
+                    if ((port & 0x400) == 0)
+                        result &= keyLine[2];
 
-                            if ((port & 0x200) == 0)
-                                result &= keyLine[1];
+                    if ((port & 0x200) == 0)
+                        result &= keyLine[1];
 
-                            if ((port & 0x100) == 0)
-                                result &= keyLine[0];
-                        }
+                    if ((port & 0x100) == 0)
+                        result &= keyLine[0];
+                }
 
-                        result = result & 0x1f; //mask out lower 4 bits
-                        result = result | 0xa0; //set bit 5 & 7 to 1
+                result = result & 0x1f; //mask out lower 4 bits
+                result = result | 0xa0; //set bit 5 & 7 to 1
 
-                        if (tapeIsPlaying) {
-                            if (tapeBit == 0) {
-                                result &= ~(TAPE_BIT);    //reset is EAR ON
-                            } else {
-                                result |= (TAPE_BIT); //set is EAR Off
-                            }
-                        } else {
-                            if (Issue2Keyboard) {
-                                if ((lastFEOut & (EAR_BIT + MIC_BIT)) == 0) {
-                                    result &= ~(TAPE_BIT);
-                                } else
-                                    result |= TAPE_BIT;
-                            } else {
-                                if ((lastFEOut & EAR_BIT) == 0) {
-                                    result &= ~(TAPE_BIT);
-                                } else
-                                    result |= TAPE_BIT;
-                            }
-                        }
-                        totalTStates += 3;
-                    } else {
-                        Contend(port, 1, 3); //T2, T3
-
-                        if (ayIsAvailable && ((port & 0xc002) == 0xc000)) //AY register activate
-                        {
-                            result = aySound.PortRead();
-                        } else if (HasKempstonMouse)//Kempston Mouse
-                        {
-                            if (port == 64479)
-                                result = MouseX % 0xff;     //X ranges from 0 to 255
-                            else if (port == 65503)
-                                result = MouseY % 0xff;     //Y ranges from 0 to 255
-                            else if (port == 64223)
-                                result = MouseButton;// MouseButton;
-                        } else
-                        //Unused port, return floating bus
-                        {
-                            int _tstates = totalTStates - 1; //the floating bus is read on the last t-state
-
-                            //if we're on the top or bottom border return 0xff
-                            if ((_tstates < contentionStartPeriod) || (_tstates > contentionEndPeriod))
-                                result = 0xff;
-                            else {
-                                if (floatingBusTable[_tstates] < 0)
-                                    result = 0xff;
-                                else
-                                    result = PeekByteNoContend(floatingBusTable[_tstates]);
-                            }
-                        }
+                if (tapeIsPlaying) {
+                    if (tapeBit == 0) {
+                        result &= ~(TAPE_BIT);    //reset is EAR ON
                     }
+                    else {
+                        result |= (TAPE_BIT); //set is EAR Off
+                    }
+                }
+                else {
+                    if (Issue2Keyboard) {
+                        if ((lastFEOut & (EAR_BIT + MIC_BIT)) == 0) {
+                            result &= ~(TAPE_BIT);
+                        }
+                        else
+                            result |= TAPE_BIT;
+                    }
+                    else {
+                        if ((lastFEOut & EAR_BIT) == 0) {
+                            result &= ~(TAPE_BIT);
+                        }
+                        else
+                            result |= TAPE_BIT;
+                    }
+                }
+                totalTStates += 3;
+            }
+            else {
+                Contend(port, 1, 3); //T2, T3
+
+                if (ayIsAvailable && ((port & 0xc002) == 0xc000)) //AY register activate
+                    result = aySound.PortRead();
+                else if (HasKempstonMouse)//Kempston Mouse
+                {
+                    if (port == 64479)
+                        result = MouseX % 0xff;     //X ranges from 0 to 255
+                    else if (port == 65503)
+                        result = MouseY % 0xff;     //Y ranges from 0 to 255
+                    else if (port == 64223)
+                        result = MouseButton;// MouseButton;
+                }
+                else //Unused port, return floating bus
+                {
+                    int _tstates = totalTStates - 1; //the floating bus is read on the last t-state
+
+                    //if we're on the top or bottom border return 0xff
+                    if ((_tstates < contentionStartPeriod) || (_tstates > contentionEndPeriod))
+                        result = 0xff;
+                    else {
+                        if (floatingBusTable[_tstates] < 0)
+                            result = 0xff;
+                        else
+                            result = PeekByteNoContend(floatingBusTable[_tstates]);
+                    }
+                }
+            }
 
             base.In(port, result & 0xff);
             return (result & 0xff);

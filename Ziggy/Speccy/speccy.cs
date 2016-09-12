@@ -613,13 +613,9 @@ namespace Speccy
             LAST
         };
 
-        //This holds the key lines used by the speccy for input
-        public bool[] keyBuffer;
-
-        public bool externalSingleStep = false;
-
         public int joystickType = 0; //A bit field of above joysticks to emulate (usually not more than 2).
-
+        public bool UseKempstonPort1F = false; //If 1f, decoding scheme uses top 3 bits (5,6,7) else only the 5th bit is tested (port d4).
+        
         ////Each joystickState corresponds to an emulated joystick
         //Bits: 0 = button 3, 1 = button 2, 3 = button 1, 4 = up, 5 = down, 6 = left, 7 = right
         public int[] joystickState = new int[(int)JoysticksEmulated.LAST];
@@ -668,17 +664,17 @@ namespace Speccy
             public int frameIndex;
         };
 
-       // public int rzxFrameCount;
-       // protected int rzxFetchCount;
-       // protected int rzxInputCount;
+        //This holds the key lines used by the speccy for input
+        public bool[] keyBuffer;
+
+        //SpecEmu interfacing
+        public bool externalSingleStep = false;
+
         protected byte rzxIN;
         public RZXFile rzx;
-       // protected RZXFile.RZX_Frame rzxFrame;
-       // protected System.Collections.Generic.List<RollbackBookmark> rzxBookmarks = new System.Collections.Generic.List<RollbackBookmark>();
         protected System.Collections.Generic.List<byte> rzxInputs = new System.Collections.Generic.List<byte>();
         public bool isPlayingRZX = false;
         public bool isRecordingRZX = false;
-       // protected int rzxCurrentBookmark = 0;
 
         //Disk related stuff
         protected int diskDriveState = 0;
@@ -1644,6 +1640,16 @@ namespace Speccy
                 OnPortEvent(new PortIOEventArgs(port, val, true));
         }
 
+        public virtual bool IsKempstonActive(int port) {
+            if (UseKempstonPort1F) {
+                if ((port & 0xe0) == 0)
+                    return true;
+            }
+            else if ((port & 0x20) == 0)
+                return true;
+
+            return false;
+        }
         //Updates the state of the renderer
         //This was abstracted earlier but the logic seems to work with all models, so...
         public virtual void UpdateScreenBuffer(int _tstates) {

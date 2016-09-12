@@ -418,6 +418,12 @@
             set { joystick2 = value; }
         }
 
+        public bool KempstonUsesPort1F
+        {
+            get;
+            set;
+        }
+
         private bool onscreenLED = true;
 
         public bool ShowOnscreenIndicators {
@@ -520,6 +526,7 @@
             joystick2 = Properties.Settings.Default.joystick2;
             joystick1Emulate = (int)Properties.Settings.Default.joystick1ToEmulate;
             joystick2Emulate = (int)Properties.Settings.Default.joystick2ToEmulate;
+            KempstonUsesPort1F = (bool)Properties.Settings.Default.KempstonUsesPort1F;
         }
 
         #region Old XML file method
@@ -717,6 +724,8 @@
             Properties.Settings.Default.joystick2 = joystick2;
             Properties.Settings.Default.joystick1ToEmulate = joystick1Emulate;
             Properties.Settings.Default.joystick2ToEmulate = joystick2Emulate;
+            Properties.Settings.Default.KempstonUsesPort1F = KempstonUsesPort1F;
+
             Properties.Settings.Default.Save();
         }
 

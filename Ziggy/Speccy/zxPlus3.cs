@@ -244,89 +244,82 @@ namespace Speccy
             totalTStates++; //T2
 
             //Kempston joystick
-            if ((port & 0xe0) == 0) {
-                if (HasKempstonJoystick && !externalSingleStep) {
+            if (HasKempstonJoystick && IsKempstonActive(port)) {
+                if (!externalSingleStep) {
                     Contend(port, 1, 3);
                     result = joystickState[(int)JoysticksEmulated.KEMPSTON];
                 }
-            } else
-                if (lowBitReset)    //Even address, so get input
+            }
+            else if (lowBitReset)    //Even address, so get input
             {
-                    // totalTStates += 3;
+                // totalTStates += 3;
 
-                    if (!externalSingleStep) {
-                        if ((port & 0x8000) == 0)
-                            result &= keyLine[7];
+                if (!externalSingleStep) {
+                    if ((port & 0x8000) == 0)
+                        result &= keyLine[7];
 
-                        if ((port & 0x4000) == 0)
-                            result &= keyLine[6];
+                    if ((port & 0x4000) == 0)
+                        result &= keyLine[6];
 
-                        if ((port & 0x2000) == 0)
-                            result &= keyLine[5];
+                    if ((port & 0x2000) == 0)
+                        result &= keyLine[5];
 
-                        if ((port & 0x1000) == 0)
-                            result &= keyLine[4];
+                    if ((port & 0x1000) == 0)
+                        result &= keyLine[4];
 
-                        if ((port & 0x800) == 0)
-                            result &= keyLine[3];
+                    if ((port & 0x800) == 0)
+                        result &= keyLine[3];
 
-                        if ((port & 0x400) == 0)
-                            result &= keyLine[2];
+                    if ((port & 0x400) == 0)
+                        result &= keyLine[2];
 
-                        if ((port & 0x200) == 0)
-                            result &= keyLine[1];
+                    if ((port & 0x200) == 0)
+                        result &= keyLine[1];
 
-                        if ((port & 0x100) == 0)
-                            result &= keyLine[0];
-                    }
-
-                    result = result & 0x1f; //mask out lower 4 bits
-                    result = result | 0xa0; //set bit 5 & 7 to 1
-
-                    if (tapeIsPlaying) {
-                        if (tapeBit == 0) {
-                            result &= ~(TAPE_BIT);    //reset is EAR ON
-                        } else {
-                            result |= (TAPE_BIT); //set is EAR Off
-                        }
-                    } else
-                        if ((lastFEOut & 0x10) == 0) {
-                            result &= ~(0x40);
-                        } else
-                            result |= 0x40;
-                } else {
-                    //totalTStates += 3;
-                    if ((port & 0xc002) == 0xc000) //AY register activate on Port FFFD
-                {
-                        result = aySound.PortRead();
-                    } else
-                        if ((port & 0xc002) == 0x8000) //Port BFFD also activates AY on the +3/2A
-                {
-                            result = aySound.PortRead();
-                        } else if (HasKempstonMouse)//Kempston Mouse
-                {
-                            if (port == 64479)
-                                result = MouseX % 0xff;     //X ranges from 0 to 255
-                            else if (port == 65503)
-                                result = MouseY % 0xff;     //Y ranges from 0 to 255
-                            else if (port == 64223)
-                                result = MouseButton;// MouseButton;
-                        } else
-                            //Disk status read
-                            if ((port & 0xF002) == 0x2000) //Is bit 12 set and bits 13,14,15 and 1 reset?
-                {
-                                result = udpDrive.DiskStatusRead();
-                            } else
-                                //Disk read byte
-                                if ((port & 0xF002) == 0x3000) {
-                                    result = udpDrive.DiskReadByte();
-                                } else if ((port & 0xF002) == 0x0) {
-                                    if (pagingDisabled)
-                                        result = 0x1;
-                                    else
-                                        result = 0xff;
-                                }
+                    if ((port & 0x100) == 0)
+                        result &= keyLine[0];
                 }
+
+                result = result & 0x1f; //mask out lower 4 bits
+                result = result | 0xa0; //set bit 5 & 7 to 1
+
+                if (tapeIsPlaying) {
+                    if (tapeBit == 0)
+                        result &= ~(TAPE_BIT);    //reset is EAR ON
+                    else
+                        result |= (TAPE_BIT); //set is EAR Off
+                }
+                else if ((lastFEOut & 0x10) == 0)
+                    result &= ~(0x40);
+                else
+                    result |= 0x40;
+            }
+            else {
+                //totalTStates += 3;
+                if ((port & 0xc002) == 0xc000) //AY register activate on Port FFFD
+                    result = aySound.PortRead();
+                else if ((port & 0xc002) == 0x8000) //Port BFFD also activates AY on the +3/2A
+                        result = aySound.PortRead();
+                else if (HasKempstonMouse)//Kempston Mouse
+                {
+                    if (port == 64479)
+                        result = MouseX % 0xff;     //X ranges from 0 to 255
+                    else if (port == 65503)
+                        result = MouseY % 0xff;     //Y ranges from 0 to 255
+                    else if (port == 64223)
+                        result = MouseButton;// MouseButton;
+                }
+                else if ((port & 0xF002) == 0x2000) //Is bit 12 set and bits 13,14,15 and 1 reset?
+                    result = udpDrive.DiskStatusRead();
+                else if ((port & 0xF002) == 0x3000)
+                    result = udpDrive.DiskReadByte();
+                else if ((port & 0xF002) == 0x0) {
+                    if (pagingDisabled)
+                        result = 0x1;
+                    else
+                        result = 0xff;
+                }
+            }
             totalTStates += 3;
             base.In(port, result & 0xff);
             return (result & 0xff);
