@@ -15,6 +15,9 @@ Ver 0.7.2
 + Joysticks are now remembered between emulator sessions and automatically enabled on startup, if found.
 + Added Insta-Load option to Tape Deck (anton).
 + Completely rewrote RZX module to follow specs more closely.
++ Added ability to load custom symbols to represent memory locations (R Martins). Symbols should be stored as CSV in key-pairs like so:
+23606, CHARS
+42000, SPRITE DATA
 
 Ver 0.7.1
 --------------------

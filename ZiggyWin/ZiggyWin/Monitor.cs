@@ -7586,6 +7586,33 @@ namespace ZeroWin
             PokeMemoryButton_Click(sender, e);
         }
 
+        private void loadSymbolsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Title = "Select Symbol File";
+            openFileDialog1.FileName = "";
+            openFileDialog1.Filter = "All supported files|*.txt;*.csv";
+
+            if(openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                using(StreamReader reader = new StreamReader(openFileDialog1.SafeFileName))
+                {
+                    int count = 0;
+                    while(!reader.EndOfStream)
+                    {
+                        var line = reader.ReadLine();
+                        var values = line.Split(',');
+                        int addr = Convert.ToInt32(values[0]);
+                        if (addr > 65535)
+                            continue;
+
+                        systemVariables[addr] =  Convert.ToString(values[1]).Trim();
+                        count++;                                                      
+                    }
+                }
+                MessageBox.Show("Symbols loaded successfully!", "Symbol file", MessageBoxButtons.OK);
+            }
+        }
+
         private void toggleBreakpointToolStripMenuItem_Click(object sender, EventArgs e) {
             ToggleBreakpointButton_Click(sender, e);
         }

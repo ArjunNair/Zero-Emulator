@@ -111,8 +111,8 @@
             this.toolStripButton7 = new System.Windows.Forms.ToolStripButton();
             this.rzxRecordButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.statusLabelText = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusProgressBar = new System.Windows.Forms.ToolStripProgressBar();
+            this.statusLabelText = new System.Windows.Forms.ToolStripStatusLabel();
             this.fileDownloadStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.rzxPlaybackStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.rzxRecordStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -727,6 +727,13 @@
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.Resize += new System.EventHandler(this.statusStrip1_Resize);
             // 
+            // statusProgressBar
+            // 
+            resources.ApplyResources(this.statusProgressBar, "statusProgressBar");
+            this.statusProgressBar.CausesValidation = false;
+            this.statusProgressBar.Name = "statusProgressBar";
+            this.statusProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            // 
             // statusLabelText
             // 
             resources.ApplyResources(this.statusLabelText, "statusLabelText");
@@ -736,13 +743,6 @@
             this.statusLabelText.BorderStyle = System.Windows.Forms.Border3DStyle.Adjust;
             this.statusLabelText.Name = "statusLabelText";
             this.statusLabelText.Spring = true;
-            // 
-            // statusProgressBar
-            // 
-            resources.ApplyResources(this.statusProgressBar, "statusProgressBar");
-            this.statusProgressBar.CausesValidation = false;
-            this.statusProgressBar.Name = "statusProgressBar";
-            this.statusProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             // 
             // fileDownloadStatusLabel
             // 

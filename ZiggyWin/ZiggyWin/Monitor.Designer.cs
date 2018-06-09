@@ -89,6 +89,8 @@
             this.numbersInHexToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemVariablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.heatMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadSymbolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.statusStrip1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -424,7 +426,8 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.saveToolStripMenuItem});
+            this.saveToolStripMenuItem,
+            this.loadSymbolsToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -433,7 +436,7 @@
             // 
             this.saveToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.disk;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.saveToolStripMenuItem.Text = "Save...";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -456,7 +459,7 @@
             this.resumeEmulationToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.PlayHS;
             this.resumeEmulationToolStripMenuItem.Name = "resumeEmulationToolStripMenuItem";
             this.resumeEmulationToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.resumeEmulationToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.resumeEmulationToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.resumeEmulationToolStripMenuItem.Text = "Resume";
             this.resumeEmulationToolStripMenuItem.Click += new System.EventHandler(this.resumeEmulationToolStripMenuItem_Click);
             // 
@@ -464,7 +467,7 @@
             // 
             this.runToCursorToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.GoToSourceCode_6546;
             this.runToCursorToolStripMenuItem.Name = "runToCursorToolStripMenuItem";
-            this.runToCursorToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.runToCursorToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.runToCursorToolStripMenuItem.Text = "Run To Cursor";
             this.runToCursorToolStripMenuItem.Click += new System.EventHandler(this.runToCursorToolStripMenuItem_Click);
             // 
@@ -472,21 +475,21 @@
             // 
             this.stopDebuggingToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.StopHS;
             this.stopDebuggingToolStripMenuItem.Name = "stopDebuggingToolStripMenuItem";
-            this.stopDebuggingToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.stopDebuggingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.stopDebuggingToolStripMenuItem.Text = "Stop";
             this.stopDebuggingToolStripMenuItem.Click += new System.EventHandler(this.stopDebuggingToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(147, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // stepOverToolStripMenuItem
             // 
             this.stepOverToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.StepOver_6328;
             this.stepOverToolStripMenuItem.Name = "stepOverToolStripMenuItem";
             this.stepOverToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F10;
-            this.stepOverToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.stepOverToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.stepOverToolStripMenuItem.Text = "Step Over";
             this.stepOverToolStripMenuItem.Click += new System.EventHandler(this.stepOverToolStripMenuItem_Click);
             // 
@@ -495,7 +498,7 @@
             this.stepInToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.StepIn_6326;
             this.stepInToolStripMenuItem.Name = "stepInToolStripMenuItem";
             this.stepInToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F11;
-            this.stepInToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.stepInToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.stepInToolStripMenuItem.Text = "Step In";
             this.stepInToolStripMenuItem.Click += new System.EventHandler(this.stepInToolStripMenuItem_Click);
             // 
@@ -504,7 +507,7 @@
             this.stepOutToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.Stepout_6327;
             this.stepOutToolStripMenuItem.Name = "stepOutToolStripMenuItem";
             this.stepOutToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F12;
-            this.stepOutToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.stepOutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.stepOutToolStripMenuItem.Text = "Step Out";
             this.stepOutToolStripMenuItem.Click += new System.EventHandler(this.stepOutToolStripMenuItem_Click);
             // 
@@ -651,6 +654,19 @@
             this.heatMapToolStripMenuItem.Visible = false;
             this.heatMapToolStripMenuItem.Click += new System.EventHandler(this.heatMapToolStripMenuItem_Click);
             // 
+            // loadSymbolsToolStripMenuItem
+            // 
+            this.loadSymbolsToolStripMenuItem.Name = "loadSymbolsToolStripMenuItem";
+            this.loadSymbolsToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.loadSymbolsToolStripMenuItem.Text = "Load Symbols...";
+            this.loadSymbolsToolStripMenuItem.ToolTipText = "Allows you to load custom symbols to represent memory locations.\r\nSymbols should " +
+    "be stored as CSV in key-pairs like so:\r\n23606, CHARS\r\n42000, SPRITE DATA";
+            this.loadSymbolsToolStripMenuItem.Click += new System.EventHandler(this.loadSymbolsToolStripMenuItem_Click);
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
+            // 
             // Monitor
             // 
             this.AcceptButton = this.jumpAddrButton;
@@ -746,6 +762,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripButton callStackButton;
         private System.Windows.Forms.ToolStripMenuItem heatMapToolStripMenuItem;
-
+        private System.Windows.Forms.ToolStripMenuItem loadSymbolsToolStripMenuItem;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }

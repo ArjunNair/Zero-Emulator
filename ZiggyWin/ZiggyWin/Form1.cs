@@ -523,7 +523,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             TimeoutToHide = TimeSpan.FromSeconds(5);
 
             panel1.SendToBack();
-            this.Icon = ZeroWin.Properties.Resources.ZeroIcon;
+            //this.Icon = ZeroWin.Properties.Resources.ZeroIcon;
         }
 
         private void EjectD_Click(object sender, EventArgs e)
