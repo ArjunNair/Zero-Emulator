@@ -495,6 +495,8 @@ namespace Speccy
 
         //Render related stuff
         public int[] ScreenBuffer;                        //buffer for the windows side rasterizer
+        protected int[] LastScanlineColor;
+        protected short lastScanlineColorCounter;
         protected byte[] screen;                           //display memory (16384 for 48k)
         protected short[] attr;                           //attribute memory lookup (mapped 1:1 to screen for convenience)
         protected short[] tstateToDisp;                   //tstate-display mapping
@@ -558,11 +560,9 @@ namespace Speccy
         public int tapeTStates = 0;
         public uint edgeDuration = 0;
         public bool tapeIsPlaying = false;
-        public int tapeBit = 0;
+        public int pulseLevel = 0;
 
         //Tape loading
-        public const int PULSE_LOW = 0;
-        public const int PULSE_HIGH = 1;
         public int blockCounter = 0;
         public bool tapePresent = false;
         public bool tape_flashLoad = true;
@@ -571,10 +571,10 @@ namespace Speccy
         private int pulseCounter = 0;
         private int repeatCount = 0;
         private int bitCounter = 0;
+        private byte bitShifter = 0;
         private int dataCounter = 0;
         private byte dataByte = 0;
         private int currentBit = 0;
-        private int pulse = 0;
         private bool isPauseBlockPreproccess = false; //To ensure previous edge is finished correctly
         private bool isProcessingPauseBlock = false;  //Signals if the current pause block is currently being serviced.
         private int pauseCounter = 0;
@@ -787,7 +787,7 @@ namespace Speccy
             isPlayingRZX = true;
             totalTStates = (int)rzx.record.tstatesAtStart;
         }
-        */
+        
         public void ContinueRecordingRZX(RZXFile _rzx) {
             isRecordingRZX = true;
             isPlayingRZX = false;
@@ -795,7 +795,7 @@ namespace Speccy
             rzx.ContinueRecording();
             rzxInputs = new System.Collections.Generic.List<byte>();
         }
-
+        */
         public bool ContinueRZXSession(string filename) {
             isRecordingRZX = true;
             isPlayingRZX = false;
@@ -822,7 +822,7 @@ namespace Speccy
         public void DiscardRZX() {
             isRecordingRZX = false;
             isPlayingRZX = false;
-            rzx.Discard();
+            //rzx.Discard();
         }
 
         public void SaveRZX(bool doFinalise) {
@@ -973,7 +973,6 @@ namespace Speccy
             tapeTStates = 0;
             edgeDuration = 0;
             tapeIsPlaying = false;
-            tapeBit = 0;
 
             blockCounter = 0;
             isPlaying = false;
@@ -983,7 +982,6 @@ namespace Speccy
             dataCounter = 0;
             dataByte = 0;
             currentBit = 0;
-            pulse = 0;
         }
 
         protected void FlashLoadTape() {
@@ -1085,14 +1083,13 @@ namespace Speccy
             dataByte = 0;
             currentBit = 0;
             currentBlock = null;
-            pulse = 0;
             isPauseBlockPreproccess = false; //To ensure previous edge is finished correctly
             ////////////////////////////
 
             averagedSound = 0;
             aySound = new AYSound(); //aySound.reset doesn't work so well...
             flashOn = false;
-
+            lastScanlineColorCounter = 0;
             //We jiggle the wait period after resetting so that FRAMES/RANDOMIZE works randomly enough on the speccy.
             resetFrameTarget = new Random().Next(40, 90);
         }
@@ -1155,6 +1152,7 @@ namespace Speccy
                         if (tapeBitWasFlipped) {
                             tapeBitFlipAck = true;
                             tapeBitWasFlipped = false;
+                            return;
                         } else {
                             //bool doLoop = false;
                             switch (tape_whichRegToCheck) {
@@ -1190,9 +1188,18 @@ namespace Speccy
                                     //doLoop = false;
                                     return;
                             }
-                            tapeTStates += (totalTStates - oldTStates);
+
                             tape_edgeDetectorRan = true;
                             while (!((tape_regValue == 255) || (tape_regValue == 1))) {
+                                if (tapeBitFlipAck)
+                                    tapeBitWasFlipped = false;
+
+                                tapeTStates += (totalTStates - oldTStates);
+
+                                 if (tapeBitWasFlipped) {
+                                    tapeBitFlipAck = true;
+                                    return;
+                                }
 
                                 if (tapeTStates >= edgeDuration) {
                                     tapeTStates = (int)(tapeTStates - edgeDuration);
@@ -1200,10 +1207,7 @@ namespace Speccy
                                     DoTapeEvent(new TapeEventArgs(TapeEventType.EDGE_LOAD));
                                 }
 
-                                if (tapeBitWasFlipped) {
-                                    tapeBitFlipAck = true;
-                                    break;
-                                }
+                               
                                 tapeTStates += tape_tstatesStep;
                                 switch (tape_whichRegToCheck) {
                                     case 1:
@@ -1349,7 +1353,7 @@ namespace Speccy
 
         //The main loop which executes opcodes repeatedly till 1 frame (69888 tstates)
         //has been generated.
-        private int NO_PAINT_REP = 100;
+        private int NO_PAINT_REP = 50;
 
         public void Run() {
             for (int rep = 0; rep < (tapeIsPlaying && tape_edgeLoad ? NO_PAINT_REP : 1); rep++)
@@ -1434,7 +1438,7 @@ namespace Speccy
                         if (tapeIsPlaying && rep != NO_PAINT_REP - 1)
                         {
                             needsPaint = false;
-                            System.Threading.Thread.Sleep(0); //TO DO: Remove?
+                            System.Threading.Thread.Sleep(1); //TO DO: Remove?
                         }
                         break;
                     }
@@ -1442,7 +1446,6 @@ namespace Speccy
                     if (externalSingleStep)
                         break;
                 } //run loop
-                
             }
         }
 
@@ -1590,15 +1593,23 @@ namespace Speccy
             return val;
         }
 
-        //Pokes a byte at a specific bank and offset
-        //The offset input can be upto 16384, the bank and offset are adjusted
-        //automatically.
-        public void PokeRAMPage(int bank, int offset, byte val) {
-            int indx = offset / 8192;
-            RAMpage[bank * 2 + indx][offset % 8192] = val;
+        //Pokes bytes from an array into a ram bank.
+        public void PokeRAMPage(int bank, int dataLength, byte[] data) {
+            for (int f = 0; f < dataLength; f++) {
+                int indx = f / 8192;
+                RAMpage[bank * 2 + indx][f % 8192] = data[f];
+            }
         }
 
-        //Returns the byte at a given 16 bit address with no contention
+        //Pokes bytes from an array into contiguous rom banks.
+        public void PokeROMPages(int bank, int dataLength, byte[] data) {
+            for (int f = 0; f < dataLength; f++) {
+                int indx = f / 8192;
+                ROMpage[bank * 2 + indx][f % 8192] = data[f];
+            }
+        }
+
+        //Pokes the byte at a given 16 bit address with no contention
         public void PokeByteNoContend(int addr, int b) {
             addr &= 0xffff;
             b &= 0xff;
@@ -1606,10 +1617,19 @@ namespace Speccy
             int page = (addr) >> 13;
             int offset = (addr) & 0x1FFF;
 
-            // if (page < 2 && isROMprotected && !special64KRAM)
-            //     return;
-
             PageWritePointer[page][offset] = (byte)b;
+        }
+
+        //Pokes  byte from an array at a given 16 bit address with no contention
+        public void PokeBytesNoContend(int addr, int dataOffset, int dataLength, byte[] data) {
+            int page, offset;
+
+            for (int f = dataOffset; f < dataOffset + dataLength; f++, addr++) {
+                addr &= 0xffff;
+                page = (addr) >> 13;
+                offset = (addr) & 0x1FFF;
+                PageWritePointer[page][offset] = data[f];
+            }
         }
 
         //Returns a value from a port (can be contended)
@@ -1723,22 +1743,19 @@ namespace Speccy
 
                         for (int a = 0; a < 8; ++a) {
                             if ((pixelData & 0x80) != 0) {
+                                //PAL interlacing
+                                //int pal = paletteInk/2 + (0xffffff - LastScanlineColor[lastScanlineColorCounter]/2);
+                                //ScreenBuffer[ULAByteCtr++] = pal;
+                                //LastScanlineColor[lastScanlineColorCounter++] = paletteInk;
                                 ScreenBuffer[ULAByteCtr++] = paletteInk;
                                 lastAttrValue = ink;
-                                //pixelIsPaper = false;
                             } else {
-                                /* Gamma ramping
-                                int p = palettePaper;
-                                if (!pixelIsPaper)
-                                {
-                                    if (!((paper & 0x07) - (lastAttrValue & 0x7) < 0) && ((paper & 0x07) > 0))
-                                        p = AttrColors[paper + 8];
-                                }
-                                ScreenBuffer[ULAByteCtr++] = p;
-                                */
+                                //PAL interlacing
+                                //int pal = palettePaper/2 + (0xffffff - LastScanlineColor[lastScanlineColorCounter]/2);
+                                //ScreenBuffer[ULAByteCtr++] = pal;
+                                //LastScanlineColor[lastScanlineColorCounter++] = palettePaper;
                                 ScreenBuffer[ULAByteCtr++] = palettePaper;
                                 lastAttrValue = paper;
-                               // pixelIsPaper = true;
                             }
                             pixelData <<= 1;
                         }                 
@@ -1750,10 +1767,18 @@ namespace Speccy
                     } else
                         bor = AttrColors[borderColour];
 
-                    for (int g = 0; g < 8; g++)
+                    for(int g = 0; g < 8; g++) {
+                        //PAL interlacing
+                        //int pal = bor/2 + (0xffffff -  LastScanlineColor[lastScanlineColorCounter]/2);
+                        //ScreenBuffer[ULAByteCtr++] = pal;
+                        //LastScanlineColor[lastScanlineColorCounter++] = bor;                        
                         ScreenBuffer[ULAByteCtr++] = bor;
+                    }
                 }
                 lastTState += 4;
+
+                if(lastScanlineColorCounter >= ScanLineWidth)
+                    lastScanlineColorCounter = 0;
             }
         }
 
@@ -2516,6 +2541,7 @@ namespace Speccy
         //Resets the render state everytime an interrupt is generated
         public void ULAUpdateStart() {
             ULAByteCtr = 0;
+            lastScanlineColorCounter = 0;
             screenByteCtr = DisplayStart;
             lastTState = ActualULAStart;
             needsPaint = true;
@@ -2526,14 +2552,14 @@ namespace Speccy
 
         //Contends the machine for a given address (_addr)
         public void Contend(int _addr) {
-            if (IsContended(_addr) && model != MachineModel._plus3) {
+            if (model != MachineModel._plus3 && IsContended(_addr)) {
                 totalTStates += contentionTable[totalTStates];
             }
         }
 
         //Contends the machine for a given address (_addr) for n tstates (_time) for x times (_count)
         public void Contend(int _addr, int _time, int _count) {
-            if (IsContended(_addr) && model != MachineModel._plus3) {
+            if (model != MachineModel._plus3 && IsContended(_addr)) {
                 for (int f = 0; f < _count; f++) {
                     totalTStates += contentionTable[totalTStates] + _time;
                 }
@@ -10905,18 +10931,19 @@ namespace Speccy
         public void TapeStopped(bool cancelCallback = false) {
             tapeIsPlaying = false;
 
-            if (pulse != 0)
+            if (pulseLevel != 0)
                 FlipTapeBit();
             if (TapeEvent != null && !cancelCallback)
                 OnTapeEvent(new TapeEventArgs(TapeEventType.STOP_TAPE)); //stop the tape!
         }
 
         private void FlipTapeBit() {
-            pulse = 1 - pulse;
+            pulseLevel = 1 - pulseLevel;
+
             tapeBitWasFlipped = true;
             tapeBitFlipAck = false;
-            tapeBit = pulse;
-            if (pulse == 0) {
+
+            if (pulseLevel == 0) {
                 soundOut = 0;
             } else
                 soundOut = short.MinValue >> 1; //half
@@ -10940,7 +10967,7 @@ namespace Speccy
                     repeatCount = -1;
 
                     //Pulse is low by default for PULS blocks
-                    if (pulse != 0)
+                    if (pulseLevel != 0)
                         FlipTapeBit();
                    
                     //Process pulse if there is one
@@ -10949,10 +10976,12 @@ namespace Speccy
                     } else
                         break;
                 } else if (currentBlock is PZXFile.DATA_Block) {
-                    pulseCounter = 0;
+                    pulseCounter = -1;
                     bitCounter = -1;
                     dataCounter = -1;
-                    if (pulse != (((PZXFile.DATA_Block)currentBlock).initialPulseLevel))
+                    bitShifter = 0;
+                    
+                    if (pulseLevel != (((PZXFile.DATA_Block)currentBlock).initialPulseLevel))
                         FlipTapeBit();
 
                     if (!NextDataBit()) {
@@ -10968,11 +10997,13 @@ namespace Speccy
                     //Ensure previous edge is finished correctly by flipping the edge one last time
                     //edgeDuration = (35000 * 2);
                     //isPauseBlockPreproccess = true;
-                     PZXFile.PAUS_Block block = (PZXFile.PAUS_Block)currentBlock;
-                    if (block.initialPulseLevel != pulse)
+                    PZXFile.PAUS_Block block = (PZXFile.PAUS_Block)currentBlock;
+
+                    if (block.initialPulseLevel != pulseLevel)
                         FlipTapeBit();
                    
                     edgeDuration = (block.duration);
+
                     int diff = (int)edgeDuration - tapeTStates;
                     if (diff > 0) {
                         edgeDuration = (uint)diff;
@@ -11002,13 +11033,15 @@ namespace Speccy
             while (pulseCounter < block.pulse.Count - 1) {
                 pulseCounter++; //b'cos pulseCounter is -1 when it reaches here initially
                 repeatCount = block.pulse[pulseCounter].count;
-                if ((block.pulse[pulseCounter].duration == 0)) {
+                if ((block.pulse[pulseCounter].duration == 0) && repeatCount > 0) {
                     if ((repeatCount & 0x01) != 0) 
-                        FlipTapeBit(); //Flip ear bit if odd
+                         FlipTapeBit();                        
                     continue; //next pulse
                 }
-                if (block.pulse[pulseCounter].duration > 0) {
-                    int diff = block.pulse[pulseCounter].duration - tapeTStates;
+                edgeDuration = block.pulse[pulseCounter].duration;
+
+                if (edgeDuration > 0) {
+                    int diff = (int)edgeDuration - tapeTStates;
                     if (diff > 0) {
                         edgeDuration = (uint)diff;
                         tapeTStates = 0;
@@ -11016,11 +11049,12 @@ namespace Speccy
                     } else
                         tapeTStates = -diff;
                 }
-                FlipTapeBit();
+
+                FlipTapeBit(); 
                 repeatCount--;
                 if (repeatCount <= 0)
                     continue;
-                edgeDuration = (block.pulse[pulseCounter].duration);
+                
                 return true;
             }
 
@@ -11030,45 +11064,45 @@ namespace Speccy
 
         public bool NextDataBit() {
             PZXFile.DATA_Block block = (PZXFile.DATA_Block)currentBlock;
-
+           
             //Bits left for processing?
             while (bitCounter < block.count - 1) {
                 bitCounter++;
-                if (bitCounter % 8 == 0) {
+                if (bitShifter == 0) {
+                    bitShifter = 0x80;
                     //All 8 bits done so get next byte
                     dataCounter++;
                     if (dataCounter < block.data.Count) {
                         dataByte = block.data[dataCounter];
                     }
-                } else
-                    dataByte = (byte)((dataByte << 1) & 0xff);
-
-                currentBit = ((dataByte & 0x80) == 0 ? 0 : 1);
+                }
+                currentBit = ((dataByte & bitShifter) == 0 ? 0 : 1);
+                bitShifter >>= 1;
                 pulseCounter = 0;
+                int numPulses = 0;
 
                 if (currentBit == 0) {
-                    if (block.s0[pulseCounter] == 0) {
-                        continue;
-                    } else {
-                        edgeDuration = (block.s0[pulseCounter]);
-                        //return true;
-                    }
-                } else {
-                    if (block.s1[pulseCounter] == 0) {
-                        continue;
-                    } else {
-                        edgeDuration = (block.s1[pulseCounter]);
-                       // return true;
-                    }
+                    edgeDuration = (block.s0[0]);
+                    numPulses = block.p0;
+                }
+                else {
+                    edgeDuration = (block.s1[0]);
+                    numPulses = block.p1;
                 }
 
-                int diff = (int)edgeDuration - tapeTStates;
-                if (diff > 0) {
-                    edgeDuration = (uint)diff;
-                    tapeTStates = 0;
-                    return true;
-                } else
-                    tapeTStates = -diff;
+                if (numPulses == 0)
+                    continue;
+
+                if (edgeDuration > 0) {
+                    int diff = (int)edgeDuration - tapeTStates;
+                    if(diff > 0) {
+                        edgeDuration = (uint)diff;
+                        tapeTStates = 0;
+                        return true;
+                    }
+                    else
+                        tapeTStates = -diff;
+                }
 
                 FlipTapeBit();
             }
@@ -11077,14 +11111,16 @@ namespace Speccy
             if (block.tail > 0) {
                 currentBit = -1;
                 edgeDuration = (block.tail);
-                int diff = (int)edgeDuration - tapeTStates;
-                if (diff > 0) {
-                    edgeDuration = (uint)diff;
-                    tapeTStates = 0;
-                    return true;
-                } else
-                    tapeTStates = -diff;
 
+                if (edgeDuration > 0) {
+                    int diff = (int)edgeDuration - tapeTStates;
+                    if (diff > 0) {
+                        edgeDuration = (uint)diff;
+                        tapeTStates = 0;
+                        return true;
+                    } else
+                        tapeTStates = -diff;
+                }
                 FlipTapeBit();
             }/* else {
                 //HACK: Sometimes a tape might have it's last tail pulse missing.
@@ -11229,13 +11265,13 @@ namespace Speccy
 #endregion PULS
 
 #region DATA
- else if (currentBlock is PZXFile.DATA_Block) {
+                else if (currentBlock is PZXFile.DATA_Block) {
                     PZXFile.DATA_Block block = (PZXFile.DATA_Block)currentBlock;
 
                     //Are we done with pulses for a certain sequence?
                     if (currentBit == 0) {
                         pulseCounter++;
-                        if (pulseCounter < block.s0.Count) {
+                        if (pulseCounter < block.p0) {
                             edgeDuration = (block.s0[pulseCounter]);
                         } else {
                             //All pulses done for this bit so fetch next bit
@@ -11246,7 +11282,7 @@ namespace Speccy
                         }
                     } else if (currentBit == 1) {
                         pulseCounter++;
-                        if (pulseCounter < block.s1.Count) {
+                        if (pulseCounter < block.p1) {
                             edgeDuration = (block.s1[pulseCounter]);
                         } else {
                             //All pulses done for this bit so fetch next bit
@@ -11266,7 +11302,7 @@ namespace Speccy
 #endregion DATA
 
 #region PAUS
- else if (currentBlock is PZXFile.PAUS_Block) {
+                else if (currentBlock is PZXFile.PAUS_Block) {
                     isPauseBlockPreproccess = false;
                     NextPZXBlock();
                     return;

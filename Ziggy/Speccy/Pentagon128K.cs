@@ -416,10 +416,10 @@ namespace Speccy
                 result = result | 0xa0; //set bit 5 & 7 to 1
 
                 if (tapeIsPlaying) {
-                    if (tapeBit == 0)
-                        result &= ~(TAPE_BIT);    //reset is EAR ON
+                    if (pulseLevel == 0)
+                        result &= ~(TAPE_BIT);    //reset is EAR off
                     else
-                        result |= (TAPE_BIT); //set is EAR Off
+                        result |= (TAPE_BIT);     //set is EAR on
                 }
                 else if ((lastFEOut & EAR_BIT) == 0)
                         result &= ~(TAPE_BIT);
@@ -630,7 +630,7 @@ namespace Speccy
                                 break;
                         }
                     } else {
-                        wdDrive.WriteSystemReg(v);
+                         wdDrive.WriteSystemReg(v);
                         totalTStates += 3;
                     }
                     //totalTStates += 3;

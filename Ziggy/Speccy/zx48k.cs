@@ -44,6 +44,7 @@ namespace Speccy
                                               + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
                                               + ScanLineWidth * BorderBottomHeight]; //56 lines of border
 
+            LastScanlineColor = new int[ScanLineWidth];
             keyBuffer = new bool[(int)keyCode.LAST];
 
             attr = new short[DisplayLength]; //6144 bytes of display memory will be mapped
@@ -285,11 +286,11 @@ namespace Speccy
                 result = result | 0xa0; //set bit 5 & 7 to 1
 
                 if (tapeIsPlaying) {
-                    if (tapeBit == 0) {
-                        result &= ~(TAPE_BIT);    //reset is EAR ON
+                    if (pulseLevel == 0) {
+                        result &= ~(TAPE_BIT);    //reset is EAR off
                     }
                     else {
-                        result |= (TAPE_BIT); //set is EAR Off
+                        result |= (TAPE_BIT); //set is EAR on
                     }
                 }
                 else {
@@ -374,16 +375,21 @@ namespace Speccy
 
                 //needsPaint = true; //useful while debugging as it renders line by line
                 borderColour = val & BORDER_BIT;  //The LSB 3 bits of val hold the border colour
-                int beepVal = val & (EAR_BIT + MIC_BIT);
+                int beepVal = val & EAR_BIT;
+
                 if (!tapeIsPlaying) {
+
                     if (beepVal != lastSoundOut) {
+
                         if ((beepVal) == 0) {
                             soundOut = MIN_SOUND_VOL;
                         } else {
-                            soundOut = (short)(MAX_SOUND_VOL * 0.5f);
+                            soundOut = MAX_SOUND_VOL;
                         }
+
                         if ((val & MIC_BIT) != 0)   //Boost slightly if MIC is on
                             soundOut += (short)(MAX_SOUND_VOL * 0.2f);
+
                         lastSoundOut = beepVal;
                     }
                 }
