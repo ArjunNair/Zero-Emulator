@@ -104,26 +104,26 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="47616">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="46592">
       <assemblyIdentity name="Peripherals" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>9Ne9bgl9bGXGlKXa2oQFqQLPkZQ=</dsig:DigestValue>
+        <dsig:DigestValue>4RRkHGpzCHG/GjBctOG9hp9zbBI=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="158720">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="157696">
       <assemblyIdentity name="Speccy" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>UaSRGPdi6hcB7y0VflUshKvExXo=</dsig:DigestValue>
+        <dsig:DigestValue>kVL5BWH0Gri2mxioGSkcgsJLHbI=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -140,14 +140,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2371072">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="2373632">
       <assemblyIdentity name="Zero" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>JNZjhM8jcCydhsN37W1+26NBh3U=</dsig:DigestValue>
+        <dsig:DigestValue>XojpkDz2+acjT92WNjZAVxlkzSk=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -159,7 +159,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>+nga6qabz8/STnHiNlH/Y90YzAY=</dsig:DigestValue>
+        <dsig:DigestValue>1qfMTwvamvDlGvMmIbzc6OPZloo=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -171,7 +171,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>3Pew9Sgmal1PxU/G/wSrKoiPFYU=</dsig:DigestValue>
+        <dsig:DigestValue>NVfigy2qX+zP6CD4AGr6mBDf6kg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

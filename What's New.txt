@@ -10,6 +10,7 @@ Ver 0.7.2 (WIP)
 - Fixed a couple of RZX bugs.
 - Fixed monitor opcode not showing hex numbers (R Martins).
 - Fixed directX issue with device being lost when computer is locked/sleeps (R Martins).
+- Fixed wrong breakpoint being removed in debugger in certain cases (R Martins).
 - Key2Joy now uses TAB as fire key instead of ALT.
 + Joysticks are now remembered between emulator sessions and automatically enabled on startup, if found.
 + Added Insta-Load option to Tape Deck (anton).

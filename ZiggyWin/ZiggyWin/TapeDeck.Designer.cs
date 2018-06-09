@@ -58,6 +58,7 @@
             this.autoPlayStopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fastLoadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.edgeLoadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.instaLoadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -67,7 +68,6 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.instaLoadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -183,71 +183,71 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.openToolStripMenuItem.Text = "Open...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.loadButton_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(148, 6);
             // 
             // ejectToolStripMenuItem
             // 
             this.ejectToolStripMenuItem.Name = "ejectToolStripMenuItem";
-            this.ejectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.ejectToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.ejectToolStripMenuItem.Text = "Eject";
             this.ejectToolStripMenuItem.Click += new System.EventHandler(this.ejectButton_Click);
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.stopToolStripMenuItem.Text = "Stop";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.stopButton_Click);
             // 
             // playToolStripMenuItem
             // 
             this.playToolStripMenuItem.Name = "playToolStripMenuItem";
-            this.playToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.playToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.playToolStripMenuItem.Text = "Play";
             this.playToolStripMenuItem.Click += new System.EventHandler(this.playButton_Click);
             // 
             // rewindToolStripMenuItem
             // 
             this.rewindToolStripMenuItem.Name = "rewindToolStripMenuItem";
-            this.rewindToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rewindToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.rewindToolStripMenuItem.Text = "Rewind";
             this.rewindToolStripMenuItem.Click += new System.EventHandler(this.rewindButton_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(148, 6);
             // 
             // previousBlockToolStripMenuItem
             // 
             this.previousBlockToolStripMenuItem.Name = "previousBlockToolStripMenuItem";
-            this.previousBlockToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.previousBlockToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.previousBlockToolStripMenuItem.Text = "Previous Block";
             this.previousBlockToolStripMenuItem.Click += new System.EventHandler(this.prevButton_Click);
             // 
             // nextBlockToolStripMenuItem
             // 
             this.nextBlockToolStripMenuItem.Name = "nextBlockToolStripMenuItem";
-            this.nextBlockToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.nextBlockToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.nextBlockToolStripMenuItem.Text = "Next Block";
             this.nextBlockToolStripMenuItem.Click += new System.EventHandler(this.nextButton_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(148, 6);
             // 
             // infoToolStripMenuItem
             // 
             this.infoToolStripMenuItem.Name = "infoToolStripMenuItem";
-            this.infoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.infoToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.infoToolStripMenuItem.Text = "Tape Info...";
             this.infoToolStripMenuItem.Click += new System.EventHandler(this.infoToolStripMenuItem_Click);
             // 
@@ -299,6 +299,17 @@
             this.edgeLoadToolStripMenuItem.ToolTipText = "This should be enabled for  Auto Play/Stop. It also provides a bit of a speed boo" +
     "st.";
             this.edgeLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.edgeLoadCheckBox_CheckedChanged);
+            // 
+            // instaLoadToolStripMenuItem
+            // 
+            this.instaLoadToolStripMenuItem.Checked = true;
+            this.instaLoadToolStripMenuItem.CheckOnClick = true;
+            this.instaLoadToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.instaLoadToolStripMenuItem.Name = "instaLoadToolStripMenuItem";
+            this.instaLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.instaLoadToolStripMenuItem.Text = "Insta-Load";
+            this.instaLoadToolStripMenuItem.ToolTipText = "WIll instantly load any tape using the standard loader (ROM).";
+            this.instaLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.instaLoadToolStripMenuItem_CheckedChanged);
             // 
             // statusStrip1
             // 
@@ -401,17 +412,6 @@
             this.button1.TabIndex = 0;
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.ejectButton_Click);
-            // 
-            // instaLoadToolStripMenuItem
-            // 
-            this.instaLoadToolStripMenuItem.Checked = true;
-            this.instaLoadToolStripMenuItem.CheckOnClick = true;
-            this.instaLoadToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.instaLoadToolStripMenuItem.Name = "instaLoadToolStripMenuItem";
-            this.instaLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
-            this.instaLoadToolStripMenuItem.Text = "Insta-Load";
-            this.instaLoadToolStripMenuItem.ToolTipText = "WIll instantly load any tape using the standard loader (ROM).";
-            this.instaLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.instaLoadToolStripMenuItem_CheckedChanged);
             // 
             // TapeDeck
             // 

@@ -1114,8 +1114,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     {
                         
                         case EMULATOR_STATE.PLAYING_RZX:
-                            //statusLabelText.Text = "RZX Played: " + (zx.rzxFrameCount * 100 / zx.rzx.frames.Count) + "%";
-                            statusLabelText.Text = "RZX Played: " + (rzxFramesToPlay > 0 ? zx.GetNumRZXFramesPlayed() * 100 / rzxFramesToPlay : 0) + "%";
+                            //statusLabelText.Text = "RZX Played: " + (rzxFramesToPlay > 0 ? zx.GetNumRZXFramesPlayed() * 100 / rzxFramesToPlay : 0) + "%";
+                            statusLabelText.Text = "Playing RZX";
+                            statusProgressBar.Value = (rzxFramesToPlay > 0 ? zx.GetNumRZXFramesPlayed() * 100 / rzxFramesToPlay : 0);
                             break;
                         case EMULATOR_STATE.RECORDING_RZX:
                             statusLabelText.Text = "Recording RZX ...";
@@ -3534,7 +3535,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 SetEmulationState(EMULATOR_STATE.PLAYING_RZX);
             }
             else {
-                zx.ContinueRecordingRZX(rzx);
+               // zx.ContinueRecordingRZX(rzx);
                 SetEmulationState(EMULATOR_STATE.RECORDING_RZX);
             }
         }
@@ -3566,12 +3567,13 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             isPlayingRZX = true;
             RZXFile rzx = new RZXFile();
             rzx.RZXFileEventHandler += RZXCallback;
-            rzx.LoadRZX(filename);
+            //rzx.LoadRZX(filename);
             rzx.Playback(filename);
             zx.StartPlaybackRZX(rzx);
             SetEmulationState(EMULATOR_STATE.PLAYING_RZX);
             //rzx.LoadRZX(filename);
             //UseRZX(rzx, isRecording);
+            statusProgressBar.Value = 0;
         }
 
         private void UseZ80(Z80_SNAPSHOT z80)
@@ -4885,6 +4887,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 zx.HasKempstonJoystick = true;
             }
 
+        }
+
+        private void statusStrip1_Resize(object sender, EventArgs e) {
+            statusProgressBar.Width = statusStrip1.Width * 28 / 100;
         }
     }
 }
