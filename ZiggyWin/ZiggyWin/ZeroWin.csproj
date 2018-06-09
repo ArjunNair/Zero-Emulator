@@ -472,60 +472,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>DefaultSettings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Resources\Tape.png" />
-    <None Include="Resources\disk2.png" />
-    <None Include="Resources\download.png" />
     <None Include="Resources\scanlines2.png" />
-    <None Include="Resources\zeroIndicators.png" />
-    <None Include="Resources\zeroSpeccyLogo.png" />
-    <None Include="Resources\newBaseIconGlow.png" />
-    <None Include="Resources\folder_Open_16xLG.png" />
-    <None Include="Resources\folder_Open_32xMD.png" />
-    <None Include="Resources\gear_16xLG.png" />
-    <None Include="Resources\save_16xLG.png" />
-    <None Include="Resources\StatusAnnotations_Pause_16xLG.png" />
-    <None Include="Resources\Symbols_Pause_16xLG.png" />
-    <None Include="Resources\StatusAnnotations_Play_16xLG.png" />
-    <None Include="Resources\Symbols_Play_16xLG.png" />
-    <None Include="Resources\Record_8791.png" />
-    <None Include="Resources\Binary_16xLG.png" />
-    <None Include="Resources\refresh_16xMD.png" />
-    <None Include="Resources\refresh_16xLG.png" />
-    <None Include="Resources\Symbols_Stop_16xLG.png" />
-    <None Include="Resources\library_16xLG.png" />
-    <None Include="Resources\magnifier_16xLG.png" />
-    <None Include="Resources\Symbols_Help_and_inclusive_16xLG.png" />
-    <None Include="Resources\DisassemblyWindow_6536.png" />
-    <None Include="Resources\DynamicHelp_5659.png" />
-    <None Include="Resources\F1Help_7644.png" />
-    <None Include="Resources\Symbols_Pause_32xLG.png" />
-    <None Include="Resources\Camera_16xLG.png" />
-    <None Include="Resources\MD-pause.png" />
-    <None Include="Resources\MD-next.png" />
-    <None Include="Resources\MD-play.png" />
-    <None Include="Resources\MD-previous.png" />
-    <None Include="Resources\MD-stop.png" />
-    <None Include="Resources\file-download.png" />
-    <None Include="Resources\MD-eject.png" />
-    <None Include="Resources\MD-cassette-tape.png" />
-    <None Include="Resources\MD-photo.png" />
-    <None Include="Resources\power-standby.png" />
-    <None Include="Resources\power-on-off.png" />
-    <None Include="Resources\wizard.png" />
-    <None Include="Resources\arrow-1-left.png" />
-    <None Include="Resources\arrow-1-right.png" />
-    <None Include="Resources\rzxPlay_16x16.png" />
-    <None Include="Resources\rzxPlay_16x16.jpg" />
-    <None Include="Resources\tape_16x16.png" />
-    <None Include="Resources\rzxRecord_16x16.png" />
-    <None Include="Resources\rzxRecord16x16.jpg" />
-    <None Include="Resources\rzxPlay16x16.png" />
-    <None Include="Resources\download_16x16.png" />
-    <None Include="Resources\sound_high.png" />
-    <None Include="Resources\sound_mute.png" />
-    <None Include="Resources\keyboard_16x16.png" />
-    <None Include="Resources\mouse 16x16.png" />
-    <None Include="Resources\mouse 32x32.png" />
     <Content Include="Ziggy Emulator.ico" />
   </ItemGroup>
   <ItemGroup>

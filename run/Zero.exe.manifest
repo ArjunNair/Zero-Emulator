@@ -98,26 +98,26 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="50176">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Peripherals.dll" size="46592">
       <assemblyIdentity name="Peripherals" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>SUyOgqc2KvQY6zljMNrh0huuqLM=</dsig:DigestValue>
+        <dsig:DigestValue>AOFpTpFxknWx8ahDbfreU8o/OvU=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="158720">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Speccy.dll" size="159232">
       <assemblyIdentity name="Speccy" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>9QCg2GT08wwgksCdt2Nq0ZK+OyU=</dsig:DigestValue>
+        <dsig:DigestValue>6mqTsoXivLNHPBYC9ENo5Bx5O40=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -134,14 +134,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="1932288">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Zero.exe" size="1935360">
       <assemblyIdentity name="Zero" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>vHGJ9M5ooglQ5GDWpNmkwhIctLc=</dsig:DigestValue>
+        <dsig:DigestValue>NHVc+dbzLTXwde/MGI+8CpFaAT4=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -153,7 +153,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>96N3haI5lSILLByxjArixD0NK0E=</dsig:DigestValue>
+        <dsig:DigestValue>/MjU1i9fcstj+SxmtRHQTNluvFg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
