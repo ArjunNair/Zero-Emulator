@@ -11,6 +11,7 @@ Ver 0.7.2 (WIP)
 - Fixed a couple of RZX bugs.
 - Fixed monitor opcode not showing hex numbers (R Martins).
 - Fixed directX issue with device being lost when computer is locked/sleeps (R Martins).
+- Fixed wrong breakpoint being removed in debugger in certain cases (R Martins).
 - Key2Joy now uses TAB as fire key instead of ALT.
 * Changed the way Zero attempts to load ROMs if it couldn't find a valid one on start-up.
 + Added option to disable tape traps in Options.

@@ -630,7 +630,7 @@ namespace Speccy
                                 break;
                         }
                     } else {
-                        wdDrive.WriteSystemReg(v);
+                         wdDrive.WriteSystemReg(v);
                         totalTStates += 3;
                     }
                     //totalTStates += 3;

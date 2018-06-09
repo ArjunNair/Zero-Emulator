@@ -787,7 +787,7 @@ namespace Speccy
             isPlayingRZX = true;
             totalTStates = (int)rzx.record.tstatesAtStart;
         }
-        */
+        
         public void ContinueRecordingRZX(RZXFile _rzx) {
             isRecordingRZX = true;
             isPlayingRZX = false;
@@ -795,7 +795,7 @@ namespace Speccy
             rzx.ContinueRecording();
             rzxInputs = new System.Collections.Generic.List<byte>();
         }
-
+        */
         public bool ContinueRZXSession(string filename) {
             isRecordingRZX = true;
             isPlayingRZX = false;
@@ -822,7 +822,7 @@ namespace Speccy
         public void DiscardRZX() {
             isRecordingRZX = false;
             isPlayingRZX = false;
-            rzx.Discard();
+            //rzx.Discard();
         }
 
         public void SaveRZX(bool doFinalise) {

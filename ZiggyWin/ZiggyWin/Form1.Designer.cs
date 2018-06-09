@@ -112,8 +112,9 @@
             this.rzxRecordButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabelText = new System.Windows.Forms.ToolStripStatusLabel();
-            this.rzxPlaybackStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.fileDownloadStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.rzxPlaybackStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.rzxRecordStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.mouseStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.tapeStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -710,9 +711,10 @@
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusProgressBar,
             this.statusLabelText,
-            this.rzxPlaybackStatusLabel,
             this.fileDownloadStatusLabel,
+            this.rzxPlaybackStatusLabel,
             this.rzxRecordStatusLabel,
             this.mouseStripStatusLabel,
             this.tapeStatusLabel,
@@ -723,6 +725,7 @@
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.ShowItemToolTips = true;
             this.statusStrip1.SizingGrip = false;
+            this.statusStrip1.Resize += new System.EventHandler(this.statusStrip1_Resize);
             // 
             // statusLabelText
             // 
@@ -734,19 +737,28 @@
             this.statusLabelText.Name = "statusLabelText";
             this.statusLabelText.Spring = true;
             // 
-            // rzxPlaybackStatusLabel
+            // statusProgressBar
             // 
-            this.rzxPlaybackStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            resources.ApplyResources(this.rzxPlaybackStatusLabel, "rzxPlaybackStatusLabel");
-            this.rzxPlaybackStatusLabel.Image = global::ZeroWin.Properties.Resources.rzxPlay16x16;
-            this.rzxPlaybackStatusLabel.Name = "rzxPlaybackStatusLabel";
+            resources.ApplyResources(this.statusProgressBar, "statusProgressBar");
+            this.statusProgressBar.CausesValidation = false;
+            this.statusProgressBar.Name = "statusProgressBar";
+            this.statusProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             // 
             // fileDownloadStatusLabel
             // 
             this.fileDownloadStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             resources.ApplyResources(this.fileDownloadStatusLabel, "fileDownloadStatusLabel");
             this.fileDownloadStatusLabel.Image = global::ZeroWin.Properties.Resources.download_16x16;
+            this.fileDownloadStatusLabel.Margin = new System.Windows.Forms.Padding(1, 3, 1, 2);
             this.fileDownloadStatusLabel.Name = "fileDownloadStatusLabel";
+            this.fileDownloadStatusLabel.Padding = new System.Windows.Forms.Padding(1, 0, 0, 0);
+            // 
+            // rzxPlaybackStatusLabel
+            // 
+            this.rzxPlaybackStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            resources.ApplyResources(this.rzxPlaybackStatusLabel, "rzxPlaybackStatusLabel");
+            this.rzxPlaybackStatusLabel.Image = global::ZeroWin.Properties.Resources.rzxPlay16x16;
+            this.rzxPlaybackStatusLabel.Name = "rzxPlaybackStatusLabel";
             // 
             // rzxRecordStatusLabel
             // 
@@ -922,6 +934,7 @@
         private System.Windows.Forms.ToolStripButton keyboard48Button;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel mouseStripStatusLabel;
+        private System.Windows.Forms.ToolStripProgressBar statusProgressBar;
     }
 }
 
