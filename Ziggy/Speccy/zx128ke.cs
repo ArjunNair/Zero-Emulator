@@ -42,6 +42,7 @@ namespace Speccy
                                               + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
                                               + ScanLineWidth * BorderBottomHeight]; //56 lines of border
 
+            LastScanlineColor = new int[ScanLineWidth];
             keyBuffer = new bool[(int)keyCode.LAST];
 
             attr = new short[DisplayLength];  //6144 bytes of display memory will be mapped
@@ -249,10 +250,10 @@ namespace Speccy
                     result = result | 0xa0; //set bit 5 & 7 to 1
 
                     if (tapeIsPlaying) {
-                        if (tapeBit == 0)
-                            result &= ~(TAPE_BIT);    //reset is EAR ON
+                        if (pulseLevel == 0)
+                            result &= ~(TAPE_BIT);    //reset is EAR off
                         else
-                            result |= (TAPE_BIT); //set is EAR Off
+                            result |= (TAPE_BIT); //set is EAR On
                     }
                     else if ((lastFEOut & 0x10) == 0)
                             result &= ~(0x40);

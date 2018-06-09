@@ -1184,25 +1184,24 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             return dataString;
         }
 
-        private bool LoadROM(String romName)
-        {
-            romName = "\\" + romName;
-
-            //First try to load from the path saved in the config file
-            romLoaded = zx.LoadROM(config.PathRoms, romName);
+        private bool LoadROM(String romName) {
             logger.Log("Booting ROM: " + romName);
+
+            byte[] romData;
+            romLoaded = Utilities.ReadBytesFromFile(config.PathRoms + "\\" + romName, out romData);
+
             //Next try the application startup path (useful if running off USB)
             if (!romLoaded)
             {
-                romLoaded = zx.LoadROM(Application.StartupPath + "\\roms", romName);
+                romLoaded = Utilities.ReadBytesFromFile(Application.StartupPath + "\\roms\\" + romName, out romData);
 
                 //Aha! This worked so update the path in config file
                 if (romLoaded)
                     config.PathRoms = Application.StartupPath + "\\roms";
             }
-            while (!romLoaded)
-            {
-                MessageBox.Show("Zero couldn't find the '" + romName.Substring(1, romName.Length - 1) + "' file for the " +
+
+            while (!romLoaded) {
+                MessageBox.Show("Zero couldn't load the ROM file for the " +
                                 Utilities.GetStringFromEnum(zx.model) + ".\nSelect a valid ROM to continue.", "Missing ROM",
                                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
@@ -1212,9 +1211,109 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 openFileDialog1.Filter = "All supported files|*.rom;";
 
                 if (openFileDialog1.ShowDialog() == DialogResult.OK) {
-                    romName = "\\" + openFileDialog1.SafeFileName;
+                    romName = openFileDialog1.SafeFileName;
                     config.PathRoms = Path.GetDirectoryName(openFileDialog1.FileName);
-                    romLoaded = zx.LoadROM(config.PathRoms, romName);
+                    romLoaded = Utilities.ReadBytesFromFile(config.PathRoms + "\\" + romName, out romData);
+                }
+                else {
+                    MessageBox.Show("Unfortunately, Zero cannot work without a valid ROM file.\nIt will now exit.",
+                            "Unable to continue!", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+                    break;
+                }
+            }
+
+            if (romLoaded) {
+                switch (zx.model) {
+                    case MachineModel._48k:
+                        if (romData.Length != 16384)
+                            romLoaded = false;
+                        else {
+                            config.Current48kROM = romName;
+                            zx.PokeROMPages(0, 16384, romData);
+                        }
+                        break;
+
+                    case MachineModel._128k:
+                        if (romData.Length != 32768)
+                            romLoaded = false;
+                        else {
+                            config.Current128kROM = romName;
+                            zx.PokeROMPages(0, 16384 * 2, romData);
+                        }
+                        break;
+
+                    case MachineModel._128ke:
+                        if (romData.Length != 32768)
+                            romLoaded = false;
+                        else {
+                            config.Current128keROM = romName;
+                            zx.PokeROMPages(0, 16384 * 2, romData);
+                        }
+                        break;
+
+                    case MachineModel._plus3:
+                        if (romData.Length != 65536)
+                            romLoaded = false;
+                        else {
+                            config.CurrentPlus3ROM = romName;
+                            zx.PokeROMPages(0, 16384 * 4, romData);
+                        }
+                        break;
+
+                    case MachineModel._pentagon:
+                        if (romData.Length != 32768)
+                            romLoaded = false;
+                        else {
+                            zx.PokeROMPages(0, 16384 * 2, romData);
+                            string filename = config.PathRoms + "\\" + "trdos.rom";
+                            romLoaded = Utilities.ReadBytesFromFile(filename, out romData);
+
+                            if (!romLoaded || romData.Length != 16384) {
+                                if (MessageBox.Show("Zero couldn't load the TR DOS image for the " +
+                                    Utilities.GetStringFromEnum(zx.model) + ".\nThe TR DOS image should be in the same folder as the pentagon ROM and named as 'trdos.rom'.",
+                                    "TR DOS not found", MessageBoxButtons.OK) == DialogResult.OK)
+                                    return false;
+                            }
+
+                            //TR DOS resides in the top rom pages.
+                            zx.PokeROMPages(2, 16384, romData);
+                            config.CurrentPentagonROM = romName;
+                        }
+                        break;
+                }
+            }
+            return romLoaded;
+        }
+
+        private bool OldLoadROM(String romName)
+        {
+            //First try to load from the path saved in the config file
+            romLoaded = zx.LoadROM(config.PathRoms + "\\", romName);
+            logger.Log("Booting ROM: " + romName);
+            //Next try the application startup path (useful if running off USB)
+            if (!romLoaded)
+            {
+                romLoaded = zx.LoadROM(Application.StartupPath + "\\roms\\", romName);
+
+                //Aha! This worked so update the path in config file
+                if (romLoaded)
+                    config.PathRoms = Application.StartupPath + "\\roms";
+            }
+            while (!romLoaded)
+            {
+                MessageBox.Show("Zero couldn't find the '" + romName + "' file for the " +
+                                Utilities.GetStringFromEnum(zx.model) + ".\nSelect a valid ROM to continue.", "Missing ROM",
+                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+                openFileDialog1.InitialDirectory = config.PathRoms;
+                openFileDialog1.Title = "Choose a ROM";
+                openFileDialog1.FileName = "";
+                openFileDialog1.Filter = "All supported files|*.rom;";
+
+                if (openFileDialog1.ShowDialog() == DialogResult.OK) {
+                    romName = openFileDialog1.SafeFileName;
+                    config.PathRoms = Path.GetDirectoryName(openFileDialog1.FileName);
+                    romLoaded = zx.LoadROM(config.PathRoms + "\\", romName);
 
                     if (romLoaded) {
                         switch (zx.model) {
@@ -1453,32 +1552,32 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                     if (config.EnableKey2Joy)
                         HandleKey2Joy((int)keyCode.UP, true);
-                    else
-                        zx.keyBuffer[(int)keyCode.UP] = true;
+
+                    zx.keyBuffer[(int)keyCode.UP] = true;
                     break;
 
                 case Keys.Left:
 
                     if (config.EnableKey2Joy)
                         HandleKey2Joy((int)keyCode.LEFT, true);
-                    else
-                        zx.keyBuffer[(int)keyCode.LEFT] = true;
+
+                    zx.keyBuffer[(int)keyCode.LEFT] = true;
                     break;
 
                 case Keys.Right:
 
                     if (config.EnableKey2Joy)
                         HandleKey2Joy((int)keyCode.RIGHT, true);
-                    else
-                        zx.keyBuffer[(int)keyCode.RIGHT] = true;
+
+                    zx.keyBuffer[(int)keyCode.RIGHT] = true;
                     break;
 
                 case Keys.Down:
 
                     if (config.EnableKey2Joy)
                         HandleKey2Joy((int)keyCode.DOWN, true);
-                    else
-                        zx.keyBuffer[(int)keyCode.DOWN] = true;
+
+                    zx.keyBuffer[(int)keyCode.DOWN] = true;
                     break;
 
                 case Keys.Back:
@@ -1885,33 +1984,32 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                     if (config.EnableKey2Joy)
                         HandleKey2Joy((int)keyCode.UP, false);
-                    else
-                        zx.keyBuffer[(int)keyCode.UP] = false;
+
+                    zx.keyBuffer[(int)keyCode.UP] = false;
                     break;
 
                 case Keys.Left:
 
                     if (config.EnableKey2Joy)
                         HandleKey2Joy((int)keyCode.LEFT, false);
-                    else
-                        zx.keyBuffer[(int)keyCode.LEFT] = false;
+
+                    zx.keyBuffer[(int)keyCode.LEFT] = false;
                     break;
 
                 case Keys.Right:
 
                     if (config.EnableKey2Joy)
                         HandleKey2Joy((int)keyCode.RIGHT, false);
-                    else
-                        zx.keyBuffer[(int)keyCode.RIGHT] = false;
+
+                    zx.keyBuffer[(int)keyCode.RIGHT] = false;
                     break;
 
                 case Keys.Down:
 
                     if (config.EnableKey2Joy)
                         HandleKey2Joy((int)keyCode.DOWN, false);
-                    else
-                        zx.keyBuffer[(int)keyCode.DOWN] = false;
 
+                    zx.keyBuffer[(int)keyCode.DOWN] = false;
                     break;
 
                 case Keys.Back:
@@ -2738,6 +2836,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             else
                 zx.HasKempstonJoystick = false;
 
+            zx.UseKempstonPort1F = config.KempstonUsesPort1F;
 
             if ((config.EnableKey2Joy) && (config.Key2JoystickType == (int)zxmachine.JoysticksEmulated.KEMPSTON)) {
                 zx.HasKempstonJoystick = true;
@@ -2825,6 +2924,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             optionWindow.EnableVSync = config.EnableVSync;
             optionWindow.MaintainAspectRatioInFullScreen = config.MaintainAspectRatioInFullScreen;
             optionWindow.DisableTapeTraps = config.DisableTapeTraps;
+            optionWindow.KempstonUsesPort1F = config.KempstonUsesPort1F;
 
             switch (config.PaletteMode)
             {
@@ -2883,6 +2983,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             config.MaintainAspectRatioInFullScreen = optionWindow.MaintainAspectRatioInFullScreen;
             dxWindow.ShowScanlines = interlaceToolStripMenuItem.Checked = config.EnableInterlacedOverlay;
             pixelToolStripMenuItem.Checked = config.EnablePixelSmoothing = optionWindow.PixelSmoothing;
+            config.KempstonUsesPort1F = optionWindow.KempstonUsesPort1F;
 
             if (config.EnableVSync != optionWindow.EnableVSync)
             {
@@ -4914,6 +5015,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 zx.HasKempstonJoystick = true;
             }
 
+            zx.UseKempstonPort1F = config.KempstonUsesPort1F;
         }
     }
 }

@@ -42,6 +42,8 @@ namespace Speccy
                                               + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
                                               + ScanLineWidth * BorderBottomHeight]; //56 lines of border
 
+            LastScanlineColor = new int[ScanLineWidth];
+
             keyBuffer = new bool[(int)keyCode.LAST];
             attr = new short[DisplayLength];  //6144 bytes of display memory will be mapped
             Reset(true);
@@ -78,13 +80,15 @@ namespace Speccy
             contendedBankPagedIn = false;
             pagingDisabled = false;
             showShadowScreen = false;
+            borderColour = 7;
 
             Random rand = new Random();
             //Fill memory with random stuff to simulate hard reset
             for (int i = DisplayStart; i < DisplayStart + 6912; ++i)
                 PokeByteNoContend(i, rand.Next(255));
             screen = GetPageData(5); //Bank 5 is a copy of the screen
-
+            screenByteCtr = DisplayStart;
+            ULAByteCtr = 0;
             ActualULAStart = 14366 - 24 - (TstatesPerScanline * BorderTopHeight) + LateTiming;
             lastTState = ActualULAStart;
             BuildAttributeMap();
@@ -256,17 +260,17 @@ namespace Speccy
                     result = result | 0xa0; //set bit 5 & 7 to 1
 
                     if (tapeIsPlaying) {
-                        if (tapeBit == 0) {
-                            result &= ~(TAPE_BIT);    //reset is EAR ON
-                        } else {
-                            result |= (TAPE_BIT); //set is EAR Off
-                        }
+                        if (pulseLevel == 0)
+                            result &= ~(TAPE_BIT);    //reset is EAR off
+                        else
+                            result |= (TAPE_BIT);       //set is EAR On
                     }
-                    else if ((lastFEOut & 0x10) == 0) {
+                    else if ((lastFEOut & 0x10) == 0)
                             result &= ~(0x40);
-                        }
                         else
                             result |= 0x40;
+
+                    totalTStates += 3;
                 }
                 else {
                     Contend(port, 1, 3); //T2, T3
@@ -302,7 +306,7 @@ namespace Speccy
                         }
                     }
                 }
-            totalTStates += 3;
+          
             base.In(port, result & 0xff);
             return (result & 0xff);
         }

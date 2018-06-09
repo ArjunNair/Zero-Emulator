@@ -5,7 +5,6 @@ using zlib;
 
 namespace Peripherals
 {
-
     public class ByteUtililty {
         public static byte[] RawSerialize(object anything) {
             int rawsize = Marshal.SizeOf(anything);

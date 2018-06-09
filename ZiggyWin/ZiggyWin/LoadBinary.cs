@@ -89,27 +89,26 @@ namespace ZeroWin
                     }
 
                     if (addressRadioButton.Checked) {
-                        int end = start + (int)fs.Length;
+                        int end = start + bytesRead;
+
                         if (end > 65536)
                             end = 65536;
 
-                        for (int f = start; f < end; f++) {
-                            ziggyWin.zx.PokeByteNoContend(f, buffer[f - start]);
-                        }
-                    } else {
-                        int end = (int)fs.Length;
+                        ziggyWin.zx.PokeBytesNoContend(start, 0, end - start, buffer);
+                    } 
+                    else {
+                        int end = bytesRead;
+
                         if (end > 16384)
                             end = 16384;
 
-                        for (int f = 0; f < end; f++) {
-                            ziggyWin.zx.PokeRAMPage(pageComboBox.SelectedIndex * 2, f, buffer[f]);
-                        }
+                        ziggyWin.zx.PokeRAMPage(pageComboBox.SelectedIndex * 2, end, buffer);
                     }
-
-                    MessageBox.Show("Binary file loaded successfully.", "File loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
+                MessageBox.Show("Binary file loaded successfully.", "File loaded", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 fs.Close();
-            } else {
+            } 
+            else {
                 int start = 16384;
                 int end = 16384;
                 if (addressRadioButton.Checked) {

@@ -46,6 +46,7 @@ namespace Speccy
                                               + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
                                               + ScanLineWidth * BorderBottomHeight]; //56 lines of border
 
+            LastScanlineColor = new int[ScanLineWidth];
             keyBuffer = new bool[(int)keyCode.LAST];
 
             attr = new short[DisplayLength];  //6144 bytes of display memory will be mapped
@@ -61,7 +62,7 @@ namespace Speccy
                 udpDrive.DiskReset();
                 base.Reset(coldBoot);
 
-                contentionStartPeriod = 14360;// The +3 didn't have late timings!
+                contentionStartPeriod = 14361;// The +3 didn't have late timings!
                 contentionEndPeriod = contentionStartPeriod + (ScreenHeight * TstatesPerScanline); //57324 + LateTiming;
 
                 PageReadPointer[0] = ROMpage[0];
@@ -103,7 +104,7 @@ namespace Speccy
                 screen = GetPageData(5); //Bank 5 is a copy of the screen
                 screenByteCtr = DisplayStart;
                 ULAByteCtr = 0;
-                ActualULAStart = 14365 - 24 - (TstatesPerScanline * BorderTopHeight);
+                ActualULAStart = 14366 - 24 - (TstatesPerScanline * BorderTopHeight);
                 lastTState = ActualULAStart;
                 BuildAttributeMap();
 
@@ -252,7 +253,7 @@ namespace Speccy
             }
             else if (lowBitReset)    //Even address, so get input
             {
-                // totalTStates += 3;
+                 totalTStates += 3;
 
                 if (!externalSingleStep) {
                     if ((port & 0x8000) == 0)
@@ -284,10 +285,10 @@ namespace Speccy
                 result = result | 0xa0; //set bit 5 & 7 to 1
 
                 if (tapeIsPlaying) {
-                    if (tapeBit == 0)
-                        result &= ~(TAPE_BIT);    //reset is EAR ON
+                    if (pulseLevel == 0)
+                        result &= ~(TAPE_BIT);    //reset is EAR off
                     else
-                        result |= (TAPE_BIT); //set is EAR Off
+                        result |= (TAPE_BIT); //set is EAR On
                 }
                 else if ((lastFEOut & 0x10) == 0)
                     result &= ~(0x40);
@@ -295,7 +296,7 @@ namespace Speccy
                     result |= 0x40;
             }
             else {
-                //totalTStates += 3;
+                totalTStates += 3;
                 if ((port & 0xc002) == 0xc000) //AY register activate on Port FFFD
                     result = aySound.PortRead();
                 else if ((port & 0xc002) == 0x8000) //Port BFFD also activates AY on the +3/2A
@@ -648,6 +649,7 @@ namespace Speccy
                 }
                 totalTStates += 2;
             } else {
+                totalTStates += 3;
                 //AY register activate
                 if ((port & 0xC002) == 0xC000) {
                     aySound.SelectedRegister = val & 0x0F;
@@ -680,7 +682,7 @@ namespace Speccy
                                         if (mode == 1) {
                                             ULAGroupMode = 1;
                                         } else if (mode == 0) //palette group
-                    {
+                                        {
                                             ULAGroupMode = 0;
                                             ULAPaletteGroup = val & 0x3f;
                                         }

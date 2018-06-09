@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.IO;
 
 namespace ZeroWin
 {
@@ -73,6 +74,32 @@ namespace ZeroWin
             }
 
             return number;
+        }
+
+        public static bool ReadBytesFromFile(string file, out byte[] data) {
+            FileStream fs;
+            data = new byte[0];
+
+            try {
+                fs = new FileStream(file, FileMode.Open, FileAccess.Read);
+            } catch {
+                return false;
+            }
+
+            int length = (int)fs.Length;
+
+            using (BinaryReader r = new BinaryReader(fs)) {
+                data = new byte[length];
+
+                int bytesRead = r.Read(data, 0, length);
+
+                if (bytesRead == 0) {
+                    fs.Close();
+                    return false; //something bad happened!
+                }
+            }
+
+            return true;
         }
     }
 }
