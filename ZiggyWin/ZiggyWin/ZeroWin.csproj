@@ -17,10 +17,10 @@
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>false</SignManifests>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>Ziggy Emulator.ico</ApplicationIcon>
     <TargetZone>Custom</TargetZone>
-    <Win32Resource>C:\Users\arjun\Documents\Zero-Emulator\ZiggyWin\ZiggyWin\zeroIconResource.res</Win32Resource>
+    <Win32Resource>
+    </Win32Resource>
     <SignAssembly>false</SignAssembly>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileUpgradeFlags>
@@ -88,6 +88,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>ZeroWin.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
