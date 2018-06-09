@@ -4,6 +4,7 @@ What's New
 
 Ver 0.7.2
 -------------------
+- Fixed aspect ratio in DirectX full screen mode (Hexaae).
 - Fixed mic boost emulation (Hernan). Cobra's arc works fine now.
 - Fixed Key2Joy not enabling Kempston joystick correctly (fabio).
 - Fixed Key2Joy swapping up and down cursor keys.
@@ -13,6 +14,7 @@ Ver 0.7.2
 - Key2Joy now uses TAB as fire key instead of ALT.
 + Joysticks are now remembered between emulator sessions and automatically enabled on startup, if found.
 + Added Insta-Load option to Tape Deck (anton).
++ Completely rewrote RZX module to follow specs more closely.
 
 Ver 0.7.1
 --------------------

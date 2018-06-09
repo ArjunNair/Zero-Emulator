@@ -744,7 +744,7 @@ namespace ZeroWin
             {
                 if (displayHeight < displayWidth)
                 {
-                    float aspectXScale = (displayHeight * 4.0f) / (displayWidth * 3.0f);
+                    float aspectXScale = 0.75f; // (displayHeight * 4.0f) / (displayWidth * 3.0f);
                     scaleX = (scaleX * aspectXScale);
                     int newWidth = (int)(displayWidth * aspectXScale);
                     //displayRect = new Rectangle(0, 0, newWidth, displayHeight);
@@ -752,7 +752,7 @@ namespace ZeroWin
                 }
                 else //Not tested!!!
                 {
-                    float aspectYScale = (displayWidth * 3.0f) / (displayHeight * 4.0f);
+                    float aspectYScale = 1.33f;// (displayWidth * 3.0f) / (displayHeight * 4.0f);
                     scaleY = (scaleY * aspectYScale);
                     int newHeight = (int)(displayHeight * aspectYScale);
                     //displayRect = new Rectangle(0, 0, displayWidth, newHeight);
