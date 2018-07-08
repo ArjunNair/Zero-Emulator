@@ -17,6 +17,7 @@ namespace ZeroWin
         private Registers registerViewer = null;
         private Machine_State machineState = null;
         private CallStackViewer callStackViewer = null;
+        private WatchWindow watchWindow = null;
 
         //Internal set of registers that mimic the z80 reg state
         private int pc, bc, de, hl, ir, mp, sp, _bc, _de, _hl, ix, iy, im, af, _af;
@@ -34,7 +35,7 @@ namespace ZeroWin
         private bool isMemoryViewerOpen = false;
         private bool isMachineStateViewerOpen = false;
         private bool isCallStackViewerOpen = false;
-
+        private bool isWatchWindowOpen = false;
         public bool useHexNumbers = false;
         public bool isTraceOn = false;
         public bool showSysVars = true;
@@ -223,6 +224,61 @@ namespace ZeroWin
             RUNTOCURSOR,
         }
 
+        public class WatchVariable
+        {
+            private int address;
+            private int data;
+            private string label;
+
+            public int Address
+            {
+                get { return address; }
+                set { address = value; }
+            }
+
+            public int Data
+            {
+                get { return data; }
+                set { data = value; }
+            }
+
+            public string Label
+            {
+                get { return label; }
+                set { label = value;}
+            }
+
+            public string AddressAsString
+            {
+                get
+                {
+                    if(address < 0)
+                        return "-";
+                    else
+                        return address.ToString();
+                }
+
+            }
+
+            public string DataAsString
+            {
+                get
+                {
+                    if(data < 0)
+                        return "-";
+                    else
+                        return data.ToString();
+                }
+            }
+
+            public WatchVariable()
+            {
+                address = 0;
+                data = 0;
+                label = "";
+            }
+        }
+
         public class BreakPointCondition : Object
         {
             private SPECCY_EVENT condition;
@@ -320,6 +376,28 @@ namespace ZeroWin
                 lst1.DataSource = lst2;
             }
         }
+        
+        private void UpdateToolsWindows()
+        {
+            if(profiler != null && !profiler.IsDisposed)
+                profiler.RefreshData();
+
+            if(memoryViewer != null && !memoryViewer.IsDisposed)
+                memoryViewer.RefreshData(useHexNumbers);
+
+            if(registerViewer != null && !registerViewer.IsDisposed)
+                registerViewer.RefreshView(useHexNumbers);
+
+            if(machineState != null && !machineState.IsDisposed)
+                machineState.RefreshView(this.ziggyWin);
+
+            if(watchWindow != null && !watchWindow.IsDisposed)
+                watchWindow.RefreshData(useHexNumbers);
+
+            if(callStackViewer != null && !callStackViewer.IsDisposed)
+                callStackViewer.RefreshView();
+
+        }
 
         private void ProcessMemoryBreakpoint(int addr, int val) {
             pauseEmulation = true;
@@ -329,17 +407,7 @@ namespace ZeroWin
             Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
             ziggyWin.zx.needsPaint = true;
 
-            if (profiler != null && !profiler.IsDisposed)
-                profiler.RefreshData();
-
-            if (memoryViewer != null && !memoryViewer.IsDisposed)
-                memoryViewer.RefreshData(useHexNumbers);
-
-            if (registerViewer != null && !registerViewer.IsDisposed)
-                registerViewer.RefreshView(useHexNumbers);
-
-            if (machineState != null && !machineState.IsDisposed)
-                machineState.RefreshView(this.ziggyWin);
+            UpdateToolsWindows();
 
             if (!(dbState == MonitorState.RUN || dbState == MonitorState.STEPOVER || dbState == MonitorState.STEPOUT) && !pauseEmulation) {
                 Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
@@ -430,12 +498,9 @@ namespace ZeroWin
             }
         }
 
-        public void DoPauseEmulation() {
-
+        public void DoPauseEmulation() {                                    
             ziggyWin.ShouldExitFullscreen();
-
             ziggyWin.zx.Pause();
-
             ziggyWin.ForceScreenUpdate();
 
             dataGridView1.DataSource = null;
@@ -456,22 +521,7 @@ namespace ZeroWin
                 }
                 memoryViewList.Add(mu);
             }
-            //dataGridView4.DataSource = memoryViewList;
-            if (profiler != null && !profiler.IsDisposed)
-                profiler.RefreshData();
-
-            if (memoryViewer != null && !memoryViewer.IsDisposed)
-                memoryViewer.RefreshData(useHexNumbers);
-
-            if (registerViewer != null && !registerViewer.IsDisposed)
-                registerViewer.RefreshView(useHexNumbers);
-
-            if (machineState != null && !machineState.IsDisposed)
-                machineState.RefreshView(this.ziggyWin);
-
-            if (callStackViewer != null && !callStackViewer.IsDisposed)
-                callStackViewer.RefreshView();
-
+            UpdateToolsWindows();
             this.Show();
             this.Focus();
         }
@@ -598,26 +648,10 @@ namespace ZeroWin
             }
 
             if (dbState == MonitorState.STEPIN) {
-                //  dbState = MonitorState.PAUSE;
-
                 SetState(MonitorState.PAUSE);
-                // UpdateZXState();
-
                 Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
-
                 ziggyWin.zx.needsPaint = true;
-
-                if (profiler != null && !profiler.IsDisposed)
-                    profiler.RefreshData();
-
-                if (memoryViewer != null && !memoryViewer.IsDisposed)
-                    memoryViewer.RefreshData(useHexNumbers);
-
-                if (registerViewer != null && !registerViewer.IsDisposed)
-                    registerViewer.RefreshView(useHexNumbers);
-
-                if (machineState != null && !machineState.IsDisposed)
-                    machineState.RefreshView(this.ziggyWin);
+                UpdateToolsWindows();
             } else {
                 breakPointStatus = "";
             }
@@ -626,8 +660,7 @@ namespace ZeroWin
                 if (previousPC != pc) {
                     Disassemble(previousPC, previousPC, false, true);
 
-                    LogMessage log = new LogMessage();
-
+                    LogMessage log = new LogMessage();            
                     log.Address = TraceMessage.address;
                     log.Opcodes = TraceMessage.opcodes;
                     log.Tstates = previousTState;//ziggyWin.zx. totalTStates;
@@ -649,18 +682,7 @@ namespace ZeroWin
                 SetState(MonitorState.PAUSE);
                 Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
                 ziggyWin.zx.needsPaint = true;
-
-                if (profiler != null && !profiler.IsDisposed)
-                    profiler.RefreshData();
-
-                if (memoryViewer != null && !memoryViewer.IsDisposed)
-                    memoryViewer.RefreshData(useHexNumbers);
-
-                if (registerViewer != null && !registerViewer.IsDisposed)
-                    registerViewer.RefreshView(useHexNumbers);
-
-                if (machineState != null && !machineState.IsDisposed)
-                    machineState.RefreshView(this.ziggyWin);
+                UpdateToolsWindows();
             }
         }
 
@@ -680,18 +702,7 @@ namespace ZeroWin
                     SetState(MonitorState.PAUSE);
                     Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
                     ziggyWin.zx.needsPaint = true;
-
-                    if (profiler != null && !profiler.IsDisposed)
-                        profiler.RefreshData();
-
-                    if (memoryViewer != null && !memoryViewer.IsDisposed)
-                        memoryViewer.RefreshData(useHexNumbers);
-
-                    if (registerViewer != null && !registerViewer.IsDisposed)
-                        registerViewer.RefreshView(useHexNumbers);
-
-                    if (machineState != null && !machineState.IsDisposed)
-                        machineState.RefreshView(this.ziggyWin);
+                    UpdateToolsWindows();
                     break;
                 }
             }
@@ -764,18 +775,7 @@ namespace ZeroWin
                     SetState(MonitorState.PAUSE);
                     Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
                     ziggyWin.zx.needsPaint = true;
-
-                    if (profiler != null && !profiler.IsDisposed)
-                        profiler.RefreshData();
-
-                    if (memoryViewer != null && !memoryViewer.IsDisposed)
-                        memoryViewer.RefreshData(useHexNumbers);
-
-                    if (registerViewer != null && !registerViewer.IsDisposed)
-                        registerViewer.RefreshView(useHexNumbers);
-
-                    if (machineState != null && !machineState.IsDisposed)
-                        machineState.RefreshView(this.ziggyWin);
+                    UpdateToolsWindows();
                     break;
                 }
             }
@@ -1039,6 +1039,7 @@ namespace ZeroWin
         }
 
         public BindingList<MemoryUnit> memoryViewList = new BindingList<MemoryUnit>();
+        public BindingList<WatchVariable> watchVariableList = new BindingList<WatchVariable>();
 
         /// <summary>
         /// Remove the column header border in the Aero theme in Vista,
@@ -1091,12 +1092,11 @@ namespace ZeroWin
                 }
                 memoryViewList.Add(mu);
             }
-            //dataGridView4.DataSource = memoryViewList;
-            if (memoryViewer != null && !memoryViewer.IsDisposed)
-                memoryViewer.RefreshData(useHexNumbers);
 
-            if (profiler != null && !profiler.IsDisposed)
-                profiler.RefreshData();
+            for(int i = 0; i < watchVariableList.Count; i++)
+                watchVariableList[i].Data = ziggyWin.zx.PeekByteNoContend(watchVariableList[i].Address);
+
+            UpdateToolsWindows();
         }
 
         public void DeSyncWithZX() {
@@ -1362,6 +1362,18 @@ namespace ZeroWin
             ziggyWin.zx.PokeByteNoContend(addr, val);
             Disassemble(addr, addr, false, false);
             memoryViewList[addr / 10].Bytes[addr % 10] = val;
+
+            if(memoryViewer != null && !memoryViewer.IsDisposed)
+                memoryViewer.RefreshData(useHexNumbers);
+
+            for(int i = 0; i < watchVariableList.Count; i++)
+                if(watchVariableList[i].Address == addr)
+                    watchVariableList[i].Data = val;
+
+            if(watchWindow != null && !watchWindow.IsDisposed)
+                watchWindow.RefreshData(useHexNumbers);
+
+            dataGridView1.Update();
         }
 
         //Stores opcode and one paramater
@@ -7185,6 +7197,9 @@ namespace ZeroWin
             if (machineState != null && !machineState.IsDisposed)
                 machineState.Close();
 
+            if(watchWindow != null && !watchWindow.IsDisposed)
+                watchWindow.Close();
+
             SetState(0);
             ziggyWin.zx.doRun = true;
             ziggyWin.zx.ResetKeyboard();
@@ -7225,6 +7240,37 @@ namespace ZeroWin
                 breakPointList.Add(_kv);
                 breakPointConditions.Add(_kv.Value);
             }
+        }
+        
+        public void AddWatchVariable(int addr, string label)
+        {
+            WatchVariable wv = new WatchVariable();
+            wv.Address = addr;
+            wv.Data = ziggyWin.zx.PeekByteNoContend(addr);
+
+            if(label == "")
+                systemVariables.TryGetValue(addr, out label);
+
+            wv.Label = label;
+            watchVariableList.Add(wv);
+        }
+
+        public void RemoveWatchVariable(int addr)
+        {
+            for(int i = 0; i < watchVariableList.Count; i++)
+            {
+                if(watchVariableList[i].Address == addr)
+                {
+                    watchVariableList.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        public void RemoveAllWatchVariables()
+        {
+            watchVariableList.Clear();
+            watchVariableList = new BindingList<WatchVariable>();
         }
 
         private void jumpAddrButton_Click(object sender, EventArgs e) {
@@ -7436,6 +7482,12 @@ namespace ZeroWin
                 machineState.Hide();
             }
 
+            if(watchWindow != null && !watchWindow.IsDisposed)
+            {
+                isWatchWindowOpen = true;
+                watchWindow.Hide();
+            }
+
             if (callStackViewer != null && !callStackViewer.IsDisposed) {
                 isCallStackViewerOpen = true;
                 callStackViewer.Hide();
@@ -7501,6 +7553,7 @@ namespace ZeroWin
         private void ClearAllBreakpointsButton_Click(object sender, EventArgs e) {
             RemoveAllBreakpoints();
         }
+        
 
         // to draw breakpoint
         private void dataGridView1_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e) {
@@ -7551,14 +7604,7 @@ namespace ZeroWin
                 this.dataGridView1.Columns[0].DefaultCellStyle.Format = "";
             }
 
-            if (breakpointViewer != null && !breakpointViewer.IsDisposed)
-                breakpointViewer.RefreshView(useHexNumbers);
-
-            if (memoryViewer != null && !memoryViewer.IsDisposed)
-                memoryViewer.RefreshData(useHexNumbers);
-
-            if (registerViewer != null && !registerViewer.IsDisposed)
-                registerViewer.RefreshView(useHexNumbers);
+            UpdateToolsWindows();
         }
 
         private void systemVariablesToolStripMenuItem_CheckedChanged(object sender, EventArgs e) {
@@ -7611,6 +7657,14 @@ namespace ZeroWin
                 }
                 MessageBox.Show("Symbols loaded successfully!", "Symbol file", MessageBoxButtons.OK);
             }
+        }
+
+        private void watchMemoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(watchWindow == null || watchWindow.IsDisposed)
+                watchWindow = new WatchWindow(this);
+
+            watchWindow.Show();
         }
 
         private void toggleBreakpointToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -7723,6 +7777,14 @@ namespace ZeroWin
                         machineState.Show();
                 }
 
+                if(isWatchWindowOpen)
+                {
+                    if(watchWindow.IsDisposed)
+                        watchMemoryToolStripMenuItem_Click(this, e);
+                    else
+                        watchWindow.Show();
+                }
+
                 if (isCallStackViewerOpen)
                     callStackViewer.Show();
 
@@ -7732,6 +7794,7 @@ namespace ZeroWin
                 isMemoryViewerOpen = false;
                 isRegistersOpen = false;
                 isMachineStateViewerOpen = false;
+                isWatchWindowOpen = false;
             }
         }
 
