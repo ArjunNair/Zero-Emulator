@@ -4,6 +4,7 @@ What's New
 
 Ver 0.7.2 (WIP)
 -------------------
+- Fixed aspect ratio in DirectX full screen mode (Hexaae).
 - Fixed +3 contention bug (woody)
 - Fixed mic boost emulation (Hernan). Cobra's arc works fine now.
 - Fixed Key2Joy not enabling Kempston joystick correctly (fabio).
@@ -13,10 +14,17 @@ Ver 0.7.2 (WIP)
 - Fixed directX issue with device being lost when computer is locked/sleeps (R Martins).
 - Fixed wrong breakpoint being removed in debugger in certain cases (R Martins).
 - Key2Joy now uses TAB as fire key instead of ALT.
-* Changed the way Zero attempts to load ROMs if it couldn't find a valid one on start-up.
-+ Added option to disable tape traps in Options.
 + Joysticks are now remembered between emulator sessions and automatically enabled on startup, if found.
 + Added Insta-Load option to Tape Deck (anton).
++ Completely rewrote RZX module to follow specs more closely.
++ Added ability to load custom symbols to represent memory locations (R Martins). Symbols should be stored as CSV in key-pairs like so:
+23606, CHARS
+42000, SPRITE DATA
++ Added Watch Window tool in Debugger (R Martins).
+* Changed the way Zero attempts to load ROMs if it couldn't find a valid one on start-up.
++ Added option to disable tape traps in Options.
+
+
 
 
 

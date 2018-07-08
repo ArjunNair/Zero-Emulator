@@ -65,6 +65,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadSymbolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resumeEmulationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.runToCursorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -78,18 +79,18 @@
             this.clearAllBreakpointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.breakpointsEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.machineStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.memoryViewerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.registersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-            this.executionLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pokeMemoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.watchMemoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.heatMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.aSCIICharactersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.numbersInHexToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemVariablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.heatMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadSymbolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.statusStrip1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
@@ -440,6 +441,15 @@
             this.saveToolStripMenuItem.Text = "Save...";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
+            // loadSymbolsToolStripMenuItem
+            // 
+            this.loadSymbolsToolStripMenuItem.Name = "loadSymbolsToolStripMenuItem";
+            this.loadSymbolsToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.loadSymbolsToolStripMenuItem.Text = "Load Symbols...";
+            this.loadSymbolsToolStripMenuItem.ToolTipText = "Allows you to load custom symbols to represent memory locations.\r\nSymbols should " +
+    "be stored as CSV in key-pairs like so:\r\n23606, CHARS\r\n42000, SPRITE DATA";
+            this.loadSymbolsToolStripMenuItem.Click += new System.EventHandler(this.loadSymbolsToolStripMenuItem_Click);
+            // 
             // debugToolStripMenuItem
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -459,7 +469,7 @@
             this.resumeEmulationToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.PlayHS;
             this.resumeEmulationToolStripMenuItem.Name = "resumeEmulationToolStripMenuItem";
             this.resumeEmulationToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.resumeEmulationToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.resumeEmulationToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
             this.resumeEmulationToolStripMenuItem.Text = "Resume";
             this.resumeEmulationToolStripMenuItem.Click += new System.EventHandler(this.resumeEmulationToolStripMenuItem_Click);
             // 
@@ -467,7 +477,7 @@
             // 
             this.runToCursorToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.GoToSourceCode_6546;
             this.runToCursorToolStripMenuItem.Name = "runToCursorToolStripMenuItem";
-            this.runToCursorToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.runToCursorToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
             this.runToCursorToolStripMenuItem.Text = "Run To Cursor";
             this.runToCursorToolStripMenuItem.Click += new System.EventHandler(this.runToCursorToolStripMenuItem_Click);
             // 
@@ -475,21 +485,21 @@
             // 
             this.stopDebuggingToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.StopHS;
             this.stopDebuggingToolStripMenuItem.Name = "stopDebuggingToolStripMenuItem";
-            this.stopDebuggingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stopDebuggingToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
             this.stopDebuggingToolStripMenuItem.Text = "Stop";
             this.stopDebuggingToolStripMenuItem.Click += new System.EventHandler(this.stopDebuggingToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(147, 6);
             // 
             // stepOverToolStripMenuItem
             // 
             this.stepOverToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.StepOver_6328;
             this.stepOverToolStripMenuItem.Name = "stepOverToolStripMenuItem";
             this.stepOverToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F10;
-            this.stepOverToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stepOverToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
             this.stepOverToolStripMenuItem.Text = "Step Over";
             this.stepOverToolStripMenuItem.Click += new System.EventHandler(this.stepOverToolStripMenuItem_Click);
             // 
@@ -498,7 +508,7 @@
             this.stepInToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.StepIn_6326;
             this.stepInToolStripMenuItem.Name = "stepInToolStripMenuItem";
             this.stepInToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F11;
-            this.stepInToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stepInToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
             this.stepInToolStripMenuItem.Text = "Step In";
             this.stepInToolStripMenuItem.Click += new System.EventHandler(this.stepInToolStripMenuItem_Click);
             // 
@@ -507,7 +517,7 @@
             this.stepOutToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.Stepout_6327;
             this.stepOutToolStripMenuItem.Name = "stepOutToolStripMenuItem";
             this.stepOutToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F12;
-            this.stepOutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stepOutToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
             this.stepOutToolStripMenuItem.Text = "Step Out";
             this.stepOutToolStripMenuItem.Click += new System.EventHandler(this.stepOutToolStripMenuItem_Click);
             // 
@@ -540,12 +550,8 @@
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.breakpointsEditorToolStripMenuItem,
-            this.machineStateToolStripMenuItem,
-            this.memoryViewerToolStripMenuItem,
-            this.registersToolStripMenuItem,
-            this.toolStripSeparator6,
-            this.executionLogToolStripMenuItem,
-            this.pokeMemoryToolStripMenuItem});
+            this.pokeMemoryToolStripMenuItem,
+            this.watchMemoryToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -559,47 +565,6 @@
             this.breakpointsEditorToolStripMenuItem.Text = "Breakpoints Editor";
             this.breakpointsEditorToolStripMenuItem.Click += new System.EventHandler(this.breakpointsEditorToolStripMenuItem_Click);
             // 
-            // machineStateToolStripMenuItem
-            // 
-            this.machineStateToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.Processor;
-            this.machineStateToolStripMenuItem.Name = "machineStateToolStripMenuItem";
-            this.machineStateToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.S)));
-            this.machineStateToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.machineStateToolStripMenuItem.Text = "Machine State";
-            this.machineStateToolStripMenuItem.Click += new System.EventHandler(this.machineStateToolStripMenuItem_Click);
-            // 
-            // memoryViewerToolStripMenuItem
-            // 
-            this.memoryViewerToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.MemoryWindow_6537;
-            this.memoryViewerToolStripMenuItem.Name = "memoryViewerToolStripMenuItem";
-            this.memoryViewerToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.V)));
-            this.memoryViewerToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.memoryViewerToolStripMenuItem.Text = "Memory Viewer";
-            this.memoryViewerToolStripMenuItem.Click += new System.EventHandler(this.memoryViewerToolStripMenuItem_Click);
-            // 
-            // registersToolStripMenuItem
-            // 
-            this.registersToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.RegistersWindow_6538;
-            this.registersToolStripMenuItem.Name = "registersToolStripMenuItem";
-            this.registersToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.R)));
-            this.registersToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.registersToolStripMenuItem.Text = "Registers";
-            this.registersToolStripMenuItem.Click += new System.EventHandler(this.registersToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator6
-            // 
-            this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(204, 6);
-            // 
-            // executionLogToolStripMenuItem
-            // 
-            this.executionLogToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.IntelliTrace_16x;
-            this.executionLogToolStripMenuItem.Name = "executionLogToolStripMenuItem";
-            this.executionLogToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.L)));
-            this.executionLogToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.executionLogToolStripMenuItem.Text = "Execution Log";
-            this.executionLogToolStripMenuItem.Click += new System.EventHandler(this.executionLogToolStripMenuItem_Click);
-            // 
             // pokeMemoryToolStripMenuItem
             // 
             this.pokeMemoryToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.PencilTool_206;
@@ -609,22 +574,85 @@
             this.pokeMemoryToolStripMenuItem.Text = "Poke Memory";
             this.pokeMemoryToolStripMenuItem.Click += new System.EventHandler(this.pokeMemoryToolStripMenuItem_Click);
             // 
+            // watchMemoryToolStripMenuItem
+            // 
+            this.watchMemoryToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.magnifier_16xLG;
+            this.watchMemoryToolStripMenuItem.Name = "watchMemoryToolStripMenuItem";
+            this.watchMemoryToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.W)));
+            this.watchMemoryToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.watchMemoryToolStripMenuItem.Text = "Watch Memory";
+            this.watchMemoryToolStripMenuItem.Click += new System.EventHandler(this.watchMemoryToolStripMenuItem_Click);
+            // 
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem4,
+            this.toolStripMenuItem1,
+            this.toolStripMenuItem2,
+            this.toolStripMenuItem3,
+            this.heatMapToolStripMenuItem,
+            this.toolStripSeparator7,
             this.aSCIICharactersToolStripMenuItem,
             this.numbersInHexToolStripMenuItem,
-            this.systemVariablesToolStripMenuItem,
-            this.heatMapToolStripMenuItem});
+            this.systemVariablesToolStripMenuItem});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "View";
+            // 
+            // toolStripMenuItem4
+            // 
+            this.toolStripMenuItem4.Image = global::ZeroWin.Properties.Resources.IntelliTrace_16x;
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.L)));
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(185, 22);
+            this.toolStripMenuItem4.Text = "Execution Log";
+            this.toolStripMenuItem4.Click += new System.EventHandler(this.executionLogToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Image = global::ZeroWin.Properties.Resources.Processor;
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.S)));
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(185, 22);
+            this.toolStripMenuItem1.Text = "Machine State";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.machineStateToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Image = global::ZeroWin.Properties.Resources.MemoryWindow_6537;
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.V)));
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(185, 22);
+            this.toolStripMenuItem2.Text = "Memory";
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.memoryViewerToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Image = global::ZeroWin.Properties.Resources.RegistersWindow_6538;
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.R)));
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(185, 22);
+            this.toolStripMenuItem3.Text = "Registers";
+            this.toolStripMenuItem3.Click += new System.EventHandler(this.registersToolStripMenuItem_Click);
+            // 
+            // heatMapToolStripMenuItem
+            // 
+            this.heatMapToolStripMenuItem.Name = "heatMapToolStripMenuItem";
+            this.heatMapToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.heatMapToolStripMenuItem.Text = "Heat Map";
+            this.heatMapToolStripMenuItem.Visible = false;
+            this.heatMapToolStripMenuItem.Click += new System.EventHandler(this.heatMapToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(182, 6);
             // 
             // aSCIICharactersToolStripMenuItem
             // 
             this.aSCIICharactersToolStripMenuItem.CheckOnClick = true;
             this.aSCIICharactersToolStripMenuItem.Name = "aSCIICharactersToolStripMenuItem";
-            this.aSCIICharactersToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+            this.aSCIICharactersToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.aSCIICharactersToolStripMenuItem.Text = "ASCII characters";
             this.aSCIICharactersToolStripMenuItem.CheckedChanged += new System.EventHandler(this.aSCIICharactersToolStripMenuItem_CheckedChanged);
             // 
@@ -632,7 +660,7 @@
             // 
             this.numbersInHexToolStripMenuItem.CheckOnClick = true;
             this.numbersInHexToolStripMenuItem.Name = "numbersInHexToolStripMenuItem";
-            this.numbersInHexToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+            this.numbersInHexToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.numbersInHexToolStripMenuItem.Text = "Hex Numbers";
             this.numbersInHexToolStripMenuItem.CheckedChanged += new System.EventHandler(this.numbersInHexToolStripMenuItem_CheckedChanged);
             // 
@@ -642,26 +670,9 @@
             this.systemVariablesToolStripMenuItem.CheckOnClick = true;
             this.systemVariablesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.systemVariablesToolStripMenuItem.Name = "systemVariablesToolStripMenuItem";
-            this.systemVariablesToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+            this.systemVariablesToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.systemVariablesToolStripMenuItem.Text = "System Variables";
             this.systemVariablesToolStripMenuItem.CheckedChanged += new System.EventHandler(this.systemVariablesToolStripMenuItem_CheckedChanged);
-            // 
-            // heatMapToolStripMenuItem
-            // 
-            this.heatMapToolStripMenuItem.Name = "heatMapToolStripMenuItem";
-            this.heatMapToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
-            this.heatMapToolStripMenuItem.Text = "Heat Map";
-            this.heatMapToolStripMenuItem.Visible = false;
-            this.heatMapToolStripMenuItem.Click += new System.EventHandler(this.heatMapToolStripMenuItem_Click);
-            // 
-            // loadSymbolsToolStripMenuItem
-            // 
-            this.loadSymbolsToolStripMenuItem.Name = "loadSymbolsToolStripMenuItem";
-            this.loadSymbolsToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.loadSymbolsToolStripMenuItem.Text = "Load Symbols...";
-            this.loadSymbolsToolStripMenuItem.ToolTipText = "Allows you to load custom symbols to represent memory locations.\r\nSymbols should " +
-    "be stored as CSV in key-pairs like so:\r\n23606, CHARS\r\n42000, SPRITE DATA";
-            this.loadSymbolsToolStripMenuItem.Click += new System.EventHandler(this.loadSymbolsToolStripMenuItem_Click);
             // 
             // openFileDialog1
             // 
@@ -749,20 +760,21 @@
         private System.Windows.Forms.ToolStripMenuItem clearAllBreakpointsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem breakpointsEditorToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem memoryViewerToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem registersToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem executionLogToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pokeMemoryToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aSCIICharactersToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem numbersInHexToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem systemVariablesToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton machineStateButton;
-        private System.Windows.Forms.ToolStripMenuItem machineStateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripButton callStackButton;
         private System.Windows.Forms.ToolStripMenuItem heatMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadSymbolsToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.ToolStripMenuItem watchMemoryToolStripMenuItem;
     }
 }

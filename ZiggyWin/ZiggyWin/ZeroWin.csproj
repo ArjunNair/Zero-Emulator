@@ -160,6 +160,12 @@
     <Compile Include="CustomListbox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="WatchWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WatchWindow.Designer.cs">
+      <DependentUpon>WatchWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Library.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -342,6 +348,9 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WatchWindow.resx">
+      <DependentUpon>WatchWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Infoseeker.resx">
       <DependentUpon>Infoseeker.cs</DependentUpon>
