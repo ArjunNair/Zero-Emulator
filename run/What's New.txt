@@ -24,6 +24,7 @@ Ver 0.7.2 (WIP)
 + Added Watch Window tool in Debugger (R Martins).
 * Changed the way Zero attempts to load ROMs if it couldn't find a valid one on start-up.
 + Added option to disable tape traps in Options.
++ Added Memory Profiler (in Debugger) that shows a hotspot of read/write activities in the memory.
 
 Ver 0.7.1
 --------------------
