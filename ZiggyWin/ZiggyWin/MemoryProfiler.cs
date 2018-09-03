@@ -8,28 +8,29 @@ using Speccy;
 
 namespace ZeroWin
 {
-    public partial class CodeProfiler : Form
+    public partial class MemoryProfiler : Form
     {
         Form1 ziggyWin;
         double lastTime;
-        const int MAP_WIDTH = 256;
-        const int MAP_HEIGHT= 256;
+        const int MAP_WIDTH = 512;
+        const int MAP_HEIGHT= 512;
         uint[] heatMap = new uint[65536];
         Bitmap bmpOut = new Bitmap(MAP_WIDTH, MAP_HEIGHT, PixelFormat.Format32bppArgb);
         private Color[] heatColors = new Color[8] {Color.Black, Color.Cyan, Color.Blue, Color.LightGreen, Color.Green, Color.Yellow, Color.Red, Color.Crimson };
         Thread paintThread;
         bool run = true;
 
-        public CodeProfiler(Form1 zw)
+        public MemoryProfiler(Form1 zw)
         {
             InitializeComponent();
             ziggyWin = zw;
-            panel1.Size = new Size(MAP_WIDTH, MAP_HEIGHT);
             lastTime = PrecisionTimer.TimeInSeconds();
             ziggyWin.zx.MemoryWriteEvent += MemoryWriteEventHandler;
-            ziggyWin.zx.FrameEndEvent += FrameEndEventHandler;
+            ziggyWin.zx.MemoryReadEvent += MemoryReadEventHandler;
+            //ziggyWin.zx.FrameEndEvent += FrameEndEventHandler;
 
             this.Invalidate();
+            
             paintThread = new Thread(new ThreadStart(PaintMap));
             paintThread.Name = "Heatmap Thread";
             paintThread.Priority = System.Threading.ThreadPriority.Normal;
@@ -46,7 +47,8 @@ namespace ZeroWin
                     continue;
 
                 lastTime = currentTime;
-
+                //panel1.Invalidate();
+                //continue;
                 Rectangle rect = new Rectangle(0, 0, bmpOut.Width, bmpOut.Height);
                 System.Drawing.Imaging.BitmapData bmpData =
                     bmpOut.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite,
@@ -59,28 +61,34 @@ namespace ZeroWin
 
                     for (int f = 0; f < 65536; f++)
                     {
-
                         int colorIndex = (int)(heatMap[f] % 7);
 
                         if (colorIndex > 7)
                             colorIndex = 7;
 
-                        *(p++) = heatColors[colorIndex].ToArgb();
-
+                        *(p) = heatColors[colorIndex].ToArgb();
+                        *(p + 1) = heatColors[colorIndex].ToArgb();
+                        *(p + MAP_WIDTH) = heatColors[colorIndex].ToArgb();
+                        *(p + MAP_WIDTH + 1) = heatColors[colorIndex].ToArgb();
+                        p++; p++;
+                        //*(p++) = heatColors[colorIndex].ToArgb();
+                        if((f+1) % 256 == 0)
+                            p = p + MAP_WIDTH;
+                        heatMap[f] = 0;
                     }
                 }
 
                 bmpOut.UnlockBits(bmpData);
                 pictureBox1.Image = bmpOut;
+                //pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             }
         }
 
         protected override void OnPaint(PaintEventArgs e) {
-          
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e) {
-            /*
+            
             Graphics g = e.Graphics;
             SolidBrush myBrush = new SolidBrush(Color.Red);
 
@@ -95,21 +103,27 @@ namespace ZeroWin
                     g.FillRectangle(myBrush, new Rectangle(i * 3, f * 3, 2, 2));
                 }
             }
-             */
+             
         } 
 
         void FrameEndEventHandler(object sender)
-        {
+        {   
+            /*
             for (int f = 0; f < 65536; f++)
             {
                 if (heatMap[f] > 0)
-                    heatMap[f]--;
-            }
+                    heatMap[f] = 0;
+            }*/      
         }
 
         void MemoryWriteEventHandler(object sender, MemoryEventArgs e)
         {
-            heatMap[e.Address] = 7;
+            heatMap[e.Address] = 6;
+        }
+
+        void MemoryReadEventHandler(object sender, MemoryEventArgs e)
+        {
+            heatMap[e.Address] = 1;
         }
 
         private void CodeProfiler_FormClosing(object sender, FormClosingEventArgs e)

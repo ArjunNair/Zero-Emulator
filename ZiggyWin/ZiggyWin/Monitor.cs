@@ -7667,6 +7667,11 @@ namespace ZeroWin
             watchWindow.Show();
         }
 
+        private void toolsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
         private void toggleBreakpointToolStripMenuItem_Click(object sender, EventArgs e) {
             ToggleBreakpointButton_Click(sender, e);
         }
@@ -7806,7 +7811,7 @@ namespace ZeroWin
         }
 
         private void heatMapToolStripMenuItem_Click(object sender, EventArgs e) {
-            CodeProfiler cp = new CodeProfiler(ziggyWin);
+            MemoryProfiler cp = new MemoryProfiler(ziggyWin);
             cp.Show();
         }
     }

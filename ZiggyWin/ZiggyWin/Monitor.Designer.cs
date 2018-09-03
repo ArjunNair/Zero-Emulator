@@ -86,12 +86,12 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.heatMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.aSCIICharactersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.numbersInHexToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemVariablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.heatMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -551,10 +551,12 @@
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.breakpointsEditorToolStripMenuItem,
             this.pokeMemoryToolStripMenuItem,
-            this.watchMemoryToolStripMenuItem});
+            this.watchMemoryToolStripMenuItem,
+            this.heatMapToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
+            this.toolsToolStripMenuItem.Click += new System.EventHandler(this.toolsToolStripMenuItem_Click);
             // 
             // breakpointsEditorToolStripMenuItem
             // 
@@ -590,7 +592,6 @@
             this.toolStripMenuItem1,
             this.toolStripMenuItem2,
             this.toolStripMenuItem3,
-            this.heatMapToolStripMenuItem,
             this.toolStripSeparator7,
             this.aSCIICharactersToolStripMenuItem,
             this.numbersInHexToolStripMenuItem,
@@ -635,14 +636,6 @@
             this.toolStripMenuItem3.Text = "Registers";
             this.toolStripMenuItem3.Click += new System.EventHandler(this.registersToolStripMenuItem_Click);
             // 
-            // heatMapToolStripMenuItem
-            // 
-            this.heatMapToolStripMenuItem.Name = "heatMapToolStripMenuItem";
-            this.heatMapToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.heatMapToolStripMenuItem.Text = "Heat Map";
-            this.heatMapToolStripMenuItem.Visible = false;
-            this.heatMapToolStripMenuItem.Click += new System.EventHandler(this.heatMapToolStripMenuItem_Click);
-            // 
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
@@ -677,6 +670,14 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
+            // 
+            // heatMapToolStripMenuItem
+            // 
+            this.heatMapToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.library_16xLG;
+            this.heatMapToolStripMenuItem.Name = "heatMapToolStripMenuItem";
+            this.heatMapToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.heatMapToolStripMenuItem.Text = "Memory Profiler";
+            this.heatMapToolStripMenuItem.Click += new System.EventHandler(this.heatMapToolStripMenuItem_Click);
             // 
             // Monitor
             // 
@@ -767,7 +768,6 @@
         private System.Windows.Forms.ToolStripMenuItem systemVariablesToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton machineStateButton;
         private System.Windows.Forms.ToolStripButton callStackButton;
-        private System.Windows.Forms.ToolStripMenuItem heatMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadSymbolsToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
@@ -776,5 +776,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
         private System.Windows.Forms.ToolStripMenuItem watchMemoryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem heatMapToolStripMenuItem;
     }
 }

@@ -150,11 +150,11 @@
     <Compile Include="CallStackViewer.Designer.cs">
       <DependentUpon>CallStackViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="CodeProfiler.cs">
+    <Compile Include="MemoryProfiler.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CodeProfiler.Designer.cs">
-      <DependentUpon>CodeProfiler.cs</DependentUpon>
+    <Compile Include="MemoryProfiler.Designer.cs">
+      <DependentUpon>MemoryProfiler.cs</DependentUpon>
     </Compile>
     <Compile Include="Controller.cs" />
     <Compile Include="CustomListbox.cs">
@@ -338,8 +338,8 @@
     <EmbeddedResource Include="CallStackViewer.resx">
       <DependentUpon>CallStackViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CodeProfiler.resx">
-      <DependentUpon>CodeProfiler.cs</DependentUpon>
+    <EmbeddedResource Include="MemoryProfiler.resx">
+      <DependentUpon>MemoryProfiler.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.af-ZA.resx">
       <DependentUpon>Form1.cs</DependentUpon>
