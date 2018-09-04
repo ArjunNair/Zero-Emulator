@@ -14,6 +14,7 @@ Ver 0.7.2 (WIP)
 - Fixed directX issue with device being lost when computer is locked/sleeps (R Martins).
 - Fixed wrong breakpoint being removed in debugger in certain cases (R Martins).
 - Fixed loading of some 128k Z80 files with trailing zeros (Damien Guard).
+- Fixed breakpoints not reflecting correctly in the debugger (R Martins).
 - Key2Joy now uses TAB as fire key instead of ALT.
 + Joysticks are now remembered between emulator sessions and automatically enabled on startup, if found.
 + Added Insta-Load option to Tape Deck (anton).

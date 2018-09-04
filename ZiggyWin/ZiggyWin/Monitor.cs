@@ -1096,6 +1096,19 @@ namespace ZeroWin
             for(int i = 0; i < watchVariableList.Count; i++)
                 watchVariableList[i].Data = ziggyWin.zx.PeekByteNoContend(watchVariableList[i].Address);
 
+            breakpointRowList.Clear();
+
+            foreach (var br in breakPointList)
+            {
+               if (br.Key == SPECCY_EVENT.OPCODE_PC)
+               {
+                    int index = disassemblyList.Find("Address", br.Value.Address);
+                    if (index >= 0)
+                    {
+                        breakpointRowList.Add(index);
+                    }
+               }
+            }
             UpdateToolsWindows();
         }
 
