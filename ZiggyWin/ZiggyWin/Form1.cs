@@ -13,6 +13,7 @@ namespace ZeroWin
 {
     public partial class Form1 : Form
     {
+     
 #if ENABLE_WM_EXCHANGE
 
         [StructLayout(LayoutKind.Sequential)]
@@ -2475,9 +2476,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     normalToolStripMenuItem_Click_1(this, null);
                     break;
             }
-
-            
-               
+         
             JoystickController.EnumerateJosticks();
             string[] joysticks = JoystickController.GetDeviceNames();
 
@@ -4998,6 +4997,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         }
 
         private void SetupJoysticks() {
+            
             if (joystick1Index >= 0) {
                 joystick1.Release();
                 joystick1.InitJoystick(this, joystick1Index);
@@ -5005,7 +5005,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             if (joystick2Index >= 0) {
                 joystick2.Release();
-                joystick2.InitJoystick(this, joystick2Index);
+                joystick2.InitJoystick(this, joystick2Index);  
             }
 
             if ((joystick2MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON) || (joystick1MapIndex == (int)zxmachine.JoysticksEmulated.KEMPSTON))
