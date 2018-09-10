@@ -376,7 +376,7 @@ namespace ZeroWin
                 lst1.DataSource = lst2;
             }
         }
-        
+
         private void UpdateToolsWindows()
         {
             if(profiler != null && !profiler.IsDisposed)
@@ -1195,8 +1195,9 @@ namespace ZeroWin
             this.SuspendLayout();
 
             dataGridView1.ColumnHeadersBorderStyle = ProperColumnHeadersBorderStyle;
-
+            dataGridView1.CellValidating += new DataGridViewCellValidatingEventHandler(dataGridView1_CellValidating);
             dataGridView1.CellDoubleClick += new DataGridViewCellEventHandler(dataGridView1_CellDoubleClick);
+            dataGridView1.CellEndEdit += new DataGridViewCellEventHandler(dataGridView1_CellEndEdit);
             dataGridView1.CellToolTipTextNeeded += new DataGridViewCellToolTipTextNeededEventHandler(dataGridView1_CellToolTipTextNeeded);
             ziggyWin.zx.MemoryReadEvent += new MemoryReadEventHandler(Monitor_MemoryRead);
             ziggyWin.zx.MemoryExecuteEvent += new MemoryExecuteEventHandler(Monitor_MemoryExecute);
@@ -1305,6 +1306,73 @@ namespace ZeroWin
             dgridColLogInstructions.DataPropertyName = "Opcodes";
 
             this.ResumeLayout();
+        }
+
+        private void dataGridView1_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        {
+            //Console.WriteLine("dataGridView1_CellValidating");
+            if(!dataGridView1.IsCurrentCellInEditMode)
+                return;
+
+            dataGridView1.Rows[e.RowIndex].ErrorText = "";
+            int newInteger;
+
+            // Do not try to validate the 'new row' until finished 
+            // editing since there 
+            // is not any point in validating its initial value. 
+            if(dataGridView1.Rows[e.RowIndex].IsNewRow) { return; }
+            var enteredString = e.FormattedValue.ToString().Split(' ');
+            int[] newValues = new int[enteredString.Length];
+            bool validEdit = true;
+            for (int i = 0; i < enteredString.Length; i++)
+            {
+                var fv = enteredString[i];
+                if(fv == "")
+                    continue;
+                newInteger = Utilities.ConvertToInt(fv);
+                if (newInteger < 0 || newInteger > 255 || enteredString.Length > 5)
+                {
+                    //e.Cancel = true;
+                    //Console.Write(e.FormattedValue);
+                    //Console.WriteLine(": the value must be a valid integer");
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "the value must be a valid integer";
+                    validEdit = false;
+                    break;
+                }
+                newValues[i] = newInteger;
+            }
+            if (validEdit)
+            {
+                int numberOfChanges = newValues.Length - disassemblyList[e.RowIndex].BytesAtAddress.Count;
+                for(int i = 0; i < newValues.Length; i++)
+                {
+                    Console.WriteLine(newValues[i]);
+                    ziggyWin.zx.PokeByteNoContend(disassemblyList[e.RowIndex].Address + i, newValues[i]);
+                }
+
+                //The number of edits is less than the previous number of bytes at this disassembly address. So poke the remaining to zero.
+                if (numberOfChanges < 0)
+                {
+                    for (int i = newValues.Length; i < disassemblyList[e.RowIndex].BytesAtAddress.Count; ++i)
+                    {
+                        ziggyWin.zx.PokeByteNoContend(disassemblyList[e.RowIndex].Address + i, 0);
+                    }
+                }
+            }
+            dataGridView1.RefreshEdit();
+            //dataGridView1.EndEdit();
+        }
+
+        private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            //Console.WriteLine("dataGridView1_CellEndEdit");
+            dataGridView1.SuspendLayout();
+            //var enteredString = dataGridView1[e.ColumnIndex, e.RowIndex].FormattedValue.ToString().Split(' ');
+            Disassemble(disassemblyList[e.RowIndex].Address, disassemblyList[e.RowIndex].Address + 10, false, false);
+            dataGridView1.ResumeLayout();
+            dataGridView1.Refresh();
+            DataGridViewCell cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            cell.ReadOnly = true;
         }
 
         private void dataGridView1_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e) {
@@ -7095,7 +7163,9 @@ namespace ZeroWin
             if (!traceOn && opcodeMatches < 5) {
                 disassemblyLookup.Clear();
                 for (int f = 0; f < disassemblyList.Count; ++f) {
-                    disassemblyLookup.Add(disassemblyList[f].Address, f);
+                    int index = -1;
+                    if(!disassemblyLookup.TryGetValue(disassemblyList[f].Address, out index))
+                        disassemblyLookup.Add(disassemblyList[f].Address, f);
                 }
             }
         }
@@ -7112,6 +7182,17 @@ namespace ZeroWin
         private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e) {
             if (e.RowIndex == -1) {
                 return;
+            }
+            
+            if(e.ColumnIndex == 1)
+            {
+                DataGridViewCell cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                cell.ReadOnly = false;
+                Console.WriteLine(cell.ReadOnly);
+                //dataGridView1.CurrentCell = cell;
+                dataGridView1.BeginEdit(true); 
+                return;
+
             }
             KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv = new KeyValuePair<SPECCY_EVENT, BreakPointCondition>(SPECCY_EVENT.OPCODE_PC, new BreakPointCondition(SPECCY_EVENT.OPCODE_PC, disassemblyList[e.RowIndex].Address, -1));
             //int index = disassemblyList.Find("Address", disassemblyList[e.RowIndex].Address);

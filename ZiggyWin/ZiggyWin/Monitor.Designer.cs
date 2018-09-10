@@ -81,6 +81,7 @@
             this.breakpointsEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pokeMemoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.watchMemoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.heatMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,7 +92,6 @@
             this.numbersInHexToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemVariablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.heatMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -398,6 +398,7 @@
             this.dataGridView1.ShowRowErrors = false;
             this.dataGridView1.Size = new System.Drawing.Size(369, 318);
             this.dataGridView1.TabIndex = 10;
+            this.dataGridView1.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellDoubleClick);
             this.dataGridView1.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dataGridView1_RowPostPaint);
             // 
             // label1
@@ -585,6 +586,14 @@
             this.watchMemoryToolStripMenuItem.Text = "Watch Memory";
             this.watchMemoryToolStripMenuItem.Click += new System.EventHandler(this.watchMemoryToolStripMenuItem_Click);
             // 
+            // heatMapToolStripMenuItem
+            // 
+            this.heatMapToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.library_16xLG;
+            this.heatMapToolStripMenuItem.Name = "heatMapToolStripMenuItem";
+            this.heatMapToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.heatMapToolStripMenuItem.Text = "Memory Profiler";
+            this.heatMapToolStripMenuItem.Click += new System.EventHandler(this.heatMapToolStripMenuItem_Click);
+            // 
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -670,14 +679,6 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // heatMapToolStripMenuItem
-            // 
-            this.heatMapToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.library_16xLG;
-            this.heatMapToolStripMenuItem.Name = "heatMapToolStripMenuItem";
-            this.heatMapToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.heatMapToolStripMenuItem.Text = "Memory Profiler";
-            this.heatMapToolStripMenuItem.Click += new System.EventHandler(this.heatMapToolStripMenuItem_Click);
             // 
             // Monitor
             // 

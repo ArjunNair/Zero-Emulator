@@ -94,6 +94,7 @@
             this.debuggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.programFinderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.kKeyboardHelperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.basicImportToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.cheatHelperToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutZeroToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
@@ -458,6 +459,7 @@
             this.debuggerToolStripMenuItem,
             this.programFinderToolStripMenuItem,
             this.kKeyboardHelperToolStripMenuItem,
+            this.basicImportToolStripMenuItem3,
             this.cheatHelperToolStripMenuItem1,
             this.aboutZeroToolStripMenuItem,
             this.toolStripSeparator17,
@@ -577,6 +579,13 @@
             this.kKeyboardHelperToolStripMenuItem.Name = "kKeyboardHelperToolStripMenuItem";
             resources.ApplyResources(this.kKeyboardHelperToolStripMenuItem, "kKeyboardHelperToolStripMenuItem");
             this.kKeyboardHelperToolStripMenuItem.Click += new System.EventHandler(this.toolStripMenuItem3_Click);
+            // 
+            // basicImportToolStripMenuItem3
+            // 
+            this.basicImportToolStripMenuItem3.Image = global::ZeroWin.Properties.Resources.B_button;
+            this.basicImportToolStripMenuItem3.Name = "basicImportToolStripMenuItem3";
+            resources.ApplyResources(this.basicImportToolStripMenuItem3, "basicImportToolStripMenuItem3");
+            this.basicImportToolStripMenuItem3.Click += new System.EventHandler(this.basicImportToolStripMenuItem3_Click);
             // 
             // cheatHelperToolStripMenuItem1
             // 
@@ -935,6 +944,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel mouseStripStatusLabel;
         private System.Windows.Forms.ToolStripProgressBar statusProgressBar;
+        private System.Windows.Forms.ToolStripMenuItem basicImportToolStripMenuItem3;
     }
 }
 

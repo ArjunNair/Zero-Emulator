@@ -69,7 +69,7 @@ namespace ZeroWin
                 validInput = System.Int32.TryParse(input, out number);
 
             if (!validInput) {
-                System.Windows.Forms.MessageBox.Show("Your input doesn't seem to be a valid number.", "Invalid input", System.Windows.Forms.MessageBoxButtons.OK);
+                System.Windows.Forms.MessageBox.Show(input + " isn't a valid number.", "Invalid input", System.Windows.Forms.MessageBoxButtons.OK);
                 number = -1;
             }
 
