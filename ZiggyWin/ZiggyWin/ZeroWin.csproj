@@ -132,28 +132,28 @@
     <Compile Include="AboutBox1.Designer.cs">
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </Compile>
-    <Compile Include="ArchiveHandler.cs">
+    <Compile Include="Tools\ArchiveHandler.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ArchiveHandler.Designer.cs">
+    <Compile Include="Tools\ArchiveHandler.Designer.cs">
       <DependentUpon>ArchiveHandler.cs</DependentUpon>
     </Compile>
-    <Compile Include="Breakpoints.cs">
+    <Compile Include="Tools\Breakpoints.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Breakpoints.Designer.cs">
+    <Compile Include="Tools\Breakpoints.Designer.cs">
       <DependentUpon>Breakpoints.cs</DependentUpon>
     </Compile>
-    <Compile Include="CallStackViewer.cs">
+    <Compile Include="Tools\CallStackViewer.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CallStackViewer.Designer.cs">
+    <Compile Include="Tools\CallStackViewer.Designer.cs">
       <DependentUpon>CallStackViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="MemoryProfiler.cs">
+    <Compile Include="Tools\MemoryProfiler.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MemoryProfiler.Designer.cs">
+    <Compile Include="Tools\MemoryProfiler.Designer.cs">
       <DependentUpon>MemoryProfiler.cs</DependentUpon>
     </Compile>
     <Compile Include="Controller.cs" />
@@ -166,48 +166,48 @@
     <Compile Include="Tools\BASICImporter.Designer.cs">
       <DependentUpon>BASICImporter.cs</DependentUpon>
     </Compile>
-    <Compile Include="WatchWindow.cs">
+    <Compile Include="Tools\WatchWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WatchWindow.Designer.cs">
+    <Compile Include="Tools\WatchWindow.Designer.cs">
       <DependentUpon>WatchWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="Library.cs">
+    <Compile Include="Tools\Library.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Library.Designer.cs">
+    <Compile Include="Tools\Library.Designer.cs">
       <DependentUpon>Library.cs</DependentUpon>
     </Compile>
-    <Compile Include="Logger.cs" />
-    <Compile Include="Machine State.cs">
+    <Compile Include="Tools\Logger.cs" />
+    <Compile Include="Tools\Machine State.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Machine State.Designer.cs">
+    <Compile Include="Tools\Machine State.Designer.cs">
       <DependentUpon>Machine State.cs</DependentUpon>
     </Compile>
     <Compile Include="MRUManager.cs" />
-    <Compile Include="PicturePreview.cs">
+    <Compile Include="Tools\PicturePreview.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PicturePreview.Designer.cs">
+    <Compile Include="Tools\PicturePreview.Designer.cs">
       <DependentUpon>PicturePreview.cs</DependentUpon>
     </Compile>
-    <Compile Include="Registers.cs">
+    <Compile Include="Tools\Registers.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Registers.Designer.cs">
+    <Compile Include="Tools\Registers.Designer.cs">
       <DependentUpon>Registers.cs</DependentUpon>
     </Compile>
-    <Compile Include="MemoryViewer.cs">
+    <Compile Include="Tools\MemoryViewer.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MemoryViewer.Designer.cs">
+    <Compile Include="Tools\MemoryViewer.Designer.cs">
       <DependentUpon>MemoryViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="Profiler.cs">
+    <Compile Include="Tools\Profiler.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Profiler.Designer.cs">
+    <Compile Include="Tools\Profiler.Designer.cs">
       <DependentUpon>Profiler.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\DefaultSettings.Designer.cs">
@@ -215,40 +215,40 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>DefaultSettings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Infoseeker.cs">
+    <Compile Include="Tools\Infoseeker.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Infoseeker.Designer.cs">
+    <Compile Include="Tools\Infoseeker.Designer.cs">
       <DependentUpon>Infoseeker.cs</DependentUpon>
     </Compile>
-    <Compile Include="Infoviewer.cs">
+    <Compile Include="Tools\Infoviewer.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Infoviewer.Designer.cs">
+    <Compile Include="Tools\Infoviewer.Designer.cs">
       <DependentUpon>Infoviewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="JoystickButtonMapper.cs">
+    <Compile Include="Tools\JoystickButtonMapper.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="JoystickButtonMapper.Designer.cs">
+    <Compile Include="Tools\JoystickButtonMapper.Designer.cs">
       <DependentUpon>JoystickButtonMapper.cs</DependentUpon>
     </Compile>
-    <Compile Include="JoystickRemap.cs">
+    <Compile Include="Tools\JoystickRemap.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="JoystickRemap.Designer.cs">
+    <Compile Include="Tools\JoystickRemap.Designer.cs">
       <DependentUpon>JoystickRemap.cs</DependentUpon>
     </Compile>
-    <Compile Include="LoadBinary.cs">
+    <Compile Include="Tools\LoadBinary.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LoadBinary.Designer.cs">
+    <Compile Include="Tools\LoadBinary.Designer.cs">
       <DependentUpon>LoadBinary.cs</DependentUpon>
     </Compile>
-    <Compile Include="Monitor.cs">
+    <Compile Include="Tools\Monitor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Monitor.Designer.cs">
+    <Compile Include="Tools\Monitor.Designer.cs">
       <DependentUpon>Monitor.cs</DependentUpon>
     </Compile>
     <Compile Include="Options.cs">
@@ -263,10 +263,10 @@
     <Compile Include="pane.Designer.cs">
       <DependentUpon>pane.cs</DependentUpon>
     </Compile>
-    <Compile Include="PokeMemory.cs">
+    <Compile Include="Tools\PokeMemory.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PokeMemory.Designer.cs">
+    <Compile Include="Tools\PokeMemory.Designer.cs">
       <DependentUpon>PokeMemory.cs</DependentUpon>
     </Compile>
     <Compile Include="ScrollableLabel.cs">
@@ -276,23 +276,23 @@
       <DependentUpon>ScrollableLabel.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="SpectrumKeyboard.cs">
+    <Compile Include="Tools\SpectrumKeyboard.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SpectrumKeyboard.Designer.cs">
+    <Compile Include="Tools\SpectrumKeyboard.Designer.cs">
       <DependentUpon>SpectrumKeyboard.cs</DependentUpon>
     </Compile>
     <Compile Include="SQLHelper.cs" />
-    <Compile Include="TapeDeck.cs">
+    <Compile Include="Tools\TapeDeck.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TapeDeck.Designer.cs">
+    <Compile Include="Tools\TapeDeck.Designer.cs">
       <DependentUpon>TapeDeck.cs</DependentUpon>
     </Compile>
-    <Compile Include="TapeInfo.cs">
+    <Compile Include="Tools\TapeInfo.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TapeInfo.Designer.cs">
+    <Compile Include="Tools\TapeInfo.Designer.cs">
       <DependentUpon>TapeInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="TextOnImageControl.cs">
@@ -301,16 +301,16 @@
     <Compile Include="TextOnImageControl.Designer.cs">
       <DependentUpon>TextOnImageControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Trainer Wizard.cs">
+    <Compile Include="Tools\Trainer Wizard.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Trainer Wizard.Designer.cs">
+    <Compile Include="Tools\Trainer Wizard.Designer.cs">
       <DependentUpon>Trainer Wizard.cs</DependentUpon>
     </Compile>
-    <Compile Include="TrainerValueInput.cs">
+    <Compile Include="Tools\TrainerValueInput.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TrainerValueInput.Designer.cs">
+    <Compile Include="Tools\TrainerValueInput.Designer.cs">
       <DependentUpon>TrainerValueInput.cs</DependentUpon>
     </Compile>
     <Compile Include="Utilities.cs" />
@@ -335,16 +335,16 @@
       <DependentUpon>AboutBox1.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="ArchiveHandler.resx">
+    <EmbeddedResource Include="Tools\ArchiveHandler.resx">
       <DependentUpon>ArchiveHandler.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Breakpoints.resx">
+    <EmbeddedResource Include="Tools\Breakpoints.resx">
       <DependentUpon>Breakpoints.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CallStackViewer.resx">
+    <EmbeddedResource Include="Tools\CallStackViewer.resx">
       <DependentUpon>CallStackViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MemoryProfiler.resx">
+    <EmbeddedResource Include="Tools\MemoryProfiler.resx">
       <DependentUpon>MemoryProfiler.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.af-ZA.resx">
@@ -358,41 +358,41 @@
     <EmbeddedResource Include="Tools\BASICImporter.resx">
       <DependentUpon>BASICImporter.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WatchWindow.resx">
+    <EmbeddedResource Include="Tools\WatchWindow.resx">
       <DependentUpon>WatchWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Infoseeker.resx">
+    <EmbeddedResource Include="Tools\Infoseeker.resx">
       <DependentUpon>Infoseeker.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Infoviewer.resx">
+    <EmbeddedResource Include="Tools\Infoviewer.resx">
       <DependentUpon>Infoviewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="JoystickButtonMapper.resx">
+    <EmbeddedResource Include="Tools\JoystickButtonMapper.resx">
       <DependentUpon>JoystickButtonMapper.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="JoystickRemap.resx">
+    <EmbeddedResource Include="Tools\JoystickRemap.resx">
       <DependentUpon>JoystickRemap.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Library.resx">
+    <EmbeddedResource Include="Tools\Library.resx">
       <DependentUpon>Library.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LoadBinary.resx">
+    <EmbeddedResource Include="Tools\LoadBinary.resx">
       <DependentUpon>LoadBinary.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Machine State.resx">
+    <EmbeddedResource Include="Tools\Machine State.resx">
       <DependentUpon>Machine State.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PicturePreview.resx">
+    <EmbeddedResource Include="Tools\PicturePreview.resx">
       <DependentUpon>PicturePreview.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Registers.resx">
+    <EmbeddedResource Include="Tools\Registers.resx">
       <DependentUpon>Registers.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MemoryViewer.resx">
+    <EmbeddedResource Include="Tools\MemoryViewer.resx">
       <DependentUpon>MemoryViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Monitor.resx">
+    <EmbeddedResource Include="Tools\Monitor.resx">
       <DependentUpon>Monitor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options.resx">
@@ -401,10 +401,10 @@
     <EmbeddedResource Include="pane.resx">
       <DependentUpon>pane.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PokeMemory.resx">
+    <EmbeddedResource Include="Tools\PokeMemory.resx">
       <DependentUpon>PokeMemory.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Profiler.resx">
+    <EmbeddedResource Include="Tools\Profiler.resx">
       <DependentUpon>Profiler.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -412,19 +412,19 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="SpectrumKeyboard.resx">
+    <EmbeddedResource Include="Tools\SpectrumKeyboard.resx">
       <DependentUpon>SpectrumKeyboard.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TapeDeck.resx">
+    <EmbeddedResource Include="Tools\TapeDeck.resx">
       <DependentUpon>TapeDeck.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TapeInfo.resx">
+    <EmbeddedResource Include="Tools\TapeInfo.resx">
       <DependentUpon>TapeInfo.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Trainer Wizard.resx">
+    <EmbeddedResource Include="Tools\Trainer Wizard.resx">
       <DependentUpon>Trainer Wizard.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TrainerValueInput.resx">
+    <EmbeddedResource Include="Tools\TrainerValueInput.resx">
       <DependentUpon>TrainerValueInput.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ZRenderer.resx">
