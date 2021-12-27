@@ -5,7 +5,6 @@ namespace ZeroWin
 {
     public partial class ZLibrary : Form
     {
-        SQLHelper sql = new SQLHelper(Properties.Settings.Default.PathLibrary + ".\\zxLibrary.db");
         public ZLibrary() {
             InitializeComponent();
         }

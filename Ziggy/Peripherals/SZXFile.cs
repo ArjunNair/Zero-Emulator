@@ -220,170 +220,178 @@ namespace Peripherals
             return val;
         }
 
-        public bool LoadSZX(Stream fs) {
+        public bool LoadSZX(ref byte[] buffer) {
+            if (buffer.Length == 0)
+                return false; //something bad happened!
+
             for (int f = 0; f < 16; f++)
                 RAM_BANK[f] = new byte[8192];
 
+            GCHandle pinnedBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+
+            //Read in the szx header to begin proceedings
+            header = (ZXST_Header)Marshal.PtrToStructure(pinnedBuffer.AddrOfPinnedObject(),
+                                                                     typeof(ZXST_Header));
+
+            if (header.MajorVersion != 1) {
+                pinnedBuffer.Free();
+                return false;
+            }
+
+            string formatName = GetID(header.Magic);
+            int bufferCounter = Marshal.SizeOf(header);
+
+            while (bufferCounter < buffer.Length) {
+                //Read the block info
+                ZXST_Block block = (ZXST_Block)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                     typeof(ZXST_Block));
+
+                bufferCounter += Marshal.SizeOf(block);
+                string blockID = GetID(block.Id);
+                switch (blockID) {
+                    case "SPCR":
+                    //Read the ZXST_SpecRegs structure
+                    specRegs = (ZXST_SpecRegs)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                         typeof(ZXST_SpecRegs));
+                    break;
+
+                    case "Z80R":
+                    //Read the ZXST_SpecRegs structure
+                    z80Regs = (ZXST_Z80Regs)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                         typeof(ZXST_Z80Regs));
+                    break;
+
+                    case "KEYB":
+                    //Read the ZXST_SpecRegs structure
+                    keyboard = (ZXST_Keyboard)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                         typeof(ZXST_Keyboard));
+                    break;
+
+                    case "AY\0\0":
+                    ayState = (ZXST_AYState)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                        typeof(ZXST_AYState));
+                    break;
+
+                    case "+3\0\0":
+                    plus3Disk = (ZXST_Plus3Disk)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                        typeof(ZXST_Plus3Disk));
+
+                    numDrivesPresent = plus3Disk.numDrives;
+                    plus3DiskFile = new ZXST_DiskFile[plus3Disk.numDrives];
+                    externalDisk = new String[plus3Disk.numDrives];
+                    InsertDisk = new bool[plus3Disk.numDrives];
+                    break;
+
+                    case "DSK\0":
+                    ZXST_DiskFile df = (ZXST_DiskFile)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                        typeof(ZXST_DiskFile));
+
+                    plus3DiskFile[df.driveNum] = df;
+                    InsertDisk[df.driveNum] = true;
+
+                    int offset2 = bufferCounter + Marshal.SizeOf(df);
+                    char[] file = new char[df.uncompressedSize];
+                    Array.Copy(buffer, offset2, file, 0, df.uncompressedSize); //leave out the \0 terminator
+                    externalDisk[df.driveNum] = new String(file);
+                    break;
+
+                    case "TAPE":
+                    tape = (ZXST_Tape)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                        typeof(ZXST_Tape));
+                    InsertTape = true;
+
+                    //Embedded tape file
+                    if ((tape.flags & 1) != 0) {
+                        int offset = bufferCounter + Marshal.SizeOf(tape);
+                        //Compressed?
+                        if ((tape.flags & 2) != 0) {
+                            MemoryStream compressedData = new MemoryStream(buffer, offset, tape.compressedSize);
+                            MemoryStream uncompressedData = new MemoryStream();
+                            using (ZInputStream zipStream = new ZInputStream(compressedData)) {
+                                byte[] tempBuffer = new byte[2048];
+                                int bytesUnzipped = 0;
+                                while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
+                                    uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
+                                }
+                                embeddedTapeData = uncompressedData.ToArray();
+                                compressedData.Close();
+                                uncompressedData.Close();
+                            }
+                        }
+                        else {
+                            embeddedTapeData = new byte[tape.compressedSize];
+                            Array.Copy(buffer, offset, embeddedTapeData, 0, tape.compressedSize);
+                        }
+                    }
+                    else //external tape file
+                  {
+                        int offset = bufferCounter + Marshal.SizeOf(tape);
+                        char[] file2 = new char[tape.compressedSize - 1];
+                        Array.Copy(buffer, offset, file2, 0, tape.compressedSize - 1); //leave out the \0 terminator
+                        externalTapeFile = new String(file2);
+                    }
+                    break;
+
+                    case "RAMP":
+                    //Read the ZXST_SpecRegs structure
+                    ZXST_RAMPage ramPages = (ZXST_RAMPage)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                         typeof(ZXST_RAMPage));
+                    if (ramPages.wFlags == ZXSTRF_COMPRESSED) {
+                        int offset = bufferCounter + Marshal.SizeOf(ramPages);
+                        int compressedSize = ((int)block.Size - (Marshal.SizeOf(ramPages)));//  - Marshal.SizeOf(block) - 1 ));
+                        MemoryStream compressedData = new MemoryStream(buffer, offset, compressedSize);
+                        MemoryStream uncompressedData = new MemoryStream();
+                        using (ZInputStream zipStream = new ZInputStream(compressedData)) {
+                            byte[] tempBuffer = new byte[2048];
+                            int bytesUnzipped = 0;
+                            while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
+                                uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
+                            }
+                            byte[] pageData = uncompressedData.ToArray();
+                            {
+                                Array.Copy(pageData, 0, RAM_BANK[ramPages.chPageNo * 2], 0, 8192);
+                                Array.Copy(pageData, 0 + 8192, RAM_BANK[ramPages.chPageNo * 2 + 1], 0, 8192);
+                            }
+                            compressedData.Close();
+                            uncompressedData.Close();
+                        }
+                    }
+                    else {
+                        int bufferOffset = bufferCounter + Marshal.SizeOf(ramPages);
+                        {
+                            Array.Copy(buffer, bufferOffset, RAM_BANK[ramPages.chPageNo * 2], 0, 8192);
+                            Array.Copy(buffer, bufferOffset + 8192, RAM_BANK[ramPages.chPageNo * 2 + 1], 0, 8192);
+                        }
+                    }
+                    break;
+
+                    case "PLTT":
+                    palette = (ZXST_PaletteBlock)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
+                                                                         typeof(ZXST_PaletteBlock));
+
+                    paletteLoaded = true;
+                    break;
+
+                    default: //unrecognised block, so skip to next
+                    break;
+                }
+
+                bufferCounter += (int)block.Size; //Move to next block
+            }
+            pinnedBuffer.Free();
+            return true;
+        }
+
+        public bool LoadSZX(Stream fs) {
+            bool loaded = false;
             using (BinaryReader r = new BinaryReader(fs)) {
                 int bytesToRead = (int)fs.Length;
 
                 byte[] buffer = new byte[bytesToRead];
                 int bytesRead = r.Read(buffer, 0, bytesToRead);
-
-                if (bytesRead == 0)
-                    return false; //something bad happened!
-
-                GCHandle pinnedBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-
-                //Read in the szx header to begin proceedings
-                header = (ZXST_Header)Marshal.PtrToStructure(pinnedBuffer.AddrOfPinnedObject(),
-                                                                         typeof(ZXST_Header));
-
-                if (header.MajorVersion != 1) {
-                    pinnedBuffer.Free();
-                    return false;
-                }
-
-                string formatName = GetID(header.Magic);
-                int bufferCounter = Marshal.SizeOf(header);
-
-                while (bufferCounter < bytesRead) {
-                    //Read the block info
-                    ZXST_Block block = (ZXST_Block)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                         typeof(ZXST_Block));
-
-                    bufferCounter += Marshal.SizeOf(block);
-                    string blockID = GetID(block.Id);
-                    switch (blockID) {
-                        case "SPCR":
-                            //Read the ZXST_SpecRegs structure
-                            specRegs = (ZXST_SpecRegs)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                                 typeof(ZXST_SpecRegs));
-                            break;
-
-                        case "Z80R":
-                            //Read the ZXST_SpecRegs structure
-                            z80Regs = (ZXST_Z80Regs)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                                 typeof(ZXST_Z80Regs));
-                            break;
-
-                        case "KEYB":
-                            //Read the ZXST_SpecRegs structure
-                            keyboard = (ZXST_Keyboard)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                                 typeof(ZXST_Keyboard));
-                            break;
-
-                        case "AY\0\0":
-                            ayState = (ZXST_AYState)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                                typeof(ZXST_AYState));
-                            break;
-
-                        case "+3\0\0":
-                            plus3Disk = (ZXST_Plus3Disk)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                                typeof(ZXST_Plus3Disk));
-
-                            numDrivesPresent = plus3Disk.numDrives;
-                            plus3DiskFile = new ZXST_DiskFile[plus3Disk.numDrives];
-                            externalDisk = new String[plus3Disk.numDrives];
-                            InsertDisk = new bool[plus3Disk.numDrives];
-                            break;
-
-                        case "DSK\0":
-                            ZXST_DiskFile df = (ZXST_DiskFile)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                                typeof(ZXST_DiskFile));
-
-                            plus3DiskFile[df.driveNum] = df;
-                            InsertDisk[df.driveNum] = true;
-
-                            int offset2 = bufferCounter + Marshal.SizeOf(df);
-                            char[] file = new char[df.uncompressedSize];
-                            Array.Copy(buffer, offset2, file, 0, df.uncompressedSize); //leave out the \0 terminator
-                            externalDisk[df.driveNum] = new String(file);
-                            break;
-
-                        case "TAPE":
-                            tape = (ZXST_Tape)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                                typeof(ZXST_Tape));
-                            InsertTape = true;
-
-                            //Embedded tape file
-                            if ((tape.flags & 1) != 0) {
-                                int offset = bufferCounter + Marshal.SizeOf(tape);
-                                //Compressed?
-                                if ((tape.flags & 2) != 0) {
-                                    MemoryStream compressedData = new MemoryStream(buffer, offset, tape.compressedSize);
-                                    MemoryStream uncompressedData = new MemoryStream();
-                                    using (ZInputStream zipStream = new ZInputStream(compressedData)) {
-                                        byte[] tempBuffer = new byte[2048];
-                                        int bytesUnzipped = 0;
-                                        while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
-                                            uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
-                                        }
-                                        embeddedTapeData = uncompressedData.ToArray();
-                                        compressedData.Close();
-                                        uncompressedData.Close();
-                                    }
-                                } else {
-                                    embeddedTapeData = new byte[tape.compressedSize];
-                                    Array.Copy(buffer, offset, embeddedTapeData, 0, tape.compressedSize);
-                                }
-                            } else //external tape file
-                            {
-                                int offset = bufferCounter + Marshal.SizeOf(tape);
-                                char[] file2 = new char[tape.compressedSize - 1];
-                                Array.Copy(buffer, offset, file2, 0, tape.compressedSize - 1); //leave out the \0 terminator
-                                externalTapeFile = new String(file2);
-                            }
-                            break;
-
-                        case "RAMP":
-                            //Read the ZXST_SpecRegs structure
-                            ZXST_RAMPage ramPages = (ZXST_RAMPage)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                                 typeof(ZXST_RAMPage));
-                            if (ramPages.wFlags == ZXSTRF_COMPRESSED) {
-                                int offset = bufferCounter + Marshal.SizeOf(ramPages);
-                                int compressedSize = ((int)block.Size - (Marshal.SizeOf(ramPages)));//  - Marshal.SizeOf(block) - 1 ));
-                                MemoryStream compressedData = new MemoryStream(buffer, offset, compressedSize);
-                                MemoryStream uncompressedData = new MemoryStream();
-                                using (ZInputStream zipStream = new ZInputStream(compressedData)) {
-                                    byte[] tempBuffer = new byte[2048];
-                                    int bytesUnzipped = 0;
-                                    while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
-                                        uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
-                                    }
-                                    byte[] pageData = uncompressedData.ToArray();
-                                    {
-                                        Array.Copy(pageData, 0, RAM_BANK[ramPages.chPageNo * 2], 0, 8192);
-                                        Array.Copy(pageData, 0 + 8192, RAM_BANK[ramPages.chPageNo * 2 + 1], 0, 8192);
-                                    }
-                                    compressedData.Close();
-                                    uncompressedData.Close();
-                                }
-                            } else {
-                                int bufferOffset = bufferCounter + Marshal.SizeOf(ramPages);
-                                {
-                                    Array.Copy(buffer, bufferOffset, RAM_BANK[ramPages.chPageNo * 2], 0, 8192);
-                                    Array.Copy(buffer, bufferOffset + 8192, RAM_BANK[ramPages.chPageNo * 2 + 1], 0, 8192);
-                                }
-                            }
-                            break;
-
-                        case "PLTT":
-                            palette = (ZXST_PaletteBlock)Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(buffer, bufferCounter),
-                                                                                 typeof(ZXST_PaletteBlock));
-
-                            paletteLoaded = true;
-                            break;
-
-                        default: //unrecognised block, so skip to next
-                            break;
-                    }
-
-                    bufferCounter += (int)block.Size; //Move to next block
-                }
-                pinnedBuffer.Free();
-                return true;
+                loaded = LoadSZX(ref buffer);
             }
+            return loaded;
         }
 
         public bool LoadSZX(string filename) {

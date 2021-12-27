@@ -54,6 +54,19 @@
             this.machineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.emulationSpeedMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.emulationSpeed1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.emulationSpeed2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.emulationSpeed4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.emulationSpeed8 = new System.Windows.Forms.ToolStripMenuItem();
+            this.emulationSpeed10 = new System.Windows.Forms.ToolStripMenuItem();
+            this.cpuSpeedMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cpuSpeed1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.cpuSpeed2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.cpuSpeed3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.cpuSpeed4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.cpuSpeed5 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator13 = new System.Windows.Forms.ToolStripSeparator();
             this.zxSpectrum48kToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.zxSpectrum128kToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -76,20 +89,20 @@
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.fullScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.rzxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxPlaybackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.rzxRecordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxContinueSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.rzxFinaliseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxDiscardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxStopToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.rzxInsertBookmarkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxRollbackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator16 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.commanderStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.tapeBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debuggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.programFinderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -112,14 +125,15 @@
             this.toolStripButton7 = new System.Windows.Forms.ToolStripButton();
             this.rzxRecordButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.statusProgressBar = new System.Windows.Forms.ToolStripProgressBar();
+            this.machineLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusLabelText = new System.Windows.Forms.ToolStripStatusLabel();
+            this.speedStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.fpsStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.fileDownloadStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.rzxPlaybackStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.rzxRecordStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.mouseStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.tapeStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.diskStatusLable = new System.Windows.Forms.ToolStripStatusLabel();
+            this.storageDeviceStatusLable = new System.Windows.Forms.ToolStripStatusLabel();
+            this.rzxStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.soundStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
@@ -133,8 +147,8 @@
             // 
             // panel1
             // 
-            resources.ApplyResources(this.panel1, "panel1");
             this.panel1.BackColor = System.Drawing.Color.DimGray;
+            resources.ApplyResources(this.panel1, "panel1");
             this.panel1.CausesValidation = false;
             this.panel1.Name = "panel1";
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
@@ -153,6 +167,7 @@
             this.fileToolStripMenuItem,
             this.machineToolStripMenuItem,
             this.viewToolStripMenuItem,
+            this.rzxToolStripMenuItem,
             this.toolsToolStripMenuItem});
             resources.ApplyResources(this.menuStrip1, "menuStrip1");
             this.menuStrip1.Name = "menuStrip1";
@@ -269,6 +284,9 @@
             this.machineToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.resetToolStripMenuItem,
             this.toolStripMenuItem6,
+            this.toolStripSeparator5,
+            this.emulationSpeedMenuItem,
+            this.cpuSpeedMenuItem,
             this.toolStripSeparator13,
             this.zxSpectrum48kToolStripMenuItem,
             this.zxSpectrum128kToolStripMenuItem1,
@@ -292,6 +310,97 @@
             this.toolStripMenuItem6.Name = "toolStripMenuItem6";
             resources.ApplyResources(this.toolStripMenuItem6, "toolStripMenuItem6");
             this.toolStripMenuItem6.Click += new System.EventHandler(this.pauseEmulationESCToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            resources.ApplyResources(this.toolStripSeparator5, "toolStripSeparator5");
+            // 
+            // emulationSpeedMenuItem
+            // 
+            this.emulationSpeedMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.emulationSpeed1,
+            this.emulationSpeed2,
+            this.emulationSpeed4,
+            this.emulationSpeed8,
+            this.emulationSpeed10});
+            this.emulationSpeedMenuItem.Name = "emulationSpeedMenuItem";
+            resources.ApplyResources(this.emulationSpeedMenuItem, "emulationSpeedMenuItem");
+            // 
+            // emulationSpeed1
+            // 
+            this.emulationSpeed1.Checked = true;
+            this.emulationSpeed1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.emulationSpeed1.Name = "emulationSpeed1";
+            resources.ApplyResources(this.emulationSpeed1, "emulationSpeed1");
+            this.emulationSpeed1.Click += new System.EventHandler(this.emulationSpeed1_Click);
+            // 
+            // emulationSpeed2
+            // 
+            this.emulationSpeed2.Name = "emulationSpeed2";
+            resources.ApplyResources(this.emulationSpeed2, "emulationSpeed2");
+            this.emulationSpeed2.Click += new System.EventHandler(this.emulationSpeed2_Click);
+            // 
+            // emulationSpeed4
+            // 
+            this.emulationSpeed4.Name = "emulationSpeed4";
+            resources.ApplyResources(this.emulationSpeed4, "emulationSpeed4");
+            this.emulationSpeed4.Click += new System.EventHandler(this.emulationSpeed4_Click);
+            // 
+            // emulationSpeed8
+            // 
+            this.emulationSpeed8.Name = "emulationSpeed8";
+            resources.ApplyResources(this.emulationSpeed8, "emulationSpeed8");
+            this.emulationSpeed8.Click += new System.EventHandler(this.emulationSpeed8_Click);
+            // 
+            // emulationSpeed10
+            // 
+            this.emulationSpeed10.Name = "emulationSpeed10";
+            resources.ApplyResources(this.emulationSpeed10, "emulationSpeed10");
+            this.emulationSpeed10.Click += new System.EventHandler(this.emulationSpeed10_Click);
+            // 
+            // cpuSpeedMenuItem
+            // 
+            this.cpuSpeedMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cpuSpeed1,
+            this.cpuSpeed2,
+            this.cpuSpeed3,
+            this.cpuSpeed4,
+            this.cpuSpeed5});
+            this.cpuSpeedMenuItem.Name = "cpuSpeedMenuItem";
+            resources.ApplyResources(this.cpuSpeedMenuItem, "cpuSpeedMenuItem");
+            // 
+            // cpuSpeed1
+            // 
+            this.cpuSpeed1.Checked = true;
+            this.cpuSpeed1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cpuSpeed1.Name = "cpuSpeed1";
+            resources.ApplyResources(this.cpuSpeed1, "cpuSpeed1");
+            this.cpuSpeed1.Click += new System.EventHandler(this.cpuSpeed1_Click);
+            // 
+            // cpuSpeed2
+            // 
+            this.cpuSpeed2.Name = "cpuSpeed2";
+            resources.ApplyResources(this.cpuSpeed2, "cpuSpeed2");
+            this.cpuSpeed2.Click += new System.EventHandler(this.cpuSpeed2_Click);
+            // 
+            // cpuSpeed3
+            // 
+            this.cpuSpeed3.Name = "cpuSpeed3";
+            resources.ApplyResources(this.cpuSpeed3, "cpuSpeed3");
+            this.cpuSpeed3.Click += new System.EventHandler(this.cpuSpeed3_Click);
+            // 
+            // cpuSpeed4
+            // 
+            this.cpuSpeed4.Name = "cpuSpeed4";
+            resources.ApplyResources(this.cpuSpeed4, "cpuSpeed4");
+            this.cpuSpeed4.Click += new System.EventHandler(this.cpuSpeed4_Click);
+            // 
+            // cpuSpeed5
+            // 
+            this.cpuSpeed5.Name = "cpuSpeed5";
+            resources.ApplyResources(this.cpuSpeed5, "cpuSpeed5");
+            this.cpuSpeed5.Click += new System.EventHandler(this.cpuSpeed5_Click);
             // 
             // toolStripSeparator13
             // 
@@ -450,39 +559,22 @@
             resources.ApplyResources(this.fullScreenToolStripMenuItem, "fullScreenToolStripMenuItem");
             this.fullScreenToolStripMenuItem.Click += new System.EventHandler(this.fullScreenToolStripMenuItem_Click);
             // 
-            // toolsToolStripMenuItem
+            // rzxToolStripMenuItem
             // 
-            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem4,
-            this.toolStripSeparator16,
-            this.tapeBrowserToolStripMenuItem,
-            this.debuggerToolStripMenuItem,
-            this.programFinderToolStripMenuItem,
-            this.kKeyboardHelperToolStripMenuItem,
-            this.basicImportToolStripMenuItem3,
-            this.cheatHelperToolStripMenuItem1,
-            this.aboutZeroToolStripMenuItem,
-            this.toolStripSeparator17,
-            this.preferencesToolStripMenuItem});
-            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            resources.ApplyResources(this.toolsToolStripMenuItem, "toolsToolStripMenuItem");
-            // 
-            // toolStripMenuItem4
-            // 
-            this.toolStripMenuItem4.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.rzxToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.rzxPlaybackToolStripMenuItem,
-            this.toolStripSeparator8,
+            this.toolStripSeparator1,
             this.rzxRecordToolStripMenuItem,
             this.rzxContinueSessionToolStripMenuItem,
-            this.toolStripSeparator9,
+            this.toolStripSeparator2,
             this.rzxFinaliseToolStripMenuItem,
             this.rzxDiscardToolStripMenuItem,
             this.rzxStopToolStripMenuItem1,
-            this.toolStripSeparator10,
+            this.toolStripSeparator4,
             this.rzxInsertBookmarkToolStripMenuItem,
             this.rzxRollbackToolStripMenuItem});
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            resources.ApplyResources(this.toolStripMenuItem4, "toolStripMenuItem4");
+            this.rzxToolStripMenuItem.Name = "rzxToolStripMenuItem";
+            resources.ApplyResources(this.rzxToolStripMenuItem, "rzxToolStripMenuItem");
             // 
             // rzxPlaybackToolStripMenuItem
             // 
@@ -490,10 +582,10 @@
             resources.ApplyResources(this.rzxPlaybackToolStripMenuItem, "rzxPlaybackToolStripMenuItem");
             this.rzxPlaybackToolStripMenuItem.Click += new System.EventHandler(this.rzxPlaybackToolStripMenuItem_Click);
             // 
-            // toolStripSeparator8
+            // toolStripSeparator1
             // 
-            this.toolStripSeparator8.Name = "toolStripSeparator8";
-            resources.ApplyResources(this.toolStripSeparator8, "toolStripSeparator8");
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            resources.ApplyResources(this.toolStripSeparator1, "toolStripSeparator1");
             // 
             // rzxRecordToolStripMenuItem
             // 
@@ -507,10 +599,10 @@
             resources.ApplyResources(this.rzxContinueSessionToolStripMenuItem, "rzxContinueSessionToolStripMenuItem");
             this.rzxContinueSessionToolStripMenuItem.Click += new System.EventHandler(this.rzxContinueSessionToolStripMenuItem_Click);
             // 
-            // toolStripSeparator9
+            // toolStripSeparator2
             // 
-            this.toolStripSeparator9.Name = "toolStripSeparator9";
-            resources.ApplyResources(this.toolStripSeparator9, "toolStripSeparator9");
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            resources.ApplyResources(this.toolStripSeparator2, "toolStripSeparator2");
             // 
             // rzxFinaliseToolStripMenuItem
             // 
@@ -530,13 +622,14 @@
             this.rzxStopToolStripMenuItem1.Name = "rzxStopToolStripMenuItem1";
             this.rzxStopToolStripMenuItem1.Click += new System.EventHandler(this.rzxStopToolStripMenuItem1_Click);
             // 
-            // toolStripSeparator10
+            // toolStripSeparator4
             // 
-            this.toolStripSeparator10.Name = "toolStripSeparator10";
-            resources.ApplyResources(this.toolStripSeparator10, "toolStripSeparator10");
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            resources.ApplyResources(this.toolStripSeparator4, "toolStripSeparator4");
             // 
             // rzxInsertBookmarkToolStripMenuItem
             // 
+            this.rzxInsertBookmarkToolStripMenuItem.AutoToolTip = true;
             resources.ApplyResources(this.rzxInsertBookmarkToolStripMenuItem, "rzxInsertBookmarkToolStripMenuItem");
             this.rzxInsertBookmarkToolStripMenuItem.Name = "rzxInsertBookmarkToolStripMenuItem";
             this.rzxInsertBookmarkToolStripMenuItem.Click += new System.EventHandler(this.insertBookmarkToolStripMenuItem_Click);
@@ -547,10 +640,27 @@
             this.rzxRollbackToolStripMenuItem.Name = "rzxRollbackToolStripMenuItem";
             this.rzxRollbackToolStripMenuItem.Click += new System.EventHandler(this.rollbackToolStripMenuItem_Click);
             // 
-            // toolStripSeparator16
+            // toolsToolStripMenuItem
             // 
-            this.toolStripSeparator16.Name = "toolStripSeparator16";
-            resources.ApplyResources(this.toolStripSeparator16, "toolStripSeparator16");
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.commanderStripMenuItem3,
+            this.tapeBrowserToolStripMenuItem,
+            this.debuggerToolStripMenuItem,
+            this.programFinderToolStripMenuItem,
+            this.kKeyboardHelperToolStripMenuItem,
+            this.basicImportToolStripMenuItem3,
+            this.cheatHelperToolStripMenuItem1,
+            this.aboutZeroToolStripMenuItem,
+            this.toolStripSeparator17,
+            this.preferencesToolStripMenuItem});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            resources.ApplyResources(this.toolsToolStripMenuItem, "toolsToolStripMenuItem");
+            // 
+            // commanderStripMenuItem3
+            // 
+            this.commanderStripMenuItem3.Name = "commanderStripMenuItem3";
+            resources.ApplyResources(this.commanderStripMenuItem3, "commanderStripMenuItem3");
+            this.commanderStripMenuItem3.Click += new System.EventHandler(this.commanderStripMenuItem3_Click);
             // 
             // tapeBrowserToolStripMenuItem
             // 
@@ -688,7 +798,7 @@
             // toolStripButton3
             // 
             this.toolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton3.Image = global::ZeroWin.Properties.Resources.smallTape;
+            this.toolStripButton3.Image = global::ZeroWin.Properties.Resources.cassette3;
             resources.ApplyResources(this.toolStripButton3, "toolStripButton3");
             this.toolStripButton3.Name = "toolStripButton3";
             this.toolStripButton3.Click += new System.EventHandler(this.tapeBrowserButton_Click);
@@ -720,14 +830,15 @@
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.statusProgressBar,
+            this.machineLabel,
             this.statusLabelText,
+            this.speedStatusLabel,
+            this.fpsStatusLabel,
+            this.toolStripStatusLabel2,
             this.fileDownloadStatusLabel,
-            this.rzxPlaybackStatusLabel,
-            this.rzxRecordStatusLabel,
             this.mouseStripStatusLabel,
-            this.tapeStatusLabel,
-            this.diskStatusLable,
+            this.storageDeviceStatusLable,
+            this.rzxStatusLabel,
             this.soundStatusLabel,
             this.toolStripStatusLabel1});
             resources.ApplyResources(this.statusStrip1, "statusStrip1");
@@ -736,22 +847,45 @@
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.Resize += new System.EventHandler(this.statusStrip1_Resize);
             // 
-            // statusProgressBar
+            // machineLabel
             // 
-            resources.ApplyResources(this.statusProgressBar, "statusProgressBar");
-            this.statusProgressBar.CausesValidation = false;
-            this.statusProgressBar.Name = "statusProgressBar";
-            this.statusProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.machineLabel.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            this.machineLabel.BorderStyle = System.Windows.Forms.Border3DStyle.Adjust;
+            this.machineLabel.Name = "machineLabel";
+            resources.ApplyResources(this.machineLabel, "machineLabel");
             // 
             // statusLabelText
             // 
             resources.ApplyResources(this.statusLabelText, "statusLabelText");
-            this.statusLabelText.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
-            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
-            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
-            this.statusLabelText.BorderStyle = System.Windows.Forms.Border3DStyle.Adjust;
+            this.statusLabelText.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right)));
+            this.statusLabelText.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
             this.statusLabelText.Name = "statusLabelText";
             this.statusLabelText.Spring = true;
+            // 
+            // speedStatusLabel
+            // 
+            this.speedStatusLabel.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
+            this.speedStatusLabel.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.speedStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.speedStatusLabel.Name = "speedStatusLabel";
+            resources.ApplyResources(this.speedStatusLabel, "speedStatusLabel");
+            // 
+            // fpsStatusLabel
+            // 
+            resources.ApplyResources(this.fpsStatusLabel, "fpsStatusLabel");
+            this.fpsStatusLabel.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
+            this.fpsStatusLabel.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.fpsStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.fpsStatusLabel.Name = "fpsStatusLabel";
+            this.fpsStatusLabel.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            // 
+            // toolStripStatusLabel2
+            // 
+            this.toolStripStatusLabel2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            resources.ApplyResources(this.toolStripStatusLabel2, "toolStripStatusLabel2");
+            this.toolStripStatusLabel2.Margin = new System.Windows.Forms.Padding(1, 3, 1, 2);
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Padding = new System.Windows.Forms.Padding(1, 0, 0, 0);
             // 
             // fileDownloadStatusLabel
             // 
@@ -762,46 +896,29 @@
             this.fileDownloadStatusLabel.Name = "fileDownloadStatusLabel";
             this.fileDownloadStatusLabel.Padding = new System.Windows.Forms.Padding(1, 0, 0, 0);
             // 
-            // rzxPlaybackStatusLabel
-            // 
-            this.rzxPlaybackStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            resources.ApplyResources(this.rzxPlaybackStatusLabel, "rzxPlaybackStatusLabel");
-            this.rzxPlaybackStatusLabel.Image = global::ZeroWin.Properties.Resources.rzxPlay16x16;
-            this.rzxPlaybackStatusLabel.Name = "rzxPlaybackStatusLabel";
-            // 
-            // rzxRecordStatusLabel
-            // 
-            this.rzxRecordStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            resources.ApplyResources(this.rzxRecordStatusLabel, "rzxRecordStatusLabel");
-            this.rzxRecordStatusLabel.Image = global::ZeroWin.Properties.Resources.BreakpointEnabled_6584_16x;
-            this.rzxRecordStatusLabel.Name = "rzxRecordStatusLabel";
-            // 
             // mouseStripStatusLabel
             // 
             resources.ApplyResources(this.mouseStripStatusLabel, "mouseStripStatusLabel");
             this.mouseStripStatusLabel.Image = global::ZeroWin.Properties.Resources.mouse_32x32;
             this.mouseStripStatusLabel.Name = "mouseStripStatusLabel";
             // 
-            // tapeStatusLabel
+            // storageDeviceStatusLable
             // 
-            this.tapeStatusLabel.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
+            this.storageDeviceStatusLable.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
             | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
             | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
-            this.tapeStatusLabel.BorderStyle = System.Windows.Forms.Border3DStyle.Adjust;
-            resources.ApplyResources(this.tapeStatusLabel, "tapeStatusLabel");
-            this.tapeStatusLabel.Image = global::ZeroWin.Properties.Resources.cassette3;
-            this.tapeStatusLabel.Name = "tapeStatusLabel";
+            this.storageDeviceStatusLable.BorderStyle = System.Windows.Forms.Border3DStyle.Adjust;
+            this.storageDeviceStatusLable.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            resources.ApplyResources(this.storageDeviceStatusLable, "storageDeviceStatusLable");
+            this.storageDeviceStatusLable.Image = global::ZeroWin.Properties.Resources.cassette;
+            this.storageDeviceStatusLable.Name = "storageDeviceStatusLable";
             // 
-            // diskStatusLable
+            // rzxStatusLabel
             // 
-            this.diskStatusLable.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
-            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
-            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
-            this.diskStatusLable.BorderStyle = System.Windows.Forms.Border3DStyle.Adjust;
-            this.diskStatusLable.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            resources.ApplyResources(this.diskStatusLable, "diskStatusLable");
-            this.diskStatusLable.Image = global::ZeroWin.Properties.Resources.disk;
-            this.diskStatusLable.Name = "diskStatusLable";
+            this.rzxStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            resources.ApplyResources(this.rzxStatusLabel, "rzxStatusLabel");
+            this.rzxStatusLabel.Image = global::ZeroWin.Properties.Resources.rzxPlay16x16;
+            this.rzxStatusLabel.Name = "rzxStatusLabel";
             // 
             // soundStatusLabel
             // 
@@ -831,6 +948,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.panel1);
             this.DoubleBuffered = true;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
@@ -915,36 +1033,50 @@
         private System.Windows.Forms.ToolStripMenuItem insertDiskBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem insertDiskCToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem insertDiskDToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
-        private System.Windows.Forms.ToolStripMenuItem rzxPlaybackToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
-        private System.Windows.Forms.ToolStripMenuItem rzxRecordToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem rzxContinueSessionToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
-        private System.Windows.Forms.ToolStripMenuItem rzxStopToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem rzxFinaliseToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem rzxDiscardToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
-        private System.Windows.Forms.ToolStripMenuItem rzxInsertBookmarkToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem rzxRollbackToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator16;
         private System.Windows.Forms.ToolStripMenuItem aboutZeroToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator17;
         private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator18;
         private System.Windows.Forms.ToolStripMenuItem recentFilesToolStripMenuItem;
         private System.Windows.Forms.ToolStripStatusLabel statusLabelText;
-        private System.Windows.Forms.ToolStripStatusLabel diskStatusLable;
-        private System.Windows.Forms.ToolStripStatusLabel tapeStatusLabel;
+        private System.Windows.Forms.ToolStripStatusLabel storageDeviceStatusLable;
         private System.Windows.Forms.ToolStripStatusLabel fileDownloadStatusLabel;
-        private System.Windows.Forms.ToolStripStatusLabel rzxRecordStatusLabel;
-        private System.Windows.Forms.ToolStripStatusLabel rzxPlaybackStatusLabel;
+        private System.Windows.Forms.ToolStripStatusLabel rzxStatusLabel;
         private System.Windows.Forms.ToolStripStatusLabel soundStatusLabel;
         private System.Windows.Forms.ToolStripButton keyboard48Button;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel mouseStripStatusLabel;
-        private System.Windows.Forms.ToolStripProgressBar statusProgressBar;
         private System.Windows.Forms.ToolStripMenuItem basicImportToolStripMenuItem3;
+        private System.Windows.Forms.ToolStripMenuItem commanderStripMenuItem3;
+        private System.Windows.Forms.ToolStripStatusLabel machineLabel;
+        private System.Windows.Forms.ToolStripStatusLabel fpsStatusLabel;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripMenuItem rzxToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rzxPlaybackToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem rzxRecordToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rzxContinueSessionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem rzxFinaliseToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rzxDiscardToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rzxStopToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem rzxInsertBookmarkToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rzxRollbackToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem cpuSpeedMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cpuSpeed1;
+        private System.Windows.Forms.ToolStripMenuItem cpuSpeed2;
+        private System.Windows.Forms.ToolStripMenuItem cpuSpeed3;
+        private System.Windows.Forms.ToolStripMenuItem cpuSpeed4;
+        private System.Windows.Forms.ToolStripMenuItem cpuSpeed5;
+        private System.Windows.Forms.ToolStripMenuItem emulationSpeedMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem emulationSpeed1;
+        private System.Windows.Forms.ToolStripMenuItem emulationSpeed2;
+        private System.Windows.Forms.ToolStripMenuItem emulationSpeed4;
+        private System.Windows.Forms.ToolStripMenuItem emulationSpeed8;
+        private System.Windows.Forms.ToolStripMenuItem emulationSpeed10;
+        private System.Windows.Forms.ToolStripStatusLabel speedStatusLabel;
     }
 }
 

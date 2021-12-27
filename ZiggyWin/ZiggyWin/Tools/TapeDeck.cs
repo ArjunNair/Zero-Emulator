@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using ZeroWin;
 using Peripherals;
-using Speccy;
+using SpeccyCommon;
 
 namespace ZeroWin
 {
@@ -17,6 +16,19 @@ namespace ZeroWin
         private bool tapFileOpen = false;
         private bool isPauseBlockPreproccess = false; //To ensure previous edge is finished correctly
         private TapeInfo tapeInfo = new TapeInfo();
+        private string currentTapeStatus
+        {
+            get { return statusStrip1.Items[0].Text; }
+        }
+
+        public struct TapeStatus
+        {
+            public const string NO_ERROR = "";
+            public const string NO_TAPE_INSERTED = "No tape in tape deck.";
+            public const string TAPE_PLAYING = "Tape is playing.";
+            public const string TAPE_STOPPED = "Tape stopped.";
+            public const string TAPE_EJECTED = "Tape ejected.";                        
+        }
 
         public bool DoTapeAutoStart {
             get {
@@ -45,7 +57,9 @@ namespace ZeroWin
             }
 
             set {
+                ziggyWin.zx.tape_edgeLoad = value;
                 edgeLoadToolStripMenuItem.Checked = value;
+                autoPlayStopToolStripMenuItem.Checked = value;
             }
         }
 
@@ -56,16 +70,7 @@ namespace ZeroWin
 
             set {
                 fastLoadToolStripMenuItem.Checked = value;
-            }
-        }
-
-        public bool DoTapeInstaLoad {
-            get {
-                return instaLoadToolStripMenuItem.Checked;
-            }
-
-            set {
-                instaLoadToolStripMenuItem.Checked = value;
+                ziggyWin.zx.tape_flashLoad = value;
             }
         }
 
@@ -94,7 +99,7 @@ namespace ZeroWin
             ziggyWin.zx.tape_edgeLoad = edgeLoadToolStripMenuItem.Checked;
             ziggyWin.zx.tape_AutoPlay = autoPlayStopToolStripMenuItem.Checked;
             ziggyWin.zx.tape_readToPlay = tapeIsInserted;
-            ziggyWin.zx.tape_flashLoad = instaLoadToolStripMenuItem.Checked;
+            ziggyWin.zx.tape_flashLoad = fastLoadToolStripMenuItem.Checked;
         }
 
         public void UnRegisterEventHooks() {
@@ -138,22 +143,22 @@ namespace ZeroWin
             if (tapFileOpen) {
                 using (System.IO.FileStream tapFile = new System.IO.FileStream(tapFileName, System.IO.FileMode.Append)) {
                     using (System.IO.BinaryWriter r = new System.IO.BinaryWriter(tapFile)) {
-                        int blockID = ziggyWin.zx._AF >> 8; //block ID in A register
-                        int startAddr = ziggyWin.zx.IX;     //start address in IX
-                        int tapLength = ziggyWin.zx.DE;     //Length of data in DE
+                        int blockID = ziggyWin.zx.cpu.regs.AF_ >> 8; //block ID in A register
+                        int startAddr = ziggyWin.zx.cpu.regs.IX;     //start address in IX
+                        int tapLength = ziggyWin.zx.cpu.regs.DE;     //Length of data in DE
                         int checksum = blockID;
 
                         r.Write((short)(tapLength + 2));
                         r.Write((byte)(blockID));
                         for (int f = startAddr; f < (startAddr + tapLength); f++) {
-                            byte data = (byte)(ziggyWin.zx.PeekByteNoContend(f));
+                            byte data = ziggyWin.zx.PeekByteNoContend((ushort)f);
                             r.Write(data);
                             checksum = checksum ^ data;
                         }
                         r.Write((byte)(checksum));
                         if (blockID == 0xff) {
                             //tapFileOpen = false;
-                            ziggyWin.ShowTapeIndicator = false;
+                            ziggyWin.EnableStorageDeviceIndicator = false;
                         }
                     }
                 }
@@ -165,52 +170,48 @@ namespace ZeroWin
             InsertTape(tapFileName);
         }
 
-        public void Deck_TapeEvent(Object sender, Speccy.TapeEventArgs e) {
-            if (!tapeIsInserted && e.EventType != Speccy.TapeEventType.SAVE_TAP && e.EventType != Speccy.TapeEventType.CLOSE_TAP)
+        public void Deck_TapeEvent(Object sender, TapeEventArgs e) {
+            if (!tapeIsInserted && e.EventType != TapeEventType.SAVE_TAP && e.EventType != TapeEventType.CLOSE_TAP)
                 return;
             
-            if (e.EventType == Speccy.TapeEventType.STOP_TAPE) //stop
+            if (e.EventType == TapeEventType.STOP_TAPE) //stop
             {
-                ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.EmulationSpeed);
-                ziggyWin.ShowTapeIndicator = false;
-                ziggyWin.zx.MuteSound(!ziggyWin.config.EnableSound);
+                ziggyWin.EnableStorageDeviceIndicator = false;
+                //ziggyWin.zx.MuteSound(ziggyWin.config.audioOptions.Mute);
                 progressBar1.Value = 0;
                 progressBar1.Maximum = 100;
                 progressStep = 0;
                 progressBar1.Refresh();
                 statusStrip1.Items[0].Text = "Tape stopped.";
-                if (ziggyWin.zx.keyBuffer[(int)ZeroWin.Form1.keyCode.ALT])
+                if (ziggyWin.zx.keyBuffer[(int)keyCode.ALT])
                     ziggyWin.saveSnapshotMenuItem_Click(this, null);
             } 
-            else if (e.EventType == Speccy.TapeEventType.SAVE_TAP) //Save TAP
+            else if (e.EventType == TapeEventType.SAVE_TAP) //Save TAP
             {
                 SaveTAP();
             } 
-            else if (e.EventType == Speccy.TapeEventType.CLOSE_TAP) //Close TAP
+            else if (e.EventType == TapeEventType.CLOSE_TAP) //Close TAP
             {
                 CloseTAP();
-            } else if (e.EventType == Speccy.TapeEventType.START_TAPE) {
+            } else if (e.EventType == TapeEventType.START_TAPE) {
                 if (!tapeIsInserted)
                     return;
-
+   
                 isPlaying = true;
-                ziggyWin.ShowTapeIndicator = true;
+                ziggyWin.EnableStorageDeviceIndicator = true;
                 ziggyWin.zx.tapeIsPlaying = true;
                 ziggyWin.zx.tapeTStates = 0;
                 ziggyWin.zx.tape_readToPlay = true;
-                if (ziggyWin.tapeFastLoad) {
-                    ziggyWin.zx.SetEmulationSpeed(0);
-                    ziggyWin.zx.MuteSound(true);
-                    ziggyWin.zx.ResetKeyboard();
-                } else {
-                    ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.EmulationSpeed);
-                    if (!ziggyWin.config.EnableSound)
-                        ziggyWin.zx.MuteSound(true);
-                }
+
             } else if (e.EventType == TapeEventType.NEXT_BLOCK) {
                 progressBar1.Value = 0;
                 progressBar1.Maximum = 100;
                 progressStep = 10;
+
+                if (ziggyWin.zx.blockCounter - 1 >= dataGridView1.Rows.Count) {
+                    StopTape();
+                    return;
+                }
 
                 if (ziggyWin.zx.currentBlock is PZXFile.PULS_Block) {
                     //Prepare progress bar
@@ -245,6 +246,7 @@ namespace ZeroWin
             dataGridView1.Columns[0].FillWeight = 0.25f;
             dataGridView1.Columns[1].FillWeight = 0.75f;
             statusStrip1.Items[0].Text = "Ready to play";
+
             for (int i = 0; i < PZXFile.blocks.Count; i++) {
                 if (PZXFile.blocks[i] is PZXFile.PZXT_Header) {
                     PZXFile.PZXT_Header info = (PZXFile.PZXT_Header)PZXFile.blocks[i];
@@ -270,13 +272,30 @@ namespace ZeroWin
                         tapeText += String.Format("{0}\r\n\t", info.Comments[f]);
                     }
                     tapeInfo.SetText(tapeText);
-              
-                    //tapeInfo.Invalidate();
+
                 }
             }
+            //To generate row numbers
+            //foreach (DataGridViewRow row in dataGridView1.Rows)
+            //   row.HeaderCell.Value = (row.Index + 1).ToString();
+        }
+
+        public void InsertTape(string filename, ref byte[] buffer) {
+            ziggyWin.zx.ResetTape();
+            ziggyWin.ShowTapeIndicator = true;
+            ejectButton_Click(this, null);
+            ziggyWin.zx.tapeIsPlaying = false;
+            PZXFile.LoadPZX(ref buffer);
+            ReadTape(filename);
+            tapeIsInserted = true;
+            ziggyWin.zx.tape_readToPlay = true;
+            ziggyWin.zx.tapeFilename = filename;
+            ziggyWin.zx.blockCounter = 0;
         }
 
         public void InsertTape(string filename, System.IO.Stream fs) {
+            ziggyWin.zx.ResetTape();
+            ziggyWin.ShowTapeIndicator = true;
             ejectButton_Click(this, null);
             ziggyWin.zx.tapeIsPlaying = false;
             PZXFile.LoadPZX(fs);
@@ -288,6 +307,8 @@ namespace ZeroWin
         }
 
         public void InsertTape(string filename) {
+            ziggyWin.zx.ResetTape();
+            ziggyWin.ShowTapeIndicator = true;
             ejectButton_Click(this, null);
             ziggyWin.zx.tapeIsPlaying = false;
             PZXFile.LoadPZX(filename);
@@ -296,6 +317,7 @@ namespace ZeroWin
             ziggyWin.zx.tape_readToPlay = true;
             ziggyWin.zx.tapeFilename = filename;
             ziggyWin.zx.blockCounter = 0;
+            ziggyWin.zx.tapeBitWasFlipped = false;
         }
 
         private void loadButton_Click(object sender, EventArgs e) {
@@ -303,26 +325,30 @@ namespace ZeroWin
             return;
         }
 
+        public string StartTape()
+        {
+            this.playButton_Click(this, null);
+            return currentTapeStatus;
+        }
+
         private void playButton_Click(object sender, EventArgs e) {
-            if (!tapeIsInserted)
+            if(!tapeIsInserted)
                 return;
 
             isPlaying = true;
-            ziggyWin.ShowTapeIndicator = true;
+            ziggyWin.EnableStorageDeviceIndicator = true;
             ziggyWin.zx.tapeIsPlaying = true;
             ziggyWin.zx.tapeTStates = 0;
             ziggyWin.zx.tape_readToPlay = true;
             if (ziggyWin.tapeFastLoad) {
-                ziggyWin.zx.SetEmulationSpeed(0);
-                ziggyWin.zx.MuteSound(true);
                 ziggyWin.zx.ResetKeyboard();
             } else {
-                ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.EmulationSpeed);
-                if (!ziggyWin.config.EnableSound)
-                    ziggyWin.zx.MuteSound(true);
+               // ResetEmulationSpeed();
+
             }
+
             //Deck_TapeEvent(this, new Speccy.TapeEventArgs(TapeEventType.START_TAPE));
-           
+
             ziggyWin.zx.blockCounter--;
 
             if (ziggyWin.zx.blockCounter < 0)
@@ -338,38 +364,56 @@ namespace ZeroWin
         }
 
         private void ejectButton_Click(object sender, EventArgs e) {
-            if (!tapeIsInserted)
+            if(!tapeIsInserted)
                 return;
+
             dataGridView1.DataSource = null;
             PZXFile.blocks.Clear();
             PZXFile.tapeBlockInfo.Clear();
             ziggyWin.zx.blockCounter = 0;
-            statusStrip1.Items[0].Text = "No tape inserted";
+            statusStrip1.Items[0].Text = TapeStatus.NO_TAPE_INSERTED;
             tapeInfo.SetText("");
-            ziggyWin.zx.TapeStopped(true);
-            ziggyWin.zx.ResetTapeEdgeDetector();
+            ziggyWin.zx.StopTape(true);
+            ziggyWin.zx.ResetTape();
             tapeIsInserted = false;
             tapFileOpen = false;
             ziggyWin.zx.tape_readToPlay = false;
             ziggyWin.zx.tapeFilename = "";
+            return;
         }
 
+        public string StopTape()
+        {
+            this.stopButton_Click(this, null);
+            return currentTapeStatus;
+        }
+
+        private void BoostEmulationSpeed() {
+            if (ziggyWin.zx.tape_flashLoad) {
+                ziggyWin.zx.SetEmulationSpeed(4);
+                ziggyWin.zx.SetCPUSpeed(4);
+            }
+        }
+
+        private void ResetEmulationSpeed() {
+            if (ziggyWin.zx.tape_flashLoad) {
+                ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.emulationOptions.EmulationSpeed);
+                ziggyWin.zx.SetCPUSpeed(ziggyWin.config.emulationOptions.CPUMultiplier);
+            }
+        }
         private void stopButton_Click(object sender, EventArgs e) {
-            if (!tapeIsInserted)
+            if(!tapeIsInserted)
                 return;
-            if (ziggyWin.zx.blockCounter > 0)
-                ziggyWin.zx.blockCounter = dataGridView1.Rows[ziggyWin.zx.blockCounter - 1].Index;
-            ziggyWin.zx.TapeStopped(true);
-            ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.EmulationSpeed);
-            ziggyWin.ShowTapeIndicator = false;
-            if (ziggyWin.tapeFastLoad && ziggyWin.config.EnableSound)
-                ziggyWin.zx.MuteSound(false);
-            ziggyWin.zx.tape_readToPlay = false;
+
+            ziggyWin.zx.StopTape(true);
+
+            ziggyWin.EnableStorageDeviceIndicator = false;
             progressBar1.Value = 0;
             progressBar1.Maximum = 100;
             progressStep = 0;
             progressBar1.Refresh();
-            statusStrip1.Items[0].Text = "Tape stopped.";
+            statusStrip1.Items[0].Text = TapeStatus.TAPE_STOPPED;
+            return;
         }
 
         private void prevButton_Click(object sender, EventArgs e) {
@@ -404,11 +448,10 @@ namespace ZeroWin
         private void rewindButton_Click(object sender, EventArgs e) {
             if (!tapeIsInserted)
                 return;
-            ziggyWin.zx.TapeStopped(true);
-            ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.EmulationSpeed);
-            ziggyWin.ShowTapeIndicator = false;
-            if (ziggyWin.tapeFastLoad && ziggyWin.config.EnableSound)
-                ziggyWin.zx.MuteSound(false);
+            ziggyWin.zx.StopTape(true);
+
+            ziggyWin.EnableStorageDeviceIndicator = false;
+
             ziggyWin.zx.blockCounter = 0;
             progressBar1.Value = 0;
             progressBar1.Maximum = 100;
@@ -418,12 +461,13 @@ namespace ZeroWin
         }
 
         private void edgeLoadCheckBox_CheckedChanged(object sender, EventArgs e) {
-            if (edgeLoadToolStripMenuItem.Checked) {
+            DoTapeEdgeLoad = edgeLoadToolStripMenuItem.Checked;
+            /*if (edgeLoadToolStripMenuItem.Checked) {
                 ziggyWin.zx.tape_edgeLoad = true;
             } else {
                 ziggyWin.zx.tape_edgeLoad = false;
                 autoPlayStopToolStripMenuItem.Checked = false;
-            }
+            }*/
         }
 
         private void autoStartCheckBox_CheckedChanged(object sender, EventArgs e) {
@@ -438,13 +482,17 @@ namespace ZeroWin
             if (fastLoadToolStripMenuItem.Checked) {
                 ziggyWin.tapeFastLoad = true;
                 if (isPlaying) {
-                    ziggyWin.zx.SetEmulationSpeed(0);
-                    ziggyWin.zx.MuteSound(true);
+                    BoostEmulationSpeed();
+                    //ziggyWin.zx.SetEmulationSpeed(10);
+                    //ziggyWin.zx.SetCPUSpeed(2);
+                   // ziggyWin.zx.MuteSound(true);
                 }
             } else {
                 if (isPlaying) {
-                    ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.EmulationSpeed);
-                    ziggyWin.zx.MuteSound(ziggyWin.config.EnableSound);
+                    ResetEmulationSpeed();
+                    //ziggyWin.zx.SetEmulationSpeed(ziggyWin.config.emulationOptions.EmulationSpeed);
+                    //ziggyWin.zx.MuteSound(ziggyWin.config.audioOptions.Mute);
+                    //ziggyWin.zx.SetCPUSpeed(ziggyWin.config.emulationOptions.CPUMultiplier);
                 }
                 ziggyWin.tapeFastLoad = false;
             }
@@ -497,11 +545,11 @@ namespace ZeroWin
                 tapeInfo.Show();
         }
 
-        private void instaLoadToolStripMenuItem_CheckedChanged(object sender, EventArgs e) {
-            if (instaLoadToolStripMenuItem.Checked)
+        private void fastLoadToolStripMenuItem_Click(object sender, EventArgs e) {
+            /*if (fastLoadToolStripMenuItem.Checked)
                 ziggyWin.zx.tape_flashLoad = true;
             else
-                ziggyWin.zx.tape_flashLoad = false;
+                ziggyWin.zx.tape_flashLoad = false;*/
         }
     }
 }

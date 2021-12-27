@@ -46,7 +46,7 @@ namespace Peripherals
         public class Pulse
         {
             public ushort count;
-            public ushort duration;
+            public uint duration;
         }
 
         public class PULS_Block : Block
@@ -185,6 +185,7 @@ namespace Peripherals
                 p.count = 1;
                 p.duration = (System.BitConverter.ToUInt16(_buffer, _counter));
                 _counter += 2;
+
                 if (p.duration > 0x8000) {
                     p.count = (ushort)(p.duration & 0x7FFF);
                     p.duration = System.BitConverter.ToUInt16(_buffer, _counter);
@@ -194,6 +195,7 @@ namespace Peripherals
                     p.duration &= 0x7FFF;
                     p.duration <<= 16;
                     p.duration |= System.BitConverter.ToUInt16(_buffer, _counter);
+
                     _counter += 2;
                 }
 
@@ -232,6 +234,82 @@ namespace Peripherals
             }
             return block;
         }
+        public static bool LoadPZX(ref byte[] buffer) {
+            blocks.Clear();
+            tapeBlockInfo.Clear();
+
+            if (buffer.Length == 0)
+                return false; //something bad happened!
+
+            int counter = 0;
+
+            while (counter < buffer.Length) {
+                //Read tag first (in a really lame way)
+                string blockTag = null;
+                for (int i = 0; i < 4; i++) {
+                    blockTag += (char)(buffer[counter++]);
+                }
+
+                uint blockSize = System.BitConverter.ToUInt32(buffer, counter);
+                counter += 4;
+
+                switch (blockTag) {
+                    case "PZXT":
+                    PZXT_Header header = GetHeader(buffer, counter, blockSize);
+                    header.tag = "PZXT Header";
+                    header.size = blockSize;
+                    blocks.Add(header);
+                    break;
+
+                    case "PULS":
+                    PULS_Block pblock = GetPulse(buffer, counter, blockSize);
+                    pblock.tag = "PULS";
+                    pblock.size = blockSize;
+                    blocks.Add(pblock);
+                    break;
+
+                    case "DATA":
+                    DATA_Block dblock = GetData(buffer, counter, blockSize);
+                    dblock.tag = "DATA";
+                    dblock.size = blockSize;
+                    blocks.Add(dblock);
+                    break;
+
+                    case "PAUS":
+                    PAUS_Block pauseBlock = new PAUS_Block();
+                    pauseBlock.tag = "PAUS";
+                    uint d = System.BitConverter.ToUInt32(buffer, counter);
+                    pauseBlock.initialPulseLevel = ((d & 0x80000000) == 0 ? 0 : 1);
+                    pauseBlock.duration = (d & 0x7FFFFFFF);
+                    pauseBlock.size = blockSize;
+                    blocks.Add(pauseBlock);
+                    break;
+
+                    case "BRWS":
+                    BRWS_Block brwsBlock = new BRWS_Block();
+                    brwsBlock.tag = "BRWS";
+                    int baseCount = counter;
+                    brwsBlock.text = GetString(buffer, ref counter, (uint)counter + blockSize);
+                    brwsBlock.size = blockSize;
+                    counter = baseCount;
+                    blocks.Add(brwsBlock);
+                    break;
+
+                    case "STOP":
+                    STOP_Block stopBlock = new STOP_Block();
+                    stopBlock.tag = "STOP";
+                    stopBlock.flag = System.BitConverter.ToUInt16(buffer, counter);
+                    stopBlock.size = blockSize;
+                    blocks.Add(stopBlock);
+                    break;
+
+                    default:
+                    break;
+                }
+                counter += (int)blockSize;
+            }
+            return true;
+        }
 
         public static bool LoadPZX(System.IO.Stream fs) {
             blocks.Clear();
@@ -245,75 +323,8 @@ namespace Peripherals
                 if (bytesRead == 0)
                     return false; //something bad happened!
 
-                int counter = 0;
-
-                while (counter < bytesRead) {
-                    //Read tag first (in a really lame way)
-                    string blockTag = null;
-                    for (int i = 0; i < 4; i++) {
-                        blockTag += (char)(buffer[counter++]);
-                    }
-
-                    uint blockSize = System.BitConverter.ToUInt32(buffer, counter);
-                    counter += 4;
-
-                    switch (blockTag) {
-                        case "PZXT":
-                            PZXT_Header header = GetHeader(buffer, counter, blockSize);
-                            header.tag = "PZXT Header";
-                            header.size = blockSize;
-                            blocks.Add(header);
-                            break;
-
-                        case "PULS":
-                            PULS_Block pblock = GetPulse(buffer, counter, blockSize);
-                            pblock.tag = "PULS";
-                            pblock.size = blockSize;
-                            blocks.Add(pblock);
-                            break;
-
-                        case "DATA":
-                            DATA_Block dblock = GetData(buffer, counter, blockSize);
-                            dblock.tag = "DATA";
-                            dblock.size = blockSize;
-                            blocks.Add(dblock);
-                            break;
-
-                        case "PAUS":
-                            PAUS_Block pauseBlock = new PAUS_Block();
-                            pauseBlock.tag = "PAUS";
-                            uint d = System.BitConverter.ToUInt32(buffer, counter);
-                            pauseBlock.initialPulseLevel = ((d & 0x80000000) == 0 ? 0 : 1);
-                            pauseBlock.duration = (d & 0x7FFFFFFF);
-                            pauseBlock.size = blockSize;
-                            blocks.Add(pauseBlock);
-                            break;
-
-                        case "BRWS":
-                            BRWS_Block brwsBlock = new BRWS_Block();
-                            brwsBlock.tag = "BRWS";
-                            int baseCount = counter;
-                            brwsBlock.text = GetString(buffer, ref counter, (uint)counter + blockSize);
-                            brwsBlock.size = blockSize;
-                            counter = baseCount;
-                            blocks.Add(brwsBlock);
-                            break;
-
-                        case "STOP":
-                            STOP_Block stopBlock = new STOP_Block();
-                            stopBlock.tag = "STOP";
-                            stopBlock.flag = System.BitConverter.ToUInt16(buffer, counter);
-                            stopBlock.size = blockSize;
-                            blocks.Add(stopBlock);
-                            break;
-
-                        default:
-                            break;
-                    }
-                    counter += (int)blockSize;
-                }
+                return LoadPZX(ref buffer);
             }
-            return true;
         }
 
         public static bool LoadPZX(string filename) {

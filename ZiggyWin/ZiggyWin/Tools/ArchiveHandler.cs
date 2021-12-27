@@ -15,7 +15,7 @@ namespace ZeroWin
             }
             listView1.Columns.Add("File");
             listView1.Columns.Add("Size (bytes)");
-
+            //listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             for (int f = 0; f < fileList.Length; ) {
                 ListViewItem listItem = new ListViewItem();
                 listItem.Text = fileList[f++];

@@ -740,7 +740,7 @@ namespace ZeroWin
             float scaleY = ((float)displayHeight / (float)(ScreenHeight));
 
             //Maintain 4:3 aspect ration when full screen
-            if (EnableFullScreen && ziggyWin.config.MaintainAspectRatioInFullScreen)
+            if (EnableFullScreen && ziggyWin.config.renderOptions.MaintainAspectRatioInFullScreen)
             {
                 if (displayHeight < displayWidth)
                 {
@@ -842,6 +842,11 @@ namespace ZeroWin
         }
 
         private void RenderDDSurface() {
+            //Sometimes render is attempted even after dxDevice has been disposed off.
+            if (dxDevice.Disposed) {
+                return;
+            }
+
             lock (ziggyWin.zx) {
                 displaySprite.CopySurface(screenRect,ziggyWin.zx.ScreenBuffer);
             }

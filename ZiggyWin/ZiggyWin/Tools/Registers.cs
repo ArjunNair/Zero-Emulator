@@ -142,7 +142,7 @@ namespace ZeroWin
             else
                 FlagSCheck.Checked = false;
 
-            interruptCheckBox.Checked = monitor.ziggyWin.zx.IFF1;
+            interruptCheckBox.Checked = monitor.cpu.iff_1;
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e) {

@@ -20,7 +20,7 @@ namespace ZeroWin
             int val = Utilities.ConvertToInt(textBox2.Text);
             
             if (addr > -1 && val > -1) {
-                monitorRef.PokeByte(addr, val & 0xff);
+                monitorRef.PokeByte((ushort)addr, (byte)val);
                 this.Close();
             }
         }

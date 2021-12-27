@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using SpeccyCommon;
 
 namespace ZeroWin
 {
@@ -22,7 +23,7 @@ namespace ZeroWin
                 maskedTextBox2.Visible = false;
                 this.Text = "Load Binary";
                 button2.Text = "Load";
-                if (zw.zx.model == Speccy.MachineModel._48k) {
+                if (zw.zx.model == MachineModel._48k) {
                     addressRadioButton.Checked = true;
                     ramPageRadioButton.Enabled = false;
                     pageComboBox.Enabled = false;
@@ -35,7 +36,7 @@ namespace ZeroWin
                 this.Text = "Save Binary";
                 button2.Text = "Save";
 
-                if (zw.zx.model == Speccy.MachineModel._48k) {
+                if (zw.zx.model == MachineModel._48k) {
                     addressRadioButton.Checked = true;
                     ramPageRadioButton.Enabled = false;
                     pageComboBox.Enabled = false;
@@ -160,8 +161,8 @@ namespace ZeroWin
 
                 using (BinaryWriter r = new BinaryWriter(fs)) {
                     if (addressRadioButton.Checked) {
-                        for (int f = start; f < end; f++)
-                            r.Write((byte)ziggyWin.zx.PeekByteNoContend(f));
+                        for (ushort f = (ushort)start; f < end; f++)
+                            r.Write(ziggyWin.zx.PeekByteNoContend(f));
                     } else {
                         byte[] ramData = ziggyWin.zx.GetPageData(pageComboBox.SelectedIndex * 2);
                         int adjust = (end > 8192 ? end - 8192 : 0);

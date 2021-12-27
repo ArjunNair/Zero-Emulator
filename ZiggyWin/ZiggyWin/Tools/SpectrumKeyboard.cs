@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using SpeccyCommon;
 
 namespace ZeroWin
 {
@@ -14,7 +15,7 @@ namespace ZeroWin
                 c.Font = new System.Drawing.Font(System.Drawing.SystemFonts.MessageBoxFont.FontFamily, c.Font.Size);
             }
             ziggyWin = _zw;
-            comboBox1.Items.AddRange(Speccy.SpectrumCharSet.Keywords);
+            comboBox1.Items.AddRange(SpeccyGlobals.Keywords);
             //Since the items are sorted, we can remove the symbols <= <> and >= from the keyword list
             //by repeatedly removing the first item in the list.
             comboBox1.Items.RemoveAt(0);
@@ -26,7 +27,7 @@ namespace ZeroWin
         }
 
         private void button1_Click(object sender, EventArgs e) {
-            int index = Array.IndexOf(Speccy.SpectrumCharSet.Keywords, comboBox1.Items[comboBox1.SelectedIndex]);
+            int index = Array.IndexOf(SpeccyGlobals.Keywords, comboBox1.Items[comboBox1.SelectedIndex]);
             if (index >= 0) {
                 ziggyWin.AddKeywordToEditorBuffer((byte)(165 + index));
             }

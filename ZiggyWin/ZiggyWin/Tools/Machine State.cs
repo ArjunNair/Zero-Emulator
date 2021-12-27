@@ -13,8 +13,8 @@ namespace ZeroWin
         }
 
         public void RefreshView(Form1 ziggyWin) {
-            this.Text = ziggyWin.config.CurrentSpectrumModel;
-            tStateLabel.Text = ziggyWin.zx.totalTStates.ToString();
+            this.Text = ziggyWin.config.emulationOptions.CurrentModelName;
+            tStateLabel.Text = ziggyWin.zx.cpu.t_states.ToString();
             frameLengthLabel.Text = ziggyWin.zx.FrameLength.ToString();
             pagingCheckBox.Checked = !ziggyWin.zx.pagingDisabled;
             shadowScreenCheckBox.Checked = ziggyWin.zx.showShadowScreen;
@@ -24,23 +24,23 @@ namespace ZeroWin
             page4Label.Text = ziggyWin.zx.BankInPage3;
             contendedLabel.Text = ziggyWin.zx.contendedBankPagedIn ? "contended" : "";
 
-            switch (ziggyWin.config.CurrentSpectrumModel) {
+            switch (ziggyWin.config.emulationOptions.CurrentModelName) {
                 case "ZX Spectrum 48k":
-                    romNameLabel.Text = ziggyWin.config.Current48kROM;
+                    romNameLabel.Text = ziggyWin.config.romOptions.Current48kROM;
                     page2Label.Text = "-----";
                     page3Label.Text = "-----";
                     break;
 
                 case "ZX Spectrum 128ke":
-                    romNameLabel.Text = ziggyWin.config.Current128keROM;
+                    romNameLabel.Text = ziggyWin.config.romOptions.Current128keROM;
                     break;
 
                 case "ZX Spectrum 128k":
-                    romNameLabel.Text = ziggyWin.config.Current128kROM;
+                    romNameLabel.Text = ziggyWin.config.romOptions.Current128kROM;
                     break;
 
                 case "ZX Spectrum +3":
-                    romNameLabel.Text = ziggyWin.config.CurrentPlus3ROM;
+                    romNameLabel.Text = ziggyWin.config.romOptions.CurrentPlus3ROM;
                     break;
             }
         }

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ZeroWin</RootNamespace>
     <AssemblyName>Zero</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ManifestCertificateThumbprint>B90B56FE5ADAB239E60817F7638AA5760A9AE529</ManifestCertificateThumbprint>
     <ManifestKeyFile>ZiggyWin_TemporaryKey.pfx</ManifestKeyFile>
@@ -22,7 +22,8 @@
     <Win32Resource>
     </Win32Resource>
     <SignAssembly>false</SignAssembly>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -38,8 +39,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>14</ApplicationRevision>
-    <ApplicationVersion>0.4.0.%2a</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>0.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -54,10 +55,11 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseVSHostingProcess>true</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>
     </DefineConstants>
@@ -65,16 +67,19 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\..\run\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>..\..\run\</OutputPath>
@@ -85,6 +90,8 @@
     <ErrorReport>prompt</ErrorReport>
     <DebugSymbols>true</DebugSymbols>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>ZeroWin.Program</StartupObject>
@@ -93,6 +100,9 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
+      <HintPath>..\..\Ziggy\packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.dll</HintPath>
@@ -106,9 +116,15 @@
       <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.DirectInput.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualC" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\Ziggy\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Peripherals, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\run\Peripherals.dll</HintPath>
+    </Reference>
+    <Reference Include="ScintillaNET">
+      <HintPath>..\..\..\..\..\C#\spASM\spASM\spASM\bin\Debug\ScintillaNET.dll</HintPath>
     </Reference>
     <Reference Include="Speccy, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
@@ -116,14 +132,11 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
-    <Reference Include="ZipForge, Version=2.1.1.0, Culture=neutral, PublicKeyToken=3a6e82ca8e39718a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\run\ZipForge.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutBox1.cs">
@@ -132,6 +145,10 @@
     <Compile Include="AboutBox1.Designer.cs">
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </Compile>
+    <Compile Include="JoystickController.cs" />
+    <Compile Include="InputSystem.cs" />
+    <Compile Include="MouseController.cs" />
+    <Compile Include="RecentFiles.cs" />
     <Compile Include="Tools\ArchiveHandler.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -150,13 +167,20 @@
     <Compile Include="Tools\CallStackViewer.Designer.cs">
       <DependentUpon>CallStackViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\CLIOptions.cs" />
+    <Compile Include="Tools\Command.cs" />
+    <Compile Include="Tools\Commander.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\Commander.Designer.cs">
+      <DependentUpon>Commander.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\MemoryProfiler.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Tools\MemoryProfiler.Designer.cs">
       <DependentUpon>MemoryProfiler.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controller.cs" />
     <Compile Include="CustomListbox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -178,14 +202,13 @@
     <Compile Include="Tools\Library.Designer.cs">
       <DependentUpon>Library.cs</DependentUpon>
     </Compile>
-    <Compile Include="Tools\Logger.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Tools\Machine State.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Tools\Machine State.Designer.cs">
       <DependentUpon>Machine State.cs</DependentUpon>
     </Compile>
-    <Compile Include="MRUManager.cs" />
     <Compile Include="Tools\PicturePreview.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -282,7 +305,6 @@
     <Compile Include="Tools\SpectrumKeyboard.Designer.cs">
       <DependentUpon>SpectrumKeyboard.cs</DependentUpon>
     </Compile>
-    <Compile Include="SQLHelper.cs" />
     <Compile Include="Tools\TapeDeck.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -343,6 +365,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\CallStackViewer.resx">
       <DependentUpon>CallStackViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\Commander.resx">
+      <DependentUpon>Commander.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\MemoryProfiler.resx">
       <DependentUpon>MemoryProfiler.cs</DependentUpon>
@@ -435,6 +460,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -492,6 +518,8 @@
     </None>
     <None Include="Resources\scanlines2.png" />
     <None Include="Resources\B_button.png" />
+    <None Include="Resources\icons8-keyboard-26.png" />
+    <None Include="Resources\cassette.png" />
     <Content Include="Ziggy Emulator.ico" />
   </ItemGroup>
   <ItemGroup>

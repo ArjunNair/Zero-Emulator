@@ -112,25 +112,26 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBox1.Text" xml:space="preserve">
-    <value>Many thanks to my wife Purnima for not only putting up with me, but also for designing some of the visual elements in the  emulator.
+    <value>Many thanks to Mark Woodmass (Woody) for his patient and detailed technical advice on various aspects of emulation, and to Rich Chandler, Paul Dunn (Dunny) and others on the ZX Spectrum discord group for their help and feedback. 
 
-I'm indebted to Mark Woodmass (Woody) for providing me with help and guidance while writing this emulator and for being extremely patient despite my many inane queries on the subject. 
+This emulator wouldn't have been possible otherwise without their considerable encouragement and support.
 
-Thanks also to Richard Chandler (Karingal) for various tidbits of information on emulator writing as well as some great laughs on WoSF. 
+I must also thank my wife Purnima for putting up with my obsession with the speccy and providing encouragement and help with this project!
 
-Shouts also to the good folks on #spin(IRC) for their technical (well some of it any rate) inputs which have helped me refine the working of Zero in many subtle ways.
+Thanks also to Patrik Rak for permission to use the various PZX conversion tools that Zero uses to support other tape format.
+You can find more information on them on Patrik's site: http://zxds.raxoft.cz/pzx.html.
 
-Many thanks to Alex Makeev for letting me use his DirectSound routines from ZXMAK 2 allowing me to replace SlimDX completly with DirectX starting from v0.6.
+Thanks to Alex Makeev for permission to use his DirectSound routines from ZXMAK 2.
 
-Finally, a great big thanks to spec-chums all around the world for their tireless work and neverending enthusiasm in all things related to the speccy. May the Infinite Energy pokes be with them, always!</value>
+Additional contributors whose feedback have helped in shaping the emulator can be found credited in the What's New file.</value>
   </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="pictureBox1.BackgroundImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6

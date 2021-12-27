@@ -50,9 +50,12 @@ namespace ZeroWin
         
         public virtual void CopySurface(System.Drawing.Rectangle target, int[] source)
         {
-            GraphicsStream gs = surface.LockRectangle(target, LockFlags.None);
-            gs.Write(source);
-            surface.UnlockRectangle();
+            //Sometimes throws an exception when closing the window if we try to lock surface and it has been disposed.
+            if (!surface.Disposed) {
+                GraphicsStream gs = surface.LockRectangle(target, LockFlags.None);
+                gs.Write(source);
+                surface.UnlockRectangle();
+            }
         }
 
         public Surface GetSurface()

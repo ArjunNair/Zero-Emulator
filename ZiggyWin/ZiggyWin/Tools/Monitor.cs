@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
-using Speccy;
+using SpeccyCommon;
+using Cpu;
 
 namespace ZeroWin
 {
     public partial class Monitor : Form
     {
         public Form1 ziggyWin;
-
+        public Z80 cpu;
         private MemoryViewer memoryViewer = null;
         private Profiler profiler = null;
         private Breakpoints breakpointViewer = null;
@@ -20,13 +21,13 @@ namespace ZeroWin
         private WatchWindow watchWindow = null;
 
         //Internal set of registers that mimic the z80 reg state
-        private int pc, bc, de, hl, ir, mp, sp, _bc, _de, _hl, ix, iy, im, af, _af;
+        private ushort pc, bc, de, hl, ir, mp, sp, _bc, _de, _hl, ix, iy, im, af, _af;
 
         private int tstates;
         private String breakPointStatus = "";
         private bool pauseEmulation = false;
         private int runToCursorAddress = -1;
-        private int previousPC = 0;
+        private ushort previousPC = 0;
         private int previousTState = 0;
         private bool lastOpcodeWasRET = false; //used for Step Out operation
         private bool isBreakpointWindowOpen = false;
@@ -72,7 +73,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValuePC {
+        public ushort ValuePC {
             get {
                 return pc;
             }
@@ -82,7 +83,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueSP {
+        public ushort ValueSP {
             get {
                 return sp;
             }
@@ -92,7 +93,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueMP {
+        public ushort ValueMP {
             get {
                 return mp;
             }
@@ -102,7 +103,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueIM {
+        public ushort ValueIM {
             get {
                 return im;
             }
@@ -111,7 +112,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueAF {
+        public ushort ValueAF {
             get {
                 return af;
             }
@@ -120,7 +121,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueIR {
+        public ushort ValueIR {
             get {
                 return ir;
             }
@@ -129,7 +130,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueAF_ {
+        public ushort ValueAF_ {
             get {
                 return _af;
             }
@@ -138,7 +139,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueHL {
+        public ushort ValueHL {
             get {
                 return hl;
             }
@@ -147,7 +148,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueBC {
+        public ushort ValueBC {
             get {
                 return bc;
             }
@@ -156,7 +157,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueDE {
+        public ushort ValueDE {
             get {
                 return de;
             }
@@ -165,7 +166,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueHL_ {
+        public ushort ValueHL_ {
             get {
                 return _hl;
             }
@@ -174,7 +175,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueBC_ {
+        public ushort ValueBC_ {
             get {
                 return _bc;
             }
@@ -183,7 +184,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueDE_ {
+        public ushort ValueDE_ {
             get {
                 return _de;
             }
@@ -192,7 +193,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueIX {
+        public ushort ValueIX {
             get {
                 return ix;
             }
@@ -201,7 +202,7 @@ namespace ZeroWin
             }
         }
 
-        public int ValueIY {
+        public ushort ValueIY {
             get {
                 return iy;
             }
@@ -401,16 +402,16 @@ namespace ZeroWin
 
         private void ProcessMemoryBreakpoint(int addr, int val) {
             pauseEmulation = true;
-            pc = ziggyWin.zx.PC;
+            pc = cpu.regs.PC;
             DoPauseEmulation();
             SetState(MonitorState.PAUSE);
-            Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
+            Disassemble(cpu.regs.PC, cpu.regs.PC, false, false);
             ziggyWin.zx.needsPaint = true;
 
             UpdateToolsWindows();
 
             if (!(dbState == MonitorState.RUN || dbState == MonitorState.STEPOVER || dbState == MonitorState.STEPOUT) && !pauseEmulation) {
-                Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
+                Disassemble(cpu.regs.PC, cpu.regs.PC, false, false);
                 memoryViewList[addr / 10].Bytes[addr % 10] = val;
 
                 if (memoryViewer != null && !memoryViewer.IsDisposed)
@@ -422,6 +423,34 @@ namespace ZeroWin
                 if (machineState != null && !machineState.IsDisposed)
                     machineState.RefreshView(this.ziggyWin);
             }
+        }
+
+        public void DoPauseEmulation() {
+            ziggyWin.ShouldExitFullscreen();
+            ziggyWin.zx.Pause();
+            ziggyWin.ForceScreenUpdate();
+
+            dataGridView1.DataSource = null;
+            disassemblyList = new DisassemblyList();
+            Disassemble(0, 65535, true, false);
+            AssignToDGVDisassembly(dataGridView1, disassemblyList);
+            SetState(MonitorState.PAUSE);
+            monitorStatusLabel.Text = "Breakpoint hit: " + breakPointStatus;
+            memoryViewList = new BindingList<MemoryUnit>();
+            for (int i = 0; i < 65535; i += 10) {
+                MemoryUnit mu = new MemoryUnit(this);
+                mu.Address = i;
+                mu.Bytes = new List<int>();
+                for (int g = 0; g < 10; g++) {
+                    if (i + g > 65535)
+                        break;
+                    mu.Bytes.Add(ziggyWin.zx.PeekByteNoContend((ushort)(i + g)));
+                }
+                memoryViewList.Add(mu);
+            }
+            UpdateToolsWindows();
+            this.Show();
+            this.Focus();
         }
 
         //Event: Raised when the z80 memory contents have changed (via POKE)
@@ -498,45 +527,18 @@ namespace ZeroWin
             }
         }
 
-        public void DoPauseEmulation() {                                    
-            ziggyWin.ShouldExitFullscreen();
-            ziggyWin.zx.Pause();
-            ziggyWin.ForceScreenUpdate();
-
-            dataGridView1.DataSource = null;
-            disassemblyList = new DisassemblyList();
-            Disassemble(0, 65535, true, false);
-            AssignToDGVDisassembly(dataGridView1, disassemblyList);
-            SetState(MonitorState.PAUSE);
-            monitorStatusLabel.Text = "Breakpoint hit: " + breakPointStatus;
-            memoryViewList = new BindingList<MemoryUnit>();
-            for (int i = 0; i < 65535; i += 10) {
-                MemoryUnit mu = new MemoryUnit(this);
-                mu.Address = i;
-                mu.Bytes = new List<int>();
-                for (int g = 0; g < 10; g++) {
-                    if (i + g > 65535)
-                        break;
-                    mu.Bytes.Add(ziggyWin.zx.PeekByteNoContend(i + g));
-                }
-                memoryViewList.Add(mu);
-            }
-            UpdateToolsWindows();
-            this.Show();
-            this.Focus();
-        }
-
         //Event: Raised before a opcode has been executed by the z80
         // public void Monitor_OpcodeExecuted(Object sender, OpcodeExecutedEventArgs e)
         public void Monitor_OpcodeExecuted(Object sender) {
-            if (pauseEmulation) {
+            if (pauseEmulation && pc == cpu.regs.PC) {
                 pauseEmulation = false;
                 return;
             }
+            cpu = ziggyWin.zx.cpu;
             //ziggyWin.zx.Pause();
             //Can't do ValuePC = etc because ValuePC calls HexAnd8bitRegUpdate internally
             //leading to a severe hit on framerate.
-            pc = ziggyWin.zx.PC;
+            pc = cpu.regs.PC;
 
             //Check if any breakpoints have been hit
             foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv in breakPointList)
@@ -546,7 +548,7 @@ namespace ZeroWin
 
                 switch (kv.Key) {
                     case SPECCY_EVENT.OPCODE_A:
-                        if (ziggyWin.zx.A == val.Address) {
+                        if (cpu.regs.A == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("A = {0} (${0:x})", val.Address);
                         }
@@ -560,42 +562,42 @@ namespace ZeroWin
                         break;
 
                     case SPECCY_EVENT.OPCODE_HL:
-                        if (ziggyWin.zx.HL == val.Address) {
+                        if (cpu.regs.HL == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("HL = {0} (${0:x})", val.Address);
                         }
                         break;
 
                     case SPECCY_EVENT.OPCODE_BC:
-                        if (ziggyWin.zx.BC == val.Address) {
+                        if (cpu.regs.BC == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("BC = {0} (${0:x})", val.Address);
                         }
                         break;
 
                     case SPECCY_EVENT.OPCODE_DE:
-                        if (ziggyWin.zx.DE == val.Address) {
+                        if (cpu.regs.DE == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("DE = {0} (${0:x})", val.Address);
                         }
                         break;
 
                     case SPECCY_EVENT.OPCODE_IX:
-                        if (ziggyWin.zx.IX == val.Address) {
+                        if (cpu.regs.IX == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("IX = {0} (${0:x})", val.Address);
                         }
                         break;
 
                     case SPECCY_EVENT.OPCODE_IY:
-                        if (ziggyWin.zx.IY == val.Address) {
+                        if (cpu.regs.IY == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("IY = {0} (${0:x})", val.Address);
                         }
                         break;
 
                     case SPECCY_EVENT.OPCODE_SP:
-                        if (ziggyWin.zx.SP == val.Address) {
+                        if (cpu.regs.SP == val.Address) {
                             pauseEmulation = true;
                             breakPointStatus = String.Format("SP = {0} (${0:x})", val.Address);
                         }
@@ -628,7 +630,7 @@ namespace ZeroWin
                             break;
 
                         case 0xED:
-                            int nxtopc = PeekByte(pc + 1);
+                            int nxtopc = PeekByte((ushort)(pc + 1));
                             if (nxtopc == 0x45 || nxtopc == 0x4D)   //RETI or RETN
                                 lastOpcodeWasRET = true;
                             break;
@@ -649,7 +651,7 @@ namespace ZeroWin
 
             if (dbState == MonitorState.STEPIN) {
                 SetState(MonitorState.PAUSE);
-                Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
+                Disassemble(cpu.regs.PC, (ushort)(cpu.regs.PC + 1), false, false);
                 ziggyWin.zx.needsPaint = true;
                 UpdateToolsWindows();
             } else {
@@ -658,7 +660,7 @@ namespace ZeroWin
 
             if (isTraceOn && (dbState != MonitorState.STEPOVER)) {
                 if (previousPC != pc) {
-                    Disassemble(previousPC, previousPC, false, true);
+                    Disassemble(previousPC, (ushort)(previousPC + 1), false, true);
 
                     LogMessage log = new LogMessage();            
                     log.Address = TraceMessage.address;
@@ -670,7 +672,7 @@ namespace ZeroWin
 
             if (dbState != MonitorState.STEPOVER) {
                 previousPC = pc;
-                previousTState = ziggyWin.zx.totalTStates;
+                previousTState = cpu.t_states;
             }
         }
 
@@ -680,14 +682,14 @@ namespace ZeroWin
             }
             if (dbState == MonitorState.STEPIN) {
                 SetState(MonitorState.PAUSE);
-                Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
+                Disassemble(cpu.regs.PC, cpu.regs.PC, false, false);
                 ziggyWin.zx.needsPaint = true;
                 UpdateToolsWindows();
             }
         }
 
         private void Monitor_StateChangeEvent(object sender, StateChangeEventArgs e) {
-            pc = ziggyWin.zx.PC;
+            pc = cpu.regs.PC;
 
             pauseEmulation = false;
 
@@ -700,7 +702,7 @@ namespace ZeroWin
                     breakPointStatus = String.Format("{0}", e.EventType);
                     DoPauseEmulation();
                     SetState(MonitorState.PAUSE);
-                    Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
+                    Disassemble(cpu.regs.PC, cpu.regs.PC, false, false);
                     ziggyWin.zx.needsPaint = true;
                     UpdateToolsWindows();
                     break;
@@ -715,7 +717,7 @@ namespace ZeroWin
         }
 
         public void Monitor_PortIO(Object sender, PortIOEventArgs e) {
-            pc = ziggyWin.zx.PC;
+            pc = cpu.regs.PC;
 
             pauseEmulation = false;
             //Check if any breakpoints have been hit
@@ -742,9 +744,16 @@ namespace ZeroWin
                         break;
 
                     case SPECCY_EVENT.PORT_READ:
-                        if (!e.IsWrite && (e.Port == val.Address)) {
-                            breakPointStatus = String.Format("Port read @ {0} (${0:x})", val);
-                            pauseEmulation = true;
+                        if (!e.IsWrite) {
+                            if (ziggyWin.zx.isPlayingRZX) {
+                                breakPointStatus = String.Format("RZX Port read @ {0} (${0:x})", val);
+                                pauseEmulation = true;
+                            }
+                            else
+                            if (e.Port == val.Address) {
+                                breakPointStatus = String.Format("Port read @ {0} (${0:x})", val);
+                                pauseEmulation = true;
+                            }
                         }
                         break;
 
@@ -773,10 +782,37 @@ namespace ZeroWin
                 if (pauseEmulation) {
                     DoPauseEmulation();
                     SetState(MonitorState.PAUSE);
-                    Disassemble(ziggyWin.zx.PC, ziggyWin.zx.PC, false, false);
+                    Disassemble(cpu.regs.PC, cpu.regs.PC, false, false);
                     ziggyWin.zx.needsPaint = true;
                     UpdateToolsWindows();
                     break;
+                }
+            }
+        }
+
+        private void Monitor_RZXPlaybackStartEvent(object sender) {
+            breakPointStatus = String.Format("RZX Playback start." );
+            DoPauseEmulation();
+            SetState(MonitorState.PAUSE);
+            Disassemble(cpu.regs.PC, cpu.regs.PC, false, false);
+            ziggyWin.zx.needsPaint = true;
+            UpdateToolsWindows();
+        }
+
+        private void Monitor_RZXFrameEndEvent(object sender, RZXFrameEventArgs e) {
+            foreach (KeyValuePair<SPECCY_EVENT, BreakPointCondition> kv in breakPointList) {
+                // int val = Convert.ToInt32(kv.Value);
+                BreakPointCondition val = kv.Value;
+
+                if (kv.Key == SPECCY_EVENT.RZX_FRAME_END) {
+                    if (val.Data == -1 || val.Data == e.FrameNumber) {
+                        breakPointStatus = String.Format("RZX frame {0} end: #ExpectedFetch {1} #ActualFetch {2} #ExpectedINs {3} #ActualINs {4}", e.FrameNumber, e.ExpectedFetchCount, e.ActualFetchCount, e.ExpectedINs, e.ExecutedINs);
+                        DoPauseEmulation();
+                        SetState(MonitorState.PAUSE);
+                        Disassemble(cpu.regs.PC, cpu.regs.PC, false, false);
+                        ziggyWin.zx.needsPaint = true;
+                        UpdateToolsWindows();
+                    }
                 }
             }
         }
@@ -786,7 +822,7 @@ namespace ZeroWin
         public class OpcodeDisassembly : INotifyPropertyChanged
         {
             private Monitor monitorRef;
-            private int address;
+            private ushort address;
             private List<int> bytesAtAddress = new List<int>();
             private String opcodes;
             private int param1 = int.MaxValue;
@@ -804,7 +840,7 @@ namespace ZeroWin
                     PropertyChanged(this, new PropertyChangedEventArgs(name));
             }
 
-            public int Address {
+            public ushort Address {
                 get {
                     return address;
                 }
@@ -925,10 +961,11 @@ namespace ZeroWin
             protected override int FindCore(PropertyDescriptor prop, object key) {
                 // Get the property info for the specified property.
                 // Ignore the prop value and search by address.
+                ushort val = Convert.ToUInt16(key);
                 for (int i = 0; i < Count; ++i) {
-                    if (Items[i].Address == ((int)key))
+                    if (Items[i].Address == val)
                         return i;
-                    else if (Items[i].Address > ((int)key))
+                    else if (Items[i].Address > val)
                         return i - 1;
                 }
                 return -1;
@@ -1059,7 +1096,8 @@ namespace ZeroWin
             ziggyWin.zx.MemoryWriteEvent -= new MemoryWriteEventHandler(Monitor_MemoryWrite);
             ziggyWin.zx.OpcodeExecutedEvent -= new OpcodeExecutedEventHandler(Monitor_OpcodeExecuted);
             ziggyWin.zx.PortEvent -= new PortIOEventHandler(Monitor_PortIO);
-
+            ziggyWin.zx.RZXPlaybackStartEvent -= new RZXPlaybackStartEventHandler(Monitor_RZXPlaybackStartEvent);
+            ziggyWin.zx.RZXFrameEndEvent -= new RZXFrameEndEventHandler(Monitor_RZXFrameEndEvent);
             ziggyWin.zx.StateChangeEvent -= new StateChangeEventHandler(Monitor_StateChangeEvent);
         }
 
@@ -1069,6 +1107,8 @@ namespace ZeroWin
             ziggyWin.zx.MemoryWriteEvent += new MemoryWriteEventHandler(Monitor_MemoryWrite);
             ziggyWin.zx.OpcodeExecutedEvent += new OpcodeExecutedEventHandler(Monitor_OpcodeExecuted);
             ziggyWin.zx.PortEvent += new PortIOEventHandler(Monitor_PortIO);
+            ziggyWin.zx.RZXPlaybackStartEvent += new RZXPlaybackStartEventHandler(Monitor_RZXPlaybackStartEvent);
+            ziggyWin.zx.RZXFrameEndEvent += new RZXFrameEndEventHandler(Monitor_RZXFrameEndEvent);
             ziggyWin.zx.StateChangeEvent += new StateChangeEventHandler(Monitor_StateChangeEvent);
         }
 
@@ -1088,13 +1128,13 @@ namespace ZeroWin
                 for (int g = 0; g < 10; g++) {
                     if (i + g > 65535)
                         break;
-                    mu.Bytes.Add(ziggyWin.zx.PeekByteNoContend(i + g));
+                    mu.Bytes.Add(ziggyWin.zx.PeekByteNoContend((ushort)(i + g)));
                 }
                 memoryViewList.Add(mu);
             }
 
             for(int i = 0; i < watchVariableList.Count; i++)
-                watchVariableList[i].Data = ziggyWin.zx.PeekByteNoContend(watchVariableList[i].Address);
+                watchVariableList[i].Data = ziggyWin.zx.PeekByteNoContend((ushort)(watchVariableList[i].Address));
 
             breakpointRowList.Clear();
 
@@ -1185,6 +1225,7 @@ namespace ZeroWin
             InitializeComponent();
             pauseEmulation = true;
             ziggyWin = zw;
+            cpu = zw.zx.cpu;
 
             // Set the default dialog font on each child control
             foreach (Control c in Controls) {
@@ -1196,7 +1237,7 @@ namespace ZeroWin
 
             dataGridView1.ColumnHeadersBorderStyle = ProperColumnHeadersBorderStyle;
             dataGridView1.CellValidating += new DataGridViewCellValidatingEventHandler(dataGridView1_CellValidating);
-            dataGridView1.CellDoubleClick += new DataGridViewCellEventHandler(dataGridView1_CellDoubleClick);
+            //dataGridView1.CellDoubleClick += new DataGridViewCellEventHandler(dataGridView1_CellDoubleClick);
             dataGridView1.CellEndEdit += new DataGridViewCellEventHandler(dataGridView1_CellEndEdit);
             dataGridView1.CellToolTipTextNeeded += new DataGridViewCellToolTipTextNeededEventHandler(dataGridView1_CellToolTipTextNeeded);
             ziggyWin.zx.MemoryReadEvent += new MemoryReadEventHandler(Monitor_MemoryRead);
@@ -1205,6 +1246,8 @@ namespace ZeroWin
             ziggyWin.zx.OpcodeExecutedEvent += new OpcodeExecutedEventHandler(Monitor_OpcodeExecuted);
             ziggyWin.zx.PortEvent += new PortIOEventHandler(Monitor_PortIO);
             ziggyWin.zx.StateChangeEvent += new StateChangeEventHandler(Monitor_StateChangeEvent);
+            ziggyWin.zx.RZXPlaybackStartEvent += new RZXPlaybackStartEventHandler(Monitor_RZXPlaybackStartEvent);
+            ziggyWin.zx.RZXFrameEndEvent += new RZXFrameEndEventHandler(Monitor_RZXFrameEndEvent);
             //ziggyWin.zx.PopStackEvent += new PopStackEventHandler(Monitor_PopStackEvent);
             //ziggyWin.zx.PushStackEvent += new PushStackEventHandler(Monitor_PushStackEvent);
 
@@ -1247,7 +1290,7 @@ namespace ZeroWin
                 for (int g = 0; g < 10; g++) {
                     if (i + g > 65535)
                         break;
-                    mu.Bytes.Add(ziggyWin.zx.PeekByteNoContend(i + g));
+                    mu.Bytes.Add(ziggyWin.zx.PeekByteNoContend((ushort)(i + g)));
                 }
                 memoryViewList.Add(mu);
             }
@@ -1368,7 +1411,7 @@ namespace ZeroWin
             //Console.WriteLine("dataGridView1_CellEndEdit");
             dataGridView1.SuspendLayout();
             //var enteredString = dataGridView1[e.ColumnIndex, e.RowIndex].FormattedValue.ToString().Split(' ');
-            Disassemble(disassemblyList[e.RowIndex].Address, disassemblyList[e.RowIndex].Address + 10, false, false);
+            Disassemble(disassemblyList[e.RowIndex].Address, (ushort)(disassemblyList[e.RowIndex].Address + 10), false, false);
             dataGridView1.ResumeLayout();
             dataGridView1.Refresh();
             DataGridViewCell cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
@@ -1390,25 +1433,29 @@ namespace ZeroWin
         //Register state and other information are updated here.
         //Also the DataGridView is set to point to the current PC address
         private void UpdateZXState() {
-            TStates = ziggyWin.zx.totalTStates;
-            ValuePC = ziggyWin.zx.PC;
-            ValueSP = ziggyWin.zx.SP;
-            ValueHL = ziggyWin.zx.HL;
-            ValueDE = ziggyWin.zx.DE;
-            ValueBC = ziggyWin.zx.BC;
-            ValueAF = ziggyWin.zx.AF;
-            ValueIR = ziggyWin.zx.IR;
-            ValueMP = ziggyWin.zx.MemPtr;
-            ValueHL_ = ziggyWin.zx._HL;
-            ValueDE_ = ziggyWin.zx._DE;
-            ValueBC_ = ziggyWin.zx._BC;
-            ValueAF_ = ziggyWin.zx._AF;
-            ValueIX = ziggyWin.zx.IX;
-            ValueIY = ziggyWin.zx.IY;
-            ValueIM = ziggyWin.zx.interruptMode;
+            cpu = ziggyWin.zx.cpu;
+            TStates = cpu.t_states;
+            ValuePC = cpu.regs.PC;
+            ValueSP = cpu.regs.SP;
+            ValueHL = cpu.regs.HL;
+            ValueDE = cpu.regs.DE;
+            ValueBC = cpu.regs.BC;
+            ValueAF = cpu.regs.AF;
+            ValueIR = cpu.regs.IR;
+            ValueMP = cpu.regs.MemPtr;
+            ValueHL_ = cpu.regs.HL_;
+            ValueDE_ = cpu.regs.DE_;
+            ValueBC_ = cpu.regs.BC_;
+            ValueAF_ = cpu.regs.AF_;
+            ValueIX = cpu.regs.IX;
+            ValueIY = cpu.regs.IY;
+            ValueIM = cpu.interrupt_mode;
 
             if (registerViewer != null && !registerViewer.IsDisposed)
                 registerViewer.RefreshView(useHexNumbers);
+
+            if (machineState != null && !machineState.IsDisposed)
+                machineState.RefreshView(ziggyWin);
 
             //HexAnd8bitRegUpdate();
             int index;
@@ -1417,29 +1464,32 @@ namespace ZeroWin
             }
             if (index < 0)
                 index = 0;
-            dataGridView1.FirstDisplayedScrollingRowIndex = index;
-            dataGridView1.CurrentCell = dataGridView1.Rows[index].Cells[0];
-            dataGridView1.Rows[index].Selected = true;
+
+            if (index < dataGridView1.Rows.Count) {
+                dataGridView1.FirstDisplayedScrollingRowIndex = index;
+                dataGridView1.CurrentCell = dataGridView1.Rows[index].Cells[0];
+                dataGridView1.Rows[index].Selected = true;
+            }
             dataGridView1.Refresh();
         }
 
         //Returns the byte value at an address and adds it to the byteList
-        private int PeekByte(int addr) {
-            int b = ziggyWin.zx.PeekByteNoContend(addr & 0xffff);
+        private byte PeekByte(ushort addr) {
+            byte b = ziggyWin.zx.PeekByteNoContend(addr);
             byteList.Add(b); //= byteString + " " + b.ToString();
             return b;
         }
 
         //Returns the word value at an address and adds it to the byteList
-        private int PeekWord(int addr) {
-            int a = ziggyWin.zx.PeekByteNoContend(addr & 0xffff);
+        private ushort PeekWord(ushort addr) {
+            int a = ziggyWin.zx.PeekByteNoContend(addr);
             byteList.Add(a);// = byteString + " " + a.ToString();
-            a = ziggyWin.zx.PeekByteNoContend((addr + 1) & 0xffff);
+            a = ziggyWin.zx.PeekByteNoContend((ushort)(addr + 1));
             byteList.Add(a);// byteString = byteString + " " + a.ToString();
-            return ziggyWin.zx.PeekWordNoContend(addr & 0xffff);
+            return ziggyWin.zx.PeekWordNoContend(addr);
         }
 
-        public void PokeByte(int addr, int val) {
+        public void PokeByte(ushort addr, byte val) {
             ziggyWin.zx.PokeByteNoContend(addr, val);
             Disassemble(addr, addr, false, false);
             memoryViewList[addr / 10].Bytes[addr % 10] = val;
@@ -1501,8 +1551,8 @@ namespace ZeroWin
 
         //Disassembles within a range of memory addresses.
         //specifying rebuild as true will generate a list from scratch.
-        protected void Disassemble(int startAddr, int endAddr, bool rebuild, bool traceOn) {
-            int PC = startAddr;
+        protected void Disassemble(ushort startAddr, ushort endAddr, bool rebuild, bool traceOn) {
+            ushort PC = startAddr;
             int opcode;
             int disp = 0; //used later on to calculate relative jumps
             int opcodeMatches = 0;
@@ -1519,7 +1569,7 @@ namespace ZeroWin
 
                 // OpcodeDisassembly od = new OpcodeDisassembly(this);
                 //od.LineNo = line;
-                int address = PC;
+                ushort address = PC;
 
                 param1 = int.MaxValue;
                 param2 = int.MaxValue;
@@ -1532,9 +1582,13 @@ namespace ZeroWin
                 }
 
                 opcode = PeekByte(PC);
-                PC = (PC + 1);
-
-            jmp4Undoc:  //We will jump here for undocumented instructions.
+                if (PC == 65535) {
+                    break;
+                }
+                PC++;
+                if (PC > endAddr)
+                    break;
+                jmp4Undoc:  //We will jump here for undocumented instructions.
                 bool jumpForUndoc = false;
                 disp = 0;
                 //Massive switch-case to decode the instructions!
@@ -4048,7 +4102,7 @@ namespace ZeroWin
                             case 0x36:  //LD (IX + d), n
                                 disp = GetDisplacement(PeekByte(PC));
 
-                                Log("LD (IX + {0:D}), {1,0:D}", disp, PeekByte(PC + 1));
+                                Log("LD (IX + {0:D}), {1,0:D}", disp, PeekByte((ushort)(PC + 1)));
                                 PC += 2;
                                 break;
 
@@ -5850,7 +5904,7 @@ namespace ZeroWin
                             case 0x36:  //LD (IY + d), n
                                 disp = GetDisplacement(PeekByte(PC));
 
-                                Log("LD (IY + {0:D}), {1,0:D}", disp, PeekByte(PC + 1));
+                                Log("LD (IY + {0:D}), {1,0:D}", disp, PeekByte((ushort)(PC + 1)));
                                 PC += 2;
                                 break;
 
@@ -7258,7 +7312,8 @@ namespace ZeroWin
         }
 
         //Remember to unregister all events and inform the parent form
-        //that the debugger is no longer in "active" debugging state
+        //that the debugger is no longer in "active" debugging state.
+        //TODO: We don't seem to be telling the parent form that we aren't debuggin anymore, properly.
         private void Monitor_FormClosing(object sender, FormClosingEventArgs e) {
             ziggyWin.zx.MemoryWriteEvent -= new MemoryWriteEventHandler(Monitor_MemoryWrite);
             ziggyWin.zx.MemoryReadEvent -= new MemoryReadEventHandler(Monitor_MemoryRead);
@@ -7266,6 +7321,8 @@ namespace ZeroWin
             ziggyWin.zx.OpcodeExecutedEvent -= new OpcodeExecutedEventHandler(Monitor_OpcodeExecuted);
             ziggyWin.zx.PortEvent -= new PortIOEventHandler(Monitor_PortIO);
             ziggyWin.zx.StateChangeEvent -= new StateChangeEventHandler(Monitor_StateChangeEvent);
+            ziggyWin.zx.RZXPlaybackStartEvent -= new RZXPlaybackStartEventHandler(Monitor_RZXPlaybackStartEvent);
+            ziggyWin.zx.RZXFrameEndEvent -= new RZXFrameEndEventHandler(Monitor_RZXFrameEndEvent);
             disassemblyList.Clear();
             dataGridView1.DataSource = null;
             disassemblyLookup.Clear();
@@ -7340,7 +7397,7 @@ namespace ZeroWin
         {
             WatchVariable wv = new WatchVariable();
             wv.Address = addr;
-            wv.Data = ziggyWin.zx.PeekByteNoContend(addr);
+            wv.Data = ziggyWin.zx.PeekByteNoContend((ushort)addr);
 
             if(label == "")
                 systemVariables.TryGetValue(addr, out label);
@@ -7504,7 +7561,7 @@ namespace ZeroWin
 
                 ziggyWin.zx.doRun = true;
                 previousPC = pc;
-                previousTState = ziggyWin.zx.totalTStates;
+                previousTState = cpu.t_states;
                 ziggyWin.zx.Resume();
                 //ziggyWin.Focus();
                 return;
@@ -7520,7 +7577,7 @@ namespace ZeroWin
 
                 ziggyWin.zx.doRun = true;
                 previousPC = pc;
-                previousTState = ziggyWin.zx.totalTStates;
+                previousTState = cpu.t_states;
                 ziggyWin.zx.Resume();
                 //ziggyWin.Focus();
                 return;
@@ -7531,7 +7588,7 @@ namespace ZeroWin
 
             ziggyWin.zx.doRun = true;
             previousPC = pc;
-            previousTState = ziggyWin.zx.totalTStates;
+            previousTState = cpu.t_states;
 
             this.Hide();
             //ziggyWin.zx.monitorSaysRun = true;
@@ -7542,7 +7599,7 @@ namespace ZeroWin
         private void StepInButton_Click(object sender, EventArgs e) {
             previousPC = pc;
             ziggyWin.zx.ResetKeyboard();
-            previousTState = ziggyWin.zx.totalTStates;
+            previousTState = cpu.t_states;
             SetState(MonitorState.STEPIN);
         }
 
@@ -7597,7 +7654,7 @@ namespace ZeroWin
             ziggyWin.zx.doRun = true;
             ziggyWin.zx.ResetKeyboard();
             previousPC = pc;
-            previousTState = ziggyWin.zx.totalTStates;
+            previousTState = cpu.t_states;
             HideWindow();
             //ziggyWin.zx.monitorSaysRun = true;
             ziggyWin.zx.Resume();
@@ -7607,7 +7664,7 @@ namespace ZeroWin
         private void ResumeEmulationButton_Click(object sender, EventArgs e) {
             ziggyWin.zx.ResetKeyboard();
             previousPC = pc;
-            previousTState = ziggyWin.zx.totalTStates;
+            previousTState = cpu.t_states;
 
             HideWindow();
             SetState(0);
@@ -7676,7 +7733,7 @@ namespace ZeroWin
         private void StepOutButton_Click(object sender, EventArgs e) {
             previousPC = pc;
             ziggyWin.zx.ResetKeyboard();
-            previousTState = ziggyWin.zx.totalTStates;
+            previousTState = cpu.t_states;
             SetState(MonitorState.STEPOUT);
         }
 

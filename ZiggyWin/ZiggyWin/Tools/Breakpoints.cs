@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using Speccy;
+using SpeccyCommon;
 
 namespace ZeroWin
 {
@@ -143,10 +143,10 @@ namespace ZeroWin
 
                 val = Utilities.ConvertToInt(maskedTextBox3.Text);
 
-                if (val > 255) {
+                /*if (val > 255) {
                     System.Windows.Forms.MessageBox.Show("The value is not within 0 to 255!", "Invalid input", MessageBoxButtons.OK);
                     return;
-                }
+                }*/
             } else
                 val = -1;
 

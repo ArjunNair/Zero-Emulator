@@ -55,6 +55,11 @@
 
         protected System.IntPtr fdc = System.IntPtr.Zero;
 
+        // Fix for index mark toggle in Seek command (woody).
+        // This should be removed once the fix is applied in the WD1793 controller.
+        protected byte current_command = 0;
+        protected byte status_read_count = 0; 
+
         public void DiskInsert(string filename, byte _unit) {
             wd1793_InsertDisk(fdc, _unit, filename);
         }
@@ -65,7 +70,12 @@
         }
 
         public byte ReadStatusReg() {
-            return wd1793_ReadStatusReg(fdc);
+            byte v = wd1793_ReadStatusReg(fdc);
+            status_read_count += 1;
+            if (status_read_count % 32 == 0) {
+                v = (byte)(v ^ 2);
+            }
+            return v;
         }
 
         public byte ReadSectorReg() {
@@ -85,6 +95,7 @@
         }
 
         public void WriteCommandReg(byte _data, ushort _pc) {
+            current_command = _data;
             wd1793_WriteCommandReg(fdc, _data, _pc);
         }
 
@@ -114,8 +125,6 @@
         public void DiskShutdown() {
             if (fdc != System.IntPtr.Zero)
                 wd1793_ShutDown(fdc);
-
-            //OnDiskEvent(new DiskEventArgs(0));
         }
     }
 }

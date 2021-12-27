@@ -58,7 +58,6 @@
             this.autoPlayStopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fastLoadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.edgeLoadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.instaLoadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -110,7 +109,7 @@
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
+            this.dataGridView1.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.ControlLightLight;
             dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -134,6 +133,7 @@
             this.dataGridView1.ShowRowErrors = false;
             this.dataGridView1.Size = new System.Drawing.Size(267, 239);
             this.dataGridView1.TabIndex = 4;
+            this.dataGridView1.VirtualMode = true;
             // 
             // openFileDialog1
             // 
@@ -258,8 +258,7 @@
             this.autoLoadTapesToolStripMenuItem,
             this.autoPlayStopToolStripMenuItem,
             this.fastLoadToolStripMenuItem,
-            this.edgeLoadToolStripMenuItem,
-            this.instaLoadToolStripMenuItem});
+            this.edgeLoadToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -268,14 +267,14 @@
             // 
             this.autoLoadTapesToolStripMenuItem.CheckOnClick = true;
             this.autoLoadTapesToolStripMenuItem.Name = "autoLoadTapesToolStripMenuItem";
-            this.autoLoadTapesToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.autoLoadTapesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.autoLoadTapesToolStripMenuItem.Text = "Auto Load";
             this.autoLoadTapesToolStripMenuItem.ToolTipText = "Enable this to automatically load in a tape when a tape file is opened.";
             // 
             // autoPlayStopToolStripMenuItem
             // 
             this.autoPlayStopToolStripMenuItem.Name = "autoPlayStopToolStripMenuItem";
-            this.autoPlayStopToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.autoPlayStopToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.autoPlayStopToolStripMenuItem.Text = "Auto Play && Stop";
             this.autoPlayStopToolStripMenuItem.ToolTipText = "Will automatically start or stop playing the tape. Requires Edge Load.";
             this.autoPlayStopToolStripMenuItem.CheckedChanged += new System.EventHandler(this.autoStartCheckBox_CheckedChanged);
@@ -285,31 +284,21 @@
             // 
             this.fastLoadToolStripMenuItem.CheckOnClick = true;
             this.fastLoadToolStripMenuItem.Name = "fastLoadToolStripMenuItem";
-            this.fastLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.fastLoadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.fastLoadToolStripMenuItem.Text = "Fast-Load";
             this.fastLoadToolStripMenuItem.ToolTipText = "Will try to load in a tape faster by boosting the emulation speed.";
             this.fastLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.fastLoadToolStripMenuItem.Click += new System.EventHandler(this.fastLoadToolStripMenuItem_Click);
             // 
             // edgeLoadToolStripMenuItem
             // 
             this.edgeLoadToolStripMenuItem.CheckOnClick = true;
             this.edgeLoadToolStripMenuItem.Name = "edgeLoadToolStripMenuItem";
-            this.edgeLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.edgeLoadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.edgeLoadToolStripMenuItem.Text = "Edge-Load";
             this.edgeLoadToolStripMenuItem.ToolTipText = "This should be enabled for  Auto Play/Stop. It also provides a bit of a speed boo" +
     "st.";
             this.edgeLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.edgeLoadCheckBox_CheckedChanged);
-            // 
-            // instaLoadToolStripMenuItem
-            // 
-            this.instaLoadToolStripMenuItem.Checked = true;
-            this.instaLoadToolStripMenuItem.CheckOnClick = true;
-            this.instaLoadToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.instaLoadToolStripMenuItem.Name = "instaLoadToolStripMenuItem";
-            this.instaLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
-            this.instaLoadToolStripMenuItem.Text = "Insta-Load";
-            this.instaLoadToolStripMenuItem.ToolTipText = "WIll instantly load any tape using the standard loader (ROM).";
-            this.instaLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.instaLoadToolStripMenuItem_CheckedChanged);
             // 
             // statusStrip1
             // 
@@ -481,6 +470,5 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
-        private System.Windows.Forms.ToolStripMenuItem instaLoadToolStripMenuItem;
     }
 }

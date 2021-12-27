@@ -97,6 +97,7 @@ namespace ZeroWin
             this.Location = new Point(zwRef.Location.X + 20, zwRef.Location.Y + 20);
             textBox1.SelectionStart = 0;
             textBox1.SelectionLength = 0;
+            versionLabel.Text = "Version " + Application.ProductVersion;
         }
     }
 }

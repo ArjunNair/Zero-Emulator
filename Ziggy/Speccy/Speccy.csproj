@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Speccy</RootNamespace>
     <AssemblyName>Speccy</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -30,7 +30,8 @@
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,17 +42,19 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\</OutputPath>
@@ -64,6 +67,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>
     </DefineConstants>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -74,14 +78,23 @@
   </Target>
   -->
   <ItemGroup>
-    <Compile Include="Pentagon128K.cs" />
+    <Compile Include="Devices\AudioDevice.cs" />
+    <Compile Include="Devices\AY_8192.cs" />
+    <Compile Include="Devices\IODevice.cs" />
+    <Compile Include="Devices\KempstonJoystick.cs" />
+    <Compile Include="Devices\KempstonMouse.cs" />
+    <Compile Include="Devices\SpeccyDevice.cs" />
+    <Compile Include="Devices\ULA.cs" />
+    <Compile Include="Devices\ULA_Plus.cs" />
+    <Compile Include="Pentagon_128k.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="speccy.cs" />
-    <Compile Include="Z80Core.cs" />
-    <Compile Include="zx128k.cs" />
-    <Compile Include="zx128ke.cs" />
-    <Compile Include="zx48k.cs" />
-    <Compile Include="zxPlus3.cs" />
+    <Compile Include="speccy_common.cs" />
+    <Compile Include="zx_plus3.cs" />
+    <Compile Include="zx_128ke.cs" />
+    <Compile Include="zx_128k.cs" />
+    <Compile Include="zx_48k.cs" />
+    <Compile Include="zxSpectrum.cs" />
+    <Compile Include="Z80.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Peripherals">

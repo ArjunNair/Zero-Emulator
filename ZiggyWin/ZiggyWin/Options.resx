@@ -112,18 +112,28 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <data name="label4.Text" xml:space="preserve">
+    <value>Some of the Spectrums were off in their contention timings by 1 T-State. The effects of this were noticeable only in games that relied heavily on precise contention timings for things like drawing on the border.</value>
+  </data>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>326, 17</value>
   </metadata>
+  <data name="aspectRatioFullscreenCheckBox.ToolTip" xml:space="preserve">
+    <value>In full screen mode, this option will make the emulator maintain the aspect ratio
+of the speccy screen, which may lead to black borders on wide screen monitors.
+Otherwise it will try to stretch the image to fit the screen.</value>
+  </data>
   <data name="port1FCheckbox.ToolTip" xml:space="preserve">
     <value>Port $1F is used by the original Kempston interface.
-Some games used this port, but most used $df as it was
-popular among cheap Kempston clones.
+Some games used this port (famously Sabrewulf), 
+but most used $df as it was popular among cheap 
+Kempston clones.
+
 If you find your game doesn't work with Kempston, try 
 toggling this checkbox.</value>
   </data>
@@ -141,27 +151,16 @@ In a nutshell, enable this feature if you just want to play games
 and don't care about terms like "contention", "border effects",
 "floating bus" and whatnots.</value>
   </data>
-  <data name="label4.Text" xml:space="preserve">
-    <value>Some of the Spectrums were off in their contention timings by 1 T-State. The effects of this were noticeable only in games that relied heavily on precise contention timings for things like drawing on the border.</value>
-  </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>326, 17</value>
-  </metadata>
-  <data name="aspectRatioFullscreenCheckBox.ToolTip" xml:space="preserve">
-    <value>In full screen mode, this option will make the emulator maintain the aspect ratio
-of the speccy screen, which may lead to black borders on wide screen monitors.
-Otherwise it will try to stretch the image to fit the screen.</value>
-  </data>
-  <metadata name="folderBrowserDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <metadata name="folderBrowserDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <metadata name="openFileDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <metadata name="openFileDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>186, 17</value>
   </metadata>
-  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>25</value>
   </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAYAgIAAAAEAIAAoCAEAZgAAADAwAAABACAAqCUAAI4IAQAgIAAAAQAgAKgQAAA2LgEAICAAAAEA

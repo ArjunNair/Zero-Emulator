@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using zlib;
-
+using System.Reflection;
 
 
 namespace Peripherals
@@ -171,7 +171,7 @@ namespace Peripherals
         private bool isReadingIRB = false;
         private int readBlockIndex = 0;
         public int fetchCount;
-        public int inputCount;
+        public ushort inputCount;
         private int snapsLoaded = 0;
 
         //Used for rollbacks
@@ -181,10 +181,10 @@ namespace Peripherals
         public RZX_Frame frame;
         public List<RZX_Frame> frames = new List<RZX_Frame>();
         
-        public int Progress {
+        public int NumFramesPlayed {
             get {return totalFramesPlayed;}
         }
-        
+
         #region v1
         /*
             public bool LoadRZX(Stream fs) {
@@ -534,10 +534,6 @@ namespace Peripherals
 
         #endregion
 
-        public int GetNumFramesPlayed() {
-            return totalFramesPlayed;
-        }
-
         public static void CopyStream(System.IO.Stream input, System.IO.Stream output) {
             byte[] buffer = new byte[2000];
             int len;
@@ -752,7 +748,7 @@ namespace Peripherals
 
         private bool SeekIRB() {
 
-            while (rzxFileReader.BaseStream.Position != rzxFileReader.BaseStream.Length) {
+            while (rzxFileReader.BaseStream.Position < rzxFileReader.BaseStream.Length) {
 
                 //Read in the block header
                 if (rzxFileReader.Read(fileBuffer, 0, 5) < 1)
@@ -1041,11 +1037,12 @@ namespace Peripherals
             header.minorVersion = 12;
             header.flags = 0;
             header.signature = "RZX!".ToCharArray();
+            string[] version = Application.ProductVersion.Split('.');
 
             creator = new RZX_Creator();
             creator.author = "Zero Emulator      \0".ToCharArray();
-            creator.majorVersion = 6;
-            creator.minorVersion = 0;
+            creator.majorVersion = System.Convert.ToUInt16(version[0]);
+            creator.minorVersion = System.Convert.ToUInt16(version[1]);
 
             frameCount = 0;
             fetchCount = 0;
@@ -1067,7 +1064,8 @@ namespace Peripherals
                 rzxFileWrite.Write(buf);
                 state = RZX_State.RECORDING;
             }
-            catch {
+            catch (System.IO.IOException e){
+                MessageBox.Show("There was an error when trying to create a new recording.", "RZX File error", MessageBoxButtons.OK);
                 return false;
             }
             inputs = new List<byte>();
@@ -1084,7 +1082,7 @@ namespace Peripherals
             state = RZX_State.PLAYBACK;
             fetchCount = 0;
             frame = new RZX_Frame();
-            frame.inputCount = 0xffff;
+            frame.inputCount = 0;
             return true;
         }
 
@@ -1102,6 +1100,13 @@ namespace Peripherals
 
             totalFramesPlayed = 0;
             return ReadFile();
+        }
+        public bool NextPlaybackFrame() {
+            bool continuePlayback = UpdatePlayback();
+            fetchCount = 0;
+            inputCount = 0;
+            totalFramesPlayed++;
+            return continuePlayback;
         }
 
         public bool UpdatePlayback() {
@@ -1138,13 +1143,49 @@ namespace Peripherals
                     newFrame.instructionCount = BitConverter.ToUInt16(buffer, 0);
                     newFrame.inputCount = BitConverter.ToUInt16(buffer, 2);
 
+                    //Repeat previous frame inputs if inputCount is 65535
+                   if (newFrame.inputCount >= 0 && newFrame.inputCount != 65535) {
+                        frame = newFrame;
+                        if (newFrame.inputCount > 0) {
+                            frame.inputs = new byte[frame.inputCount];
+                            err = ReadFromZStream(frameInfoReader, ref frame.inputs, frame.inputCount) <= 0;
+                        }
+                    }
+                   else {
+                        frame.instructionCount = newFrame.instructionCount;
+                    }
+
+                    /*
                     if (newFrame.inputCount > 0 && (newFrame.inputCount != 0xffff)) {
                         frame = newFrame;
                         frame.inputs = new byte[frame.inputCount];
                         err = ReadFromZStream(frameInfoReader, ref frame.inputs, frame.inputCount) <= 0;
                     }
-                    else
+                    else {
                         frame.instructionCount = newFrame.instructionCount;
+                        
+                        if (frame.inputCount == 0) {
+                            frame.inputs = null;
+                            frame.inputCount = newFrame.inputCount;
+                        }
+                    }*/
+
+                    
+                    //Repeat previous frame
+                    /*if (newFrame.inputCount != 0xffff) {
+                       if (newFrame.inputCount > 0) {
+                            frame = newFrame;
+                            frame.inputs = new byte[frame.inputCount];
+                            err = ReadFromZStream(frameInfoReader, ref frame.inputs, frame.inputCount) <= 0;
+                        }
+                        else {
+                            frame = newFrame;
+                            frame.inputs = null;
+                        }
+                    }
+                    else {
+                        frame.instructionCount = newFrame.instructionCount;
+                    }*/
                 }
 
                 if (err) {
@@ -1164,10 +1205,6 @@ namespace Peripherals
 
                 }
             }
-            inputCount = 0;
-            fetchCount = 0;
-            frameCount--;
-            totalFramesPlayed++;
             return true;
         }
 

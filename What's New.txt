@@ -2,8 +2,27 @@
 What's New
 --------------
 
-Ver 0.7.2 (WIP)
--------------------
+V 0.8
+----------------
++ Added CPU speed adjuster in addition to emulation speed.
++ Joysticks are now remembered between emulator sessions and automatically enabled on startup, if found.
++ Added ability to load custom symbols to represent memory locations (R Martins). Symbols should be stored as CSV in key-pairs like so:
+23606, CHARS
+42000, SPRITE DATA
++ Added Watch Window tool in Debugger (R Martins).
++ Added option to disable tape traps in Options.
++ Added Memory Profiler (in Debugger) that shows a hotspot of read/write activities in the memory.
++ Added RZX Playback Start and Frame end breakpoint events.
++ Added a command line queue to auto-execute commands one after the other, much like SpecEmu (some would say exactly like SpecEmu...). See README.txt
++ Added support for compressed CSW files.
+* Changed the way Zero attempts to load ROMs if it couldn't find a valid one on start-up.
+* Replaced the registry based Most Recently Used files with a non-registry version.
+* Re-wrote the command line parser for clearer way to pass in options. See README.txt.
+* Removed ZipForge dependency for handling zip archives.
+* Moved RZX from Tools to a main menu item.
+* Reassigned many key shortcuts to use CTRL rather than ALT.
+* Completely rewrote RZX module to follow specs more closely.
+* Key2Joy now uses TAB as fire key instead of ALT.
 - Fixed aspect ratio in DirectX full screen mode (Hexaae).
 - Fixed +3 contention bug (woody)
 - Fixed mic boost emulation (Hernan). Cobra's arc works fine now.
@@ -15,19 +34,31 @@ Ver 0.7.2 (WIP)
 - Fixed wrong breakpoint being removed in debugger in certain cases (R Martins).
 - Fixed loading of some 128k Z80 files with trailing zeros (Damien Guard).
 - Fixed breakpoints not reflecting correctly in the debugger (R Martins).
-- Key2Joy now uses TAB as fire key instead of ALT.
-+ Joysticks are now remembered between emulator sessions and automatically enabled on startup, if found.
-+ Added Insta-Load option to Tape Deck (anton).
-+ Completely rewrote RZX module to follow specs more closely.
-+ Added ability to load custom symbols to represent memory locations (R Martins). Symbols should be stored as CSV in key-pairs like so:
-23606, CHARS
-42000, SPRITE DATA
-+ Added Watch Window tool in Debugger (R Martins).
-* Changed the way Zero attempts to load ROMs if it couldn't find a valid one on start-up.
-+ Added option to disable tape traps in Options.
-+ Added Memory Profiler (in Debugger) that shows a hotspot of read/write activities in the memory.
-
-
+- Fixed handling of compressed tape data embedded in SZX.
+- Fixed saving of temporary data to user's local storage location.
+- Fixed not cleaning up of temporary files on emulator exit.
+- Fixed issues with disks information not reflecting correctly on machine switch.
+- Fixed ALT+SPACE/etc causing key presses to repeat endlessly. (woody)
+- Fixed bug in page handling when loading SZX on Spectrum +3. (woody)
+- Fixed screen flip timing during 7ffd out - passes ptime test now. (woody).
+- Fixed incorrect LD D, Res(6, IY/IX+n) instruction. (woody)
+- Fixed MIC boost emulation. For real this time. (azesmbog, cngsoft)
+- Fixed Quick Commander disks not working with TR DOS. (woody)
+- Fixed AY last OUT not being read back IN correctly (woody, azesmbog).
+- Fixed incorrect Out handling in Pentagon (azesmbog).
+- Fixed incorrect AY reset behaviour (azesmbog).
+- Fixed window form sizing issue (rich_chandler).
+- Fixed parity flag being incorrectly reset during interrupt (woody).
+- Fixed IFF2 flag not being set in SZX when creating snapshot (woody).
+- Fixed incorrect HALT implementation (ZjoyKiler).
+- Fixed incorrect LD IXL/IXH, IXL,IXH instructions (woody, azesmbog)
+- Fixed loading of z80 snapshots with invalid tstate values (woody).
+- Fixed mono sound in AY emulation (ZXGuesser).
+- Fixed aspect ratio in DirectX full screen mode (Hexaae).
+- Fixed +3 contention bug (woody)
+- Fixed issue with loading TAP files that have no pause between blocks (woody).
+- Fixed crash on startup if a filename was passed via command line and it wasn't found.
+- Removed the RZX discard option.
 
 Ver 0.7.1
 --------------------

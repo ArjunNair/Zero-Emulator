@@ -89,15 +89,6 @@ namespace ZeroWin
             }
         }
 
-        public int EmulationSpeed {
-            get {
-                return emulationSpeedTrackBar.Value;
-            }
-            set {
-                emulationSpeedTrackBar.Value = value;
-            }
-        }
-
         public bool HighCompatibilityMode {
             get { return Use128keCheckbox.Checked; }
             set { Use128keCheckbox.Checked = value; }
@@ -509,17 +500,17 @@ namespace ZeroWin
 
                 #endregion old default method
 
-                ZeroConfig defCon = new ZeroConfig();
-                RomToUse48k = defCon.Current48kROM;
-                RomToUse128k = defCon.Current128kROM;
-                RomToUse128ke = defCon.Current128keROM;
-                RomToUsePlus3 = defCon.CurrentPlus3ROM;
-                RomToUsePentagon = defCon.CurrentPentagonROM;
+                zwRef.config.Default();
+                RomToUse48k = zwRef.config.romOptions.Current48kROM;
+                RomToUse128k = zwRef.config.romOptions.Current128kROM;
+                RomToUse128ke = zwRef.config.romOptions.Current128keROM;
+                RomToUsePlus3 = zwRef.config.romOptions.CurrentPlus3ROM;
+                RomToUsePentagon = zwRef.config.romOptions.CurrentPentagonROM;
                 //Don't revert path to defaults, since there is no default path.
                 //Instead try to use application start up path.
                 RomPath = Application.StartupPath + "\\roms";
                 GamePath = Application.StartupPath + "\\programs";
-                string model = defCon.CurrentSpectrumModel;
+                string model = zwRef.config.emulationOptions.CurrentModelName;
                 switch (model) {
                     case "ZX Spectrum 48k":
                         SpectrumModel = 0;
@@ -541,10 +532,10 @@ namespace ZeroWin
                         SpectrumModel = 4;
                         break;
                 }
-                UseDirectX = defCon.UseDirectX;
-                borderSize = defCon.BorderSize;
+                //UseDirectX = zwRef.config.UseDirectX;
+                borderSize = zwRef.config.renderOptions.BorderSize;
 
-                string paletteMode = defCon.PaletteMode;
+                string paletteMode = zwRef.config.renderOptions.Palette;
                 switch (paletteMode) {
                     case "Grayscale":
                         Palette = 1;
@@ -558,15 +549,14 @@ namespace ZeroWin
                         Palette = 0;
                         break;
                 }
-                PauseOnFocusChange = defCon.PauseOnFocusLost;
-                ConfirmOnExit = defCon.ConfirmOnExit;
-                UseLateTimings = defCon.UseLateTimings;
-                UseIssue2Keyboard = defCon.UseIssue2Keyboard;
-                RestoreLastState = defCon.RestoreLastStateOnStart;
-                EmulationSpeed = defCon.EmulationSpeed;
-                ShowOnScreenLEDS = defCon.ShowOnscreenIndicators;
-                Use128keCheckbox.Checked = defCon.HighCompatibilityMode;
-                interlaceCheckBox.Checked = defCon.EnableInterlacedOverlay;
+                PauseOnFocusChange = zwRef.config.emulationOptions.PauseOnFocusLost;
+                ConfirmOnExit = zwRef.config.emulationOptions.ConfirmOnExit;
+                UseLateTimings = zwRef.config.emulationOptions.LateTimings;
+                UseIssue2Keyboard = zwRef.config.emulationOptions.UseIssue2Keyboard;
+                RestoreLastState = zwRef.config.emulationOptions.RestorePreviousSessionOnStart;
+                //ShowOnScreenLEDS = defCon.ShowOnscreenIndicators;
+                Use128keCheckbox.Checked = zwRef.config.emulationOptions.Use128keForSnapshots;
+                interlaceCheckBox.Checked = zwRef.config.renderOptions.Scanlines;
             }
         }
 
@@ -684,10 +674,6 @@ namespace ZeroWin
         private void checkBox1_CheckedChanged(object sender, EventArgs e) {
         }
 
-        private void emulationSpeedTrackBar_Scroll(object sender, EventArgs e) {
-            toolTip1.SetToolTip(emulationSpeedTrackBar, "Speed  " + emulationSpeedTrackBar.Value + "%");
-        }
-
         private void lastStateCheckbox_CheckedChanged(object sender, EventArgs e) {
         }
 
@@ -708,12 +694,14 @@ namespace ZeroWin
         }
 
         private void button1_Click(object sender, EventArgs e) {
+            /*
             if (this.zwRef.joystick1.isInitialized)
                 this.zwRef.joystick1.Release();
             this.zwRef.joystick1 = new JoystickController();
             this.zwRef.joystick1.InitJoystick(this.zwRef, Joystick1Choice - 1);
             JoystickRemap jsRemap = new JoystickRemap(this.zwRef, this.zwRef.joystick1);
             jsRemap.ShowDialog();
+            */
         }
     }
 }
