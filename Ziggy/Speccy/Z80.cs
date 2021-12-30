@@ -19,13 +19,24 @@ namespace Cpu
         public ushort SP, PC, IX, IY;
         public ushort AF_, BC_, DE_, HL_;
         public ushort MemPtr;
-        public byte A, F;
+        public byte A;
         public byte B, C;
         public byte H, L;
         public byte D, E;
         public byte I, R;
         public byte R_;
+        public byte Q;
+        public bool modified_F;
+        private byte f;
 
+        public byte F
+        {
+            get { return f; }
+            set { 
+                f = value;
+                modified_F = true;
+            }
+        }
         public byte IXH
         {
             get { return (byte)(IX >> 8); }
@@ -112,12 +123,17 @@ namespace Cpu
         private int disp = 0;               //used later on to calculate relative jumps and read multiple opcodes 
         private ushort addr = 0;
         private byte val = 0;               //temp storage
-        public bool and_32_Or_64 = false;
+
+        public bool and_32_Or_64 = false;   //tape trap acceleration
+
+        // For undocumented flag operations involving LDxR, CPxR
+        // https://github.com/hoglet67/Z80Decoder/wiki/Undocumented-Flags#interrupted-block-instructions
+        public bool blockMemoryOperation = false;
 
         public Z80_Registers regs;
 
-        private const int BIT_MEMPTR_11 = 0x800;
-        private const int BIT_MEMPTR_13 = 0x2000;
+        private const int BIT_11 = 0x800;
+        private const int BIT_13 = 0x2000;
         private const byte BIT_F_HALF = 0x10;
         private const byte BIT_F_5 = 0x20;
         private const byte BIT_F_ZERO = 0x40;
@@ -486,6 +502,8 @@ namespace Cpu
             regs.BC = 0xffff;
             regs.DE = 0xffff;
             regs.HL = 0xffff;
+            regs.modified_F = false;
+            regs.Q = 0;
 
             regs.PC = 0;
             interrupt_mode = 0;
@@ -509,6 +527,8 @@ namespace Cpu
             regs.MemPtr = 0;
             iff_1 = false;
             iff_2 = false;
+            regs.modified_F = false;
+            regs.Q = 0;
         }
 
         public void exx() {
@@ -1175,7 +1195,9 @@ namespace Cpu
 
         public void Step() {
             int opcode = FetchInstruction();
+            regs.modified_F = false;
             Execute(opcode);
+            regs.Q = (byte)((regs.modified_F ? 0 : regs.F) & (BIT_F_3 | BIT_F_5));
         }
 
         //Executes a single opcode
@@ -1921,6 +1943,7 @@ namespace Cpu
                 case 0x08:     //EX regs.AF, regs.AF'
                                // Log("EX regs.AF, regs.AF'");
                 ex_af_af();
+                regs.modified_F = false;
                 break;
 
                 case 0xD9:   //EXX
@@ -2447,17 +2470,32 @@ namespace Cpu
                 #region Carry Flag operations
                 /*** Carry Flag operations ***/
                 case 0x37:  //SCF
-                            // Log("SCF");
-                regs.F = (byte)((regs.F & (BIT_F_PARITY | BIT_F_ZERO | BIT_F_SIGN)) 
-                            | (regs.A & (BIT_F_3 | BIT_F_5)) | BIT_F_CARRY);
+                {
+                    // Log("SCF");
+                    //Undocumented SCF behaviour:
+                    //https://worldofspectrum.org/forums/discussion/41704/scf-ccf-flags-new-discovery/p1
+
+                    //regs.F = (byte)((regs.F & (BIT_F_PARITY | BIT_F_ZERO | BIT_F_SIGN)) 
+                    //            | (regs.A & (BIT_F_3 | BIT_F_5)) | BIT_F_CARRY);
+
+                    regs.F = (byte)((regs.F & (BIT_F_PARITY | BIT_F_ZERO | BIT_F_SIGN))
+                                | ((regs.Q | (regs.A & (BIT_F_3 | BIT_F_5))) | BIT_F_CARRY));
+                }
                 break;
 
                 case 0x3F:  //CCF
-                            // Log("CCF");
-                regs.F = (byte)((regs.F & (BIT_F_PARITY | BIT_F_ZERO | BIT_F_SIGN)) 
-                            | ((regs.F & BIT_F_CARRY) != 0 ? BIT_F_HALF : BIT_F_CARRY) 
-                            | (regs.A & (BIT_F_3 | BIT_F_5)));
+                {
+                        // Log("CCF");
+                        //Undocumented SCF behaviour:
 
+                        //regs.F = (byte)((regs.F & (BIT_F_PARITY | BIT_F_ZERO | BIT_F_SIGN)) 
+                        //            | ((regs.F & BIT_F_CARRY) != 0 ? BIT_F_HALF : BIT_F_CARRY) 
+                        //            | (regs.A & (BIT_F_3 | BIT_F_5)));
+
+                        regs.F = (byte)((regs.F & (BIT_F_PARITY | BIT_F_ZERO | BIT_F_SIGN))
+                                    | ((regs.F & BIT_F_CARRY) != 0 ? BIT_F_HALF : BIT_F_CARRY)
+                                    | (regs.Q | (regs.A & (BIT_F_3 | BIT_F_5))));
+                    }
                 break;
                 #endregion
 
@@ -2734,6 +2772,7 @@ namespace Cpu
                 case 0xF1:  //POP regs.AF
                             // Log("POP regs.AF");
                 regs.AF = PopStack();
+                regs.modified_F = false;
                 break;
 
                 case 0xF5:  //PUSH regs.AF
@@ -6994,30 +7033,28 @@ namespace Cpu
                         }
                         case 0xB0:  //LDIR
                         {
+                            blockMemoryOperation = true;
                             byte b = PeekByte(regs.HL);
                             PokeByte(regs.DE, b);
-                            //if (model == MachineModel._plus3)
-                            //    totalTStates += 2;
-                            //else
-
                             Contend(regs.DE, 1, 2);
-                            SetF3(((b + regs.A) & BIT_F_3) != 0);
-                            SetF5(((b + regs.A) & BIT_F_NEG) != 0);
-                            SetNeg(false);
-                            SetHalf(false);
+                           
                             if(regs.BC != 1) {
                                 regs.MemPtr = (ushort)(regs.PC - 1); //points to B0 byte
                             }
 
                             regs.BC--;
                             if(regs.BC != 0) {
-                                //if (model == MachineModel._plus3)
-                                //    totalTStates += 5;
-                                //else
                                 Contend(regs.DE, 1, 5);
                                 regs.PC -= 2;
                             }
+                            else {
+                                blockMemoryOperation = false;
+                            }
 
+                            SetF3(((b + regs.A) & BIT_F_3) != 0);
+                            SetF5(((b + regs.A) & BIT_F_NEG) != 0);
+                            SetNeg(false);
+                            SetHalf(false);
                             SetParity(regs.BC != 0);
                             regs.HL++;
                             regs.DE++;
@@ -7026,6 +7063,7 @@ namespace Cpu
                         }
                         case 0xB1:  //CPIR
                         {
+                            blockMemoryOperation = true; 
                             bool lastCarry = ((regs.F & BIT_F_CARRY) != 0);
                             byte b = PeekByte(regs.HL);
                             Cp_R(b);
@@ -7046,6 +7084,9 @@ namespace Cpu
                             if((regs.BC != 0) && ((regs.F & BIT_F_ZERO) == 0)) {
                                 Contend(regs.HL, 1, 5);
                                 regs.PC -= 2;
+                            }
+                            else {
+                                blockMemoryOperation = false;
                             }
                             regs.HL++;
 
@@ -7094,6 +7135,7 @@ namespace Cpu
                         }
                         case 0xB8:  //LDDR
                         {
+                            blockMemoryOperation = true;
                             byte b = PeekByte(regs.HL);
                             PokeByte(regs.DE, b);
                             Contend(regs.DE, 1, 2);
@@ -7109,11 +7151,13 @@ namespace Cpu
 
                             regs.BC--;
 
-                            if(regs.BC != 0) {
+                            if (regs.BC != 0) {
                                 Contend(regs.DE, 1, 5);
                                 regs.PC -= 2;
                             }
-
+                            else {
+                                blockMemoryOperation = false;
+                            }
                             SetParity(regs.BC != 0);
                             regs.HL--;
                             regs.DE--;
@@ -7122,6 +7166,7 @@ namespace Cpu
                         }
                         case 0xB9:  //CPDR
                         {
+                            blockMemoryOperation = true;
                             bool lastCarry = ((regs.F & BIT_F_CARRY) != 0);
                             byte b = PeekByte(regs.HL);
                             Cp_R(b);
@@ -7143,6 +7188,9 @@ namespace Cpu
                             if((regs.BC != 0) && ((regs.F & BIT_F_ZERO) == 0)) {
                                 Contend(regs.HL, 1, 5);
                                 regs.PC -= 2;
+                            }
+                            else {
+                                blockMemoryOperation = false;
                             }
                             regs.HL--;
                             break;

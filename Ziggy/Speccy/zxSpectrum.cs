@@ -8120,13 +8120,20 @@ namespace Speccy
         //Processes an interrupt
         public void Interrupt() {
             cpu.regs.R++;
+            cpu.regs.modified_F = false;
+            cpu.regs.Q = 0;
+
             //Disable interrupts
             cpu.iff_1 = false;
             cpu.iff_2 = false;
 
             if (cpu.is_halted) {
                 cpu.is_halted = false;
-                //cpu.regs.PC++;
+            }
+
+            if (cpu.blockMemoryOperation) {
+                cpu.SetF3((cpu.regs.PC & 0x800) != 0);
+                cpu.SetF5((cpu.regs.PC & 0x2000) != 0);
             }
 
             int oldT = cpu.t_states;
