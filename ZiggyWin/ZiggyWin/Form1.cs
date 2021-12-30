@@ -81,7 +81,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         [System.Runtime.InteropServices.DllImport(@"pzx_tools.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern System.IntPtr csw2pzx(byte[] buff, int buffSize, ref uint outSize);
 
-        [System.Runtime.InteropServices.DllImport(@"pzxtools.dll", CallingConvention = CallingConvention.Cdecl)]
+        [System.Runtime.InteropServices.DllImport(@"pzx_tools.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern System.IntPtr pzx2wav(string input_name, ref uint outSize);
 
         [System.Runtime.InteropServices.DllImport(@"pzx_tools.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -2282,6 +2282,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                         if (options.WindowSize >= 100 && (options.WindowSize % 50 == 0))
                             config.renderOptions.WindowSize = options.WindowSize - 100;
                     }
+                    
+                    if (options.WindowSize < 100) {
+                        config.renderOptions.WindowSize = 100;
+                    }
+
                     if (options.BorderSize != null) {
                         if (options.BorderSize == "mini")
                             config.renderOptions.BorderSize = 48;
@@ -2406,6 +2411,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             dxWindow.EnableVsync = config.renderOptions.Vsync;
 
             logger.Log("Initializing window...");
+
+            if (config.renderOptions.WindowSize < 0) {
+                config.renderOptions.WindowSize = 0;
+            }
             AdjustWindowSize();
 
             if (config.renderOptions.FullScreenMode)
