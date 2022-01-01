@@ -8119,24 +8119,6 @@ namespace Speccy
 
         //Processes an interrupt
         public void Interrupt() {
-            cpu.regs.R++;
-            cpu.regs.modified_F = false;
-            cpu.regs.Q = 0;
-
-            //Disable interrupts
-            cpu.iff_1 = false;
-            cpu.iff_2 = false;
-
-            if (cpu.is_halted) {
-                cpu.is_halted = false;
-            }
-
-            if (cpu.blockMemoryOperation) {
-                cpu.SetF3((cpu.regs.PC & 0x800) != 0);
-                cpu.SetF5((cpu.regs.PC & 0x2000) != 0);
-            }
-
-            int oldT = cpu.t_states;
             if (cpu.interrupt_mode < 2) //IM0 = IM1 for our purpose
             {
                 //When interrupts are enabled we can be sure that the reset sequence is over.
@@ -8151,17 +8133,12 @@ namespace Speccy
                         resetFrameCounter = 0;
                     }
                 }
-                cpu.Trigger_IM_1();
-
-            } 
-            else    //IM 2
-            {
-                cpu.Trigger_IM_2();
             }
+            int oldT = cpu.t_states;
+            cpu.Interrupt();
             int deltaT = cpu.t_states - oldT;
             timeToOutSound += deltaTStates; 
             UpdateAudio(deltaT);
-            //UpdateTapeState(deltaT);
         }
 
         public void StopTape(bool cancelCallback = false) {

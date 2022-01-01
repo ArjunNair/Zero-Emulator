@@ -126,9 +126,45 @@ namespace Cpu
 
         public bool and_32_Or_64 = false;   //tape trap acceleration
 
-        // For undocumented flag operations involving LDxR, CPxR
+        // For undocumented flag operations involving LDxR, CPxR, INxR and OTxR
         // https://github.com/hoglet67/Z80Decoder/wiki/Undocumented-Flags#interrupted-block-instructions
+        /* ZJoyKiLer's explanation. However, treat Bo as B because there is no real difference.
+            if instruction == INIR
+                    T = IO + ((C + 1) & 0xFF)
+            else if instruction == INDR
+                    T = IO + ((C - 1) & 0xFF)
+            else if (instruction == OTIR) || (instruction == OTDR)
+                    T = IO + L
+
+            NF = IO.7
+            CF = T > 255
+
+            if B
+                    ZF = 0
+                    SF = Bo.7
+                    YF = PCi.13
+                    XF = PCi.11
+
+                    if CF
+                            if IO & 0x80
+                                    PF = ((T & 7) ^ Bo).parity == ((Bo - 1) & 7).parity
+                                    HF = !(Bo & 0xF)
+                            else
+                                    PF = ((T & 7) ^ Bo).parity == ((Bo + 1) & 7).parity
+                                    HF = (Bo & 0xF) == 0xF
+                    else
+                            PF = ((T & 7) ^ Bo).parity == (Bo & 7).parity
+
+            else
+                    SF = 0
+                    ZF = 1
+                    HF = CF
+                    PF = ((T & 7) ^ Bo).parity
+        */
         public bool blockMemoryOperation = false;
+        public bool blockIOOperation = false;
+        private int blockIOData = 0;
+        private int blockIOResult = 0;
 
         public Z80_Registers regs;
 
@@ -319,7 +355,7 @@ namespace Cpu
             set { pc = value & 0xffff; }
         }
         */
-        #endregion 16 bit register access
+#endregion 16 bit register access
 
         #region Flag manipulation
 
@@ -513,6 +549,9 @@ namespace Cpu
             regs.MemPtr = 0;
             iff_1 = false;
             iff_2 = false;
+            blockMemoryOperation = false;
+            blockIOOperation = false;
+            blockIOData = 0;
         }
 
         public void UserReset() {
@@ -529,6 +568,58 @@ namespace Cpu
             iff_2 = false;
             regs.modified_F = false;
             regs.Q = 0;
+            blockMemoryOperation = false;
+            blockIOOperation = false;
+            blockIOData = 0;
+        }
+
+        public void Interrupt() {
+            regs.R++;
+            regs.modified_F = false;
+            regs.Q = 0;
+
+            //Disable interrupts
+            iff_1 = false;
+            iff_2 = false;
+
+            if (is_halted) {
+                is_halted = false;
+            }
+
+            if (blockMemoryOperation) {
+                SetF3((regs.PC & BIT_11) != 0);
+                SetF5((regs.PC & BIT_13) != 0);
+            }
+
+            if (blockIOOperation) {
+                SetF3((regs.PC & BIT_11) != 0);
+                SetF5((regs.PC & BIT_13) != 0);
+
+                if ((regs.F & BIT_F_CARRY) != 0) {
+                    if ((blockIOData & BIT_F_SIGN) != 0) {
+                        //SetParity(((regs.F & BIT_F_PARITY) ^ (parity[(regs.B - 1) & 0x7])) != 0);
+                        SetParity((parity[regs.F & BIT_F_PARITY] ^ parity[(regs.B - 1) & 0x7]) != 0);
+                        SetHalf((regs.B & 0x0F) == 0x00);
+                    }
+                    else {
+                        //SetParity(((regs.F & BIT_F_PARITY) ^ (parity[(regs.B + 1) & 0x7])) != 0);
+                        SetParity((parity[regs.F & BIT_F_PARITY] ^ parity[(regs.B + 1) & 0x7]) != 0);
+                        SetHalf((regs.B & 0x0F) == 0x0F);
+                    }
+                }
+                else {
+                    SetParity((parity[regs.F & BIT_F_PARITY] ^ parity[regs.B & 0x7]) != 0);
+                    //SetParity(((regs.F & BIT_F_PARITY) ^ (parity[regs.B & 0x7])) != 0);
+                }
+            }
+            if (interrupt_mode < 2) //IM0 = IM1 for our purpose
+            {
+                Trigger_IM_1();
+            }
+            else    //IM 2
+            {
+                Trigger_IM_2();
+            }
         }
 
         public void exx() {
@@ -7093,16 +7184,22 @@ namespace Cpu
                             break;
                         }
                         case 0xB2:  //INIR
-                                    // Log("INIR");
+                                    // Log("INIR");\
+                        blockIOOperation = true;
                         Contend(regs.IR, 1, 1);
                         result = In_BC();
+                        blockIOData = result;
                         PokeByte(regs.HL, result);
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         regs.B = Dec(regs.B); ;
                         regs.HL++;
+
                         if(regs.B != 0) {
                             Contend(regs.HL, 1, 5);
                             regs.PC -= 2;
+                        }
+                        else {
+                            blockIOOperation = false;
                         }
 
                         SetNeg((result & BIT_F_SIGN) != 0);
@@ -7112,25 +7209,33 @@ namespace Cpu
                         SetParity(parity[(((result + ((regs.C + 1) & 0xff)) & 0x7) ^ regs.B)]);
                         break;
 
-                        case 0xB3:  //OTIR
+                        case 0xB3:  //OTIR       
                         {
+                            blockIOOperation = true;
                             Contend(regs.IR, 1, 1);
                             regs.B = Dec(regs.B);
                             regs.MemPtr = (ushort)(regs.BC + 1);
 
                             byte b = PeekByte(regs.HL);
+                           
                             Out(regs.BC, b);
-                            if(regs.B != 0) {
+                            regs.HL++;
+                            if (regs.B != 0) {
                                 Contend(regs.BC, 1, 5);
                                 regs.PC -= 2;
                             }
+                            else {
+                                blockIOOperation = false;
+                            }
 
-                            regs.HL++;
+                            blockIOData = b;
+                            blockIOResult = b + regs.L;
+
                             SetNeg((b & BIT_F_SIGN) != 0);
-                            SetCarry((b + regs.L) > 0xff);
+                            SetCarry(blockIOResult > 0xff);
                             SetHalf((regs.F & BIT_F_CARRY) != 0);
 
-                            SetParity(parity[(((b + regs.L) & 0x7) ^ regs.B)]);
+                            SetParity(parity[((blockIOResult & 0x7) ^ regs.B)]);
                             break;
                         }
                         case 0xB8:  //LDDR
@@ -7197,15 +7302,20 @@ namespace Cpu
                         }
                         case 0xBA:  //INDR
                                     // Log("INDR");
+                        blockIOOperation = true;
                         Contend(regs.IR, 1, 1);
                         result = In_BC();
                         PokeByte(regs.HL, result);
                         regs.MemPtr = (ushort)(regs.BC - 1);
                         regs.B = Dec(regs.B);
+                        blockIOData = result;
 
-                        if(regs.B != 0) {
+                        if (regs.B != 0) {
                             Contend(regs.HL, 1, 5);
                             regs.PC -= 2;
+                        }
+                        else {
+                            blockIOOperation = false;
                         }
                         regs.HL--;
                         SetNeg((result & BIT_F_SIGN) != 0);
@@ -7216,24 +7326,34 @@ namespace Cpu
 
                         case 0xBB:  //OTDR
                         {
+                            blockIOOperation = true;
                             Contend(regs.IR, 1, 1);
                             regs.B = Dec(regs.B);
                             regs.MemPtr = (ushort)(regs.BC - 1);
 
                             byte b = PeekByte(regs.HL);
                             Out(regs.BC, b);
+                            regs.HL--;
 
-                            if(regs.B != 0) {
+                            blockIOData = b;
+                            blockIOResult = b + regs.L;
+
+                            if (regs.B != 0) {
                                 Contend(regs.BC, 1, 5);
                                 regs.PC -= 2;
+                                //SetZero(false);
+                            }
+                            else 
+                            {
+                                //SetZero(true);
+                                blockIOOperation = false; 
                             }
 
-                            regs.HL--;
-                            SetNeg((b & BIT_F_SIGN) != 0);
-                            SetCarry((b + regs.L) > 0xff);
+                            SetCarry(blockIOResult > 0xff);
+                            SetParity(parity[((blockIOResult & 0x7) ^ regs.B)]);
                             SetHalf((regs.F & BIT_F_CARRY) != 0);
+                            SetNeg((b & BIT_F_SIGN) != 0);
 
-                            SetParity(parity[(((b + regs.L) & 0x7) ^ regs.B)]);
                             break;
                         }
                         default:
