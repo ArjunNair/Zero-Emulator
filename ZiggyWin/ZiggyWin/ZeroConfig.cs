@@ -116,9 +116,9 @@ namespace ZeroWin
             pathOptions.Saves = @"\saves\";
             pathOptions.Programs =  @"\programs\";
 
-            tapeOptions.EdgeLoad = false;
+            tapeOptions.EdgeLoad = true;
             tapeOptions.AutoLoad = false;
-            tapeOptions.AutoPlay = false;
+            tapeOptions.AutoPlay = true;
             tapeOptions.FastLoad = false;
             tapeOptions.ROMTraps = true;
 
@@ -134,9 +134,9 @@ namespace ZeroWin
             renderOptions.Palette = "Normal";
             renderOptions.PixelSmoothing = true;
             renderOptions.Scanlines = false;
-            renderOptions.Vsync = true;
+            renderOptions.Vsync = false;
             renderOptions.UseDirectX = true;
-            renderOptions.WindowSize = 100;
+            renderOptions.WindowSize = 100; //200%
 
             audioOptions.EnableAYFor48K = false;
             audioOptions.Mute = false;
@@ -148,7 +148,7 @@ namespace ZeroWin
             emulationOptions.CPUMultiplier = 1;
             emulationOptions.LateTimings = false;
             emulationOptions.PauseOnFocusLost = true;
-            emulationOptions.RestorePreviousSessionOnStart = true;
+            emulationOptions.RestorePreviousSessionOnStart = false;
             emulationOptions.Use128keForSnapshots = false;
             emulationOptions.UseIssue2Keyboard = false;
             emulationOptions.CurrentModelName = "ZX Spectrum 48k";
@@ -156,6 +156,7 @@ namespace ZeroWin
 
             inputDeviceOptions = new InputDeviceSettings();
             inputDeviceOptions.MouseSensitivity = 3;
+            inputDeviceOptions.KempstonUsesPort1F = true;
             fileAssociationOptions = new FileAssociationSettings();
         }
 
