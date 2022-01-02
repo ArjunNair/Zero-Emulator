@@ -94,7 +94,7 @@ namespace Speccy
         public List<IODevice> io_devices = new List<IODevice>();
         public List<AudioDevice> audio_devices = new List<AudioDevice>();
         public Dictionary<int, SpeccyDevice> attached_devices = new Dictionary<int, SpeccyDevice>();
-        
+        protected Random rnd_generator = new Random();
 
         protected int[] keyLine = { 255, 255, 255, 255, 255, 255, 255, 255 };
 
@@ -128,6 +128,7 @@ namespace Speccy
         public bool needsPaint = false;     //Raised when the ULA has finished painting the entire screen
         protected bool CapsLockOn = false;
         protected int prevT;        //previous cpu t-states
+        protected int inputFrameTime = 0;
 
         //Sound
         public const short MIN_SOUND_VOL = 0;
@@ -6330,7 +6331,9 @@ namespace Speccy
             lastScanlineColorCounter = 0;
 
             //We jiggle the wait period after resetting so that FRAMES/RANDOMIZE works randomly enough on the speccy.
-            resetFrameTarget = new Random().Next(40, 90);
+            rnd_generator = new Random();
+            resetFrameTarget = rnd_generator.Next(40, 90);        
+            inputFrameTime = rnd_generator.Next(FrameLength);
         }
 
         //Updates the tape state
@@ -8036,8 +8039,6 @@ namespace Speccy
                     }
                 } 
             }
-            //if(isRecordingRZX)
-            //    rzx.fetchCount++;
 
             if (!ran_interrupt) {
                 prevT = cpu.t_states;
@@ -8047,7 +8048,7 @@ namespace Speccy
                 deltaTStates = cpu.t_states - prevT;
 
                 //// Change CPU speed///////////////////////
-                if (cpuMultiplier > 1 && !tapeIsPlaying /*!isPauseBlockPreproccess*/) {
+                if (cpuMultiplier > 1 && !tapeIsPlaying) {
                     deltaTStates /= cpuMultiplier;
                     if (deltaTStates < 1)
                         deltaTStates = (tapeIsPlaying ? 0 : 1); //tape loading likes 0, sound emulation likes 1. WTF?
@@ -8057,6 +8058,7 @@ namespace Speccy
                 /////////////////////////////////////////////////
                 timeToOutSound += deltaTStates;
             }
+            
             //UpdateTape
             if (tapeIsPlaying && !tape_edgeDetectorRan) {
                 if (!ran_interrupt)
@@ -8078,6 +8080,13 @@ namespace Speccy
                     PlayAudio();
                 }
             }
+
+            //Randomize when the keyboard state is updated as in a real speccy (kinda).
+            if (cpu.t_states >= inputFrameTime) {
+                UpdateInput();
+                inputFrameTime = rnd_generator.Next(FrameLength);
+            }
+
             //End of frame?
             if (cpu.t_states >= FrameLength) {
                 //If machine has already repainted the entire screen,
@@ -8097,7 +8106,6 @@ namespace Speccy
                 }
 
                 ULAUpdateStart();
-                UpdateInput();
 
                 if (isRecordingRZX) {
                     /*  rzxFrame = new RZXFile.RZX_Frame();
