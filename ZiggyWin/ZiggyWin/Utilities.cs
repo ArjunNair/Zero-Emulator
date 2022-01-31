@@ -62,7 +62,7 @@ namespace ZeroWin
             bool validInput = false;
             int number = -1;
 
-            if (input[0] == '$')
+            if (input[0] == '$' || input[0] == '#')
                 validInput = System.Int32.TryParse(input.Substring(1, input.Length - 1), System.Globalization.NumberStyles.HexNumber, null, out number);
             else
                 validInput = System.Int32.TryParse(input, out number);
