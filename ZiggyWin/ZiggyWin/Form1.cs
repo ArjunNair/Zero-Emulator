@@ -1043,11 +1043,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                 rzxStatusLabel.Enabled = (zx.isPlayingRZX || zx.isRecordingRZX);
 
-                if (!config.audioOptions.Mute)
-                    soundStatusLabel.Image = Properties.Resources.sound_high;
-                else
-                    soundStatusLabel.Image = Properties.Resources.sound_mute;
-
                 if (frameCount >= 50) {
                     averageFPS = (int)(1000 / (totalFrameTime / frameCount));
                     if (!dxWindow.EnableFullScreen) {
@@ -2708,8 +2703,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
             ChangeZXPalette(config.renderOptions.Palette);
 
-            if (config.audioOptions.Mute)
-                zx.MuteSound(true);
+            zx.MuteSound(config.audioOptions.Mute);
+            if (!config.audioOptions.Mute)
+                soundStatusLabel.Image = Properties.Resources.sound_high;
+            else
+                soundStatusLabel.Image = Properties.Resources.sound_mute;
 
             if (debugger != null) {
                 debugger.ReRegisterAllEvents();
@@ -3219,7 +3217,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                 statusStrip1.Visible = true;
                 toolStripMenuItem5.Enabled = true;
                 toolStripMenuItem1.Enabled = true;
-                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
                 this.WindowState = FormWindowState.Normal;
 
                 dxWindow.EnableFullScreen = false;
@@ -4632,6 +4630,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private void soundStatusLabel_Click(object sender, EventArgs e) {
             zx.MuteSound(config.audioOptions.Mute);
             config.audioOptions.Mute = !config.audioOptions.Mute;
+            if (!config.audioOptions.Mute)
+                    soundStatusLabel.Image = Properties.Resources.sound_high;
+                else
+                    soundStatusLabel.Image = Properties.Resources.sound_mute;
         }
 
         private void Form1_Resize(object sender, EventArgs e) {
