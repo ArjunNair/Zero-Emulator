@@ -96,6 +96,7 @@ namespace Speccy
             lastULAPlusOut = 0;
             GroupMode = 0;
             PaletteGroup = 0;
+            PaletteEnabled = false;
         }
 
         public void UnregisterDevice(zx_spectrum speccyModel) {
