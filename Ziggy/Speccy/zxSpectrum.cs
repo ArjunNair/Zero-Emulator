@@ -7720,13 +7720,20 @@ namespace Speccy
 
         //Enables/Disables AY sound
         public virtual void EnableAY(bool val) {
-            HasAYSound = val;
-            if (val) {
-                AY_8192 ay_device = new AY_8192();
-                AddDevice(ay_device);
+            if (model == MachineModel._48k) {
+                HasAYSound = val;
+                if (val) {
+                    AY_8192 ay_device = new AY_8192();
+                    AddDevice(ay_device);
+                }
+                else {
+                    RemoveDevice(SPECCY_DEVICE.AY_3_8912);
+                }
             }
             else {
-                RemoveDevice(SPECCY_DEVICE.AY_3_8912);
+                HasAYSound = true;
+                AY_8192 ay_device = new AY_8192();
+                AddDevice(ay_device);
             }
         }
 
@@ -8144,9 +8151,9 @@ namespace Speccy
             }
             int oldT = cpu.t_states;
             cpu.Interrupt();
-            int deltaT = cpu.t_states - oldT;
+            deltaTStates = cpu.t_states - oldT;
             timeToOutSound += deltaTStates; 
-            UpdateAudio(deltaT);
+            //UpdateAudio(deltaT);
         }
 
         public void StopTape(bool cancelCallback = false) {
