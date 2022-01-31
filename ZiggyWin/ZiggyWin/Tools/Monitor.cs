@@ -476,6 +476,13 @@ namespace ZeroWin
                     }
                 }
             }
+
+            if (watchWindow != null && !watchWindow.IsDisposed && watchWindow.Visible) {
+                for (int i = 0; i < watchVariableList.Count; i++)
+                    watchVariableList[i].Data = ziggyWin.zx.PeekByteNoContend((ushort)(watchVariableList[i].Address));
+
+                watchWindow.RefreshData(useHexNumbers);
+            }
         }
 
         //Event: Raised when the z80 memory contents are read (via PEEK)
@@ -750,7 +757,7 @@ namespace ZeroWin
                                 pauseEmulation = true;
                             }
                             else
-                            if (e.Port == val.Address) {
+                            if ((e.Port & val.Address) == val.Address) {
                                 breakPointStatus = String.Format("Port read @ {0} (${0:x})", val);
                                 pauseEmulation = true;
                             }
@@ -1240,16 +1247,8 @@ namespace ZeroWin
             //dataGridView1.CellDoubleClick += new DataGridViewCellEventHandler(dataGridView1_CellDoubleClick);
             dataGridView1.CellEndEdit += new DataGridViewCellEventHandler(dataGridView1_CellEndEdit);
             dataGridView1.CellToolTipTextNeeded += new DataGridViewCellToolTipTextNeededEventHandler(dataGridView1_CellToolTipTextNeeded);
-            ziggyWin.zx.MemoryReadEvent += new MemoryReadEventHandler(Monitor_MemoryRead);
-            ziggyWin.zx.MemoryExecuteEvent += new MemoryExecuteEventHandler(Monitor_MemoryExecute);
-            ziggyWin.zx.MemoryWriteEvent += new MemoryWriteEventHandler(Monitor_MemoryWrite);
-            ziggyWin.zx.OpcodeExecutedEvent += new OpcodeExecutedEventHandler(Monitor_OpcodeExecuted);
-            ziggyWin.zx.PortEvent += new PortIOEventHandler(Monitor_PortIO);
-            ziggyWin.zx.StateChangeEvent += new StateChangeEventHandler(Monitor_StateChangeEvent);
-            ziggyWin.zx.RZXPlaybackStartEvent += new RZXPlaybackStartEventHandler(Monitor_RZXPlaybackStartEvent);
-            ziggyWin.zx.RZXFrameEndEvent += new RZXFrameEndEventHandler(Monitor_RZXFrameEndEvent);
-            //ziggyWin.zx.PopStackEvent += new PopStackEventHandler(Monitor_PopStackEvent);
-            //ziggyWin.zx.PushStackEvent += new PushStackEventHandler(Monitor_PushStackEvent);
+            
+            ReRegisterAllEvents();
 
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 =
                  new System.Windows.Forms.DataGridViewCellStyle();
@@ -1552,7 +1551,7 @@ namespace ZeroWin
         //Disassembles within a range of memory addresses.
         //specifying rebuild as true will generate a list from scratch.
         protected void Disassemble(ushort startAddr, ushort endAddr, bool rebuild, bool traceOn) {
-            ushort PC = startAddr;
+            int PC = startAddr;
             int opcode;
             int disp = 0; //used later on to calculate relative jumps
             int opcodeMatches = 0;
@@ -1569,7 +1568,7 @@ namespace ZeroWin
 
                 // OpcodeDisassembly od = new OpcodeDisassembly(this);
                 //od.LineNo = line;
-                ushort address = PC;
+                int address = PC;
 
                 param1 = int.MaxValue;
                 param2 = int.MaxValue;
@@ -1578,16 +1577,16 @@ namespace ZeroWin
                     byteList = new List<int>();
 
                 if (!rebuild && !traceOn) {
-                    disassemblyList[line].Address = PC;
+                    disassemblyList[line].Address = (ushort)PC;
                 }
 
-                opcode = PeekByte(PC);
-                if (PC == 65535) {
+                if (PC > 65535) {
                     break;
                 }
+
+                opcode = PeekByte((ushort)PC);
+               
                 PC++;
-                if (PC > endAddr)
-                    break;
                 jmp4Undoc:  //We will jump here for undocumented instructions.
                 bool jumpForUndoc = false;
                 disp = 0;
@@ -1605,31 +1604,31 @@ namespace ZeroWin
                     # region 16 bit load operations (LD rr, nn)
                     /** LD rr, nn (excluding DD prefix) **/
                     case 0x01: //LD BC, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("LD BC, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0x11:  //LD DE, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("LD DE, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0x21:  //LD HL, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("LD HL, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0x2A:  //LD HL, (nn)
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("LD HL, ({0,0:D})", disp);
                         PC += 2;
                         break;
 
                     case 0x31:  //LD SP, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("LD SP, {0,0:D}", disp);
                         PC += 2;
                         break;
@@ -1758,19 +1757,19 @@ namespace ZeroWin
                         break;
 
                     case 0x22:  //LD (nn), HL
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("LD ({0,0:D}), HL", disp);
                         PC += 2;
                         break;
 
                     case 0x32:  //LD (nn), A
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("LD ({0,0:D}), A", disp);
                         PC += 2;
                         break;
 
                     case 0x36:  //LD (HL), n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("LD (HL), {0,0:D}", disp);
                         PC += 1;
                         break;
@@ -1779,7 +1778,7 @@ namespace ZeroWin
                     #region Indirect load operations (LD r, r)
                     /** LD r, r **/
                     case 0x06: //LD B, n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("LD B, {0,0:D}", disp);
                         PC += 1;
                         break;
@@ -1789,13 +1788,13 @@ namespace ZeroWin
                         break;
 
                     case 0x0E:  //LD C, n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("LD C, {0,0:D}", disp);
                         PC += 1;
                         break;
 
                     case 0x16:  //LD D,n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("LD D, {0,0:D}", disp);
                         PC += 1;
                         break;
@@ -1805,31 +1804,31 @@ namespace ZeroWin
                         break;
 
                     case 0x1E:  //LD E,n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("LD E, {0,0:D}", disp);
                         PC += 1;
                         break;
 
                     case 0x26:  //LD H,n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("LD H, {0,0:D}", disp);
                         PC += 1;
                         break;
 
                     case 0x2E:  //LD L,n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("LD L, {0,0:D}", disp);
                         PC += 1;
                         break;
 
                     case 0x3A:  //LD A,(nn)
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("LD A, ({0,0:D})", disp);
                         PC += 2;
                         break;
 
                     case 0x3E:  //LD A,n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("LD A, {0,0:D}", disp);
                         PC += 1;
                         break;
@@ -2179,7 +2178,7 @@ namespace ZeroWin
                         break;
 
                     case 0xC6:  //ADD A, n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("ADD A, {0,0:D}", disp);
                         PC++;
                         break;
@@ -2220,7 +2219,7 @@ namespace ZeroWin
                         break;
 
                     case 0xCE:  //ADC A, n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("ADC A, {0,0:D}", disp);
                         PC += 1;
                         break;
@@ -2260,7 +2259,7 @@ namespace ZeroWin
                         break;
 
                     case 0xD6:  //SUB n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("SUB {0,0:D}", disp);
                         PC += 1;
                         break;
@@ -2300,7 +2299,7 @@ namespace ZeroWin
                         break;
 
                     case 0xDE:  //SBC A, n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("SBC A, {0,0:D}", disp);
                         PC += 1;
                         break;
@@ -2309,37 +2308,37 @@ namespace ZeroWin
                     #region Relative Jumps (JR / DJNZ)
                     /*** Relative Jumps ***/
                     case 0x10:  //DJNZ n
-                        disp = GetDisplacement(PeekByte(PC));
+                        disp = GetDisplacement(PeekByte((ushort)PC));
                         Log("DJNZ {0,0:D}", PC + disp + 1);
                         PC++;
                         break;
 
                     case 0x18:  //JR n
-                        disp = GetDisplacement(PeekByte(PC));
+                        disp = GetDisplacement(PeekByte((ushort)PC));
                         Log("JR {0,0:D}", PC + disp + 1);
                         PC++;
                         break;
 
                     case 0x20:  //JRNZ n
-                        disp = GetDisplacement(PeekByte(PC));
+                        disp = GetDisplacement(PeekByte((ushort)PC));
                         Log("JR NZ, {0,0:D}", PC + disp + 1);
                         PC++;
                         break;
 
                     case 0x28:  //JRZ n
-                        disp = GetDisplacement(PeekByte(PC));
+                        disp = GetDisplacement(PeekByte((ushort)PC));
                         Log("JR Z, {0,0:D}", PC + disp + 1);
                         PC++;
                         break;
 
                     case 0x30:  //JRNC n
-                        disp = GetDisplacement(PeekByte(PC));
+                        disp = GetDisplacement(PeekByte((ushort)PC));
                         Log("JR NC, {0,0:D}", PC + disp + 1);
                         PC++;
                         break;
 
                     case 0x38:  //JRC n
-                        disp = GetDisplacement(PeekByte(PC));
+                        disp = GetDisplacement(PeekByte((ushort)PC));
                         Log("JR C, {0,0:D}", PC + disp + 1);
                         PC++;
                         break;
@@ -2348,37 +2347,37 @@ namespace ZeroWin
                     #region Direct jumps (JP)
                     /*** Direct jumps ***/
                     case 0xC2:  //JPNZ nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("JP NZ, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xC3:  //JP nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("JP {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xCA:  //JPZ nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("JP Z, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xD2:  //JPNC nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("JP NC, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xDA:  //JPC nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("JP C, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xE2:  //JP PO nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("JP PO, {0,0:D}", disp);
                         PC += 2;
                         break;
@@ -2388,19 +2387,19 @@ namespace ZeroWin
                         break;
 
                     case 0xEA:  //JP PE nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("JP PE, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xF2:  //JP P nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("JP P, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xFA:  //JP M nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("JP M, {0,0:D}", disp);
                         PC += 2;
                         break;
@@ -2441,7 +2440,7 @@ namespace ZeroWin
                         break;
 
                     case 0xFE:  //CP n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("CP {0,0:D}", disp);
                         PC += 1;
                         break;
@@ -2492,7 +2491,7 @@ namespace ZeroWin
                         break;
 
                     case 0xE6:  //AND n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("AND {0,0:D}", disp);
                         PC++;
                         break;
@@ -2532,7 +2531,7 @@ namespace ZeroWin
                         break;
 
                     case 0xEE:  //XOR n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("XOR {0,0:D}", disp);
                         PC++;
                         break;
@@ -2573,7 +2572,7 @@ namespace ZeroWin
                         break;
 
                     case 0xF6:  //OR n
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("OR {0,0:D}", disp);
                         PC++;
                         break;
@@ -2653,55 +2652,55 @@ namespace ZeroWin
 
                     #region CALL instructions
                     case 0xC4:  //CALL NZ, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("CALL NZ, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xCC:  //CALL Z, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("CALL Z, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xCD:  //CALL nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("CALL {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xD4:  //CALL NC, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("CALL NC, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xDC:  //CALL C, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("CALL C, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xE4:  //CALL PO, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("CALL PO, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xEC:  //CALL PE, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("CALL PE, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xF4:  //CALL P, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("CALL P, {0,0:D}", disp);
                         PC += 2;
                         break;
 
                     case 0xFC:  //CALL M, nn
-                        disp = PeekWord(PC);
+                        disp = PeekWord((ushort)PC);
                         Log("CALL M, {0,0:D}", disp);
                         PC += 2;
                         break;
@@ -2743,7 +2742,7 @@ namespace ZeroWin
 
                     #region IN instructions
                     case 0xDB:  //IN A, (n)
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("IN A, ({0:D})", disp);
                         PC++;
                         break;
@@ -2751,7 +2750,7 @@ namespace ZeroWin
 
                     #region OUT instructions
                     case 0xD3:  //OUT (n), A
-                        disp = PeekByte(PC);
+                        disp = PeekByte((ushort)PC);
                         Log("OUT ({0:D}), A", disp);
                         PC++;
                         break;
@@ -2787,7 +2786,7 @@ namespace ZeroWin
 
                     #region Opcodes with CB prefix
                     case 0xCB:
-                        switch (opcode = PeekByte(PC++)) {
+                        switch (opcode = PeekByte((ushort)PC++)) {
                             #region Rotate instructions
                             case 0x00: //RLC B
                                 Log("RLC B");
@@ -3897,7 +3896,7 @@ namespace ZeroWin
 
                     #region Opcodes with DD prefix (includes DDCB)
                     case 0xDD:
-                        switch (opcode = PeekByte(PC++)) {
+                        switch (opcode = PeekByte((ushort)PC++)) {
                             #region Addition instructions
                             case 0x09:  //ADD IX, BC
                                 Log("ADD IX, BC");
@@ -3924,7 +3923,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x86:  //Add A, (IX+d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("ADD A, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -3938,7 +3937,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x8E: //ADC A, (IX+d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("ADC A, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -3954,7 +3953,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x96:  //SUB (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("SUB (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -3968,7 +3967,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x9E:  //SBC A, (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("SBC A, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4000,13 +3999,13 @@ namespace ZeroWin
                                 break;
 
                             case 0x34:  //INC (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("INC (IX + {0:D})", disp);
                                 PC++;
                                 break;
 
                             case 0x35:  //DEC (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("DEC (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4023,7 +4022,7 @@ namespace ZeroWin
                                 break;
 
                             case 0xA6:  //AND (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("AND (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4037,7 +4036,7 @@ namespace ZeroWin
                                 break;
 
                             case 0xAE:  //XOR (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("XOR (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4051,7 +4050,7 @@ namespace ZeroWin
                                 break;
 
                             case 0xB6:  //OR (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("OR (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4067,7 +4066,7 @@ namespace ZeroWin
                                 break;
 
                             case 0xBE:  //CP (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("CP (IX + {0:D})", disp & 0xff);
                                 PC++;
                                 break;
@@ -4075,32 +4074,32 @@ namespace ZeroWin
 
                             #region Load instructions
                             case 0x21:  //LD IX, nn
-                                Log("LD IX, {0,0:D}", PeekWord(PC));
+                                Log("LD IX, {0,0:D}", PeekWord((ushort)PC));
                                 PC += 2;
                                 break;
 
                             case 0x22:  //LD (nn), IX
-                                Log("LD ({0:D}), IX", PeekWord(PC));
+                                Log("LD ({0:D}), IX", PeekWord((ushort)PC));
                                 PC += 2;
                                 break;
 
                             case 0x26:  //LD IXH, n
-                                Log("LD IXH, {0:D}", PeekByte(PC));
+                                Log("LD IXH, {0:D}", PeekByte((ushort)PC));
                                 PC++;
                                 break;
 
                             case 0x2A:  //LD IX, (nn)
-                                Log("LD IX, ({0:D})", PeekWord(PC));
+                                Log("LD IX, ({0:D})", PeekWord((ushort)PC));
                                 PC += 2;
                                 break;
 
                             case 0x2E:  //LD IXL, n
-                                Log("LD IXL, {0:D}", PeekByte(PC));
+                                Log("LD IXL, {0:D}", PeekByte((ushort)PC));
                                 PC++;
                                 break;
 
                             case 0x36:  //LD (IX + d), n
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
 
                                 Log("LD (IX + {0:D}), {1,0:D}", disp, PeekByte((ushort)(PC + 1)));
                                 PC += 2;
@@ -4115,7 +4114,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x46:  //LD B, (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD B, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4129,7 +4128,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x4E:  //LD C, (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD C, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4143,7 +4142,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x56:  //LD D, (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD D, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4157,7 +4156,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x5E:  //LD E, (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD E, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4187,7 +4186,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x66:  //LD H, (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD H, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4221,7 +4220,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x6E:  //LD L, (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD L, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4231,43 +4230,43 @@ namespace ZeroWin
                                 break;
 
                             case 0x70:  //LD (IX + d), B
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IX + {0:D}), B", disp);
                                 PC++;
                                 break;
 
                             case 0x71:  //LD (IX + d), C
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IX + {0:D}), C", disp);
                                 PC++;
                                 break;
 
                             case 0x72:  //LD (IX + d), D
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IX + {0:D}), D", disp);
                                 PC++;
                                 break;
 
                             case 0x73:  //LD (IX + d), E
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IX + {0:D}), E", disp);
                                 PC++;
                                 break;
 
                             case 0x74:  //LD (IX + d), H
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IX + {0:D}), H", disp);
                                 PC++;
                                 break;
 
                             case 0x75:  //LD (IX + d), L
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IX + {0:D}), L", disp);
                                 PC++;
                                 break;
 
                             case 0x77:  //LD (IX + d), A
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IX + {0:D}), A", disp);
                                 PC++;
                                 break;
@@ -4281,7 +4280,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x7E:  //LD A, (IX + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD A, (IX + {0:D})", disp);
                                 PC++;
                                 break;
@@ -4293,9 +4292,9 @@ namespace ZeroWin
 
                             #region All DDCB instructions
                             case 0xCB:
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 PC++;
-                                opcode = PeekByte(PC);      //The opcode comes after the offset byte!
+                                opcode = PeekByte((ushort)PC);      //The opcode comes after the offset byte!
                                 PC++;
                                 switch (opcode) {
                                     case 0x00: //LD B, RLC (IX+d)
@@ -5367,7 +5366,7 @@ namespace ZeroWin
 
                     #region Opcodes with ED prefix
                     case 0xED:
-                        opcode = PeekByte(PC++);
+                        opcode = PeekByte((ushort)PC++);
                         if (opcode < 0x40) {
                             Log("NOP");
                             break;
@@ -5386,7 +5385,7 @@ namespace ZeroWin
                                     break;
 
                                 case 0x43:  //LD (nn), BC
-                                    disp = PeekWord(PC);
+                                    disp = PeekWord((ushort)PC);
                                     Log("LD ({0:D}), BC", disp);
                                     PC += 2;
                                     break;
@@ -5420,7 +5419,7 @@ namespace ZeroWin
                                     break;
 
                                 case 0x4B:  //LD BC, (nn)
-                                    disp = PeekWord(PC);
+                                    disp = PeekWord((ushort)PC);
                                     Log("LD BC, ({0:D})", disp);
                                     PC += 2;
                                     break;
@@ -5450,7 +5449,7 @@ namespace ZeroWin
                                     break;
 
                                 case 0x53:  //LD (nn), DE
-                                    disp = PeekWord(PC);
+                                    disp = PeekWord((ushort)PC);
                                     Log("LD ({0:D}), DE", disp);
                                     PC += 2;
                                     break;
@@ -5484,7 +5483,7 @@ namespace ZeroWin
                                     break;
 
                                 case 0x5B:  //LD DE, (nn)
-                                    disp = PeekWord(PC);
+                                    disp = PeekWord((ushort)PC);
                                     Log("LD DE, ({0:D})", disp);
                                     PC += 2;
                                     break;
@@ -5518,7 +5517,7 @@ namespace ZeroWin
                                     break;
 
                                 case 0x63:  //LD (nn), HL
-                                    disp = PeekWord(PC);
+                                    disp = PeekWord((ushort)PC);
                                     Log("LD ({0:D}), HL", disp);
                                     PC += 2;
                                     break;
@@ -5548,7 +5547,7 @@ namespace ZeroWin
                                     break;
 
                                 case 0x6B:  //LD HL, (nn)
-                                    disp = PeekWord(PC);
+                                    disp = PeekWord((ushort)PC);
                                     Log("LD HL, ({0:D})", disp);
                                     PC += 2;
                                     break;
@@ -5578,7 +5577,7 @@ namespace ZeroWin
                                     break;
 
                                 case 0x73:  //LD (nn), SP
-                                    disp = PeekWord(PC);
+                                    disp = PeekWord((ushort)PC);
                                     Log("LD ({0:D}), SP", disp);
                                     PC += 2;
                                     break;
@@ -5608,7 +5607,7 @@ namespace ZeroWin
                                     break;
 
                                 case 0x7B:  //LD SP, (nn)
-                                    disp = PeekWord(PC);
+                                    disp = PeekWord((ushort)PC);
                                     Log("LD SP, ({0:D})", disp);
                                     PC += 2;
                                     break;
@@ -5699,7 +5698,7 @@ namespace ZeroWin
 
                     #region Opcodes with FD prefix (includes FDCB)
                     case 0xFD:
-                        switch (opcode = PeekByte(PC++)) {
+                        switch (opcode = PeekByte((ushort)PC++)) {
                             #region Addition instructions
                             case 0x09:  //ADD IY, BC
                                 Log("ADD IY, BC");
@@ -5726,7 +5725,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x86:  //Add A, (IY+d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("ADD A, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5740,7 +5739,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x8E: //ADC A, (IY+d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("ADC A, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5756,7 +5755,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x96:  //SUB (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("SUB (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5770,7 +5769,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x9E:  //SBC A, (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("SBC A, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5802,13 +5801,13 @@ namespace ZeroWin
                                 break;
 
                             case 0x34:  //INC (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("INC (IY + {0:D})", disp);
                                 PC++;
                                 break;
 
                             case 0x35:  //DEC (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("DEC (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5825,7 +5824,7 @@ namespace ZeroWin
                                 break;
 
                             case 0xA6:  //AND (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("AND (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5839,7 +5838,7 @@ namespace ZeroWin
                                 break;
 
                             case 0xAE:  //XOR (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("XOR (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5853,7 +5852,7 @@ namespace ZeroWin
                                 break;
 
                             case 0xB6:  //OR (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("OR (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5869,7 +5868,7 @@ namespace ZeroWin
                                 break;
 
                             case 0xBE:  //CP (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("CP (IY + {0:D})", disp & 0xff);
                                 PC++;
                                 break;
@@ -5877,32 +5876,32 @@ namespace ZeroWin
 
                             #region Load instructions
                             case 0x21:  //LD IY, nn
-                                Log("LD IY, {0:D}", PeekWord(PC));
+                                Log("LD IY, {0:D}", PeekWord((ushort)PC));
                                 PC += 2;
                                 break;
 
                             case 0x22:  //LD (nn), IY
-                                Log("LD ({0:D}), IY", PeekWord(PC));
+                                Log("LD ({0:D}), IY", PeekWord((ushort)PC));
                                 PC += 2;
                                 break;
 
                             case 0x26:  //LD IYH, n
-                                Log("LD IYH, {0:D}", PeekByte(PC));
+                                Log("LD IYH, {0:D}", PeekByte((ushort)PC));
                                 PC++;
                                 break;
 
                             case 0x2A:  //LD IY, (nn)
-                                Log("LD IY, ({0:D})", PeekWord(PC));
+                                Log("LD IY, ({0:D})", PeekWord((ushort)PC));
                                 PC += 2;
                                 break;
 
                             case 0x2E:  //LD IYL, n
-                                Log("LD IYL, {0:D}", PeekByte(PC));
+                                Log("LD IYL, {0:D}", PeekByte((ushort)PC));
                                 PC++;
                                 break;
 
                             case 0x36:  //LD (IY + d), n
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
 
                                 Log("LD (IY + {0:D}), {1,0:D}", disp, PeekByte((ushort)(PC + 1)));
                                 PC += 2;
@@ -5917,7 +5916,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x46:  //LD B, (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD B, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5931,7 +5930,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x4E:  //LD C, (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD C, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5945,7 +5944,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x56:  //LD D, (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD D, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5959,7 +5958,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x5E:  //LD E, (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD E, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -5989,7 +5988,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x66:  //LD H, (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD H, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -6023,7 +6022,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x6E:  //LD L, (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD L, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -6033,43 +6032,43 @@ namespace ZeroWin
                                 break;
 
                             case 0x70:  //LD (IY + d), B
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IY + {0:D}), B", disp);
                                 PC++;
                                 break;
 
                             case 0x71:  //LD (IY + d), C
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IY + {0:D}), C", disp);
                                 PC++;
                                 break;
 
                             case 0x72:  //LD (IY + d), D
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IY + {0:D}), D", disp);
                                 PC++;
                                 break;
 
                             case 0x73:  //LD (IY + d), E
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IY + {0:D}), E", disp);
                                 PC++;
                                 break;
 
                             case 0x74:  //LD (IY + d), H
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IY + {0:D}), H", disp);
                                 PC++;
                                 break;
 
                             case 0x75:  //LD (IY + d), L
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IY + {0:D}), L", disp);
                                 PC++;
                                 break;
 
                             case 0x77:  //LD (IY + d), A
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD (IY + {0:D}), A", disp);
                                 PC++;
                                 break;
@@ -6083,7 +6082,7 @@ namespace ZeroWin
                                 break;
 
                             case 0x7E:  //LD A, (IY + d)
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 Log("LD A, (IY + {0:D})", disp);
                                 PC++;
                                 break;
@@ -6095,9 +6094,9 @@ namespace ZeroWin
 
                             #region All FDCB instructions
                             case 0xCB:
-                                disp = GetDisplacement(PeekByte(PC));
+                                disp = GetDisplacement(PeekByte((ushort)PC));
                                 PC++;
-                                opcode = PeekByte(PC);      //The opcode comes after the offset byte!
+                                opcode = PeekByte((ushort)PC);      //The opcode comes after the offset byte!
                                 PC++;
                                 switch (opcode) {
                                     case 0x00: //LD B, RLC (IY+d)
@@ -7172,7 +7171,7 @@ namespace ZeroWin
                 if (rebuild) {
                     OpcodeDisassembly newOD = new OpcodeDisassembly(this);
 
-                    newOD.Address = address;
+                    newOD.Address = (ushort)address;
                     newOD.BytesAtAddress = byteList;
                     newOD.Opcodes = opcodeString;
                     newOD.Param1 = param1;
@@ -7212,6 +7211,9 @@ namespace ZeroWin
                     }
                 }
                 line++;
+                if (line > 65535) {
+                    break;
+                }
             }
 
             if (!traceOn && opcodeMatches < 5) {
@@ -7315,14 +7317,7 @@ namespace ZeroWin
         //that the debugger is no longer in "active" debugging state.
         //TODO: We don't seem to be telling the parent form that we aren't debuggin anymore, properly.
         private void Monitor_FormClosing(object sender, FormClosingEventArgs e) {
-            ziggyWin.zx.MemoryWriteEvent -= new MemoryWriteEventHandler(Monitor_MemoryWrite);
-            ziggyWin.zx.MemoryReadEvent -= new MemoryReadEventHandler(Monitor_MemoryRead);
-            ziggyWin.zx.MemoryExecuteEvent -= new MemoryExecuteEventHandler(Monitor_MemoryExecute);
-            ziggyWin.zx.OpcodeExecutedEvent -= new OpcodeExecutedEventHandler(Monitor_OpcodeExecuted);
-            ziggyWin.zx.PortEvent -= new PortIOEventHandler(Monitor_PortIO);
-            ziggyWin.zx.StateChangeEvent -= new StateChangeEventHandler(Monitor_StateChangeEvent);
-            ziggyWin.zx.RZXPlaybackStartEvent -= new RZXPlaybackStartEventHandler(Monitor_RZXPlaybackStartEvent);
-            ziggyWin.zx.RZXFrameEndEvent -= new RZXFrameEndEventHandler(Monitor_RZXFrameEndEvent);
+            DeRegisterAllEvents();
             disassemblyList.Clear();
             dataGridView1.DataSource = null;
             disassemblyLookup.Clear();
@@ -7791,19 +7786,21 @@ namespace ZeroWin
 
             if(openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                using(StreamReader reader = new StreamReader(openFileDialog1.SafeFileName))
+                using(StreamReader reader = new StreamReader(openFileDialog1.FileName))
                 {
                     int count = 0;
                     while(!reader.EndOfStream)
                     {
                         var line = reader.ReadLine();
                         var values = line.Split(',');
-                        int addr = Convert.ToInt32(values[0]);
+                        int addr = Utilities.ConvertToInt(values[0]);
                         if (addr > 65535)
                             continue;
 
-                        systemVariables[addr] =  Convert.ToString(values[1]).Trim();
-                        count++;                                                      
+                        if (addr >= 0) {
+                            systemVariables[addr] = Convert.ToString(values[1]).Trim();
+                            count++;
+                        }
                     }
                 }
                 MessageBox.Show("Symbols loaded successfully!", "Symbol file", MessageBoxButtons.OK);
