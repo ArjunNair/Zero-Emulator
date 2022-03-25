@@ -1057,7 +1057,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                             default:
                             break;
                         }
-                        fpsStatusLabel.Text = Math.Max(0, averageFPS) + " FPS ";
+                        fpsStatusLabel.Text = Math.Max(0, averageFPS).ToString() + " FPS ";
                     }
                     frameCount = 0;
                     totalFrameTime = 0;
@@ -2924,7 +2924,8 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             zx.EnableAY(config.audioOptions.EnableAYFor48K);
             zx.SetStereoSound(config.audioOptions.StereoSoundMode); //Also sets ACB/ABC config internally
 
-
+            inputSystem.Joystick_1_Index = optionWindow.Joystick1Choice - 1;
+            inputSystem.Joystick_2_Index = optionWindow.Joystick2Choice - 1;
             inputSystem.Joystick_1_MapIndex = optionWindow.Joystick1EmulationChoice;
             inputSystem.Joystick_2_MapIndex = optionWindow.Joystick2EmulationChoice;
             inputSystem.SetupJoysticks();

@@ -52,7 +52,8 @@ namespace ZeroWin
         }
 
         public int Joystick1Choice {
-            get {
+            get
+            {
                 return joystickComboBox1.SelectedIndex;
             }
             set {
@@ -638,11 +639,8 @@ namespace ZeroWin
                 joystick2ComboBox1.Items.Add(devNames[f]);
             }
 
-            if (joystickComboBox1.SelectedIndex < 0)
-                joystickComboBox1.SelectedIndex = 0;
-
-            if (joystick2ComboBox1.SelectedIndex < 0)
-                joystick2ComboBox1.SelectedIndex = 0;
+            joystickComboBox1.SelectedIndex = joy1;
+            joystick2ComboBox1.SelectedIndex = joy2;
 
             if (joystickComboBox2.SelectedIndex < 0)
                 joystickComboBox2.SelectedIndex = 0;
@@ -650,25 +648,26 @@ namespace ZeroWin
             if (joystick2ComboBox2.SelectedIndex < 0)
                 joystick2ComboBox2.SelectedIndex = 0;
 
-            if (devNames.Length >= joy1)
-                joystickComboBox1.SelectedIndex = joy1;
-
-            if (devNames.Length >= joy2)
-                joystick2ComboBox1.SelectedIndex = joy2;
         }
 
         private void joystick2ComboBox1_SelectedIndexChanged(object sender, EventArgs e) {
             if (joystick2ComboBox1.SelectedIndex == joystickComboBox1.SelectedIndex)
                 joystickComboBox1.SelectedIndex = 0;
 
-            button2.Enabled = Joystick2Choice > 0;
+            if (Joystick2Choice <= 0)
+            {
+                joystick2ComboBox2.SelectedIndex = 0;
+            }
         }
 
         private void joystickComboBox1_SelectedIndexChanged(object sender, EventArgs e) {
             if (joystickComboBox1.SelectedIndex == joystick2ComboBox1.SelectedIndex)
                 joystick2ComboBox1.SelectedIndex = 0;
 
-            button1.Enabled = Joystick1Choice > 0;
+            if (Joystick1Choice <= 0)
+            {
+                joystickComboBox2.SelectedIndex = 0;
+            }
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e) {
