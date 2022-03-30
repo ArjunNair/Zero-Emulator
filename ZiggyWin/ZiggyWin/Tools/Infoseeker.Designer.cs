@@ -36,6 +36,8 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.bookRadioButton = new System.Windows.Forms.RadioButton();
+            this.hardwareRadioButton = new System.Windows.Forms.RadioButton();
             this.label1 = new System.Windows.Forms.Label();
             this.moreButton = new System.Windows.Forms.Button();
             this.detailsButton = new System.Windows.Forms.Button();
@@ -45,20 +47,18 @@
             // 
             // titleBox
             // 
-            this.titleBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.titleBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.titleBox.Location = new System.Drawing.Point(6, 39);
             this.titleBox.Name = "titleBox";
-            this.titleBox.Size = new System.Drawing.Size(292, 20);
+            this.titleBox.Size = new System.Drawing.Size(335, 20);
             this.titleBox.TabIndex = 1;
             this.titleBox.TextChanged += new System.EventHandler(this.titleBox_TextChanged);
             // 
             // searchButton
             // 
-            this.searchButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchButton.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Right)));
             this.searchButton.Enabled = false;
-            this.searchButton.Location = new System.Drawing.Point(304, 37);
+            this.searchButton.Location = new System.Drawing.Point(347, 37);
             this.searchButton.Name = "searchButton";
             this.searchButton.Size = new System.Drawing.Size(71, 23);
             this.searchButton.TabIndex = 2;
@@ -72,62 +72,58 @@
             this.titleRadioButton.Checked = true;
             this.titleRadioButton.Location = new System.Drawing.Point(70, 16);
             this.titleRadioButton.Name = "titleRadioButton";
-            this.titleRadioButton.Size = new System.Drawing.Size(45, 17);
+            this.titleRadioButton.Size = new System.Drawing.Size(67, 17);
             this.titleRadioButton.TabIndex = 3;
             this.titleRadioButton.TabStop = true;
-            this.titleRadioButton.Text = "Title";
+            this.titleRadioButton.Text = "Software";
             this.titleRadioButton.UseVisualStyleBackColor = true;
             // 
             // publisherRadioButton
             // 
             this.publisherRadioButton.AutoSize = true;
-            this.publisherRadioButton.Location = new System.Drawing.Point(121, 16);
+            this.publisherRadioButton.Location = new System.Drawing.Point(304, 13);
             this.publisherRadioButton.Name = "publisherRadioButton";
             this.publisherRadioButton.Size = new System.Drawing.Size(68, 17);
             this.publisherRadioButton.TabIndex = 4;
-            this.publisherRadioButton.TabStop = true;
             this.publisherRadioButton.Text = "Publisher";
             this.publisherRadioButton.UseVisualStyleBackColor = true;
+            this.publisherRadioButton.Visible = false;
+            this.publisherRadioButton.CheckedChanged += new System.EventHandler(this.publisherRadioButton_CheckedChanged);
             // 
             // statusStrip1
             // 
             this.statusStrip1.AutoSize = false;
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1,
-            this.toolStripStatusLabel2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 459);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.toolStripStatusLabel1, this.toolStripStatusLabel2});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 580);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(391, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(434, 22);
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.TabIndex = 6;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel1
             // 
-            this.toolStripStatusLabel1.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top)
-                        | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right)
-                        | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
+            this.toolStripStatusLabel1.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides) ((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
             this.toolStripStatusLabel1.BorderStyle = System.Windows.Forms.Border3DStyle.SunkenInner;
             this.toolStripStatusLabel1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(188, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(209, 17);
             this.toolStripStatusLabel1.Spring = true;
             this.toolStripStatusLabel1.Text = "Ready";
             // 
             // toolStripStatusLabel2
             // 
-            this.toolStripStatusLabel2.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top)
-                        | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right)
-                        | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
+            this.toolStripStatusLabel2.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides) ((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
             this.toolStripStatusLabel2.BorderStyle = System.Windows.Forms.Border3DStyle.SunkenInner;
             this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(188, 17);
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(209, 17);
             this.toolStripStatusLabel2.Spring = true;
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.bookRadioButton);
+            this.groupBox1.Controls.Add(this.hardwareRadioButton);
             this.groupBox1.Controls.Add(this.titleBox);
             this.groupBox1.Controls.Add(this.publisherRadioButton);
             this.groupBox1.Controls.Add(this.label1);
@@ -136,23 +132,43 @@
             this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.groupBox1.Location = new System.Drawing.Point(5, -1);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(381, 67);
+            this.groupBox1.Size = new System.Drawing.Size(424, 67);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
+            // 
+            // bookRadioButton
+            // 
+            this.bookRadioButton.AutoSize = true;
+            this.bookRadioButton.Location = new System.Drawing.Point(220, 16);
+            this.bookRadioButton.Name = "bookRadioButton";
+            this.bookRadioButton.Size = new System.Drawing.Size(50, 17);
+            this.bookRadioButton.TabIndex = 6;
+            this.bookRadioButton.Text = "Book";
+            this.bookRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // hardwareRadioButton
+            // 
+            this.hardwareRadioButton.AutoSize = true;
+            this.hardwareRadioButton.Location = new System.Drawing.Point(143, 16);
+            this.hardwareRadioButton.Name = "hardwareRadioButton";
+            this.hardwareRadioButton.Size = new System.Drawing.Size(71, 17);
+            this.hardwareRadioButton.TabIndex = 5;
+            this.hardwareRadioButton.Text = "Hardware";
+            this.hardwareRadioButton.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(6, 18);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(58, 13);
+            this.label1.Size = new System.Drawing.Size(59, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Search by:";
+            this.label1.Text = "Search for:";
             // 
             // moreButton
             // 
-            this.moreButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.moreButton.Location = new System.Drawing.Point(11, 433);
+            this.moreButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.moreButton.Location = new System.Drawing.Point(127, 554);
             this.moreButton.Name = "moreButton";
             this.moreButton.Size = new System.Drawing.Size(142, 23);
             this.moreButton.TabIndex = 17;
@@ -162,12 +178,12 @@
             // 
             // detailsButton
             // 
-            this.detailsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.detailsButton.Location = new System.Drawing.Point(238, 433);
+            this.detailsButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.detailsButton.Location = new System.Drawing.Point(281, 554);
             this.detailsButton.Name = "detailsButton";
             this.detailsButton.Size = new System.Drawing.Size(142, 23);
             this.detailsButton.TabIndex = 18;
-            this.detailsButton.Text = "Program details...";
+            this.detailsButton.Text = "View details...";
             this.detailsButton.UseVisualStyleBackColor = true;
             this.detailsButton.Click += new System.EventHandler(this.detailsButton_Click);
             // 
@@ -176,7 +192,7 @@
             this.AcceptButton = this.searchButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(391, 481);
+            this.ClientSize = new System.Drawing.Size(434, 602);
             this.Controls.Add(this.detailsButton);
             this.Controls.Add(this.moreButton);
             this.Controls.Add(this.groupBox1);
@@ -192,8 +208,10 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
-
         }
+
+        private System.Windows.Forms.RadioButton hardwareRadioButton;
+        private System.Windows.Forms.RadioButton bookRadioButton;
 
         #endregion
 

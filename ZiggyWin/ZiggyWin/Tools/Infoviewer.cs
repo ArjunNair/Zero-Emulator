@@ -6,7 +6,7 @@ using System.Net;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
-
+using Newtonsoft.Json;
 namespace ZeroWin
 {
     public partial class Infoviewer : Form
@@ -14,6 +14,10 @@ namespace ZeroWin
         //Encapsulates the capabilities of the machine
 
         private string wos_select = "http://www.worldofspectrum.org/api/infoseek_select_xml.cgi?";
+        private string url_base = "https://api.zxinfo.dk/v3/";
+        private string search_query = "games/";
+        private string wos_archive_url = "https://archive.org/download/World_of_Spectrum_June_2017_Mirror/World%20of%20Spectrum%20June%202017%20Mirror.zip/World%20of%20Spectrum%20June%202017%20Mirror/sinclair/";
+        private string zxdb_archive_url = "https://spectrumcomputing.co.uk/zxdb/sinclair/";
         private XmlTextReader xmlReader;
         private XmlDocument xmlDoc = new XmlDocument();
         private InfoDetails details;
@@ -65,8 +69,6 @@ namespace ZeroWin
             public String Publication { get; set; }
 
             public String Controls { get; set; }
-
-            public String Protection { get; set; }
 
             public String MachineType { get; set; }
 
@@ -167,16 +169,15 @@ namespace ZeroWin
         }
 
         public void ShowDetails(String infoId, String _imageLoc) {
-            toolStripStatusLabel1.Text = "Querying infoseek...";
+            toolStripStatusLabel1.Text = "Querying ZXDB...";
             details = new InfoDetails();
-            string param = "id=" + infoId;
             pictureBox1.ImageLocation = _imageLoc;
             if (checkedListBox1.SelectedItems.Count == 0)
                 button1.Enabled = false;
             else
                 button1.Enabled = true;
             try {
-                lastURL = wos_select + param;
+                lastURL = url_base + search_query + infoId + "?mode=compact";
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(lastURL);
                 webRequest.Method = "GET";
 
@@ -207,7 +208,25 @@ namespace ZeroWin
                 MessageBox.Show("Request timed out.", "Connection Error", MessageBoxButtons.OK);
             }
         }
+        
+        // Resolves the archive path from ZXDB result to either legacy WoS archive path,
+        // or the newer ZXDB archive path depending on the prefixes in the path.
+        // Ref "Additional Details" at: https://github.com/zxdb/ZXDB/
+        private string ResolveArchivePath(string path)
+        {
+            string[] meta_path = path.Split('/');
+            string archive_path = "";
+            if (meta_path[1] == "pub")
+            {
+                archive_path = wos_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
+            }
+            else
+            {
+                archive_path = zxdb_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
+            }
 
+            return archive_path;
+        }
         private void SearchCallback(IAsyncResult result) {
             try {
                 RequestState2 rs = (RequestState2)result.AsyncState;
@@ -231,82 +250,114 @@ namespace ZeroWin
 
                 // Store the response stream in RequestState to read
                 // the stream asynchronously.
-                xmlReader = new XmlTextReader(responseStream);
-                xmlDoc = new XmlDocument();
-                xmlDoc.Load(xmlReader);
-                xmlReader.Close();
+                System.IO.StreamReader reader = new System.IO.StreamReader(responseStream);
+                var json_data = JsonConvert.DeserializeObject(reader.ReadToEnd());
+                
+                xmlDoc = JsonConvert.DeserializeXmlNode(json_data.ToString(), "hits");
+                reader.Close();
                 resp.Close();
             } catch (WebException we) {
                 MessageBox.Show(we.Message, "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
-            XmlNodeList memberNodes = xmlDoc.SelectNodes("//result");
+            xmlDoc.Save("zxdb_details.txt");
+            XmlNodeList memberNodes = xmlDoc.SelectNodes("//_source");
             foreach (XmlNode node in memberNodes) {
                 details.ProgramName = GetNodeElement(node, "title");
-                details.Year = GetNodeElement(node, "year");
-                details.Publisher = GetNodeElement(node, "publisher");
-                details.ProgramType = GetNodeElement(node, "type");
+                details.Year = GetNodeElement(node, "originalYearOfRelease");
+                details.Publisher = GetNodeElement(node, "publishers/name");
+                details.ProgramType = GetNodeElement(node, "genreType");
                 details.Language = GetNodeElement(node, "language");
-                details.Score = GetNodeElement(node, "score");
-                details.Authors = GetNodeElement(node, "author");
-                details.Controls = GetNodeElement(node, "joysticks");
-                details.Protection = GetNodeElement(node, "protectionScheme");
+                details.Score = GetNodeElement(node, "score/score");
+                details.Authors = GetNodeElement(node, "authors/name");
+                XmlNodeList control_list = node.SelectNodes("controls");
+                foreach (XmlNode control in control_list)
+                {
+                    details.Controls += control.InnerText + ", ";
+                }
                 details.Availability = GetNodeElement(node, "availability");
-                details.Publication = GetNodeElement(node, "publication");
                 details.MachineType = GetNodeElement(node, "machineType");
-                details.PicInlayURL = GetNodeElement(node, "picInlay");
-                details.PicLoadURL = GetNodeElement(node, "picLoad");
-                details.PicIngameURL = GetNodeElement(node, "picIngame");
+                
+                XmlNodeList pics_list = node.SelectNodes("additionalDownloads");
+                foreach (XmlNode pic_node in pics_list)
+                {
+                    string pic_type = pic_node.SelectSingleNode("type").InnerText;
+                    if (pic_type == "Running screen" && details.PicIngameURL == null)
+                    {
+                        string pic_url = pic_node.SelectSingleNode("path").InnerText;
+                        details.PicIngameURL = ResolveArchivePath(pic_url);
+                        /*string[] meta_path = pic_url.Split('/');
+                        if (meta_path[1] == "pub")
+                        {
+                            details.PicIngameURL = wos_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
+                        }
+                        else
+                        {
+                            details.PicIngameURL = zxdb_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
+                        }*/
+                    }
+                    else if (pic_type == "Inlay - Front" && details.PicInlayURL == null)
+                    {
+                        string pic_url = pic_node.SelectSingleNode("path").InnerText;
+                        details.PicInlayURL = ResolveArchivePath(pic_url);
+                        /*
+                        string[] meta_path = pic_url.Split('/');
+                        if (meta_path[1] == "pub")
+                        {
+                            details.PicInlayURL = wos_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
+                        }
+                        else
+                        {
+                            details.PicInlayURL = zxdb_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
+                        }*/
+                    }
+                    else if (pic_type == "Loading screen" && details.PicLoadURL == null)
+                    {
+                        string pic_url = pic_node.SelectSingleNode("path").InnerText;
+                        //details.PicLoadURL = ResolveArchivePath(pic_url);
+                        /*string[] meta_path = pic_url.Split('/');
+                        if (meta_path[1] == "pub")
+                        {
+                            details.PicLoadURL = wos_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
+                        }
+                        else
+                        {
+                            details.PicLoadURL = zxdb_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
+                        }*/
+                    }
+                }
+                XmlNodeList fileNodes2 = node.SelectNodes("releases/files");
+                foreach (XmlNode node2 in fileNodes2) {
+                    String full_link = node2.SelectSingleNode("path").InnerText;
+                    char delimiter = '/';
+                    string[] splitWords = full_link.Split(delimiter);
+                    String type = node2.SelectSingleNode("format").InnerText;
+                    fileList.Add(ResolveArchivePath(full_link));
+                    UpdateCheckbox(checkedListBox1, " (" + type + ") " + splitWords[splitWords.Length - 1]);
+                }
             }
 
-            if (string.IsNullOrEmpty(details.Protection))
-                details.Protection = "Various";
             UpdateLabelInfo(authorLabel, details.Authors);
-            UpdateLabelInfo(publicationLabel, details.Publication);
+            UpdateLabelInfo(publicationLabel, details.Publisher);
             UpdateLabelInfo(availabilityLabel, details.Availability);
-            UpdateLabelInfo(protectionLabel, details.Protection);
-            string controls = "";
-            foreach (char c in details.Controls.ToCharArray()) {
-                if (c == 'K')
-                    controls += "Keyboard, ";
-                else if (c == '1')
-                    controls += "IF 2 Left, ";
-                else if (c == '2')
-                    controls += "IF 2 Right, ";
-                else if (c == 'C')
-                    controls += "Cursor, ";
-                else if (c == 'R')
-                    controls += "Redefinable, ";
-            }
-
-            UpdateLabelInfo(controlsLabel, controls);
+            UpdateLabelInfo(controlsLabel, details.Controls);
             UpdateLabelInfo(machineLabel, details.MachineType);
 
-            XmlNodeList fileNodes = xmlDoc.SelectNodes("/result/downloads/file");
-
-            foreach (XmlNode node in fileNodes) {
-                String full_link = node.SelectSingleNode("link").InnerText;
-                char delimiter = '/';
-                string[] splitWords = full_link.Split(delimiter);
-                String type = node.SelectSingleNode("type").InnerText;
-                fileList.Add(full_link);
-                UpdateCheckbox(checkedListBox1, " (" + type + ") " + splitWords[splitWords.Length - 1]);
-            }
-
+            
+            /*
             XmlNodeList fileNodes2 = xmlDoc.SelectNodes("/result/otherDownloads/file");
             foreach (XmlNode node in fileNodes2) {
                 String full_link = node.SelectSingleNode("link").InnerText;
                 char delimiter = '/';
                 string[] splitWords = full_link.Split(delimiter);
                 String type = node.SelectSingleNode("type").InnerText;
-                fileList.Add(full_link);
+                fileList.Add(ResolveArchivePath(full_link));
                 UpdateCheckbox(checkedListBox1, " (" + type + ") " + splitWords[splitWords.Length - 1]);
             }
-
+            */
             toolStripStatusLabel1.Text = "Ready.";
 
-            if (details.PicInlayURL != "") {
+            if (details.PicInlayURL != null) {
                 try {
                     HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(details.PicInlayURL);
                     webRequest.Method = WebRequestMethods.Http.Get;
@@ -328,7 +379,7 @@ namespace ZeroWin
                 }
             }
 
-            if (details.PicLoadURL != "") {
+            if (details.PicLoadURL != null) {
                 try {
                     HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(details.PicLoadURL);
                     webRequest.Method = WebRequestMethods.Http.Get;
@@ -350,7 +401,7 @@ namespace ZeroWin
                 }
             }
 
-            if (details.PicIngameURL != "") {
+            if (details.PicIngameURL != null) {
                 try {
                     HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(details.PicIngameURL);
                     webRequest.Method = WebRequestMethods.Http.Get;
@@ -554,6 +605,11 @@ namespace ZeroWin
                 PicturePreview picPreview = new PicturePreview(pictureBox1.Image);
                 picPreview.Show();
             }
+        }
+
+        private void machineLabel_Click(object sender, EventArgs e)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

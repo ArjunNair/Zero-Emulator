@@ -1230,9 +1230,9 @@ namespace ZeroWin
 
         public Monitor(Form1 zw) {
             InitializeComponent();
-            pauseEmulation = true;
+           
             ziggyWin = zw;
-            cpu = zw.zx.cpu;
+
 
             // Set the default dialog font on each child control
             foreach (Control c in Controls) {
@@ -1248,8 +1248,6 @@ namespace ZeroWin
             dataGridView1.CellEndEdit += new DataGridViewCellEventHandler(dataGridView1_CellEndEdit);
             dataGridView1.CellToolTipTextNeeded += new DataGridViewCellToolTipTextNeededEventHandler(dataGridView1_CellToolTipTextNeeded);
             
-            ReRegisterAllEvents();
-
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 =
                  new System.Windows.Forms.DataGridViewCellStyle();
 
@@ -1280,19 +1278,7 @@ namespace ZeroWin
             this.dataGridView1.ColumnHeadersBorderStyle =
              DataGridViewHeaderBorderStyle.Raised;
 
-            Disassemble(0, 65535, true, false);
-
-            for (int i = 0; i < 65535; i += 10) {
-                MemoryUnit mu = new MemoryUnit(this);
-                mu.Address = i;
-                mu.Bytes = new List<int>();
-                for (int g = 0; g < 10; g++) {
-                    if (i + g > 65535)
-                        break;
-                    mu.Bytes.Add(ziggyWin.zx.PeekByteNoContend((ushort)(i + g)));
-                }
-                memoryViewList.Add(mu);
-            }
+            
             //clear any previously set columns
             //dataGridView1.Columns.Clear();
             dataGridView1.AutoGenerateColumns = false;
@@ -1319,9 +1305,6 @@ namespace ZeroWin
             dgridColOpcodes.ReadOnly = true;
             dgridColOpcodes.DataPropertyName = "Opcodes";
             dataGridView1.Columns.Add(dgridColOpcodes);
-
-            //dataGridView1.VirtualMode = true;
-            dataGridView1.DataSource = disassemblyList;
 
             DataGridViewTextBoxColumn dgrid2ColCondition = new DataGridViewTextBoxColumn();
             dgrid2ColCondition.HeaderText = "Condition";
@@ -7227,6 +7210,27 @@ namespace ZeroWin
         }
 
         private void Monitor_Load(object sender, EventArgs e) {
+            pauseEmulation = true;
+            cpu = ziggyWin.zx.cpu;
+            ReRegisterAllEvents();
+
+            Disassemble(0, 65535, true, false);
+            //dataGridView1.VirtualMode = true;
+            dataGridView1.DataSource = disassemblyList;
+            dataGridView1.Refresh();
+
+            for (int i = 0; i < 65535; i += 10) {
+                MemoryUnit mu = new MemoryUnit(this);
+                mu.Address = i;
+                mu.Bytes = new List<int>();
+                for (int g = 0; g < 10; g++) {
+                    if (i + g > 65535)
+                        break;
+                    mu.Bytes.Add(ziggyWin.zx.PeekByteNoContend((ushort)(i + g)));
+                }
+                memoryViewList.Add(mu);
+            }
+
             UpdateZXState();
             dbState = MonitorState.PAUSE;
         }
@@ -7350,6 +7354,8 @@ namespace ZeroWin
             ziggyWin.zx.doRun = true;
             ziggyWin.zx.ResetKeyboard();
             ziggyWin.Focus();
+            e.Cancel = true;
+            this.Hide();
         }
 
         //8-bit/16-bit number view toggle

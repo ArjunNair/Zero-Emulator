@@ -20,7 +20,7 @@ namespace ZeroWin
             this.DrawMode = DrawMode.OwnerDrawFixed;
             this.BorderStyle = BorderStyle.Fixed3D;
             this.DoubleBuffered = true;
-            this.HorizontalScrollbar = true;
+            this.HorizontalScrollbar = false;
             this.SelectionMode = SelectionMode.One;
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
             this.IntegralHeight = true;
@@ -66,7 +66,7 @@ namespace ZeroWin
 
                 Size imageSize = item.Pic.Size;
                 if (this.ItemHeight != imageSize.Height + 2)
-                    this.ItemHeight = imageSize.Height + 4;
+                    this.ItemHeight = imageSize.Height + 5;
 
                 Rectangle bounds = e.Bounds;
 
@@ -116,6 +116,20 @@ namespace ZeroWin
             // Set the HorizontalExtent property.
             this.HorizontalExtent = maxWidth + maxImageWidth;
         }
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // CustomListbox
+            // 
+            this.Size = new System.Drawing.Size(200, 96);
+            this.ResumeLayout(false);
+        }
     }
 
     public class CustomListItem
@@ -151,8 +165,8 @@ namespace ZeroWin
             textList.Add(_text);
             Pic.Image = ZeroWin.Properties.Resources.NoImage;
             // Pic.ImageLocation = null;
-            Pic.Width = 150;// 85;
-            Pic.Height = 100;// 85;
+            Pic.Width = 200;
+            Pic.Height = 150;
             Pic.SizeMode = PictureBoxSizeMode.StretchImage;
             Pic.LoadCompleted += new System.ComponentModel.AsyncCompletedEventHandler(Pic_LoadCompleted);
         }

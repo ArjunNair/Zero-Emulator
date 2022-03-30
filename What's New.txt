@@ -2,6 +2,19 @@
 What's New
 --------------
 
+V 0.8.1
+---------------
+- Fixed github issue 41: joystick detected but not saved (Hexaae).
+- Fixed ULA Palette not resetting on speccy reset (azesmbog).
+- Fixed AY being disabled for non 48k models when "Emulate AY emulation for 48k spectrum" is turned off in options (guesser).
+- Fixed Debugger> Watch Window not accepting hex addresses (Rui1973Martins).
+- Fixed Debugger> Watch Window not updating correctly when debugger is running (Rui1973Martins).
+- Fixed Debugger> Load Symbols unable to load file external to emulation folder (Rui1973Martins).
+- Fixed Debugger parsing memory >= 65535 incorrectly.
+- Fixed chain of DD/FD instructions should inhibit /INT (ZJoyKiler, Ped7g, hoglet, TonyB : https://discord.com/channels/654774470652723220/689220116801650811/944511476897546240)
+- Changed online search from the broken WoS API to ZXDB API. WIP
+
+
 V 0.8
 ----------------
 + Added CPU speed adjuster in addition to emulation speed.
@@ -24,6 +37,7 @@ V 0.8
 * Completely rewrote RZX module to follow specs more closely.
 * Key2Joy now uses TAB as fire key instead of ALT.
 - Fixed aspect ratio in DirectX full screen mode (Hexaae).
+- Fixed undocumented flag behaviour of LDxR, CPxR, INxR and OTxR instructions (ZJoyKiller, Ped7g).
 - Fixed SCF and CCF flags for undocumented behaviour (ZJoyKiller).
 - Fixed +3 contention bug (woody)
 - Fixed mic boost emulation (Hernan). Cobra's arc works fine now.
