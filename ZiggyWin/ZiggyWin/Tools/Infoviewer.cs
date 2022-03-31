@@ -18,6 +18,7 @@ namespace ZeroWin
         private string search_query = "games/";
         private string wos_archive_url = "https://archive.org/download/World_of_Spectrum_June_2017_Mirror/World%20of%20Spectrum%20June%202017%20Mirror.zip/World%20of%20Spectrum%20June%202017%20Mirror/sinclair/";
         private string zxdb_archive_url = "https://spectrumcomputing.co.uk/zxdb/sinclair/";
+        private string zxinfo_archive_url = "https://zxinfo.dk/media/"; 
         private XmlTextReader xmlReader;
         private XmlDocument xmlDoc = new XmlDocument();
         private InfoDetails details;
@@ -140,6 +141,7 @@ namespace ZeroWin
             }
             this.loadingScreen.Image = ZeroWin.Properties.Resources.NoImage;
             this.ingameScreen.Image = ZeroWin.Properties.Resources.NoImage;
+            
             fileDownloadCount = 0;
             folderBrowserDialog1.ShowNewFolderButton = true;
             folderBrowserDialog1.SelectedPath = Application.StartupPath;
@@ -169,9 +171,10 @@ namespace ZeroWin
         }
 
         public void ShowDetails(String infoId, String _imageLoc) {
-            toolStripStatusLabel1.Text = "Querying ZXDB...";
+            toolStripStatusLabel1.Text = "Searching ...";
             details = new InfoDetails();
-            pictureBox1.ImageLocation = _imageLoc;
+            //pictureBox1.ImageLocation = _imageLoc;
+            ingameScreen.ImageLocation = _imageLoc;
             if (checkedListBox1.SelectedItems.Count == 0)
                 button1.Enabled = false;
             else
@@ -220,9 +223,13 @@ namespace ZeroWin
             {
                 archive_path = wos_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
             }
-            else
+            else if (meta_path[1] == "zxdb")
             {
                 archive_path = zxdb_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
+            }
+            else if (meta_path[1] == "zxscreens")
+            {
+                archive_path = zxinfo_archive_url + String.Join("/", meta_path, 1, meta_path.Length - 1);
             }
 
             return archive_path;
@@ -260,7 +267,6 @@ namespace ZeroWin
                 MessageBox.Show(we.Message, "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            xmlDoc.Save("zxdb_details.txt");
             XmlNodeList memberNodes = xmlDoc.SelectNodes("//_source");
             foreach (XmlNode node in memberNodes) {
                 details.ProgramName = GetNodeElement(node, "title");
@@ -286,46 +292,30 @@ namespace ZeroWin
                     {
                         string pic_url = pic_node.SelectSingleNode("path").InnerText;
                         details.PicIngameURL = ResolveArchivePath(pic_url);
-                        /*string[] meta_path = pic_url.Split('/');
-                        if (meta_path[1] == "pub")
-                        {
-                            details.PicIngameURL = wos_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
-                        }
-                        else
-                        {
-                            details.PicIngameURL = zxdb_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
-                        }*/
                     }
                     else if (pic_type == "Inlay - Front" && details.PicInlayURL == null)
                     {
                         string pic_url = pic_node.SelectSingleNode("path").InnerText;
                         details.PicInlayURL = ResolveArchivePath(pic_url);
-                        /*
-                        string[] meta_path = pic_url.Split('/');
-                        if (meta_path[1] == "pub")
-                        {
-                            details.PicInlayURL = wos_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
-                        }
-                        else
-                        {
-                            details.PicInlayURL = zxdb_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
-                        }*/
-                    }
-                    else if (pic_type == "Loading screen" && details.PicLoadURL == null)
-                    {
-                        string pic_url = pic_node.SelectSingleNode("path").InnerText;
-                        //details.PicLoadURL = ResolveArchivePath(pic_url);
-                        /*string[] meta_path = pic_url.Split('/');
-                        if (meta_path[1] == "pub")
-                        {
-                            details.PicLoadURL = wos_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
-                        }
-                        else
-                        {
-                            details.PicLoadURL = zxdb_archive_url + String.Join("/", meta_path, 3, meta_path.Length - 3);
-                        }*/
                     }
                 }
+                
+                // Currently the loading screen URL that's present in "additionalDownloads" is
+                // in SCR format, which can't be loaded by WinForms methods.
+                // Instead we use the PNG/GIF url that's available in the "screens" section.
+                if (details.PicLoadURL == null)
+                {
+                    XmlNodeList screen_list = node.SelectNodes("screens");
+                    foreach (XmlNode screen in screen_list)
+                    {
+                        if (screen.SelectSingleNode("type").InnerText == "Loading screen")
+                        {
+                            string pic_url = screen.SelectSingleNode("url").InnerText;
+                            details.PicLoadURL = ResolveArchivePath(pic_url);
+                            break;
+                        }
+                    }
+                } 
                 XmlNodeList fileNodes2 = node.SelectNodes("releases/files");
                 foreach (XmlNode node2 in fileNodes2) {
                     String full_link = node2.SelectSingleNode("path").InnerText;
@@ -342,20 +332,8 @@ namespace ZeroWin
             UpdateLabelInfo(availabilityLabel, details.Availability);
             UpdateLabelInfo(controlsLabel, details.Controls);
             UpdateLabelInfo(machineLabel, details.MachineType);
-
             
-            /*
-            XmlNodeList fileNodes2 = xmlDoc.SelectNodes("/result/otherDownloads/file");
-            foreach (XmlNode node in fileNodes2) {
-                String full_link = node.SelectSingleNode("link").InnerText;
-                char delimiter = '/';
-                string[] splitWords = full_link.Split(delimiter);
-                String type = node.SelectSingleNode("type").InnerText;
-                fileList.Add(ResolveArchivePath(full_link));
-                UpdateCheckbox(checkedListBox1, " (" + type + ") " + splitWords[splitWords.Length - 1]);
-            }
-            */
-            toolStripStatusLabel1.Text = "Ready.";
+            toolStripStatusLabel1.Text = "Ready. Click on images to see bigger previews.";
 
             if (details.PicInlayURL != null) {
                 try {
@@ -400,7 +378,7 @@ namespace ZeroWin
                     MessageBox.Show(we.Message, "Connection Error", MessageBoxButtons.OK);
                 }
             }
-
+            /*
             if (details.PicIngameURL != null) {
                 try {
                     HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(details.PicIngameURL);
@@ -421,7 +399,7 @@ namespace ZeroWin
                 } catch (WebException we) {
                     MessageBox.Show(we.Message, "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-            }
+            }*/
         }
 
         private void PictureLoadCallbackTimeout(object state, bool timedOut) {
@@ -467,7 +445,7 @@ namespace ZeroWin
                 fileDownloadCount++;
                 if (fileDownloadCount >= filesToDownload) {
                     fileDownloadCount = 0;
-                    toolStripStatusLabel1.Text = "Downloading complete.";
+                    toolStripStatusLabel1.Text = "Downloads complete.";
                     AutoLoadArgs arg = new AutoLoadArgs(autoLoadFilePath);
                     EnableDownloadButton(true);
                     OnFileDownloadEvent(this, arg);
@@ -610,6 +588,22 @@ namespace ZeroWin
         private void machineLabel_Click(object sender, EventArgs e)
         {
             throw new System.NotImplementedException();
+        }
+
+        private void loadingScreen_Click(object sender, EventArgs e)
+        {
+            if (loadingScreen.Image != ZeroWin.Properties.Resources.NoImage) {
+                PicturePreview picPreview = new PicturePreview(loadingScreen.Image);
+                picPreview.Show();
+            }
+        }
+
+        private void ingameScreen_Click(object sender, EventArgs e)
+        {
+            if (ingameScreen.Image != ZeroWin.Properties.Resources.NoImage) {
+                PicturePreview picPreview = new PicturePreview(ingameScreen.Image);
+                picPreview.Show();
+            }
         }
     }
 }

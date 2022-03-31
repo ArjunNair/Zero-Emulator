@@ -157,41 +157,41 @@
             this.tabControl1.SuspendLayout();
             this.hwPage.SuspendLayout();
             this.groupBox6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox6)).BeginInit();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox1)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.groupBox5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox5)).BeginInit();
             this.groupBox4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox4)).BeginInit();
             this.groupBox3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox3)).BeginInit();
             this.tabPage4.SuspendLayout();
             this.groupBox11.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox10)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox10)).BeginInit();
             this.groupBox10.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox11)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox11)).BeginInit();
             this.tabPage1.SuspendLayout();
             this.groupBox7.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox7)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox7)).BeginInit();
             this.tabPage3.SuspendLayout();
             this.groupBox9.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox9)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox9)).BeginInit();
             this.groupBox8.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox8)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox8)).BeginInit();
             this.tabPage5.SuspendLayout();
             this.tabControl2.SuspendLayout();
             this.tabPage8.SuspendLayout();
             this.groupBox12.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox14)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox14)).BeginInit();
             this.groupBox2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox2)).BeginInit();
             this.tabPage7.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox12)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox12)).BeginInit();
             this.tabPage6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.mouseTrackBar)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox13)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.mouseTrackBar)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox13)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -287,9 +287,7 @@
             this.disableTapeTrapCheckbox.Size = new System.Drawing.Size(114, 17);
             this.disableTapeTrapCheckbox.TabIndex = 7;
             this.disableTapeTrapCheckbox.Text = "Disable tape traps.";
-            this.toolTip1.SetToolTip(this.disableTapeTrapCheckbox, "Check this if you\'re using a non-standard ROM,\r\notherwise it may cause tape trapp" +
-        "ing routines\r\n(used to save/load TAP\'s by the emulator) to\r\naccidentally trigger" +
-        " when using the ROM.");
+            this.toolTip1.SetToolTip(this.disableTapeTrapCheckbox, "Check this if you\'re using a non-standard ROM,\r\notherwise it may cause tape trapp" + "ing routines\r\n(used to save/load TAP\'s by the emulator) to\r\naccidentally trigger" + " when using the ROM.");
             this.disableTapeTrapCheckbox.UseVisualStyleBackColor = true;
             // 
             // romBrowseButton
@@ -312,7 +310,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label11.Location = new System.Drawing.Point(58, 87);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(34, 13);
@@ -325,12 +323,7 @@
             this.modelComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.modelComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.modelComboBox.FormattingEnabled = true;
-            this.modelComboBox.Items.AddRange(new object[] {
-            "ZX Spectrum 48K",
-            "ZX Spectrum 128K",
-            "ZX Spectrum 128Ke",
-            "ZX Spectrum +3",
-            "Pentagon 128K"});
+            this.modelComboBox.Items.AddRange(new object[] {"ZX Spectrum 48K", "ZX Spectrum 128K", "ZX Spectrum 128Ke", "ZX Spectrum +3", "Pentagon 128K"});
             this.modelComboBox.Location = new System.Drawing.Point(103, 48);
             this.modelComboBox.Name = "modelComboBox";
             this.modelComboBox.Size = new System.Drawing.Size(196, 21);
@@ -340,7 +333,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label6.Location = new System.Drawing.Point(58, 51);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(39, 13);
@@ -350,7 +343,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label5.Location = new System.Drawing.Point(58, 22);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(182, 13);
@@ -432,17 +425,7 @@
             this.windowSizeComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.windowSizeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.windowSizeComboBox.FormattingEnabled = true;
-            this.windowSizeComboBox.Items.AddRange(new object[] {
-            "Full Screen",
-            "100%",
-            "150%",
-            "200%",
-            "250%",
-            "300%",
-            "350%",
-            "400%",
-            "450%",
-            "500%"});
+            this.windowSizeComboBox.Items.AddRange(new object[] {"Full Screen", "100%", "150%", "200%", "250%", "300%", "350%", "400%", "450%", "500%"});
             this.windowSizeComboBox.Location = new System.Drawing.Point(177, 52);
             this.windowSizeComboBox.Name = "windowSizeComboBox";
             this.windowSizeComboBox.Size = new System.Drawing.Size(124, 21);
@@ -454,10 +437,7 @@
             this.borderSizeComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.borderSizeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.borderSizeComboBox.FormattingEnabled = true;
-            this.borderSizeComboBox.Items.AddRange(new object[] {
-            "Full Border",
-            "Medium Border",
-            "Mini Border"});
+            this.borderSizeComboBox.Items.AddRange(new object[] {"Full Border", "Medium Border", "Mini Border"});
             this.borderSizeComboBox.Location = new System.Drawing.Point(177, 87);
             this.borderSizeComboBox.Name = "borderSizeComboBox";
             this.borderSizeComboBox.Size = new System.Drawing.Size(124, 21);
@@ -501,10 +481,7 @@
             this.paletteComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.paletteComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.paletteComboBox.FormattingEnabled = true;
-            this.paletteComboBox.Items.AddRange(new object[] {
-            "Spectrum (Normal)",
-            "Grayscale (B\\W TV)",
-            "ULA Plus (64 colour)"});
+            this.paletteComboBox.Items.AddRange(new object[] {"Spectrum (Normal)", "Grayscale (B\\W TV)", "ULA Plus (64 colour)"});
             this.paletteComboBox.Location = new System.Drawing.Point(108, 64);
             this.paletteComboBox.Name = "paletteComboBox";
             this.paletteComboBox.Size = new System.Drawing.Size(121, 21);
@@ -516,8 +493,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(317, 26);
             this.label7.TabIndex = 7;
-            this.label7.Text = "Select a colour palette to emulate - from the old school Black && White to the mo" +
-    "dern ULA Plus.";
+            this.label7.Text = "Select a colour palette to emulate - from the old school Black && White to the mo" + "dern ULA Plus.";
             // 
             // pictureBox4
             // 
@@ -563,8 +539,7 @@
             this.vsyncCheckbox.Size = new System.Drawing.Size(93, 17);
             this.vsyncCheckbox.TabIndex = 7;
             this.vsyncCheckbox.Text = "Enable VSync";
-            this.toolTip1.SetToolTip(this.vsyncCheckbox, "If this option is enabled, the renderer will try update the display at your monit" +
-        "ors refresh rate, which may or may not give smoother display.");
+            this.toolTip1.SetToolTip(this.vsyncCheckbox, "If this option is enabled, the renderer will try update the display at your monit" + "ors refresh rate, which may or may not give smoother display.");
             this.vsyncCheckbox.UseVisualStyleBackColor = true;
             // 
             // pixelSmoothingCheckBox
@@ -602,7 +577,7 @@
             // 
             // label2
             // 
-            this.label2.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label2.Location = new System.Drawing.Point(59, 17);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(317, 23);
@@ -612,7 +587,7 @@
             // gdiRadioButton
             // 
             this.gdiRadioButton.AutoSize = true;
-            this.gdiRadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gdiRadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.gdiRadioButton.Location = new System.Drawing.Point(162, 43);
             this.gdiRadioButton.Name = "gdiRadioButton";
             this.gdiRadioButton.Size = new System.Drawing.Size(43, 17);
@@ -625,7 +600,7 @@
             // 
             this.directXRadioButton.AutoSize = true;
             this.directXRadioButton.Checked = true;
-            this.directXRadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.directXRadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.directXRadioButton.Location = new System.Drawing.Point(65, 43);
             this.directXRadioButton.Name = "directXRadioButton";
             this.directXRadioButton.Size = new System.Drawing.Size(59, 17);
@@ -688,9 +663,7 @@
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(314, 39);
             this.label20.TabIndex = 3;
-            this.label20.Text = "Choose the speaker configuration for the three AY channels - A,B and C - in stere" +
-    "o mode. Default is: A on left speaker, C on both speakers (center) and B on righ" +
-    "t speaker.";
+            this.label20.Text = "Choose the speaker configuration for the three AY channels - A,B and C - in stere" + "o mode. Default is: A on left speaker, C on both speakers (center) and B on righ" + "t speaker.";
             // 
             // pictureBox10
             // 
@@ -724,8 +697,7 @@
             this.ayFor48kCheckbox.Size = new System.Drawing.Size(212, 17);
             this.ayFor48kCheckbox.TabIndex = 5;
             this.ayFor48kCheckbox.Text = "Enable AY emulation for 48K Spectrum.";
-            this.toolTip1.SetToolTip(this.ayFor48kCheckbox, "Allows AY sound to be played even on a 48k machine \r\nlike the Melodik and Fuller " +
-        "Box devices.");
+            this.toolTip1.SetToolTip(this.ayFor48kCheckbox, "Allows AY sound to be played even on a 48k machine \r\nlike the Melodik and Fuller " + "Box devices.");
             this.ayFor48kCheckbox.UseVisualStyleBackColor = true;
             this.ayFor48kCheckbox.CheckedChanged += new System.EventHandler(this.ayFor48kCheckbox_CheckedChanged);
             // 
@@ -768,8 +740,7 @@
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(315, 39);
             this.label19.TabIndex = 2;
-            this.label19.Text = "Zero can emulate AY sound in both mono and stereo modes. Choose \'Mono\' for a more" +
-    " authentic experience or \'Stereo\' for a more amiable one.";
+            this.label19.Text = "Zero can emulate AY sound in both mono and stereo modes. Choose \'Mono\' for a more" + " authentic experience or \'Stereo\' for a more amiable one.";
             // 
             // tabPage1
             // 
@@ -819,8 +790,7 @@
             this.onScreenLEDCheckbox.Size = new System.Drawing.Size(154, 17);
             this.onScreenLEDCheckbox.TabIndex = 5;
             this.onScreenLEDCheckbox.Text = "Show on screen indicators.";
-            this.toolTip1.SetToolTip(this.onScreenLEDCheckbox, "If unchecked, this will turn off all on screen indicators including\r\nthe tape and" +
-        " disk activity icons.");
+            this.toolTip1.SetToolTip(this.onScreenLEDCheckbox, "If unchecked, this will turn off all on screen indicators including\r\nthe tape and" + " disk activity icons.");
             this.onScreenLEDCheckbox.UseVisualStyleBackColor = true;
             // 
             // lastStateCheckbox
@@ -831,9 +801,7 @@
             this.lastStateCheckbox.Size = new System.Drawing.Size(154, 17);
             this.lastStateCheckbox.TabIndex = 4;
             this.lastStateCheckbox.Text = "Restore session on startup.";
-            this.toolTip1.SetToolTip(this.lastStateCheckbox, "If checked, Zero will revert to the state it was in when it exited.\r\nNow you can " +
-        "turn off the emulator in the middle of your work or gaming\r\nsession and then hav" +
-        "e it carry on from where you left off.");
+            this.toolTip1.SetToolTip(this.lastStateCheckbox, "If checked, Zero will revert to the state it was in when it exited.\r\nNow you can " + "turn off the emulator in the middle of your work or gaming\r\nsession and then hav" + "e it carry on from where you left off.");
             this.lastStateCheckbox.UseVisualStyleBackColor = true;
             this.lastStateCheckbox.CheckedChanged += new System.EventHandler(this.lastStateCheckbox_CheckedChanged);
             // 
@@ -944,7 +912,7 @@
             // label27
             // 
             this.label27.AutoSize = true;
-            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label27.Location = new System.Drawing.Point(84, 171);
             this.label27.Name = "label27";
             this.label27.Size = new System.Drawing.Size(36, 13);
@@ -967,8 +935,7 @@
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(316, 26);
             this.label18.TabIndex = 23;
-            this.label18.Text = "NOTE: Windows Security *may* ask you for permission to change settings on exiting" +
-    " this dialog. Do NOT Panic! :)";
+            this.label18.Text = "NOTE: Windows Security *may* ask you for permission to change settings on exiting" + " this dialog. Do NOT Panic! :)";
             // 
             // tapCheckBox
             // 
@@ -993,7 +960,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label17.Location = new System.Drawing.Point(80, 139);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(40, 13);
@@ -1034,7 +1001,7 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label16.Location = new System.Drawing.Point(60, 105);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(60, 13);
@@ -1057,8 +1024,7 @@
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(317, 26);
             this.label15.TabIndex = 13;
-            this.label15.Text = "Choose the type of files you would like to automatically open with Zero on double" +
-    " clicking from Windows Explorer.";
+            this.label15.Text = "Choose the type of files you would like to automatically open with Zero on double" + " clicking from Windows Explorer.";
             // 
             // pictureBox9
             // 
@@ -1107,7 +1073,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label14.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label14.Location = new System.Drawing.Point(59, 92);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(56, 13);
@@ -1152,7 +1118,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label12.Location = new System.Drawing.Point(59, 57);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(40, 13);
@@ -1239,8 +1205,7 @@
             this.label28.Name = "label28";
             this.label28.Size = new System.Drawing.Size(279, 39);
             this.label28.TabIndex = 20;
-            this.label28.Text = "The arrow keys on the PC keyboard can be used to \r\nemulate one of the popular joy" +
-    "stick interfaces. The SHIFT\r\nkey works as the fire button.\r\n";
+            this.label28.Text = "The arrow keys on the PC keyboard can be used to \r\nemulate one of the popular joy" + "stick interfaces. The SHIFT\r\nkey works as the fire button.\r\n";
             // 
             // label29
             // 
@@ -1255,11 +1220,7 @@
             // 
             this.key2joyComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.key2joyComboBox.FormattingEnabled = true;
-            this.key2joyComboBox.Items.AddRange(new object[] {
-            "Kempston",
-            "Sinclair 1",
-            "Sinclair 2",
-            "Cursor"});
+            this.key2joyComboBox.Items.AddRange(new object[] {"Kempston", "Sinclair 1", "Sinclair 2", "Cursor"});
             this.key2joyComboBox.Location = new System.Drawing.Point(206, 105);
             this.key2joyComboBox.Name = "key2joyComboBox";
             this.key2joyComboBox.Size = new System.Drawing.Size(111, 21);
@@ -1292,20 +1253,19 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label1.Location = new System.Drawing.Point(65, 19);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(281, 26);
             this.label1.TabIndex = 5;
-            this.label1.Text = "A few of the older 16K and 48K games require an Issue 2\r\nkeyboard to work properl" +
-    "y.";
+            this.label1.Text = "A few of the older 16K and 48K games require an Issue 2\r\nkeyboard to work properl" + "y.";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // issue3radioButton
             // 
             this.issue3radioButton.AutoSize = true;
             this.issue3radioButton.Checked = true;
-            this.issue3radioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.issue3radioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.issue3radioButton.Location = new System.Drawing.Point(68, 67);
             this.issue3radioButton.Name = "issue3radioButton";
             this.issue3radioButton.Size = new System.Drawing.Size(108, 17);
@@ -1317,7 +1277,7 @@
             // issue2RadioButton
             // 
             this.issue2RadioButton.AutoSize = true;
-            this.issue2RadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.issue2RadioButton.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.issue2RadioButton.Location = new System.Drawing.Point(201, 67);
             this.issue2RadioButton.Name = "issue2RadioButton";
             this.issue2RadioButton.Size = new System.Drawing.Size(108, 17);
@@ -1376,8 +1336,7 @@
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(303, 35);
             this.label26.TabIndex = 18;
-            this.label26.Text = "Up to two controllers can be used on the PC to emulate some of the popular joysti" +
-    "ck interfaces. ";
+            this.label26.Text = "Up to two controllers can be used on the PC to emulate some of the popular joysti" + "ck interfaces. ";
             // 
             // pictureBox12
             // 
@@ -1401,13 +1360,7 @@
             // 
             this.joystick2ComboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.joystick2ComboBox2.FormattingEnabled = true;
-            this.joystick2ComboBox2.Items.AddRange(new object[] {
-            "(Nothing)",
-            "Kempston",
-            "Sinclair 1",
-            "Sinclair 2",
-            "Cursor",
-            "Custom"});
+            this.joystick2ComboBox2.Items.AddRange(new object[] {"(Nothing)", "Kempston", "Sinclair 1", "Sinclair 2", "Cursor", "Custom"});
             this.joystick2ComboBox2.Location = new System.Drawing.Point(257, 198);
             this.joystick2ComboBox2.Name = "joystick2ComboBox2";
             this.joystick2ComboBox2.Size = new System.Drawing.Size(111, 21);
@@ -1455,13 +1408,7 @@
             // 
             this.joystickComboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.joystickComboBox2.FormattingEnabled = true;
-            this.joystickComboBox2.Items.AddRange(new object[] {
-            "(Nothing)",
-            "Kempston",
-            "Sinclair 1",
-            "Sinclair 2",
-            "Cursor",
-            "Custom"});
+            this.joystickComboBox2.Items.AddRange(new object[] {"(Nothing)", "Kempston", "Sinclair 1", "Sinclair 2", "Cursor", "Custom"});
             this.joystickComboBox2.Location = new System.Drawing.Point(257, 88);
             this.joystickComboBox2.Name = "joystickComboBox2";
             this.joystickComboBox2.Size = new System.Drawing.Size(111, 21);
@@ -1547,12 +1494,11 @@
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(282, 34);
             this.label25.TabIndex = 10;
-            this.label25.Text = "Zero can emulate a two button Kempston mouse using the mouse attached to your PC." +
-    " ";
+            this.label25.Text = "Zero can emulate a two button Kempston mouse using the mouse attached to your PC." + " ";
             // 
             // button4
             // 
-            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button4.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.button4.Location = new System.Drawing.Point(348, 438);
             this.button4.Name = "button4";
@@ -1563,7 +1509,7 @@
             // 
             // button5
             // 
-            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button5.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button5.Location = new System.Drawing.Point(264, 438);
             this.button5.Name = "button5";
@@ -1601,67 +1547,67 @@
             this.Controls.Add(this.button4);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Options";
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Settings";
             this.Load += new System.EventHandler(this.Options_Load);
             this.tabControl1.ResumeLayout(false);
             this.hwPage.ResumeLayout(false);
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox6)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox1)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox5)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox4)).EndInit();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox3)).EndInit();
             this.tabPage4.ResumeLayout(false);
             this.groupBox11.ResumeLayout(false);
             this.groupBox11.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox10)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox10)).EndInit();
             this.groupBox10.ResumeLayout(false);
             this.groupBox10.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox11)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox11)).EndInit();
             this.tabPage1.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox7)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox7)).EndInit();
             this.tabPage3.ResumeLayout(false);
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox9)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox9)).EndInit();
             this.groupBox8.ResumeLayout(false);
             this.groupBox8.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox8)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox8)).EndInit();
             this.tabPage5.ResumeLayout(false);
             this.tabControl2.ResumeLayout(false);
             this.tabPage8.ResumeLayout(false);
             this.groupBox12.ResumeLayout(false);
             this.groupBox12.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox14)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox14)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox2)).EndInit();
             this.tabPage7.ResumeLayout(false);
             this.tabPage7.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox12)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox12)).EndInit();
             this.tabPage6.ResumeLayout(false);
             this.tabPage6.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.mouseTrackBar)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox13)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.mouseTrackBar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBox13)).EndInit();
             this.ResumeLayout(false);
-
         }
 
         #endregion

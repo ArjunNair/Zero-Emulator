@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridView dataGridView1;
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -60,7 +61,6 @@
             this.callStackButton = new System.Windows.Forms.ToolStripButton();
             this.jumpAddrTextBox4 = new System.Windows.Forms.MaskedTextBox();
             this.jumpAddrButton = new System.Windows.Forms.Button();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.label1 = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,19 +92,18 @@
             this.numbersInHexToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemVariablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            dataGridView1 = new System.Windows.Forms.DataGridView();
             this.statusStrip1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (dataGridView1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // statusStrip1
             // 
             this.statusStrip1.BackColor = System.Drawing.SystemColors.Control;
-            this.statusStrip1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.monitorStatusLabel,
-            this.toolStripStatusLabel1});
+            this.statusStrip1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.monitorStatusLabel, this.toolStripStatusLabel1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 407);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
@@ -116,7 +115,7 @@
             // 
             // monitorStatusLabel
             // 
-            this.monitorStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.monitorStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.monitorStatusLabel.Name = "monitorStatusLabel";
             this.monitorStatusLabel.Size = new System.Drawing.Size(0, 17);
             // 
@@ -128,26 +127,7 @@
             // 
             // toolStrip2
             // 
-            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ResumeEmulationButton,
-            this.RunToCursorButton,
-            this.StopDebuggerButton,
-            this.toolStripSeparator2,
-            this.StepInButton,
-            this.StepOutButton,
-            this.StepOverButton,
-            this.toolStripSeparator3,
-            this.ToggleBreakpointButton,
-            this.ClearAllBreakpointsButton,
-            this.BreakpointsButton,
-            this.toolStripSeparator4,
-            this.MemoryButton,
-            this.machineStateButton,
-            this.RegistersButton,
-            this.toolStripSeparator5,
-            this.ProfilerButton,
-            this.PokeMemoryButton,
-            this.callStackButton});
+            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.ResumeEmulationButton, this.RunToCursorButton, this.StopDebuggerButton, this.toolStripSeparator2, this.StepInButton, this.StepOutButton, this.StepOverButton, this.toolStripSeparator3, this.ToggleBreakpointButton, this.ClearAllBreakpointsButton, this.BreakpointsButton, this.toolStripSeparator4, this.MemoryButton, this.machineStateButton, this.RegistersButton, this.toolStripSeparator5, this.ProfilerButton, this.PokeMemoryButton, this.callStackButton});
             this.toolStrip2.Location = new System.Drawing.Point(0, 24);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(372, 25);
@@ -337,7 +317,7 @@
             // 
             // jumpAddrTextBox4
             // 
-            this.jumpAddrTextBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.jumpAddrTextBox4.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.jumpAddrTextBox4.Location = new System.Drawing.Point(83, 379);
             this.jumpAddrTextBox4.Name = "jumpAddrTextBox4";
             this.jumpAddrTextBox4.Size = new System.Drawing.Size(100, 23);
@@ -346,7 +326,7 @@
             // 
             // jumpAddrButton
             // 
-            this.jumpAddrButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.jumpAddrButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.jumpAddrButton.Location = new System.Drawing.Point(194, 378);
             this.jumpAddrButton.Name = "jumpAddrButton";
             this.jumpAddrButton.Size = new System.Drawing.Size(75, 28);
@@ -357,53 +337,51 @@
             // 
             // dataGridView1
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.AllowUserToResizeRows = false;
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AllowUserToDeleteRows = false;
+            dataGridView1.AllowUserToResizeRows = false;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
-            this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dataGridView1.BackgroundColor = System.Drawing.SystemColors.Window;
-            this.dataGridView1.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.RaisedVertical;
-            this.dataGridView1.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.dataGridView1.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
-            this.dataGridView1.EnableHeadersVisualStyles = false;
-            this.dataGridView1.GridColor = System.Drawing.SystemColors.ControlLightLight;
-            this.dataGridView1.Location = new System.Drawing.Point(3, 54);
-            this.dataGridView1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+            dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView1.BackgroundColor = System.Drawing.SystemColors.Window;
+            dataGridView1.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.RaisedVertical;
+            dataGridView1.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            dataGridView1.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+            dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
+            dataGridView1.EnableHeadersVisualStyles = false;
+            dataGridView1.GridColor = System.Drawing.SystemColors.ControlLightLight;
+            dataGridView1.Location = new System.Drawing.Point(3, 54);
+            dataGridView1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            this.dataGridView1.RowHeadersWidth = 20;
-            this.dataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridView1.RowHeadersWidth = 20;
+            dataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             dataGridViewCellStyle3.NullValue = null;
-            this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle3;
-            this.dataGridView1.RowTemplate.DefaultCellStyle.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dataGridView1.ShowRowErrors = false;
-            this.dataGridView1.Size = new System.Drawing.Size(369, 318);
-            this.dataGridView1.TabIndex = 10;
-            this.dataGridView1.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellDoubleClick);
-            this.dataGridView1.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dataGridView1_RowPostPaint);
+            dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridView1.RowTemplate.DefaultCellStyle.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            dataGridView1.RowTemplate.Height = 24;
+            dataGridView1.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            dataGridView1.ShowRowErrors = false;
+            dataGridView1.Size = new System.Drawing.Size(369, 318);
+            dataGridView1.TabIndex = 10;
+            dataGridView1.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellDoubleClick);
+            dataGridView1.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dataGridView1_RowPostPaint);
             // 
             // label1
             // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(3, 381);
             this.label1.Name = "label1";
@@ -413,12 +391,7 @@
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem,
-            this.debugToolStripMenuItem,
-            this.breakpointsToolStripMenuItem,
-            this.toolsToolStripMenuItem,
-            this.viewToolStripMenuItem});
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.fileToolStripMenuItem, this.debugToolStripMenuItem, this.breakpointsToolStripMenuItem, this.toolsToolStripMenuItem, this.viewToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(372, 24);
@@ -427,9 +400,7 @@
             // 
             // fileToolStripMenuItem
             // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.saveToolStripMenuItem,
-            this.loadSymbolsToolStripMenuItem});
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.saveToolStripMenuItem, this.loadSymbolsToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -447,20 +418,12 @@
             this.loadSymbolsToolStripMenuItem.Name = "loadSymbolsToolStripMenuItem";
             this.loadSymbolsToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.loadSymbolsToolStripMenuItem.Text = "Load Symbols...";
-            this.loadSymbolsToolStripMenuItem.ToolTipText = "Allows you to load custom symbols to represent memory locations.\r\nSymbols should " +
-    "be stored as CSV in key-pairs like so:\r\n23606, CHARS\r\n42000, SPRITE DATA";
+            this.loadSymbolsToolStripMenuItem.ToolTipText = "Allows you to load custom symbols to represent memory locations.\r\nSymbols should " + "be stored as CSV in key-pairs like so:\r\n23606, CHARS\r\n42000, SPRITE DATA";
             this.loadSymbolsToolStripMenuItem.Click += new System.EventHandler(this.loadSymbolsToolStripMenuItem_Click);
             // 
             // debugToolStripMenuItem
             // 
-            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.resumeEmulationToolStripMenuItem,
-            this.runToCursorToolStripMenuItem,
-            this.stopDebuggingToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.stepOverToolStripMenuItem,
-            this.stepInToolStripMenuItem,
-            this.stepOutToolStripMenuItem});
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.resumeEmulationToolStripMenuItem, this.runToCursorToolStripMenuItem, this.stopDebuggingToolStripMenuItem, this.toolStripSeparator1, this.stepOverToolStripMenuItem, this.stepInToolStripMenuItem, this.stepOutToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -524,9 +487,7 @@
             // 
             // breakpointsToolStripMenuItem
             // 
-            this.breakpointsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toggleBreakpointToolStripMenuItem,
-            this.clearAllBreakpointsToolStripMenuItem});
+            this.breakpointsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.toggleBreakpointToolStripMenuItem, this.clearAllBreakpointsToolStripMenuItem});
             this.breakpointsToolStripMenuItem.Name = "breakpointsToolStripMenuItem";
             this.breakpointsToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.breakpointsToolStripMenuItem.Text = "Breakpoints";
@@ -549,13 +510,9 @@
             // 
             // toolsToolStripMenuItem
             // 
-            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.breakpointsEditorToolStripMenuItem,
-            this.pokeMemoryToolStripMenuItem,
-            this.watchMemoryToolStripMenuItem,
-            this.heatMapToolStripMenuItem});
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.breakpointsEditorToolStripMenuItem, this.pokeMemoryToolStripMenuItem, this.watchMemoryToolStripMenuItem, this.heatMapToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
             this.toolsToolStripMenuItem.Click += new System.EventHandler(this.toolsToolStripMenuItem_Click);
             // 
@@ -563,7 +520,7 @@
             // 
             this.breakpointsEditorToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.BreakpointsWindow_6557;
             this.breakpointsEditorToolStripMenuItem.Name = "breakpointsEditorToolStripMenuItem";
-            this.breakpointsEditorToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.B)));
+            this.breakpointsEditorToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.B)));
             this.breakpointsEditorToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.breakpointsEditorToolStripMenuItem.Text = "Breakpoints Editor";
             this.breakpointsEditorToolStripMenuItem.Click += new System.EventHandler(this.breakpointsEditorToolStripMenuItem_Click);
@@ -572,7 +529,7 @@
             // 
             this.pokeMemoryToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.PencilTool_206;
             this.pokeMemoryToolStripMenuItem.Name = "pokeMemoryToolStripMenuItem";
-            this.pokeMemoryToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.P)));
+            this.pokeMemoryToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.P)));
             this.pokeMemoryToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.pokeMemoryToolStripMenuItem.Text = "Poke Memory";
             this.pokeMemoryToolStripMenuItem.Click += new System.EventHandler(this.pokeMemoryToolStripMenuItem_Click);
@@ -581,7 +538,7 @@
             // 
             this.watchMemoryToolStripMenuItem.Image = global::ZeroWin.Properties.Resources.magnifier_16xLG;
             this.watchMemoryToolStripMenuItem.Name = "watchMemoryToolStripMenuItem";
-            this.watchMemoryToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.W)));
+            this.watchMemoryToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.W)));
             this.watchMemoryToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.watchMemoryToolStripMenuItem.Text = "Watch Memory";
             this.watchMemoryToolStripMenuItem.Click += new System.EventHandler(this.watchMemoryToolStripMenuItem_Click);
@@ -596,15 +553,7 @@
             // 
             // viewToolStripMenuItem
             // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem4,
-            this.toolStripMenuItem1,
-            this.toolStripMenuItem2,
-            this.toolStripMenuItem3,
-            this.toolStripSeparator7,
-            this.aSCIICharactersToolStripMenuItem,
-            this.numbersInHexToolStripMenuItem,
-            this.systemVariablesToolStripMenuItem});
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.toolStripMenuItem4, this.toolStripMenuItem1, this.toolStripMenuItem2, this.toolStripMenuItem3, this.toolStripSeparator7, this.aSCIICharactersToolStripMenuItem, this.numbersInHexToolStripMenuItem, this.systemVariablesToolStripMenuItem});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "View";
@@ -613,7 +562,7 @@
             // 
             this.toolStripMenuItem4.Image = global::ZeroWin.Properties.Resources.IntelliTrace_16x;
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.L)));
+            this.toolStripMenuItem4.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.L)));
             this.toolStripMenuItem4.Size = new System.Drawing.Size(185, 22);
             this.toolStripMenuItem4.Text = "Execution Log";
             this.toolStripMenuItem4.Click += new System.EventHandler(this.executionLogToolStripMenuItem_Click);
@@ -622,7 +571,7 @@
             // 
             this.toolStripMenuItem1.Image = global::ZeroWin.Properties.Resources.Processor;
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.S)));
+            this.toolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.S)));
             this.toolStripMenuItem1.Size = new System.Drawing.Size(185, 22);
             this.toolStripMenuItem1.Text = "Machine State";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.machineStateToolStripMenuItem_Click);
@@ -631,7 +580,7 @@
             // 
             this.toolStripMenuItem2.Image = global::ZeroWin.Properties.Resources.MemoryWindow_6537;
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.V)));
+            this.toolStripMenuItem2.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.V)));
             this.toolStripMenuItem2.Size = new System.Drawing.Size(185, 22);
             this.toolStripMenuItem2.Text = "Memory";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.memoryViewerToolStripMenuItem_Click);
@@ -640,7 +589,7 @@
             // 
             this.toolStripMenuItem3.Image = global::ZeroWin.Properties.Resources.RegistersWindow_6538;
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.R)));
+            this.toolStripMenuItem3.ShortcutKeys = ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.R)));
             this.toolStripMenuItem3.Size = new System.Drawing.Size(185, 22);
             this.toolStripMenuItem3.Text = "Registers";
             this.toolStripMenuItem3.Click += new System.EventHandler(this.registersToolStripMenuItem_Click);
@@ -688,18 +637,19 @@
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(372, 429);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(dataGridView1);
             this.Controls.Add(this.jumpAddrTextBox4);
             this.Controls.Add(this.jumpAddrButton);
             this.Controls.Add(this.toolStrip2);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
-            this.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "Monitor";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Monitor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Monitor_FormClosing);
             this.Load += new System.EventHandler(this.Monitor_Load);
@@ -709,12 +659,11 @@
             this.statusStrip1.PerformLayout();
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (dataGridView1)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

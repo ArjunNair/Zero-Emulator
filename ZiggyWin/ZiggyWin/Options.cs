@@ -580,7 +580,6 @@ namespace ZeroWin
                     break;
 
                 case 4:
-                    currentPentagonRom = romTextBox.Text;
                     break;
             }
 

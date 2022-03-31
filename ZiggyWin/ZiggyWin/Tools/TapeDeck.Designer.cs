@@ -67,7 +67,7 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridView1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -88,7 +88,7 @@
             this.dataGridView1.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.ControlLight;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -97,7 +97,7 @@
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.SeaGreen;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -112,7 +112,7 @@
             this.dataGridView1.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.SeaGreen;
             dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -153,9 +153,7 @@
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem,
-            this.optionsToolStripMenuItem});
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.fileToolStripMenuItem, this.optionsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(267, 24);
@@ -164,18 +162,7 @@
             // 
             // fileToolStripMenuItem
             // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.ejectToolStripMenuItem,
-            this.stopToolStripMenuItem,
-            this.playToolStripMenuItem,
-            this.rewindToolStripMenuItem,
-            this.toolStripSeparator2,
-            this.previousBlockToolStripMenuItem,
-            this.nextBlockToolStripMenuItem,
-            this.toolStripSeparator4,
-            this.infoToolStripMenuItem});
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.openToolStripMenuItem, this.toolStripSeparator1, this.ejectToolStripMenuItem, this.stopToolStripMenuItem, this.playToolStripMenuItem, this.rewindToolStripMenuItem, this.toolStripSeparator2, this.previousBlockToolStripMenuItem, this.nextBlockToolStripMenuItem, this.toolStripSeparator4, this.infoToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -254,11 +241,7 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.CheckOnClick = true;
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.autoLoadTapesToolStripMenuItem,
-            this.autoPlayStopToolStripMenuItem,
-            this.fastLoadToolStripMenuItem,
-            this.edgeLoadToolStripMenuItem});
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.autoLoadTapesToolStripMenuItem, this.autoPlayStopToolStripMenuItem, this.fastLoadToolStripMenuItem, this.edgeLoadToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -267,14 +250,14 @@
             // 
             this.autoLoadTapesToolStripMenuItem.CheckOnClick = true;
             this.autoLoadTapesToolStripMenuItem.Name = "autoLoadTapesToolStripMenuItem";
-            this.autoLoadTapesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autoLoadTapesToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.autoLoadTapesToolStripMenuItem.Text = "Auto Load";
             this.autoLoadTapesToolStripMenuItem.ToolTipText = "Enable this to automatically load in a tape when a tape file is opened.";
             // 
             // autoPlayStopToolStripMenuItem
             // 
             this.autoPlayStopToolStripMenuItem.Name = "autoPlayStopToolStripMenuItem";
-            this.autoPlayStopToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autoPlayStopToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.autoPlayStopToolStripMenuItem.Text = "Auto Play && Stop";
             this.autoPlayStopToolStripMenuItem.ToolTipText = "Will automatically start or stop playing the tape. Requires Edge Load.";
             this.autoPlayStopToolStripMenuItem.CheckedChanged += new System.EventHandler(this.autoStartCheckBox_CheckedChanged);
@@ -284,7 +267,7 @@
             // 
             this.fastLoadToolStripMenuItem.CheckOnClick = true;
             this.fastLoadToolStripMenuItem.Name = "fastLoadToolStripMenuItem";
-            this.fastLoadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fastLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.fastLoadToolStripMenuItem.Text = "Fast-Load";
             this.fastLoadToolStripMenuItem.ToolTipText = "Will try to load in a tape faster by boosting the emulation speed.";
             this.fastLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
@@ -294,16 +277,14 @@
             // 
             this.edgeLoadToolStripMenuItem.CheckOnClick = true;
             this.edgeLoadToolStripMenuItem.Name = "edgeLoadToolStripMenuItem";
-            this.edgeLoadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.edgeLoadToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.edgeLoadToolStripMenuItem.Text = "Edge-Load";
-            this.edgeLoadToolStripMenuItem.ToolTipText = "This should be enabled for  Auto Play/Stop. It also provides a bit of a speed boo" +
-    "st.";
+            this.edgeLoadToolStripMenuItem.ToolTipText = "This should be enabled for  Auto Play/Stop. It also provides a bit of a speed boo" + "st.";
             this.edgeLoadToolStripMenuItem.CheckedChanged += new System.EventHandler(this.edgeLoadCheckBox_CheckedChanged);
             // 
             // statusStrip1
             // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1});
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.toolStripStatusLabel1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 318);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(267, 22);
@@ -417,14 +398,15 @@
             this.Controls.Add(this.menuStrip1);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
             this.Name = "TapeDeck";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Tape Deck";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TapeDeck_FormClosing);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridView1)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
@@ -433,7 +415,6 @@
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

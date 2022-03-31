@@ -73,10 +73,10 @@
             this.Name = "TrainerValueInput";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Trainer";
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

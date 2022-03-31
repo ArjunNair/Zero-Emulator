@@ -130,15 +130,7 @@
             // pageComboBox
             // 
             this.pageComboBox.FormattingEnabled = true;
-            this.pageComboBox.Items.AddRange(new object[] {
-            "Bank 0",
-            "Bank 1",
-            "Bank 2",
-            "Bank 3",
-            "Bank 4",
-            "Bank 5",
-            "Bank 6",
-            "Bank 7"});
+            this.pageComboBox.Items.AddRange(new object[] {"Bank 0", "Bank 1", "Bank 2", "Bank 3", "Bank 4", "Bank 5", "Bank 6", "Bank 7"});
             this.pageComboBox.Location = new System.Drawing.Point(128, 57);
             this.pageComboBox.Name = "pageComboBox";
             this.pageComboBox.Size = new System.Drawing.Size(84, 21);
@@ -190,10 +182,10 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "LoadBinary";
             this.ShowIcon = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Load Binary";
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

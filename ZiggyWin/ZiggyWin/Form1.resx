@@ -656,7 +656,10 @@ if your keyboard doesn't have the INS key.</value>
     <value>187, 22</value>
   </data>
   <data name="programFinderToolStripMenuItem.Text" xml:space="preserve">
-    <value>Search Infoseek</value>
+    <value>Search Online</value>
+  </data>
+  <data name="programFinderToolStripMenuItem.ToolTipText" xml:space="preserve">
+    <value>Search for titles online using ZXDB.</value>
   </data>
   <data name="kKeyboardHelperToolStripMenuItem.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+K</value>
@@ -707,7 +710,7 @@ if your keyboard doesn't have the INS key.</value>
     <value>0, 0</value>
   </data>
   <data name="menuStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>352, 24</value>
+    <value>362, 24</value>
   </data>
   <data name="menuStrip1.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -851,7 +854,7 @@ if your keyboard doesn't have the INS key.</value>
     <value>10, 0, 0, 0</value>
   </data>
   <data name="toolStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>352, 25</value>
+    <value>362, 25</value>
   </data>
   <data name="toolStrip1.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -884,7 +887,7 @@ if your keyboard doesn't have the INS key.</value>
     <value>False</value>
   </data>
   <data name="statusLabelText.Size" type="System.Drawing.Size, System.Drawing">
-    <value>8, 20</value>
+    <value>18, 20</value>
   </data>
   <data name="statusLabelText.Text" xml:space="preserve">
     <value>Ready</value>
@@ -977,10 +980,10 @@ Kempston mouse status</value>
     <value>0, 20</value>
   </data>
   <data name="statusStrip1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 347</value>
+    <value>0, 352</value>
   </data>
   <data name="statusStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>352, 25</value>
+    <value>362, 25</value>
   </data>
   <data name="statusStrip1.TabIndex" type="System.Int32, mscorlib">
     <value>8</value>
@@ -1010,7 +1013,7 @@ Kempston mouse status</value>
     <value>None</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>352, 372</value>
+    <value>362, 377</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

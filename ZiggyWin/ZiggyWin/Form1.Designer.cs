@@ -163,28 +163,13 @@
             // menuStrip1
             // 
             this.menuStrip1.BackColor = System.Drawing.SystemColors.MenuBar;
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem,
-            this.machineToolStripMenuItem,
-            this.viewToolStripMenuItem,
-            this.rzxToolStripMenuItem,
-            this.toolsToolStripMenuItem});
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.fileToolStripMenuItem, this.machineToolStripMenuItem, this.viewToolStripMenuItem, this.rzxToolStripMenuItem, this.toolsToolStripMenuItem});
             resources.ApplyResources(this.menuStrip1, "menuStrip1");
             this.menuStrip1.Name = "menuStrip1";
             // 
             // fileToolStripMenuItem
             // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openToolStripMenuItem,
-            this.saveSnapshotToolStripMenuItem,
-            this.saveScreenshotToolStripMenuItem,
-            this.toolStripSeparator11,
-            this.loadBinaryToolStripMenuItem,
-            this.saveBinaryToolStripMenuItem,
-            this.toolStripSeparator12,
-            this.disksMenuItem,
-            this.toolStripSeparator18,
-            this.recentFilesToolStripMenuItem});
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.openToolStripMenuItem, this.saveSnapshotToolStripMenuItem, this.saveScreenshotToolStripMenuItem, this.toolStripSeparator11, this.loadBinaryToolStripMenuItem, this.saveBinaryToolStripMenuItem, this.toolStripSeparator12, this.disksMenuItem, this.toolStripSeparator18, this.recentFilesToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             resources.ApplyResources(this.fileToolStripMenuItem, "fileToolStripMenuItem");
             // 
@@ -233,11 +218,7 @@
             // 
             // disksMenuItem
             // 
-            this.disksMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.insertDiskAToolStripMenuItem,
-            this.insertDiskBToolStripMenuItem,
-            this.insertDiskCToolStripMenuItem,
-            this.insertDiskDToolStripMenuItem});
+            this.disksMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.insertDiskAToolStripMenuItem, this.insertDiskBToolStripMenuItem, this.insertDiskCToolStripMenuItem, this.insertDiskDToolStripMenuItem});
             this.disksMenuItem.Name = "disksMenuItem";
             resources.ApplyResources(this.disksMenuItem, "disksMenuItem");
             // 
@@ -281,18 +262,7 @@
             // 
             // machineToolStripMenuItem
             // 
-            this.machineToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.resetToolStripMenuItem,
-            this.toolStripMenuItem6,
-            this.toolStripSeparator5,
-            this.emulationSpeedMenuItem,
-            this.cpuSpeedMenuItem,
-            this.toolStripSeparator13,
-            this.zxSpectrum48kToolStripMenuItem,
-            this.zxSpectrum128kToolStripMenuItem1,
-            this.zxSpectrum128keToolStripMenuItem1,
-            this.zxSpectrum3ToolStripMenuItem1,
-            this.pentagon128kToolStripMenuItem1});
+            this.machineToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.resetToolStripMenuItem, this.toolStripMenuItem6, this.toolStripSeparator5, this.emulationSpeedMenuItem, this.cpuSpeedMenuItem, this.toolStripSeparator13, this.zxSpectrum48kToolStripMenuItem, this.zxSpectrum128kToolStripMenuItem1, this.zxSpectrum128keToolStripMenuItem1, this.zxSpectrum3ToolStripMenuItem1, this.pentagon128kToolStripMenuItem1});
             this.machineToolStripMenuItem.Name = "machineToolStripMenuItem";
             resources.ApplyResources(this.machineToolStripMenuItem, "machineToolStripMenuItem");
             // 
@@ -318,12 +288,7 @@
             // 
             // emulationSpeedMenuItem
             // 
-            this.emulationSpeedMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.emulationSpeed1,
-            this.emulationSpeed2,
-            this.emulationSpeed4,
-            this.emulationSpeed8,
-            this.emulationSpeed10});
+            this.emulationSpeedMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.emulationSpeed1, this.emulationSpeed2, this.emulationSpeed4, this.emulationSpeed8, this.emulationSpeed10});
             this.emulationSpeedMenuItem.Name = "emulationSpeedMenuItem";
             resources.ApplyResources(this.emulationSpeedMenuItem, "emulationSpeedMenuItem");
             // 
@@ -361,12 +326,7 @@
             // 
             // cpuSpeedMenuItem
             // 
-            this.cpuSpeedMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.cpuSpeed1,
-            this.cpuSpeed2,
-            this.cpuSpeed3,
-            this.cpuSpeed4,
-            this.cpuSpeed5});
+            this.cpuSpeedMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.cpuSpeed1, this.cpuSpeed2, this.cpuSpeed3, this.cpuSpeed4, this.cpuSpeed5});
             this.cpuSpeedMenuItem.Name = "cpuSpeedMenuItem";
             resources.ApplyResources(this.cpuSpeedMenuItem, "cpuSpeedMenuItem");
             // 
@@ -440,10 +400,7 @@
             // 
             // viewToolStripMenuItem
             // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.renderingToolStripMenuItem,
-            this.paletteToolStripMenuItem1,
-            this.windowSizeToolStripMenuItem});
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.renderingToolStripMenuItem, this.paletteToolStripMenuItem1, this.windowSizeToolStripMenuItem});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             resources.ApplyResources(this.viewToolStripMenuItem, "viewToolStripMenuItem");
             // 
@@ -451,12 +408,7 @@
             // 
             this.renderingToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
             this.renderingToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.renderingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.directXToolStripMenuItem,
-            this.gDIToolStripMenuItem,
-            this.toolStripSeparator3,
-            this.interlaceToolStripMenuItem,
-            this.pixelToolStripMenuItem});
+            this.renderingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.directXToolStripMenuItem, this.gDIToolStripMenuItem, this.toolStripSeparator3, this.interlaceToolStripMenuItem, this.pixelToolStripMenuItem});
             this.renderingToolStripMenuItem.ForeColor = System.Drawing.SystemColors.ControlText;
             this.renderingToolStripMenuItem.Name = "renderingToolStripMenuItem";
             resources.ApplyResources(this.renderingToolStripMenuItem, "renderingToolStripMenuItem");
@@ -498,10 +450,7 @@
             // 
             // paletteToolStripMenuItem1
             // 
-            this.paletteToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.grayscaleToolStripMenuItem,
-            this.uLAPlusToolStripMenuItem,
-            this.normalToolStripMenuItem});
+            this.paletteToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.grayscaleToolStripMenuItem, this.uLAPlusToolStripMenuItem, this.normalToolStripMenuItem});
             this.paletteToolStripMenuItem1.Name = "paletteToolStripMenuItem1";
             resources.ApplyResources(this.paletteToolStripMenuItem1, "paletteToolStripMenuItem1");
             // 
@@ -527,11 +476,7 @@
             // 
             // windowSizeToolStripMenuItem
             // 
-            this.windowSizeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem2,
-            this.toolStripMenuItem5,
-            this.toolStripMenuItem1,
-            this.fullScreenToolStripMenuItem});
+            this.windowSizeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.toolStripMenuItem2, this.toolStripMenuItem5, this.toolStripMenuItem1, this.fullScreenToolStripMenuItem});
             this.windowSizeToolStripMenuItem.Name = "windowSizeToolStripMenuItem";
             resources.ApplyResources(this.windowSizeToolStripMenuItem, "windowSizeToolStripMenuItem");
             // 
@@ -561,18 +506,7 @@
             // 
             // rzxToolStripMenuItem
             // 
-            this.rzxToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.rzxPlaybackToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.rzxRecordToolStripMenuItem,
-            this.rzxContinueSessionToolStripMenuItem,
-            this.toolStripSeparator2,
-            this.rzxFinaliseToolStripMenuItem,
-            this.rzxDiscardToolStripMenuItem,
-            this.rzxStopToolStripMenuItem1,
-            this.toolStripSeparator4,
-            this.rzxInsertBookmarkToolStripMenuItem,
-            this.rzxRollbackToolStripMenuItem});
+            this.rzxToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.rzxPlaybackToolStripMenuItem, this.toolStripSeparator1, this.rzxRecordToolStripMenuItem, this.rzxContinueSessionToolStripMenuItem, this.toolStripSeparator2, this.rzxFinaliseToolStripMenuItem, this.rzxDiscardToolStripMenuItem, this.rzxStopToolStripMenuItem1, this.toolStripSeparator4, this.rzxInsertBookmarkToolStripMenuItem, this.rzxRollbackToolStripMenuItem});
             this.rzxToolStripMenuItem.Name = "rzxToolStripMenuItem";
             resources.ApplyResources(this.rzxToolStripMenuItem, "rzxToolStripMenuItem");
             // 
@@ -642,17 +576,7 @@
             // 
             // toolsToolStripMenuItem
             // 
-            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.commanderStripMenuItem3,
-            this.tapeBrowserToolStripMenuItem,
-            this.debuggerToolStripMenuItem,
-            this.programFinderToolStripMenuItem,
-            this.kKeyboardHelperToolStripMenuItem,
-            this.basicImportToolStripMenuItem3,
-            this.cheatHelperToolStripMenuItem1,
-            this.aboutZeroToolStripMenuItem,
-            this.toolStripSeparator17,
-            this.preferencesToolStripMenuItem});
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.commanderStripMenuItem3, this.tapeBrowserToolStripMenuItem, this.debuggerToolStripMenuItem, this.programFinderToolStripMenuItem, this.kKeyboardHelperToolStripMenuItem, this.basicImportToolStripMenuItem3, this.cheatHelperToolStripMenuItem1, this.aboutZeroToolStripMenuItem, this.toolStripSeparator17, this.preferencesToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             resources.ApplyResources(this.toolsToolStripMenuItem, "toolsToolStripMenuItem");
             // 
@@ -727,18 +651,7 @@
             // 
             this.toolStrip1.BackColor = System.Drawing.SystemColors.Control;
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton1,
-            this.toolStripButton2,
-            this.toolStripSeparator14,
-            this.toolStripButton6,
-            this.toolStripButton4,
-            this.toolStripButton5,
-            this.toolStripSeparator15,
-            this.toolStripButton3,
-            this.keyboard48Button,
-            this.toolStripButton7,
-            this.rzxRecordButton});
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.toolStripButton1, this.toolStripButton2, this.toolStripSeparator14, this.toolStripButton6, this.toolStripButton4, this.toolStripButton5, this.toolStripSeparator15, this.toolStripButton3, this.keyboard48Button, this.toolStripButton7, this.rzxRecordButton});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             resources.ApplyResources(this.toolStrip1, "toolStrip1");
             this.toolStrip1.Name = "toolStrip1";
@@ -829,18 +742,7 @@
             // 
             // statusStrip1
             // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.machineLabel,
-            this.statusLabelText,
-            this.speedStatusLabel,
-            this.fpsStatusLabel,
-            this.toolStripStatusLabel2,
-            this.fileDownloadStatusLabel,
-            this.mouseStripStatusLabel,
-            this.storageDeviceStatusLable,
-            this.rzxStatusLabel,
-            this.soundStatusLabel,
-            this.toolStripStatusLabel1});
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.machineLabel, this.statusLabelText, this.speedStatusLabel, this.fpsStatusLabel, this.toolStripStatusLabel2, this.fileDownloadStatusLabel, this.mouseStripStatusLabel, this.storageDeviceStatusLable, this.rzxStatusLabel, this.soundStatusLabel, this.toolStripStatusLabel1});
             resources.ApplyResources(this.statusStrip1, "statusStrip1");
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.ShowItemToolTips = true;
@@ -857,7 +759,7 @@
             // statusLabelText
             // 
             resources.ApplyResources(this.statusLabelText, "statusLabelText");
-            this.statusLabelText.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right)));
+            this.statusLabelText.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides) ((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right)));
             this.statusLabelText.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
             this.statusLabelText.Name = "statusLabelText";
             this.statusLabelText.Spring = true;
@@ -904,9 +806,7 @@
             // 
             // storageDeviceStatusLable
             // 
-            this.storageDeviceStatusLable.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
-            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
-            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
+            this.storageDeviceStatusLable.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides) ((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
             this.storageDeviceStatusLable.BorderStyle = System.Windows.Forms.Border3DStyle.Adjust;
             this.storageDeviceStatusLable.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             resources.ApplyResources(this.storageDeviceStatusLable, "storageDeviceStatusLable");
@@ -922,9 +822,7 @@
             // 
             // soundStatusLabel
             // 
-            this.soundStatusLabel.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
-            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
-            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
+            this.soundStatusLabel.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides) ((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
             this.soundStatusLabel.BorderStyle = System.Windows.Forms.Border3DStyle.Adjust;
             this.soundStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.soundStatusLabel.Image = global::ZeroWin.Properties.Resources.sound_high;
@@ -967,7 +865,6 @@
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

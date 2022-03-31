@@ -48,7 +48,7 @@
             // romNameLabel
             // 
             this.romNameLabel.AutoSize = true;
-            this.romNameLabel.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.romNameLabel.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.romNameLabel.ForeColor = System.Drawing.SystemColors.ControlText;
             this.romNameLabel.Location = new System.Drawing.Point(54, 29);
             this.romNameLabel.Name = "romNameLabel";
@@ -59,7 +59,7 @@
             // label34
             // 
             this.label34.AutoSize = true;
-            this.label34.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label34.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label34.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label34.Location = new System.Drawing.Point(9, 29);
             this.label34.Name = "label34";
@@ -71,7 +71,7 @@
             // 
             this.page4Label.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.page4Label.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.page4Label.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.page4Label.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.page4Label.ForeColor = System.Drawing.SystemColors.ControlText;
             this.page4Label.Location = new System.Drawing.Point(186, 83);
             this.page4Label.Name = "page4Label";
@@ -83,7 +83,7 @@
             // 
             this.page3Label.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.page3Label.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.page3Label.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.page3Label.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.page3Label.ForeColor = System.Drawing.SystemColors.ControlText;
             this.page3Label.Location = new System.Drawing.Point(133, 83);
             this.page3Label.Name = "page3Label";
@@ -95,7 +95,7 @@
             // 
             this.page2Label.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.page2Label.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.page2Label.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.page2Label.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.page2Label.ForeColor = System.Drawing.SystemColors.ControlText;
             this.page2Label.Location = new System.Drawing.Point(79, 83);
             this.page2Label.Name = "page2Label";
@@ -106,7 +106,7 @@
             // contendedLabel
             // 
             this.contendedLabel.AutoSize = true;
-            this.contendedLabel.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.contendedLabel.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.contendedLabel.ForeColor = System.Drawing.Color.Red;
             this.contendedLabel.Location = new System.Drawing.Point(177, 100);
             this.contendedLabel.Name = "contendedLabel";
@@ -118,7 +118,7 @@
             // 
             this.page1Label.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.page1Label.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.page1Label.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.page1Label.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.page1Label.ForeColor = System.Drawing.SystemColors.ControlText;
             this.page1Label.Location = new System.Drawing.Point(12, 83);
             this.page1Label.Name = "page1Label";
@@ -129,7 +129,7 @@
             // frameLengthLabel
             // 
             this.frameLengthLabel.AutoSize = true;
-            this.frameLengthLabel.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.frameLengthLabel.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.frameLengthLabel.ForeColor = System.Drawing.SystemColors.ControlText;
             this.frameLengthLabel.Location = new System.Drawing.Point(147, 5);
             this.frameLengthLabel.Name = "frameLengthLabel";
@@ -140,7 +140,7 @@
             // shadowScreenCheckBox
             // 
             this.shadowScreenCheckBox.AutoSize = true;
-            this.shadowScreenCheckBox.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.shadowScreenCheckBox.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.shadowScreenCheckBox.ForeColor = System.Drawing.SystemColors.ControlText;
             this.shadowScreenCheckBox.Location = new System.Drawing.Point(121, 54);
             this.shadowScreenCheckBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -153,7 +153,7 @@
             // pagingCheckBox
             // 
             this.pagingCheckBox.AutoSize = true;
-            this.pagingCheckBox.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.pagingCheckBox.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.pagingCheckBox.ForeColor = System.Drawing.SystemColors.ControlText;
             this.pagingCheckBox.Location = new System.Drawing.Point(12, 54);
             this.pagingCheckBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -166,7 +166,7 @@
             // label26
             // 
             this.label26.AutoSize = true;
-            this.label26.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label26.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label26.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label26.Location = new System.Drawing.Point(121, 5);
             this.label26.Name = "label26";
@@ -177,7 +177,7 @@
             // tStateLabel
             // 
             this.tStateLabel.AutoSize = true;
-            this.tStateLabel.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tStateLabel.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.tStateLabel.ForeColor = System.Drawing.SystemColors.ControlText;
             this.tStateLabel.Location = new System.Drawing.Point(74, 5);
             this.tStateLabel.Name = "tStateLabel";
@@ -188,7 +188,7 @@
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label24.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.label24.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label24.Location = new System.Drawing.Point(9, 5);
             this.label24.Name = "label24";
@@ -227,11 +227,11 @@
             this.Controls.Add(this.panel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "Machine_State";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Machine State";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
-
         }
 
         #endregion

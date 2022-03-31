@@ -147,13 +147,8 @@ namespace ZeroWin
 
             string content_type = "SOFTWARE";
             
-            if (hardwareRadioButton.Checked)
-                content_type = "HARDWARE";
-            else if (bookRadioButton.Checked)
-                content_type = "BOOK";
-
             search_params = "query=" + titleBox.Text + "&size=10" + "&contenttype=" + content_type + "&mode=tiny" + "&sort=rel_desc";
-            toolStripStatusLabel1.Text = "Querying ZXDB...";
+            toolStripStatusLabel1.Text = "Searching...";
             toolStripStatusLabel2.Text = "";
             detailsButton.Hide();
             statusStrip1.Refresh();
