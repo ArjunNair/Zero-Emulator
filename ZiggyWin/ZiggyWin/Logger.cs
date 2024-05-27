@@ -6,11 +6,12 @@ namespace ZeroWin
     public class Logger: IDisposable
     {
         StreamWriter sw;
-
+        String filePath;
         public void Log(string s, bool finalise = false)
         {
+            filePath = System.Windows.Forms.Application.StartupPath + "\\TempLog " + System.DateTime.Now.ToString("yyyy-MM-dd HH.mm.ss") + ".txt";
             if (sw == null)
-               sw = new System.IO.StreamWriter(@"ZeroLog.txt");
+               sw = new System.IO.StreamWriter(filePath);
 
             sw.WriteLine(s);
             sw.Flush();
@@ -26,8 +27,11 @@ namespace ZeroWin
 
         public void Dispose()
         {
-            if (sw != null)
+            if(sw != null)
+            {
                 sw.Close();
+                File.Delete(filePath);
+            }
         }
     }
 }
