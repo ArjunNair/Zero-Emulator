@@ -7096,7 +7096,7 @@ namespace Cpu
                             Cp_R(b);
                             Contend(regs.HL, 1, 5);
 
-                            if((regs.BC == 1) || (regs.A == disp)) {
+                            if((regs.BC == 1) || (regs.A == b)) {
                                 regs.MemPtr++;
                             }
                             else {
