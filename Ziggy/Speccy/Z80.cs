@@ -6468,13 +6468,13 @@ namespace Cpu
                                    // Log("IN B, (C)");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         regs.B = In_BC();
-                                break;
+                        break;
 
                         case 0x41: //Out (C), B
                                    // Log("OUT (C), B");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         Out(regs.BC, regs.B);
-                                break;
+                        break;
 
                         case 0x42:  //SBC regs.HL, regs.BC
                                     // Log("SBC regs.HL, regs.BC");
@@ -6528,15 +6528,15 @@ namespace Cpu
                                    // Log("IN C, (C)");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         regs.C = In_BC();
-                                //tstates = 0;
-                                break;
+                        //tstates = 0;
+                        break;
 
                         case 0x49: //Out (C), C
                                    // Log("OUT (C), C");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         Out(regs.BC, regs.C);
-                                //tstates = 0;
-                                break;
+                        //tstates = 0;
+                        break;
 
                         case 0x4A:  //ADC regs.HL, regs.BC
                                     // Log("ADC regs.HL, regs.BC");
@@ -6585,14 +6585,14 @@ namespace Cpu
                                    // Log("IN D, (C)");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         regs.D = In_BC();
-                                //tstates = 0;
-                                break;
+                        //tstates = 0;
+                        break;
 
                         case 0x51: //Out (C), D
                                    // Log("OUT (C), D");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         Out(regs.BC, regs.D);
-                                break;
+                        break;
 
                         case 0x52:  //SBC regs.HL, regs.DE
                                     // Log("SBC regs.HL, regs.DE");
@@ -6657,15 +6657,15 @@ namespace Cpu
                                    // Log("IN E, (C)");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         regs.E = In_BC();
-                                //tstates = 0;
-                                break;
+                        //tstates = 0;
+                        break;
 
                         case 0x59: //Out (C), E
                                    // Log("OUT (C), E");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         Out(regs.BC, regs.E);
-                                //t_states = 0;
-                                break;
+                        //t_states = 0;
+                        break;
 
                         case 0x5A:  //ADC regs.HL, regs.DE
                                     // Log("ADC regs.HL, regs.DE");
@@ -6720,13 +6720,13 @@ namespace Cpu
                                    // Log("IN H, (C)");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         regs.H = In_BC();
-                                break;
+                        break;
 
                         case 0x61: //Out (C), H
                                    // Log("OUT (C), H");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         Out(regs.BC, regs.H);
-                                break;
+                        break;
 
                         case 0x62:  //SBC regs.HL, regs.HL
                                     // Log("SBC regs.HL, regs.HL");
@@ -6784,13 +6784,13 @@ namespace Cpu
                                    // Log("IN L, (C)");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         regs.L = In_BC();
-                                break;
+                        break;
 
                         case 0x69: //Out (C), L
                                    // Log("OUT (C), L");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         Out(regs.BC, regs.L);
-                                break;
+                        break;
 
                         case 0x6A:  //ADC regs.HL, regs.HL
                                     // Log("ADC regs.HL, regs.HL");
@@ -6848,14 +6848,14 @@ namespace Cpu
                                     // Log("IN (C)");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         In_BC();
-                                //tstates = 0;
-                                break;
+                        //tstates = 0;
+                        break;
 
                         case 0x71:
                         // Log("OUT (C), 0");
                         regs.MemPtr = (ushort)(regs.BC + 1);
                         Out(regs.BC, 0);
-                                break;
+                        break;
 
                         case 0x72:  //SBC regs.HL, regs.SP
                                     // Log("SBC regs.HL, regs.SP");
