@@ -7152,6 +7152,7 @@ namespace Cpu
 
                         if (regs.B != 0) {
                             Contend(regs.HL, 1, 5);
+                            regs.MemPtr = (ushort)(regs.PC - 1);
                             regs.PC -= 2;
                             SetF3((regs.PC & BIT_11) != 0);
                             SetF5((regs.PC & BIT_13) != 0);
@@ -7185,6 +7186,7 @@ namespace Cpu
 
                             if (regs.B != 0) {
                                 Contend(regs.HL, 1, 5);
+                                regs.MemPtr = (ushort)(regs.PC - 1);
                                 regs.PC -= 2;
                                 SetF3((regs.PC & BIT_11) != 0);
                                 SetF5((regs.PC & BIT_13) != 0);
@@ -7281,6 +7283,7 @@ namespace Cpu
 
                         if (regs.B != 0) {
                             Contend(regs.HL, 1, 5);
+                            regs.MemPtr = (ushort)(regs.PC - 1);
                             regs.PC -= 2;
                             SetF3((regs.PC & BIT_11) != 0);
                             SetF5((regs.PC & BIT_13) != 0);
@@ -7314,6 +7317,7 @@ namespace Cpu
 
                             if (regs.B != 0) {
                                 Contend(regs.HL, 1, 5);
+                                regs.MemPtr = (ushort)(regs.PC - 1);
                                 regs.PC -= 2;
                                 SetF3((regs.PC & BIT_11) != 0);
                                 SetF5((regs.PC & BIT_13) != 0);
