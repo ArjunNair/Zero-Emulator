@@ -8066,6 +8066,10 @@ namespace Speccy
                 timeToOutSound += deltaTStates;
             }
             
+            // Only reset parity if INT was accepted during the last insn
+            // http://z80.info/zip/ZilogProductSpecsDatabook129-143.pdf
+            cpu.parityBitNeedsReset = cpu.parityBitNeedsReset && (FrameLength - cpu.t_states) <= 0;
+
             //UpdateTape
             if (tapeIsPlaying && !tape_edgeDetectorRan) {
                 if (!ran_interrupt)
