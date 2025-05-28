@@ -8049,6 +8049,7 @@ namespace Speccy
 
             if (!ran_interrupt) {
                 prevT = cpu.t_states;
+                cpu.parityBitNeedsReset = false;
 
                 cpu.Step();
 
