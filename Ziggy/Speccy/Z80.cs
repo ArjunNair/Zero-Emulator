@@ -7185,7 +7185,7 @@ namespace Cpu
                             SetParity(parity[((blockIOResult & 0x7) ^ regs.B)]);
 
                             if (regs.B != 0) {
-                                Contend(regs.HL, 1, 5);
+                                Contend(regs.BC, 1, 5);
                                 regs.MemPtr = (ushort)(regs.PC - 1);
                                 regs.PC -= 2;
                                 SetF3((regs.PC & BIT_11) != 0);
@@ -7316,7 +7316,7 @@ namespace Cpu
                             SetNeg((b & BIT_F_SIGN) != 0);
 
                             if (regs.B != 0) {
-                                Contend(regs.HL, 1, 5);
+                                Contend(regs.BC, 1, 5);
                                 regs.MemPtr = (ushort)(regs.PC - 1);
                                 regs.PC -= 2;
                                 SetF3((regs.PC & BIT_11) != 0);
