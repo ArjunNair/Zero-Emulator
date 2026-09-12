@@ -161,3 +161,53 @@ namespace Zero.App.Tests
         }
     }
 }
+
+namespace Zero.App.Tests
+{
+    public class TapeDeckWindowTests
+    {
+        private readonly ITestOutputHelper _output;
+        public TapeDeckWindowTests(ITestOutputHelper output)
+        {
+            _output = output;
+            MainWindow.SettingsLoader = () => { var s = new EmulatorSettings(); s.Paths.Roms = TestPaths.RomDir; s.Emulation.PauseOnFocusLost = false; s.Audio.Mute = true; return s; };
+        }
+
+        [AvaloniaFact]
+        public void Tape_deck_lists_blocks_and_follows_transport()
+        {
+            var w = new MainWindow();
+            w.Show();
+            long t = w.Session.FrameCount + 20;
+            while (w.Session.FrameCount < t) { Thread.Sleep(10); Dispatcher.UIThread.RunJobs(); }
+
+            string tap = Path.Combine(TestPaths.ProgramsDir, "Demos", "Overscan.tap");
+            Assert.True(w.Session.LoadFileAsync(tap).Result);
+            var deck = new Windows.TapeDeckWindow(w.Session, () => System.Threading.Tasks.Task.CompletedTask);
+            deck.Show(w);
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.Equal("Overscan", deck.TitleText.Text);
+            Assert.Equal(3 * 4, deck.BlockList.ItemCount); // (PULS+DATA+PAUS) x 4 TAP blocks; the PZXT header is not a playable block
+            Assert.True(deck.PlayButton.IsEnabled);
+            Assert.False(deck.StopButton.IsEnabled);
+
+            w.Session.InvokeAsync(w.Session.Tape.Play).Wait();
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            while (!deck.StopButton.IsEnabled && sw.ElapsedMilliseconds < 3000) { Thread.Sleep(10); Dispatcher.UIThread.RunJobs(); }
+            Assert.True(deck.StopButton.IsEnabled);
+            Assert.Contains("Playing", deck.StatusText.Text);
+
+            Dispatcher.UIThread.RunJobs();
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            using (var bmp = deck.CaptureRenderedFrame())
+            {
+                string path = Path.Combine(MainWindowTests.ScreenshotDir, "tape-deck.png");
+                bmp.Save(path);
+                _output.WriteLine("screenshot: " + path);
+            }
+            deck.Close();
+            w.Close();
+        }
+    }
+}

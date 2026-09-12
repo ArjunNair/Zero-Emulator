@@ -9,6 +9,7 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest Condition="$([MSBuild]::IsOSPlatform('Windows'))">app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationIcon>Assets/zero.ico</ApplicationIcon>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
@@ -23,6 +24,9 @@
     <ProjectReference Include="..\..\Ziggy\Peripherals\Peripherals.csproj" />
     <ProjectReference Include="..\Zero.Emulation\Zero.Emulation.csproj" />
     <ProjectReference Include="..\Zero.Sdl\Zero.Sdl.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   <ItemGroup>
     <!-- Bundled machine ROMs and sample programs travel with the executable. -->

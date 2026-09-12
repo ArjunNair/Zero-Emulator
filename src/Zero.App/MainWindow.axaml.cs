@@ -14,6 +14,7 @@ using Avalonia.Threading;
 using SpeccyCommon;
 using Zero.App.Dialogs;
 using Zero.App.Input;
+using Zero.App.Windows;
 using Zero.Emulation;
 using Zero.Emulation.Host;
 using Zero.Emulation.Machines;
@@ -35,6 +36,7 @@ namespace Zero.App
         private bool _pausedByFocusLoss;
         private bool _audioFallback;
         private WindowState _stateBeforeFullScreen = WindowState.Normal;
+        private TapeDeckWindow _tapeDeckWindow;
 
         /// <summary>Test hook: where settings come from (defaults to the user config file).</summary>
         internal static Func<EmulatorSettings> SettingsLoader = () => EmulatorSettings.Load();
@@ -201,6 +203,7 @@ namespace Zero.App
             {
                 case Key.F3: _ = OpenFileAsync(); return true;
                 case Key.F2: _ = SaveSnapshotAsync(); return true;
+                case Key.F4: OnShowTapeDeck(this, null); return true;
                 case Key.F5: ToggleTape(); return true;
                 case Key.F6: _session.Post(_session.Tape.Rewind); return true;
                 case Key.F7: _session.TogglePause(); return true;
@@ -235,6 +238,7 @@ namespace Zero.App
             HardResetItem.InputGesture = new KeyGesture(Key.F9, KeyModifiers.Shift);
             PauseItem.InputGesture = new KeyGesture(Key.F7);
             TapePlayItem.InputGesture = new KeyGesture(Key.F5);
+            TapeDeckItem.InputGesture = new KeyGesture(Key.F4);
             TapeRewindItem.InputGesture = new KeyGesture(Key.F6);
             MuteItem.InputGesture = new KeyGesture(Key.F8);
             FullScreenItem.InputGesture = new KeyGesture(Key.F11);
@@ -387,7 +391,20 @@ namespace Zero.App
 
         // ------------------------------------------------------------------ tape menu
 
-        private async void OnInsertTape(object sender, RoutedEventArgs e)
+        private void OnShowTapeDeck(object sender, RoutedEventArgs e)
+        {
+            if (_tapeDeckWindow == null)
+            {
+                _tapeDeckWindow = new TapeDeckWindow(_session, InsertTapeAsync);
+                _tapeDeckWindow.Closed += (_, __) => _tapeDeckWindow = null;
+                _tapeDeckWindow.Show(this);
+            }
+            else _tapeDeckWindow.Activate();
+        }
+
+        private void OnInsertTape(object sender, RoutedEventArgs e) => _ = InsertTapeAsync();
+
+        private async Task InsertTapeAsync()
         {
             bool wasPaused = _session.IsPaused;
             _session.Pause();
@@ -574,7 +591,7 @@ namespace Zero.App
             "Type LOAD \"\": press J, then Ctrl+P twice. Shift+Ctrl = Extended mode.\n" +
             "PC punctuation keys (, . ; \" - = etc.) type the matching Spectrum symbol directly.\n\n" +
             "F3 Open   F2 Save snapshot   F12 Save screen\n" +
-            "F5 Tape play/stop   F6 Rewind   F7 Pause   F8 Mute\n" +
+            "F4 Tape deck   F5 Tape play/stop   F6 Rewind   F7 Pause   F8 Mute\n" +
             "F9 Reset   Shift+F9 Hard reset   F11 Full screen\n" +
             (IsMac ? "Cmd+O / Cmd+S / Cmd+R / Cmd+P / Cmd+M / Cmd+F do the same." : ""));
 

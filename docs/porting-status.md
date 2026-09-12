@@ -27,11 +27,16 @@ where the work stands and every place the implementation deliberately deviates f
 - **Phase 2/3** done, merged. `EmulatorSession` runs the machine on its own thread, paced by the audio
   sink (`IAudioOutput.FinishedPlaying`); triple-buffered `VideoFrame`s; positional key state; SDL3 audio
   and gamepads. Two full RZX recordings replay to the end with zero desync.
-- **Phase 4** in progress. The Avalonia shell boots, renders, takes keyboard input, loads files, has the
-  v1 menu set (machine, tape deck controls, sound, view, input). Missing: a tape-deck window with block
-  list, options dialog beyond menu toggles, joystick button remapping UI, keyboard-help picture,
-  About box polish, macOS native menu, file associations.
-- **Phase 5** not started.
+- **Phase 4** mostly done. The Avalonia shell boots, renders, takes keyboard input, loads files, has the
+  v1 menu set (machine, tape, sound, view, input), a tape-deck window (block list, transport, options),
+  archive chooser, drag & drop, keyboard help and About. Verified by headless UI tests with screenshots.
+  Missing: an Options window for paths/ROM files (everything else is reachable from menus), gamepad
+  button remapping UI, keyboard-layout picture, macOS native menu bar, file associations.
+- **Phase 5** started. `dotnet publish` self-contained single-file works for all six RIDs
+  (`packaging/README.md`); GitHub Actions workflow tests on three OSes and publishes artifacts;
+  `packaging/macos/make-app.sh` builds `Zero.app`. Trimmed builds are 44 MB vs 109 MB and warning-free,
+  but are not enabled in CI until someone runs one on a real display. Code signing / notarisation
+  needs the Apple Developer identity and is documented, not automated.
 
 ## Deviations from the plan (and why)
 

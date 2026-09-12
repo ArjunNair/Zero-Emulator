@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zero
+Comment=ZX Spectrum emulator
+Exec=Zero %f
+Icon=zero
+Categories=Game;Emulator;
+MimeType=application/x-spectrum-snapshot;application/x-spectrum-tape;
+Terminal=false

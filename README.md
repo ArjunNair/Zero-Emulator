@@ -6,6 +6,20 @@ The philosophy behind Zero is to provide a highly accurate emulation of the vari
 
 ![Zero running Exolon](zero_hero.png)
 
+## Cross-platform build (branch `crossplatform`)
+
+Zero now builds and runs on Windows, macOS (Intel and Apple Silicon) and Linux with .NET 8, Avalonia and SDL3.
+
+```bash
+dotnet run --project src/Zero.App          # run the emulator
+dotnet test tests/Zero.Core.Tests --filter "Category!=Zexall&Category!=Slow"
+dotnet test tests/Zero.App.Tests           # headless UI tests
+```
+
+See [docs/porting-status.md](docs/porting-status.md) for what is in this build, what was cut for v1
+(TZX/CSW, disks, debugger) and how it differs from the Windows-only original, and
+[packaging/README.md](packaging/README.md) for self-contained builds.
+
 ## Features 
 * Emulates the 48k, 128k, 128k SE, the Spectrum +2 and the Spectrum +3 (with 2 disk drives), and the Pentagon 128k models.
 

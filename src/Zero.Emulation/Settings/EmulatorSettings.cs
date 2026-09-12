@@ -116,14 +116,6 @@ namespace Zero.Emulation.Settings
 
         public static string DefaultFile => Path.Combine(AppPaths.ConfigDirectory, "zero_config.json");
 
-        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNameCaseInsensitive = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
-            Converters = { new JsonStringEnumConverter() }
-        };
 
         public static EmulatorSettings Load(string file = null)
         {
@@ -131,7 +123,7 @@ namespace Zero.Emulation.Settings
             try
             {
                 if (File.Exists(file))
-                    return JsonSerializer.Deserialize<EmulatorSettings>(File.ReadAllText(file), JsonOptions) ?? new EmulatorSettings();
+                    return JsonSerializer.Deserialize(File.ReadAllText(file), SettingsJsonContext.Default.EmulatorSettings) ?? new EmulatorSettings();
             }
             catch (Exception)
             {
@@ -144,7 +136,7 @@ namespace Zero.Emulation.Settings
         {
             file = file ?? DefaultFile;
             AppPaths.EnsureDirectory(Path.GetDirectoryName(file));
-            File.WriteAllText(file, JsonSerializer.Serialize(this, JsonOptions));
+            File.WriteAllText(file, JsonSerializer.Serialize(this, SettingsJsonContext.Default.EmulatorSettings));
         }
 
         public void AddRecentFile(string path)
@@ -154,5 +146,17 @@ namespace Zero.Emulation.Settings
             if (RecentFiles.Count > MaxRecentFiles)
                 RecentFiles.RemoveRange(MaxRecentFiles, RecentFiles.Count - MaxRecentFiles);
         }
+    }
+
+    /// <summary>Source-generated JSON metadata: keeps settings working under PublishTrimmed.</summary>
+    [JsonSourceGenerationOptions(
+        WriteIndented = true,
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true,
+        UseStringEnumConverter = true)]
+    [JsonSerializable(typeof(EmulatorSettings))]
+    internal sealed partial class SettingsJsonContext : JsonSerializerContext
+    {
     }
 }

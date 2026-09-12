@@ -1,0 +1,81 @@
+name: build
+
+on:
+  push:
+    branches: [ master, crossplatform ]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet build Zero.sln -c Release
+      - name: Core tests (fast)
+        run: dotnet test tests/Zero.Core.Tests -c Release --no-build --filter "Category!=Zexall&Category!=Slow"
+      - name: UI tests (Avalonia headless)
+        run: dotnet test tests/Zero.App.Tests -c Release --no-build
+        env:
+          ZERO_SCREENSHOT_DIR: ${{ github.workspace }}/screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-screenshots-${{ matrix.os }}
+          path: screenshots
+          if-no-files-found: ignore
+
+  zexall:
+    name: zexall (nightly-grade, manual)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test tests/Zero.Core.Tests -c Release --filter "Category=Zexall|Category=Slow"
+
+  publish:
+    name: publish (${{ matrix.rid }})
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: win-x64,     os: windows-latest }
+          - { rid: win-arm64,   os: windows-latest }
+          - { rid: osx-x64,     os: macos-latest }
+          - { rid: osx-arm64,   os: macos-latest }
+          - { rid: linux-x64,   os: ubuntu-latest }
+          - { rid: linux-arm64, os: ubuntu-latest }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Publish self-contained single file
+        run: >
+          dotnet publish src/Zero.App/Zero.App.csproj -c Release -r ${{ matrix.rid }}
+          --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:DebugType=none -o publish/${{ matrix.rid }}
+      - name: macOS app bundle
+        if: startsWith(matrix.rid, 'osx')
+        run: bash packaging/macos/make-app.sh publish/${{ matrix.rid }} publish/Zero-${{ matrix.rid }}.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Zero-${{ matrix.rid }}
+          path: publish/

@@ -3,6 +3,7 @@
         xmlns:c="using:Zero.App.Controls"
         x:Class="Zero.App.MainWindow"
         Title="Zero"
+        Icon="/Assets/zero.ico"
         Width="760" Height="672"
         MinWidth="400" MinHeight="360"
         Background="Black"
@@ -39,6 +40,8 @@
         <MenuItem Header="Issue _2 Keyboard" x:Name="Issue2Item" ToggleType="CheckBox" Click="OnToggleIssue2" />
       </MenuItem>
       <MenuItem Header="_Tape">
+        <MenuItem Header="Tape _Deck…" x:Name="TapeDeckItem" Click="OnShowTapeDeck" />
+        <Separator />
         <MenuItem Header="_Insert Tape…" Click="OnInsertTape" />
         <MenuItem Header="_Eject" Click="OnEjectTape" />
         <Separator />

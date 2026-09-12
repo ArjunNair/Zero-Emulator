@@ -83,7 +83,7 @@ namespace Peripherals
         }
 
         // PZX_Tape tapeInfo;
-        public static System.ComponentModel.BindingList<PZX_TapeInfo> tapeBlockInfo = new System.ComponentModel.BindingList<PZX_TapeInfo>();
+        public static System.Collections.Generic.List<PZX_TapeInfo> tapeBlockInfo = new System.Collections.Generic.List<PZX_TapeInfo>();
 
         //All the blocks in the tape
         public static System.Collections.Generic.List<Block> blocks = new System.Collections.Generic.List<Block>();
