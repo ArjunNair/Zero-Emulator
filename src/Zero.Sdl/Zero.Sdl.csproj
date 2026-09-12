@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- SDL3 implementations of the host interfaces: audio output and gamepads. ppy.SDL3-CS ships the native SDL3 for every desktop RID. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Zero.Sdl</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
+    <ProjectReference Include="..\Zero.Emulation\Zero.Emulation.csproj" />
+    <PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
+  </ItemGroup>
+</Project>

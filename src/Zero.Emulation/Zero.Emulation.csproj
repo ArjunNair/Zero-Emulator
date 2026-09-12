@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Host-neutral emulator session: owns the machine, runs it on its own thread, and exposes
+    frames, input, tape deck, file loading and settings to whatever UI shell sits on top
+    (Avalonia, tests, a future CLI). No UI framework references allowed here.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Zero.Emulation</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
+    <ProjectReference Include="..\..\Ziggy\Peripherals\Peripherals.csproj" />
+  </ItemGroup>
+</Project>

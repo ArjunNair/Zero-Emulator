@@ -13,5 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
     <ProjectReference Include="..\..\Ziggy\Peripherals\Peripherals.csproj" />
+    <ProjectReference Include="..\..\src\Zero.Emulation\Zero.Emulation.csproj" />
   </ItemGroup>
 </Project>
