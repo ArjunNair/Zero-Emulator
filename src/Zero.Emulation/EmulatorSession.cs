@@ -105,12 +105,18 @@ namespace Zero.Emulation
         public void Stop()
         {
             if (_thread == null) return;
+            Trace.Log("Session.Stop: requesting");
             _stopRequested = true;
             _paused = false;
             _resumeGate.Set();
             _wake.Set();
             if (!_thread.Join(2000))
+            {
+                Trace.Log("Session.Stop: join timed out, interrupting");
                 _thread.Interrupt();
+                _thread.Join(2000);
+            }
+            Trace.Log("Session.Stop: thread finished=" + !_thread.IsAlive);
             _thread = null;
             SetState(EmulatorState.Stopped);
         }
@@ -200,10 +206,12 @@ namespace Zero.Emulation
             }
             finally
             {
+                Trace.Log("ThreadMain: shutting down machine");
                 Tape.Detach();
-                _zx?.Shutdown();
+                try { _zx?.Shutdown(); } catch (Exception ex) { Trace.Log("machine shutdown threw: " + ex.Message); }
                 _zx = null;
                 _audio = null;
+                Trace.Log("ThreadMain: exit");
             }
         }
 

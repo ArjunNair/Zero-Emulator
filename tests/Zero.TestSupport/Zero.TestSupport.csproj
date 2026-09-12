@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Helpers shared by the xunit v2 (core) and xunit v3 (Avalonia headless) test projects. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Zero.TestSupport</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
+  </ItemGroup>
+</Project>

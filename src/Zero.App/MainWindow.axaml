@@ -1,0 +1,131 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Zero.App.Controls"
+        x:Class="Zero.App.MainWindow"
+        Title="Zero"
+        Width="760" Height="672"
+        MinWidth="400" MinHeight="360"
+        Background="Black"
+        WindowStartupLocation="CenterScreen">
+  <DockPanel>
+    <Menu DockPanel.Dock="Top" x:Name="MainMenu">
+      <MenuItem Header="_File">
+        <MenuItem Header="_Open…" x:Name="OpenItem" Click="OnOpen" />
+        <MenuItem Header="Open _Recent" x:Name="RecentMenu" />
+        <Separator />
+        <MenuItem Header="_Save Snapshot…" x:Name="SaveSnapshotItem" Click="OnSaveSnapshot" />
+        <MenuItem Header="Save S_creen (.scr)…" x:Name="SaveScreenItem" Click="OnSaveScreen" />
+        <Separator />
+        <MenuItem Header="E_xit" Click="OnExit" />
+      </MenuItem>
+      <MenuItem Header="_Machine">
+        <MenuItem Header="ZX Spectrum _48K" x:Name="Machine48k" ToggleType="CheckBox" Click="OnSelectMachine" Tag="_48k" />
+        <MenuItem Header="ZX Spectrum _128K" x:Name="Machine128k" ToggleType="CheckBox" Click="OnSelectMachine" Tag="_128k" />
+        <MenuItem Header="ZX Spectrum 128_Ke" x:Name="Machine128ke" ToggleType="CheckBox" Click="OnSelectMachine" Tag="_128ke" />
+        <MenuItem Header="ZX Spectrum +_3" x:Name="MachinePlus3" ToggleType="CheckBox" Click="OnSelectMachine" Tag="_plus3" />
+        <MenuItem Header="_Pentagon 128K" x:Name="MachinePentagon" ToggleType="CheckBox" Click="OnSelectMachine" Tag="_pentagon" />
+        <Separator />
+        <MenuItem Header="_Reset" x:Name="ResetItem" Click="OnReset" />
+        <MenuItem Header="_Hard Reset" x:Name="HardResetItem" Click="OnHardReset" />
+        <Separator />
+        <MenuItem Header="_Pause" x:Name="PauseItem" ToggleType="CheckBox" Click="OnTogglePause" />
+        <MenuItem Header="_Speed">
+          <MenuItem Header="1x (normal)" x:Name="Speed1" ToggleType="CheckBox" Tag="1" Click="OnSelectSpeed" />
+          <MenuItem Header="2x" x:Name="Speed2" ToggleType="CheckBox" Tag="2" Click="OnSelectSpeed" />
+          <MenuItem Header="4x" x:Name="Speed4" ToggleType="CheckBox" Tag="4" Click="OnSelectSpeed" />
+          <MenuItem Header="10x" x:Name="Speed10" ToggleType="CheckBox" Tag="10" Click="OnSelectSpeed" />
+        </MenuItem>
+        <MenuItem Header="Late _Timings" x:Name="LateTimingsItem" ToggleType="CheckBox" Click="OnToggleLateTimings" />
+        <MenuItem Header="Issue _2 Keyboard" x:Name="Issue2Item" ToggleType="CheckBox" Click="OnToggleIssue2" />
+      </MenuItem>
+      <MenuItem Header="_Tape">
+        <MenuItem Header="_Insert Tape…" Click="OnInsertTape" />
+        <MenuItem Header="_Eject" Click="OnEjectTape" />
+        <Separator />
+        <MenuItem Header="_Play" x:Name="TapePlayItem" Click="OnTapePlay" />
+        <MenuItem Header="_Stop" x:Name="TapeStopItem" Click="OnTapeStop" />
+        <MenuItem Header="_Rewind" x:Name="TapeRewindItem" Click="OnTapeRewind" />
+        <MenuItem Header="Previous Block" Click="OnTapePrev" />
+        <MenuItem Header="Next Block" Click="OnTapeNext" />
+        <Separator />
+        <MenuItem Header="Auto _Load (LOAD &quot;&quot; on insert)" x:Name="TapeAutoLoadItem" ToggleType="CheckBox" Click="OnTapeOption" />
+        <MenuItem Header="Auto Play/Stop" x:Name="TapeAutoPlayItem" ToggleType="CheckBox" Click="OnTapeOption" />
+        <MenuItem Header="Edge Loading" x:Name="TapeEdgeLoadItem" ToggleType="CheckBox" Click="OnTapeOption" />
+        <MenuItem Header="Fast Loading" x:Name="TapeFastLoadItem" ToggleType="CheckBox" Click="OnTapeOption" />
+        <MenuItem Header="ROM Tape Traps" x:Name="TapeRomTrapsItem" ToggleType="CheckBox" Click="OnTapeOption" />
+        <Separator />
+        <MenuItem Header="Set SAVE Target (.tap)…" Click="OnSetTapSaveTarget" />
+      </MenuItem>
+      <MenuItem Header="_Sound">
+        <MenuItem Header="_Mute" x:Name="MuteItem" ToggleType="CheckBox" Click="OnToggleMute" />
+        <MenuItem Header="_Volume">
+          <MenuItem Header="25%" Tag="25" Click="OnSelectVolume" />
+          <MenuItem Header="50%" Tag="50" Click="OnSelectVolume" />
+          <MenuItem Header="75%" Tag="75" Click="OnSelectVolume" />
+          <MenuItem Header="100%" Tag="100" Click="OnSelectVolume" />
+        </MenuItem>
+        <MenuItem Header="_AY chip on 48K" x:Name="Ay48kItem" ToggleType="CheckBox" Click="OnToggleAy48k" />
+        <MenuItem Header="_Stereo">
+          <MenuItem Header="Mono" x:Name="StereoMono" ToggleType="CheckBox" Tag="0" Click="OnSelectStereo" />
+          <MenuItem Header="ACB" x:Name="StereoAcb" ToggleType="CheckBox" Tag="1" Click="OnSelectStereo" />
+          <MenuItem Header="ABC" x:Name="StereoAbc" ToggleType="CheckBox" Tag="2" Click="OnSelectStereo" />
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="_View">
+        <MenuItem Header="Window Size">
+          <MenuItem Header="1x" Tag="1" Click="OnSelectScale" />
+          <MenuItem Header="2x" Tag="2" Click="OnSelectScale" />
+          <MenuItem Header="3x" Tag="3" Click="OnSelectScale" />
+          <MenuItem Header="4x" Tag="4" Click="OnSelectScale" />
+        </MenuItem>
+        <MenuItem Header="_Full Screen" x:Name="FullScreenItem" ToggleType="CheckBox" Click="OnToggleFullScreen" />
+        <MenuItem Header="Pixel _Smoothing" x:Name="SmoothingItem" ToggleType="CheckBox" Click="OnToggleSmoothing" />
+        <MenuItem Header="_Integer Scaling" x:Name="IntegerScalingItem" ToggleType="CheckBox" Click="OnToggleIntegerScaling" />
+        <MenuItem Header="_Border">
+          <MenuItem Header="Full" x:Name="BorderFull" ToggleType="CheckBox" Tag="0" Click="OnSelectBorder" />
+          <MenuItem Header="Medium" x:Name="BorderMedium" ToggleType="CheckBox" Tag="24" Click="OnSelectBorder" />
+          <MenuItem Header="None" x:Name="BorderNone" ToggleType="CheckBox" Tag="48" Click="OnSelectBorder" />
+        </MenuItem>
+        <MenuItem Header="_Palette">
+          <MenuItem Header="Normal" x:Name="PaletteNormal" ToggleType="CheckBox" Tag="Normal" Click="OnSelectPalette" />
+          <MenuItem Header="Grayscale" x:Name="PaletteGray" ToggleType="CheckBox" Tag="Grayscale" Click="OnSelectPalette" />
+          <MenuItem Header="ULA Plus" x:Name="PaletteUlaPlus" ToggleType="CheckBox" Tag="ULA Plus" Click="OnSelectPalette" />
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="_Input">
+        <MenuItem Header="Cursor Keys as Joystick" x:Name="KeyJoyItem" ToggleType="CheckBox" Click="OnToggleKeyJoy" />
+        <MenuItem Header="Cursor Keys Emulate">
+          <MenuItem Header="Kempston" x:Name="KeyJoyKempston" ToggleType="CheckBox" Tag="1" Click="OnSelectKeyJoyType" />
+          <MenuItem Header="Sinclair 1" x:Name="KeyJoySinclair1" ToggleType="CheckBox" Tag="2" Click="OnSelectKeyJoyType" />
+          <MenuItem Header="Sinclair 2" x:Name="KeyJoySinclair2" ToggleType="CheckBox" Tag="3" Click="OnSelectKeyJoyType" />
+          <MenuItem Header="Cursor" x:Name="KeyJoyCursor" ToggleType="CheckBox" Tag="4" Click="OnSelectKeyJoyType" />
+        </MenuItem>
+        <MenuItem Header="Gamepad 1 Emulates">
+          <MenuItem Header="None" x:Name="Pad1None" ToggleType="CheckBox" Tag="0" Click="OnSelectPad1Type" />
+          <MenuItem Header="Kempston" x:Name="Pad1Kempston" ToggleType="CheckBox" Tag="1" Click="OnSelectPad1Type" />
+          <MenuItem Header="Sinclair 1" x:Name="Pad1Sinclair1" ToggleType="CheckBox" Tag="2" Click="OnSelectPad1Type" />
+          <MenuItem Header="Sinclair 2" x:Name="Pad1Sinclair2" ToggleType="CheckBox" Tag="3" Click="OnSelectPad1Type" />
+          <MenuItem Header="Cursor" x:Name="Pad1Cursor" ToggleType="CheckBox" Tag="4" Click="OnSelectPad1Type" />
+        </MenuItem>
+        <MenuItem Header="Kempston uses port 0x1F" x:Name="KempstonPortItem" ToggleType="CheckBox" Click="OnToggleKempstonPort" />
+        <Separator />
+        <MenuItem Header="Pause when window loses focus" x:Name="PauseOnFocusItem" ToggleType="CheckBox" Click="OnTogglePauseOnFocus" />
+      </MenuItem>
+      <MenuItem Header="_Help">
+        <MenuItem Header="_Keyboard Help" Click="OnKeyboardHelp" />
+        <MenuItem Header="_About Zero" Click="OnAbout" />
+      </MenuItem>
+    </Menu>
+
+    <Border DockPanel.Dock="Bottom" Background="#1E1E1E" Padding="8,3">
+      <DockPanel>
+        <TextBlock x:Name="StatusTape" DockPanel.Dock="Right" Foreground="#BBBBBB" Margin="12,0,0,0" />
+        <TextBlock x:Name="StatusFps" DockPanel.Dock="Right" Foreground="#BBBBBB" Margin="12,0,0,0" />
+        <TextBlock x:Name="StatusMachine" Foreground="#DDDDDD" FontWeight="SemiBold" />
+        <TextBlock x:Name="StatusMessage" Foreground="#F0C674" Margin="16,0,0,0" TextTrimming="CharacterEllipsis" />
+      </DockPanel>
+    </Border>
+
+    <c:SpectrumDisplay x:Name="Display" />
+  </DockPanel>
+</Window>

@@ -4,14 +4,14 @@ using System.IO;
 using System.Text;
 using Speccy;
 
-namespace Zero.Core.Tests
+namespace Zero.TestSupport
 {
     /// <summary>
     /// Reads the Spectrum display file back as text by matching each 8x8 character cell against
     /// the 48K ROM font (0x3D00..0x3FFF, chars 32..127). Cells that match nothing become '?'.
     /// Good enough to assert on boot messages and menus without a renderer.
     /// </summary>
-    internal static class ScreenText
+    public static class ScreenText
     {
         private static Dictionary<ulong, char> _font;
 

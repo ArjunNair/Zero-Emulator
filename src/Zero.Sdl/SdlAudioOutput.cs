@@ -20,6 +20,18 @@ namespace Zero.Sdl
         private readonly byte[] _buffer = new byte[AudioFormat.FrameBytes];
         private bool _disposed;
 
+        // Stall protection: a device that is present but not consuming (no session audio, sandbox,
+        // unplugged output) would otherwise freeze emulation. After StallSeconds without the queue
+        // draining we pace from the wall clock like TimerPacedAudioOutput.
+        private const double StallSeconds = 0.5;
+        private readonly System.Diagnostics.Stopwatch _clock = System.Diagnostics.Stopwatch.StartNew();
+        private double _lastDrainSeconds;
+        private int _lastQueued = -1;
+        private double _nextDeadline;
+
+        /// <summary>True once the device stopped draining and pacing switched to the wall clock.</summary>
+        public bool Stalled { get; private set; }
+
         public SdlAudioOutput()
         {
             SdlRuntime.EnsureInit(SDL_InitFlags.SDL_INIT_AUDIO);
@@ -63,7 +75,26 @@ namespace Zero.Sdl
         public bool FinishedPlaying()
         {
             if (_stream == null) return true;
-            return SDL_GetAudioStreamQueued(_stream) <= TargetQueuedFrames * AudioFormat.FrameBytes;
+
+            int queued = SDL_GetAudioStreamQueued(_stream);
+            double now = _clock.Elapsed.TotalSeconds;
+
+            if (queued < _lastQueued || _lastQueued < 0)
+            {
+                _lastDrainSeconds = now; // the device consumed something
+                if (Stalled) { Stalled = false; _nextDeadline = now; }
+            }
+            _lastQueued = queued;
+
+            if (queued <= TargetQueuedFrames * AudioFormat.FrameBytes)
+                return true;
+
+            if (now - _lastDrainSeconds > StallSeconds)
+            {
+                if (!Stalled) { Stalled = true; _nextDeadline = now; SDL_ClearAudioStream(_stream); _lastQueued = 0; }
+                return now >= _nextDeadline;
+            }
+            return false;
         }
 
         public byte[] LockBuffer() => _buffer;
@@ -71,6 +102,13 @@ namespace Zero.Sdl
         public void UnlockBuffer(byte[] buffer)
         {
             if (_stream == null || buffer == null) return;
+            if (Stalled)
+            {
+                _nextDeadline += AudioFormat.FrameSeconds;
+                double now = _clock.Elapsed.TotalSeconds;
+                if (_nextDeadline < now - 0.25) _nextDeadline = now;
+                return; // don't pile more data onto a device that isn't draining
+            }
             fixed (byte* p = buffer)
                 SDL_PutAudioStreamData(_stream, (IntPtr)p, buffer.Length);
         }

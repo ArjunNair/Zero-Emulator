@@ -14,5 +14,6 @@
     <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
     <ProjectReference Include="..\..\Ziggy\Peripherals\Peripherals.csproj" />
     <ProjectReference Include="..\..\src\Zero.Emulation\Zero.Emulation.csproj" />
+    <ProjectReference Include="..\Zero.TestSupport\Zero.TestSupport.csproj" />
   </ItemGroup>
 </Project>

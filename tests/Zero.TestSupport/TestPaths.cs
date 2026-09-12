@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 
-namespace Zero.Core.Tests
+namespace Zero.TestSupport
 {
     /// <summary>Locates repo assets (ROMs, sample programs) relative to the test assembly.</summary>
-    internal static class TestPaths
+    public static class TestPaths
     {
         public static string RepoRoot { get; } = FindRepoRoot();
 

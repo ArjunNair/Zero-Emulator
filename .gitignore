@@ -185,3 +185,6 @@ Thumbs.db
 *.user
 .vs/
 .idea/
+
+# test platform output
+TestResults/

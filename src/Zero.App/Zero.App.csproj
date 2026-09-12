@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Cross-platform desktop shell (Avalonia). Windows, macOS (x64/arm64), Linux. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Zero.App</RootNamespace>
+    <AssemblyName>Zero</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest Condition="$([MSBuild]::IsOSPlatform('Windows'))">app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
+    <ProjectReference Include="..\..\Ziggy\Peripherals\Peripherals.csproj" />
+    <ProjectReference Include="..\Zero.Emulation\Zero.Emulation.csproj" />
+    <ProjectReference Include="..\Zero.Sdl\Zero.Sdl.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Bundled machine ROMs and sample programs travel with the executable. -->
+    <None Include="..\..\run\roms\*.rom" Link="roms\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\run\programs\**\*" Link="programs\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Zero.App.Tests" />
+  </ItemGroup>
+</Project>
