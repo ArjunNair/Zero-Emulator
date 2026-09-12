@@ -102,7 +102,6 @@
             this.rzxInsertBookmarkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rzxRollbackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.commanderStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.tapeBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debuggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.programFinderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -576,15 +575,9 @@
             // 
             // toolsToolStripMenuItem
             // 
-            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.commanderStripMenuItem3, this.tapeBrowserToolStripMenuItem, this.debuggerToolStripMenuItem, this.programFinderToolStripMenuItem, this.kKeyboardHelperToolStripMenuItem, this.basicImportToolStripMenuItem3, this.cheatHelperToolStripMenuItem1, this.aboutZeroToolStripMenuItem, this.toolStripSeparator17, this.preferencesToolStripMenuItem});
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.tapeBrowserToolStripMenuItem, this.debuggerToolStripMenuItem, this.programFinderToolStripMenuItem, this.kKeyboardHelperToolStripMenuItem, this.basicImportToolStripMenuItem3, this.cheatHelperToolStripMenuItem1, this.aboutZeroToolStripMenuItem, this.toolStripSeparator17, this.preferencesToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             resources.ApplyResources(this.toolsToolStripMenuItem, "toolsToolStripMenuItem");
-            // 
-            // commanderStripMenuItem3
-            // 
-            this.commanderStripMenuItem3.Name = "commanderStripMenuItem3";
-            resources.ApplyResources(this.commanderStripMenuItem3, "commanderStripMenuItem3");
-            this.commanderStripMenuItem3.Click += new System.EventHandler(this.commanderStripMenuItem3_Click);
             // 
             // tapeBrowserToolStripMenuItem
             // 
@@ -945,7 +938,6 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel mouseStripStatusLabel;
         private System.Windows.Forms.ToolStripMenuItem basicImportToolStripMenuItem3;
-        private System.Windows.Forms.ToolStripMenuItem commanderStripMenuItem3;
         private System.Windows.Forms.ToolStripStatusLabel machineLabel;
         private System.Windows.Forms.ToolStripStatusLabel fpsStatusLabel;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;

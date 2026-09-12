@@ -2,10 +2,9 @@
 
 using System;
 using System.IO;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using zlib;
+using System.IO.Compression;
 using System.Reflection;
 
 
@@ -122,6 +121,9 @@ namespace Peripherals
     }
 
     public class RZXFile {
+        //Raised for file errors the host may want to surface (replaces MessageBox in the library).
+        public event Action<string> OnError;
+
         public System.Action<RZXFileEventArgs> RZXFileEventHandler;
         public RZX_Header header;
         public RZX_Creator creator;
@@ -162,10 +164,9 @@ namespace Peripherals
 
         public List<byte> inputs = new List<byte>();
         private List<byte> oldInputs = new List<byte>();
-        private const int ZBUFLEN = 16384;
-        private byte[] zBuffer;
         private byte[] fileBuffer;
-        private ZStream zStream;
+        private ZLibStream zInflater;   //frame data inflater during playback
+        private ZLibStream zDeflater;   //frame data deflater during recording
         private GCHandle pinnedBuffer;
         private bool isReading = false;
         private bool isReadingIRB = false;
@@ -234,11 +235,11 @@ namespace Peripherals
                                     MemoryStream compressedData = new MemoryStream(buffer, offset, snapSize);
                                     MemoryStream uncompressedData = new MemoryStream();
 
-                                    using (ZInputStream zipStream = new ZInputStream(compressedData)) {
+                                    using (ZLibStream zipStream = new ZLibStream(compressedData, CompressionMode.Decompress)) {
                                         byte[] tempBuffer = new byte[2048];
                                         int bytesUnzipped = 0;
 
-                                        while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
+                                        while ((bytesUnzipped = zipStream.Read(tempBuffer, 0, 2048)) > 0) {
                                             uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
                                         }
                                         snapshotData[snapIndex] = uncompressedData.ToArray();
@@ -265,10 +266,10 @@ namespace Peripherals
                                     int frameSize = (int)block.size - Marshal.SizeOf(record) - Marshal.SizeOf(block);
                                     MemoryStream compressedData = new MemoryStream(buffer, offset2, frameSize);
                                     MemoryStream uncompressedData = new MemoryStream();
-                                    using (ZInputStream zipStream = new ZInputStream(compressedData)) {
+                                    using (ZLibStream zipStream = new ZLibStream(compressedData, CompressionMode.Decompress)) {
                                         byte[] tempBuffer = new byte[2048];
                                         int bytesUnzipped = 0;
-                                        while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
+                                        while ((bytesUnzipped = zipStream.Read(tempBuffer, 0, 2048)) > 0) {
                                             uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
                                         }
                                         frameBuffer = uncompressedData.ToArray();
@@ -366,10 +367,10 @@ namespace Peripherals
                             snap.uncompressedSize = (uint)snapshotData[f].Length;
 
                             using (MemoryStream outMemoryStream = new MemoryStream())
-                            using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream, zlibConst.Z_DEFAULT_COMPRESSION))
+                            using (ZLibStream outZStream = new ZLibStream(outMemoryStream, CompressionLevel.Optimal, true))
                             using (Stream inMemoryStream = new MemoryStream(snapshotData[f])) {
                                 CopyStream(inMemoryStream, outZStream);
-                                outZStream.finish();
+                                outZStream.Dispose(); //ZLibStream only emits the trailer on dispose
                                 rawSZXData = outMemoryStream.ToArray();
                             }
 
@@ -386,7 +387,7 @@ namespace Peripherals
                         block.id = 0x80;
                         byte[] rawFramesData;
                         using (MemoryStream outMemoryStream = new MemoryStream())
-                        using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream, zlibConst.Z_DEFAULT_COMPRESSION)) {
+                        using (ZLibStream outZStream = new ZLibStream(outMemoryStream, CompressionLevel.Optimal, true)) {
                             foreach (RZX_Frame frame in frames) {
                                 using (Stream inMemoryStream = new MemoryStream()) {
                                     BinaryWriter bw = new BinaryWriter(inMemoryStream);
@@ -399,7 +400,7 @@ namespace Peripherals
                                 }
                             }
 
-                            outZStream.finish();
+                            outZStream.Dispose(); //ZLibStream only emits the trailer on dispose
                             rawFramesData = outMemoryStream.ToArray();
                         }
 
@@ -606,7 +607,7 @@ namespace Peripherals
             if (frameInfoFile != null) {
                 frameInfoFile.Close();
                 frameInfoFile = null;
-                File.Delete(Application.LocalUserAppDataPath + "//" + tempFrameInfoFile);
+                File.Delete(Path.Combine(Path.GetTempPath(), tempFrameInfoFile));
             }
 
             if (isRecordingBlock)
@@ -677,8 +678,6 @@ namespace Peripherals
             if (isCompressedFrames)
                 CloseZStream();
 
-            zStream.deflateEnd();
-
             if (frameCount == 0) {
                 rzxFile.Seek(currentRecordFilePos, SeekOrigin.Begin);
                 isRecordingBlock = false;
@@ -726,11 +725,11 @@ namespace Peripherals
                 MemoryStream compressedData = new MemoryStream(fileBuffer, snapDataOffset, snapSize);
                 MemoryStream uncompressedData = new MemoryStream();
 
-                using (ZInputStream zipStream = new ZInputStream(compressedData)) {
+                using (ZLibStream zipStream = new ZLibStream(compressedData, CompressionMode.Decompress)) {
                     byte[] tempBuffer = new byte[2048];
                     int bytesUnzipped = 0;
 
-                    while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0)
+                    while ((bytesUnzipped = zipStream.Read(tempBuffer, 0, 2048)) > 0)
                         uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
 
                     snapdata = uncompressedData.ToArray();
@@ -812,17 +811,17 @@ namespace Peripherals
                             rzxFileReader.Read(tempInfo, 0, blockDataSize - recordSize);
 
                             try {
-                                FileStream fs = new FileStream(Application.LocalUserAppDataPath + "//" + tempFrameInfoFile, FileMode.Create);
+                                FileStream fs = new FileStream(Path.Combine(Path.GetTempPath(), tempFrameInfoFile), FileMode.Create);
                                 fs.Write(tempInfo, 0, tempInfo.Length);
                                 fs.Flush();
                                 fs.Close();
                             }
                             catch {
-                                MessageBox.Show("There was an error processing the RZX File!", "Error", MessageBoxButtons.OK);
+                                OnError?.Invoke("There was an error processing the RZX File!");
                                 return false;
                             }
 
-                            frameInfoFile = new FileStream(Application.LocalUserAppDataPath + "//" + tempFrameInfoFile, FileMode.Open);
+                            frameInfoFile = new FileStream(Path.Combine(Path.GetTempPath(), tempFrameInfoFile), FileMode.Open);
                             frameInfoReader = new BinaryReader(frameInfoFile);
 
                             if (isCompressedFrames) {
@@ -856,102 +855,52 @@ namespace Peripherals
             }
         }
 
-        private int ReadFromZStream (BinaryReader reader, ref byte[] buffer, int numBytesToRead) {
-            zStream.next_out = buffer;
-            zStream.avail_out = numBytesToRead;
-            zStream.next_out_index = 0;
+        private int ReadFromZStream(BinaryReader reader, ref byte[] buffer, int numBytesToRead) {
+            if (zInflater == null)
+                return 0;
 
-            int err = zlibConst.Z_OK;
-
-            while (zStream.avail_out > 0 && err == zlibConst.Z_OK) {
-
-                if (zStream.avail_in == 0) {
-                    zStream.avail_in = reader.Read(zBuffer, 0, ZBUFLEN);
-
-                    if (zStream.avail_in == 0)
-                        return 0;
-
-                    zStream.next_in = zBuffer;
-                    zStream.next_in_index = 0;
-                }
-
-               err = zStream.inflate(zlibConst.Z_FINISH);
+            int total = 0;
+            while (total < numBytesToRead) {
+                int n = zInflater.Read(buffer, total, numBytesToRead - total);
+                if (n <= 0)
+                    break;
+                total += n;
             }
-            return numBytesToRead - zStream.avail_out;
+            return total;
         }
 
         private int WriteToZStream(byte[] buffer, int numBytesToWrite) {
-            int err = zlibConst.Z_OK;
-            zStream.avail_in = numBytesToWrite;
-            zStream.next_in = buffer;
-            zStream.next_in_index = 0;
-            
-            while (zStream.avail_in > 0 && err == zlibConst.Z_OK) {
+            if (zDeflater == null)
+                return 0;
 
-                if (zStream.avail_out == 0) {
-                    rzxFileWrite.Write(zBuffer, 0, ZBUFLEN);
-                    zStream.next_out = zBuffer;
-                    zStream.next_out_index = 0;
-                    zStream.avail_out = ZBUFLEN;
-                }
-                err = zStream.deflate(zlibConst.Z_NO_FLUSH);
-            }
-
-            return numBytesToWrite - zStream.avail_in;
+            zDeflater.Write(buffer, 0, numBytesToWrite);
+            return numBytesToWrite;
         }
 
         private int CloseZStream() {
-            int len, err;
-            bool done = false;
-
-            zStream.avail_in = 0;
-
-            while (!isReading) {
-                len = ZBUFLEN - zStream.avail_out;
-
-                if (len > 0) {
-                    rzxFileWrite.Write(zBuffer, 0, len);
-                    zStream.next_out = zBuffer;
-                    zStream.avail_out = ZBUFLEN;
-                    zStream.next_out_index = 0;
-                }
-
-                if (done)
-                    break;
-
-                err = zStream.deflate(zlibConst.Z_FINISH);
-                done = (zStream.avail_out > 0 || err == zlibConst.Z_STREAM_END);
+            if (zDeflater != null) {
+                zDeflater.Dispose(); //flushes pending deflate output and the zlib trailer into rzxFile
+                zDeflater = null;
             }
-
-            zBuffer = null;
+            if (zInflater != null) {
+                zInflater.Dispose();
+                zInflater = null;
+            }
             return 0;
         }
 
         private bool OpenZStream(FileStream file, long offset, bool isRead) {
-            int err;
-            zBuffer = new byte[ZBUFLEN];
-            zStream = new ZStream();
+            CloseZStream();
+            file.Seek(offset, SeekOrigin.Begin);
 
             if (isRead) {
-                zStream.next_in = zBuffer;
-                zStream.next_in_index = 0;
-                zStream.avail_in = 0;
-                err = zStream.inflateInit();
+                zInflater = new ZLibStream(file, CompressionMode.Decompress, true);
                 isReading = true;
             }
             else {
-                err = zStream.deflateInit(zlibConst.Z_DEFAULT_COMPRESSION);
-                zStream.next_out = zBuffer;
-                zStream.next_out_index = 0;
+                zDeflater = new ZLibStream(file, CompressionLevel.Optimal, true);
                 isReading = false;
             }
-
-            zStream.avail_out = ZBUFLEN;
-
-            if (err != zlibConst.Z_OK)
-                return false;
-
-            file.Seek(offset, SeekOrigin.Begin);
             return true;
         }
 
@@ -1037,7 +986,8 @@ namespace Peripherals
             header.minorVersion = 12;
             header.flags = 0;
             header.signature = "RZX!".ToCharArray();
-            string[] version = Application.ProductVersion.Split('.');
+            System.Version asmVersion = typeof(RZXFile).Assembly.GetName().Version ?? new System.Version(0, 9);
+            string[] version = new string[] { asmVersion.Major.ToString(), asmVersion.Minor.ToString() };
 
             creator = new RZX_Creator();
             creator.author = "Zero Emulator      \0".ToCharArray();
@@ -1065,7 +1015,7 @@ namespace Peripherals
                 state = RZX_State.RECORDING;
             }
             catch (System.IO.IOException e){
-                MessageBox.Show("There was an error when trying to create a new recording.", "RZX File error", MessageBoxButtons.OK);
+                OnError?.Invoke("There was an error when trying to create a new recording.");
                 return false;
             }
             inputs = new List<byte>();
@@ -1284,10 +1234,10 @@ namespace Peripherals
             snap.uncompressedSize = (uint)snapshotData.Length;
 
             using (MemoryStream outMemoryStream = new MemoryStream())
-                using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream, zlibConst.Z_DEFAULT_COMPRESSION))
+                using (ZLibStream outZStream = new ZLibStream(outMemoryStream, CompressionLevel.Optimal, true))
                     using (Stream inMemoryStream = new MemoryStream(snapshotData)) {
                         CopyStream(inMemoryStream, outZStream);
-                        outZStream.finish();
+                        outZStream.Dispose(); //ZLibStream only emits the trailer on dispose
                         rawSZXData = outMemoryStream.ToArray();
                     }
 

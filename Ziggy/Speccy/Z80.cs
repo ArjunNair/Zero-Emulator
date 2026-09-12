@@ -109,6 +109,9 @@ namespace Cpu
 
     public class Z80
     {
+        //Raised when the CPU hits an opcode it cannot handle (replaces MessageBox in the core).
+        public event System.Action<string> OnError;
+
         //Clock state
         public int t_states = 0;                 //opcode t-states
 
@@ -6398,8 +6401,7 @@ namespace Cpu
 
                                 default:
                                 System.String msg = "ERROR: Could not handle DDCB " + opcode.ToString();
-                                System.Windows.Forms.MessageBox.Show(msg, "Opcode handler",
-                                            System.Windows.Forms.MessageBoxButtons.OKCancel, System.Windows.Forms.MessageBoxIcon.Error);
+                                OnError?.Invoke(msg);
                                 break;
                             }
                             break;
@@ -9223,8 +9225,7 @@ namespace Cpu
 
                             default:
                             System.String msg = "ERROR: Could not handle FDCB " + opcode.ToString();
-                            System.Windows.Forms.MessageBox.Show(msg, "Opcode handler",
-                                        System.Windows.Forms.MessageBoxButtons.OKCancel, System.Windows.Forms.MessageBoxIcon.Error);
+                            OnError?.Invoke(msg);
                             break;
                         }
                         break;

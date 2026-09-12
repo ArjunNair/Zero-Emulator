@@ -305,7 +305,7 @@ namespace ZeroSound
 
     #region DirectSound
 
-    public unsafe class SoundManager : System.IDisposable
+    public unsafe class SoundManager : System.IDisposable, Speccy.IAudioOutput
     {
         private static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, System.ResolveEventArgs args) {
             string dllName = args.Name.Contains(",") ? args.Name.Substring(0, args.Name.IndexOf(',')) : args.Name.Replace(".dll", "");

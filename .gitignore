@@ -178,3 +178,10 @@ FakesAssemblies/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# .NET SDK-style build output
+**/bin/
+**/obj/
+*.user
+.vs/
+.idea/

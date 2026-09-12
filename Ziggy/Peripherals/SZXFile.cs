@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using zlib;
+using System.IO.Compression;
 
 namespace Peripherals
 {
@@ -307,10 +307,10 @@ namespace Peripherals
                         if ((tape.flags & 2) != 0) {
                             MemoryStream compressedData = new MemoryStream(buffer, offset, tape.compressedSize);
                             MemoryStream uncompressedData = new MemoryStream();
-                            using (ZInputStream zipStream = new ZInputStream(compressedData)) {
+                            using (ZLibStream zipStream = new ZLibStream(compressedData, CompressionMode.Decompress)) {
                                 byte[] tempBuffer = new byte[2048];
                                 int bytesUnzipped = 0;
-                                while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
+                                while ((bytesUnzipped = zipStream.Read(tempBuffer, 0, 2048)) > 0) {
                                     uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
                                 }
                                 embeddedTapeData = uncompressedData.ToArray();
@@ -341,10 +341,10 @@ namespace Peripherals
                         int compressedSize = ((int)block.Size - (Marshal.SizeOf(ramPages)));//  - Marshal.SizeOf(block) - 1 ));
                         MemoryStream compressedData = new MemoryStream(buffer, offset, compressedSize);
                         MemoryStream uncompressedData = new MemoryStream();
-                        using (ZInputStream zipStream = new ZInputStream(compressedData)) {
+                        using (ZLibStream zipStream = new ZLibStream(compressedData, CompressionMode.Decompress)) {
                             byte[] tempBuffer = new byte[2048];
                             int bytesUnzipped = 0;
-                            while ((bytesUnzipped = zipStream.read(tempBuffer, 0, 2048)) > 0) {
+                            while ((bytesUnzipped = zipStream.Read(tempBuffer, 0, 2048)) > 0) {
                                 uncompressedData.Write(tempBuffer, 0, bytesUnzipped);
                             }
                             byte[] pageData = uncompressedData.ToArray();

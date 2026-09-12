@@ -75,18 +75,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         }
 #endif
 
-        [System.Runtime.InteropServices.DllImport(@"pzx_tools.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern System.IntPtr tzx2pzx(byte[] buff, int buffSize, ref uint outSize);
-
-        [System.Runtime.InteropServices.DllImport(@"pzx_tools.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern System.IntPtr csw2pzx(byte[] buff, int buffSize, ref uint outSize);
-
-        [System.Runtime.InteropServices.DllImport(@"pzx_tools.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern System.IntPtr pzx2wav(string input_name, ref uint outSize);
-
-        [System.Runtime.InteropServices.DllImport(@"pzx_tools.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern System.IntPtr tap2pzx(byte[] buff, int buffSize, uint pause_duration, ref uint outSize);
-
 
         enum EMULATOR_STATE
         {
@@ -99,6 +87,19 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             TAPE_INSERTED,
             PLAYING_TAPE,
             DISK_INSERTED,
+        }
+
+        //The core no longer knows about DirectSound; the shell owns the audio backend and hands it in.
+        private Speccy.IAudioOutput CreateAudioOutput() {
+            return new ZeroSound.SoundManager(this.Handle, 16, 2, 44100);
+        }
+
+        private void OnEmulatorError(string message) {
+            if (InvokeRequired) {
+                BeginInvoke(new Action<string>(OnEmulatorError), message);
+                return;
+            }
+            MessageBox.Show(message, "Emulation error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private EMULATOR_STATE prevState = EMULATOR_STATE.NONE;
@@ -119,7 +120,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private InputSystem inputSystem = new InputSystem();
         private RecentFilesManager mruManager;
         public Logger logger = new Logger();
-        private Tools.Commander commander;
         public zx_spectrum zx;
 
         private ToolStripMenuItem EjectA;
@@ -2135,7 +2135,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
             switch (config.emulationOptions.CurrentModel) {
                 case MachineModel._48k: {
                         config.emulationOptions.CurrentModel = MachineModel._48k;
-                        zx = new zx_48k(this.Handle, config.emulationOptions.LateTimings);
+                        zx = new zx_48k(CreateAudioOutput(), config.emulationOptions.LateTimings);
                         zx.EnableAY(config.audioOptions.EnableAYFor48K);
                         romLoaded = LoadROM(config.romOptions.Current48kROM);
                         disksMenuItem.Enabled = false;
@@ -2146,7 +2146,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                 case MachineModel._128k: {
                         config.emulationOptions.CurrentModel = MachineModel._128k;
-                        zx = new zx_128k(this.Handle, config.emulationOptions.LateTimings);
+                        zx = new zx_128k(CreateAudioOutput(), config.emulationOptions.LateTimings);
                         romLoaded = LoadROM(config.romOptions.Current128kROM);
                         disksMenuItem.Enabled = false;
                         machineLabel.Text = "Spectrum 128K";
@@ -2156,7 +2156,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                 case MachineModel._128ke: {
                         config.emulationOptions.CurrentModel = MachineModel._128ke;
-                        zx = new zx_128ke(this.Handle, config.emulationOptions.LateTimings);
+                        zx = new zx_128ke(CreateAudioOutput(), config.emulationOptions.LateTimings);
                         romLoaded = LoadROM(config.romOptions.Current128keROM);
                         disksMenuItem.Enabled = false;
                         machineLabel.Text = "Spectrum 128KE";
@@ -2166,7 +2166,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                 case MachineModel._plus3: {
                         config.emulationOptions.CurrentModel = MachineModel._plus3;
-                        zx = new zx_plus3(this.Handle, config.emulationOptions.LateTimings);
+                        zx = new zx_plus3(CreateAudioOutput(), config.emulationOptions.LateTimings);
                         romLoaded = LoadROM(config.romOptions.CurrentPlus3ROM);
                         disksMenuItem.Enabled = true;
                         insertDiskCToolStripMenuItem.Enabled = false;
@@ -2178,7 +2178,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
 
                 case MachineModel._pentagon: {
                         config.emulationOptions.CurrentModel = MachineModel._pentagon;
-                        zx = new Pentagon_128k(this.Handle, config.emulationOptions.LateTimings);
+                        zx = new Pentagon_128k(CreateAudioOutput(), config.emulationOptions.LateTimings);
                         romLoaded = LoadROM(config.romOptions.CurrentPentagonROM);
                         disksMenuItem.Enabled = true;
                         insertDiskCToolStripMenuItem.Enabled = true;
@@ -2189,6 +2189,7 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     }
             }
             zx.FrameEndEvent += OnSpeccyFrameEnd;
+            zx.OnError += OnEmulatorError;
         }
 
         private void Form1_Load(object sender, System.EventArgs e) {
@@ -3657,20 +3658,15 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     break;
 
                     case "tzx":
-                    case "tap":
                     case "csw":
-                    IntPtr _p;
-                    uint _sz = 0;
-                    if (ext2 == "tzx")
-                        _p = tzx2pzx(buffer, buffer.Length, ref _sz);
-                    else if (ext2 == "tap")
-                        _p = tap2pzx(buffer, buffer.Length, 500, ref _sz);
-                    else
-                        _p = csw2pzx(buffer, buffer.Length, ref _sz);
+                    System.Windows.Forms.MessageBox.Show("TZX and CSW tapes are not supported in this build yet. Please convert the tape to PZX or TAP.",
+                        "Unsupported Format", System.Windows.Forms.MessageBoxButtons.OK);
+                    break;
 
-                    if (_sz != 0) {
-                        Byte[] _b = new Byte[_sz];
-                        Marshal.Copy(_p, _b, 0, (int)_sz);
+                    case "tap":
+                    byte[] _b = Peripherals.TapFile.ToPZX(buffer, 500);
+
+                    if (_b != null) {
                         Stream _st = new MemoryStream(_b);
                         tapeDeck.InsertTape(fileToOpen, _st);
                         fileNameAndSizeList.Clear();
@@ -3986,13 +3982,9 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     return;
                 }
                 if (exitCode == 0) {
-                    IntPtr _p;
-                    uint _sz = 0;
                     byte[] file_data = File.ReadAllBytes(Application.LocalUserAppDataPath + "//tempbas.tap");
-                    _p = tap2pzx(file_data, file_data.Length, 500, ref _sz);
-                    if (_sz != 0) {
-                        Byte[] _b = new Byte[_sz];
-                        Marshal.Copy(_p, _b, 0, (int)_sz);
+                    byte[] _b = Peripherals.TapFile.ToPZX(file_data, 500);
+                    if (_b != null) {
                         Stream _st = new MemoryStream(_b);
                         tapeDeck.InsertTape(filename, _st);
                         doAutoLoadTape = true;
@@ -4004,21 +3996,11 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     }
                 }
             }
-            else if ((ext == ".tzx") || (ext == ".tap") || (ext == ".csw")) {
+            else if (ext == ".tap") {
                 byte[] in_array = File.ReadAllBytes(filename);
-                IntPtr _p;
-                uint _sz = 0;
-                if (ext == ".tzx")
-                    _p = tzx2pzx(in_array, in_array.Length, ref _sz);
-                else if (ext == ".tap") {
-                    _p = tap2pzx(in_array, in_array.Length, 500, ref _sz);
-                }
-                else
-                    _p = csw2pzx(in_array, in_array.Length, ref _sz);
+                byte[] _b = Peripherals.TapFile.ToPZX(in_array, 500);
 
-                if (_sz != 0) {
-                    Byte[] _b = new Byte[_sz];
-                    Marshal.Copy(_p, _b, 0, (int)_sz);
+                if (_b != null) {
                     Stream _st = new MemoryStream(_b);
                     tapeDeck.InsertTape(filename, _st);
 
@@ -4031,6 +4013,10 @@ const string WmCpyDta = "WmCpyDta_d.dll";
                     System.Windows.Forms.MessageBox.Show("This doesn't seem to be a valid tape file.",
                   "Tape Error", System.Windows.Forms.MessageBoxButtons.OK);
                 }
+            }
+            else if ((ext == ".tzx") || (ext == ".csw")) {
+                System.Windows.Forms.MessageBox.Show("TZX and CSW tapes are not supported in this build yet. Please convert the tape to PZX or TAP.",
+                   "Unsupported Format", System.Windows.Forms.MessageBoxButtons.OK);
             }
             else if (ext == ".zip") //handle zip archives
             {
@@ -4658,13 +4644,6 @@ const string WmCpyDta = "WmCpyDta_d.dll";
         private void basicImportToolStripMenuItem3_Click(object sender, EventArgs e) {
             basicImporter = new Tools.BASICImporter(this);
             basicImporter.Show();
-        }
-
-        private void commanderStripMenuItem3_Click(object sender, EventArgs e) {
-            if (commander == null || commander.IsDisposed)
-                commander = new Tools.Commander(this);
-
-            commander.Show();
         }
 
         private void Form1_KeyUp(object sender, KeyEventArgs e) {

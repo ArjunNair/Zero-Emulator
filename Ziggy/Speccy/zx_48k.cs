@@ -7,8 +7,8 @@ namespace Speccy
     //Implements a zx 48k machine
     public class zx_48k : Speccy.zx_spectrum
     {
-        public zx_48k(IntPtr handle, bool lateTimingModel)
-            : base(handle, lateTimingModel) {
+        public zx_48k(IAudioOutput audioOutput, bool lateTimingModel)
+            : base(audioOutput, lateTimingModel) {
             model = MachineModel._48k;
             InterruptPeriod = 32;
             FrameLength = 69888;
@@ -233,7 +233,7 @@ namespace Speccy
             if (isPlayingRZX) {
                 if (rzx.inputCount < rzx.frame.inputCount) {
                     if (rzx.frame.inputs == null) {
-                        System.Windows.Forms.MessageBox.Show("Invalid RZX frame. Expected: " + rzx.frame.inputCount.ToString() + " . Actual: 0", "RZX playback error", System.Windows.Forms.MessageBoxButtons.OK);
+                        RaiseError("Invalid RZX frame. Expected: " + rzx.frame.inputCount.ToString() + " . Actual: 0");
                     }
                     else {
                         rzxIN = rzx.frame.inputs[rzx.inputCount];

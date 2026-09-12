@@ -70,8 +70,8 @@ namespace Speccy
             return ScreenHeight + adjustedBorderTopHeight + BorderBottomHeight;
         }
 
-        public Pentagon_128k(IntPtr handle, bool lateTimingModel)
-            : base(handle, lateTimingModel) {
+        public Pentagon_128k(IAudioOutput audioOutput, bool lateTimingModel)
+            : base(audioOutput, lateTimingModel) {
             FrameLength = 71680;
             InterruptPeriod = 36;
             clockSpeed = 3.54690;
@@ -350,7 +350,7 @@ namespace Speccy
                 if (rzx.inputCount < rzx.frame.inputCount) {
                     if (rzx.frame.inputs == null) {
                         //TODO: Show message box to the user.
-                        System.Windows.Forms.MessageBox.Show("Invalid RZX frame. Expected: " + rzx.frame.inputCount.ToString() + " . Actual: 0", "RZX playback error", System.Windows.Forms.MessageBoxButtons.OK);
+                        RaiseError("Invalid RZX frame. Expected: " + rzx.frame.inputCount.ToString() + " . Actual: 0");
                     }
                     else {
                         rzxIN = rzx.frame.inputs[rzx.inputCount];

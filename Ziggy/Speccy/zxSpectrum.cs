@@ -84,13 +84,19 @@ namespace Speccy
 
         #endregion
 
-        private IntPtr mainHandle;
 
 
         public Z80 cpu;
         public ULA_Plus ula_plus = new ULA_Plus();
         //public Z80_Registers regs;
-        public ZeroSound.SoundManager beeper;
+        public IAudioOutput beeper;
+
+        //Raised for non-fatal emulation errors the host may want to surface (replaces MessageBox in the core).
+        public event Action<string> OnError;
+
+        protected void RaiseError(string message) {
+            OnError?.Invoke(message);
+        }
         public List<IODevice> io_devices = new List<IODevice>();
         public List<AudioDevice> audio_devices = new List<AudioDevice>();
         public Dictionary<int, SpeccyDevice> attached_devices = new Dictionary<int, SpeccyDevice>();
@@ -6177,6 +6183,7 @@ namespace Speccy
 
         protected void InitCpu() {
             cpu = new Z80();
+            cpu.OnError += RaiseError;
             cpu.PeekByte =  new ReadByteCallback(PeekByte);
             cpu.PokeByte = new WriteByteCallback(PokeByte);
             cpu.PeekWord = new ReadWordCallback(PeekWord);
@@ -6194,8 +6201,7 @@ namespace Speccy
             cpu.TapeEdgeCpA = new TapeEdgeCpACallback(OnTapeEdgeCpA);
         }
 
-        public zx_spectrum(IntPtr handle, bool lateTimingModel) {
-            mainHandle = handle;
+        public zx_spectrum(IAudioOutput audioOutput, bool lateTimingModel) {
             JunkMemory[0] = new byte[8192];
             JunkMemory[1] = new byte[8192];
             ROMpage[0] = new byte[8192];
@@ -6238,7 +6244,7 @@ namespace Speccy
             //THREAD
             //lock (lockThis)
             {
-                beeper = new ZeroSound.SoundManager(handle, 16, 2, 44100);
+                beeper = audioOutput;
                 beeper.Play();
             }
 

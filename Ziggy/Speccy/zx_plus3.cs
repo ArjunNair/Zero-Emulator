@@ -11,8 +11,8 @@ namespace Speccy
         protected bool[] diskInserted = { false, false };
         private UDP765 udpDrive = new UDP765();
 
-        public zx_plus3(IntPtr handle, bool lateTimingModel)
-            : base(handle, lateTimingModel) {
+        public zx_plus3(IAudioOutput audioOutput, bool lateTimingModel)
+            : base(audioOutput, lateTimingModel) {
             FrameLength = 70908;
             InterruptPeriod = 32;
             clockSpeed = 3.54690;
@@ -242,7 +242,7 @@ namespace Speccy
                 if (rzx.inputCount < rzx.frame.inputCount) {
                     if (rzx.frame.inputs == null) {
                         //TODO: Show message box to the user.
-                        System.Windows.Forms.MessageBox.Show("Invalid RZX frame. Expected: " + rzx.frame.inputCount.ToString() + " . Actual: 0", "RZX playback error", System.Windows.Forms.MessageBoxButtons.OK);
+                        RaiseError("Invalid RZX frame. Expected: " + rzx.frame.inputCount.ToString() + " . Actual: 0");
                     }
                     else {
                         rzxIN = rzx.frame.inputs[rzx.inputCount];
