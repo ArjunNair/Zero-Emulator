@@ -97,6 +97,9 @@ namespace Zero.App.Tests
             Assert.Contains("© 1982 Sinclair Research Ltd", screen);
             _output.WriteLine("audio fallback: " + w.AudioFallback);
 
+            Dispatcher.UIThread.RunJobs();
+            double ratio = w.Display.Bounds.Width / w.Display.Bounds.Height;
+            Assert.InRange(ratio, 352.0 / 296 - 0.02, 352.0 / 296 + 0.02); // fitted window: no letterbox bands
             string shot = Capture(w, "boot-48k");
             Assert.True(new FileInfo(shot).Length > 1000);
             w.Close();

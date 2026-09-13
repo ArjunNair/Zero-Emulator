@@ -105,6 +105,9 @@ namespace Zero.App
 
         private void OnOpened(object sender, EventArgs e)
         {
+            // Chrome height depends on whether the menu bar is in the window (Windows/Linux) or in the
+            // system bar (macOS); fit the window once layout has measured it.
+            Dispatcher.UIThread.Post(() => { if (WindowState == WindowState.Normal) ApplyWindowScale(); }, DispatcherPriority.Loaded);
             _session.Start();
             _statusTimer.Start();
             Display.Focus();
@@ -542,9 +545,10 @@ namespace Zero.App
             int crop = Display.BorderCrop;
             double w = (frame.Width - 2 * crop) * scale;
             double h = (frame.Height - 2 * crop) * scale;
-            double chrome = Bounds.Height - Display.Bounds.Height;
-            if (chrome <= 0 || double.IsNaN(chrome)) chrome = 56;
-            Width = w;
+            double chrome = ClientSize.Height - Display.Bounds.Height;
+            if (chrome < 0 || double.IsNaN(chrome) || Display.Bounds.Height <= 0) chrome = 56;
+            double sideChrome = Math.Max(0, ClientSize.Width - Display.Bounds.Width);
+            Width = w + sideChrome;
             Height = h + chrome;
         }
 

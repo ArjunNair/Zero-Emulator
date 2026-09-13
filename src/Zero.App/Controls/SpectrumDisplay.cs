@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Media.Immutable;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Zero.Emulation.Host;
@@ -17,6 +18,7 @@ namespace Zero.App.Controls
     {
         private WriteableBitmap _bitmap;
         private int _borderCrop;
+        private ISolidColorBrush _surround = Brushes.Black;
 
         public static readonly StyledProperty<bool> SmoothProperty =
             AvaloniaProperty.Register<SpectrumDisplay, bool>(nameof(Smooth));
@@ -95,13 +97,18 @@ namespace Zero.App.Controls
                 }
             }
 
+            // Letterbox areas take the current border colour so odd window shapes look like a TV, not a defect.
+            uint rgb = (uint)frame.Pixels[0] & 0xFFFFFF;
+            if (_surround.Color.ToUInt32() != (0xFF000000u | rgb))
+                _surround = new ImmutableSolidColorBrush(Color.FromUInt32(0xFF000000u | rgb));
+
             FramesPresented++;
             InvalidateVisual();
         }
 
         public override void Render(DrawingContext context)
         {
-            context.FillRectangle(Brushes.Black, new Rect(Bounds.Size));
+            context.FillRectangle(_bitmap == null ? Brushes.Black : _surround, new Rect(Bounds.Size));
             if (_bitmap == null) return;
 
             int crop = Math.Min(_borderCrop, Math.Min(_bitmap.PixelSize.Width, _bitmap.PixelSize.Height) / 2 - 1);
