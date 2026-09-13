@@ -14,6 +14,7 @@ using Zero.Emulation.Settings;
 namespace Zero.Core.Tests
 {
     /// <summary>Drives the host-neutral session the way a UI shell would, but headless and unpaced.</summary>
+    [Collection("PZXFile static state")]
     public class EmulatorSessionTests : IDisposable
     {
         private readonly ITestOutputHelper _output;

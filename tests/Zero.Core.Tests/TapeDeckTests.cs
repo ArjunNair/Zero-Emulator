@@ -6,6 +6,7 @@ using Zero.Emulation.Tape;
 
 namespace Zero.Core.Tests
 {
+    [Collection("PZXFile static state")]
     public class TapeDeckTests
     {
         /// <summary>A minimal PZX: header with metadata strings, then one pulse block.</summary>
@@ -21,7 +22,7 @@ namespace Zero.Core.Tests
                     if (i < headerStrings.Length - 1) body.Add(0);
                 }
                 w.Write(Encoding.ASCII.GetBytes("PZXT")); w.Write(body.Count); w.Write(body.ToArray());
-                w.Write(Encoding.ASCII.GetBytes("PULS")); w.Write(4); w.Write((ushort)0x8000 | 8063); w.Write((ushort)2168);
+                w.Write(Encoding.ASCII.GetBytes("PULS")); w.Write(4); w.Write((ushort)(0x8000 | 8063)); w.Write((ushort)2168);
                 return ms.ToArray();
             }
         }
@@ -56,6 +57,22 @@ namespace Zero.Core.Tests
             Assert.Equal("Overscan", deck.Title);
             Assert.False(deck.Metadata.HasDetails);
             Assert.Equal(12, deck.Blocks.Count);
+        }
+    }
+}
+
+namespace Zero.Core.Tests
+{
+    [Collection("PZXFile static state")]
+    public class PzxRobustnessTests
+    {
+        [Theory]
+        [InlineData(new byte[0])]
+        [InlineData(new byte[] { 0x50, 0x5A, 0x58, 0x54, 200, 0, 0, 0, 1, 0 })] // header claims 200 bytes, has 2
+        public void Truncated_pzx_is_rejected_without_throwing(byte[] data)
+        {
+            Assert.False(Peripherals.PZXFile.LoadPZX(ref data));
+            Assert.False(new Zero.Emulation.Tape.TapeDeck().Insert("bad.pzx", data));
         }
     }
 }

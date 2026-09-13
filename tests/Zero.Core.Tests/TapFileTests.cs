@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Zero.Core.Tests
 {
+    [Collection("PZXFile static state")]
     public class TapFileTests
     {
         private static int CountTapBlocks(byte[] tap)

@@ -235,10 +235,22 @@ namespace Peripherals
             return block;
         }
         public static bool LoadPZX(ref byte[] buffer) {
+            try {
+                return LoadPZXCore(buffer);
+            }
+            catch (System.Exception) {
+                //Truncated or corrupt image: report failure instead of crashing the caller.
+                blocks.Clear();
+                tapeBlockInfo.Clear();
+                return false;
+            }
+        }
+
+        private static bool LoadPZXCore(byte[] buffer) {
             blocks.Clear();
             tapeBlockInfo.Clear();
 
-            if (buffer.Length == 0)
+            if (buffer == null || buffer.Length < 8)
                 return false; //something bad happened!
 
             int counter = 0;
