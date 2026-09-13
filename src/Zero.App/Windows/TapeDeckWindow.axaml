@@ -8,7 +8,8 @@
         MinWidth="420" MinHeight="300"
         WindowStartupLocation="CenterOwner">
   <DockPanel Margin="10">
-    <TextBlock DockPanel.Dock="Top" x:Name="TitleText" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,6" />
+    <TextBlock DockPanel.Dock="Top" x:Name="TitleText" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,2" />
+    <TextBlock DockPanel.Dock="Top" x:Name="InfoText" Foreground="#BBBBBB" TextWrapping="Wrap" Margin="0,0,0,8" />
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
       <Button x:Name="InsertButton" Content="Insert…" Click="OnInsert" />
       <Button x:Name="EjectButton" Content="Eject" Click="OnEject" />

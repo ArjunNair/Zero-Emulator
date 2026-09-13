@@ -211,3 +211,67 @@ namespace Zero.App.Tests
         }
     }
 }
+
+namespace Zero.App.Tests
+{
+    public class OptionsWindowTests
+    {
+        [AvaloniaFact]
+        public void Ok_writes_edits_back_and_flags_rom_changes()
+        {
+            var settings = new EmulatorSettings();
+            var w = new Windows.OptionsWindow(settings, null);
+            w.Show();
+            Dispatcher.UIThread.RunJobs();
+
+            w.CpuMultiplier.Value = 4;
+            w.Gamepad2.SelectedIndex = 2;
+            w.ConfirmOnExit.IsChecked = false;
+            w.OkButton.Command = null;
+            w.OkButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.True(w.Accepted);
+            Assert.False(w.RomsChanged);
+            Assert.Equal(4, settings.Emulation.CpuMultiplier);
+            Assert.Equal(2, settings.Input.Gamepad2Emulates);
+            Assert.False(settings.Emulation.ConfirmOnExit);
+
+            var w2 = new Windows.OptionsWindow(settings, null);
+            w2.Show();
+            w2.Rom48k.Text = "custom48.rom";
+            w2.OkButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(w2.RomsChanged);
+            Assert.Equal("custom48.rom", settings.Roms.Rom48k);
+        }
+
+        [AvaloniaFact]
+        public void Cancel_leaves_settings_untouched()
+        {
+            var settings = new EmulatorSettings();
+            var w = new Windows.OptionsWindow(settings, null);
+            w.Show();
+            w.CpuMultiplier.Value = 9;
+            w.CancelButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs();
+            Assert.False(w.Accepted);
+            Assert.Equal(1, settings.Emulation.CpuMultiplier);
+        }
+    }
+}
+
+namespace Zero.App.Tests
+{
+    public class TapeMetadataDisplayTests
+    {
+        [Fact]
+        public void Describe_metadata_joins_available_fields()
+        {
+            var m = new Zero.Emulation.Tape.TapeMetadata { Publisher = "Bug-Byte", Authors = new[] { "Matthew Smith" }, Year = "1983", Comments = new[] { "Original release" } };
+            string text = Windows.TapeDeckWindow.DescribeMetadata(m);
+            Assert.Equal("by Matthew Smith  ·  Bug-Byte  ·  1983\nOriginal release", text);
+            Assert.Equal("", Windows.TapeDeckWindow.DescribeMetadata(new Zero.Emulation.Tape.TapeMetadata()));
+        }
+    }
+}

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Peripherals;
 using Speccy;
 using SpeccyCommon;
@@ -8,6 +9,24 @@ using SpeccyCommon;
 namespace Zero.Emulation.Tape
 {
     public enum TapeDeckStatus { Empty, Stopped, Playing }
+
+    /// <summary>Descriptive fields from the PZXT header block (all optional).</summary>
+    public sealed class TapeMetadata
+    {
+        public string Title { get; set; }
+        public string Publisher { get; set; }
+        public IReadOnlyList<string> Authors { get; set; } = Array.Empty<string>();
+        public string Year { get; set; }
+        public string Language { get; set; }
+        public string Type { get; set; }
+        public string Price { get; set; }
+        public string Protection { get; set; }
+        public string Origin { get; set; }
+        public IReadOnlyList<string> Comments { get; set; } = Array.Empty<string>();
+
+        public bool HasDetails => Publisher != null || Authors.Count > 0 || Year != null || Language != null
+                                  || Type != null || Price != null || Protection != null || Origin != null || Comments.Count > 0;
+    }
 
     public sealed class TapeBlockInfo
     {
@@ -30,6 +49,7 @@ namespace Zero.Emulation.Tape
 
         public string FileName { get; private set; } = "";
         public string Title { get; private set; } = "";
+        public TapeMetadata Metadata { get; private set; } = new TapeMetadata();
         public bool IsInserted { get; private set; }
         public bool IsPlaying => _zx != null && _zx.tapeIsPlaying;
         public int CurrentBlock => _zx?.blockCounter ?? 0;
@@ -154,9 +174,18 @@ namespace Zero.Emulation.Tape
                 _blocks.Add(new TapeBlockInfo { Index = i++, Block = info.Block, Info = info.Info });
 
             Title = Path.GetFileNameWithoutExtension(name);
+            Metadata = new TapeMetadata();
             foreach (PZXFile.Block b in PZXFile.blocks)
-                if (b is PZXFile.PZXT_Header h && !string.IsNullOrEmpty(h.Title))
-                    Title = h.Title;
+            {
+                if (!(b is PZXFile.PZXT_Header h)) continue;
+                if (!string.IsNullOrEmpty(h.Title)) Title = h.Title;
+                Metadata = new TapeMetadata
+                {
+                    Title = h.Title, Publisher = h.Publisher, Authors = h.Authors.ToArray(), Year = h.YearOfPublication,
+                    Language = h.Language, Type = h.Type, Price = h.Price, Protection = h.ProtectionScheme,
+                    Origin = h.Origin, Comments = h.Comments.ToArray()
+                };
+            }
         }
 
         public void Eject()
@@ -177,6 +206,7 @@ namespace Zero.Emulation.Tape
             _tapFileOpen = false;
             FileName = "";
             Title = "";
+            Metadata = new TapeMetadata();
             Changed?.Invoke();
         }
 

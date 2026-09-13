@@ -1,0 +1,91 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Zero.App.Windows.OptionsWindow"
+        Title="Options"
+        Icon="/Assets/zero.ico"
+        Width="560" Height="440"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <DockPanel Margin="12">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+      <Button x:Name="CancelButton" Content="Cancel" MinWidth="90" IsCancel="True" Click="OnCancel" />
+      <Button x:Name="OkButton" Content="OK" MinWidth="90" IsDefault="True" Click="OnOk" />
+    </StackPanel>
+    <TabControl x:Name="Tabs">
+      <TabItem Header="Folders">
+        <StackPanel Spacing="10" Margin="0,10,0,0">
+          <TextBlock Text="Relative paths are resolved from the folder Zero runs in." Foreground="#BBBBBB" />
+          <Grid ColumnDefinitions="110,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" x:Name="PathGrid">
+            <TextBlock Grid.Row="0" Text="ROMs" VerticalAlignment="Center" />
+            <TextBox Grid.Row="0" Grid.Column="1" x:Name="RomsPath" Margin="0,2" />
+            <Button Grid.Row="0" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomsPath" Click="OnBrowseFolder" />
+            <TextBlock Grid.Row="1" Text="Programs" VerticalAlignment="Center" />
+            <TextBox Grid.Row="1" Grid.Column="1" x:Name="ProgramsPath" Margin="0,2" />
+            <Button Grid.Row="1" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="ProgramsPath" Click="OnBrowseFolder" />
+            <TextBlock Grid.Row="2" Text="Saves" VerticalAlignment="Center" />
+            <TextBox Grid.Row="2" Grid.Column="1" x:Name="SavesPath" Margin="0,2" />
+            <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="SavesPath" Click="OnBrowseFolder" />
+            <TextBlock Grid.Row="3" Text="Screenshots" VerticalAlignment="Center" />
+            <TextBox Grid.Row="3" Grid.Column="1" x:Name="ScreenshotsPath" Margin="0,2" />
+            <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="ScreenshotsPath" Click="OnBrowseFolder" />
+          </Grid>
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="ROMs">
+        <StackPanel Spacing="10" Margin="0,10,0,0">
+          <TextBlock Text="ROM image for each machine, inside the ROMs folder. Changing one restarts that machine." Foreground="#BBBBBB" TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Text="Spectrum 48K" VerticalAlignment="Center" />
+            <TextBox Grid.Row="0" Grid.Column="1" x:Name="Rom48k" Margin="0,2" />
+            <Button Grid.Row="0" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom48k" Click="OnBrowseRom" />
+            <TextBlock Grid.Row="1" Text="Spectrum 128K" VerticalAlignment="Center" />
+            <TextBox Grid.Row="1" Grid.Column="1" x:Name="Rom128k" Margin="0,2" />
+            <Button Grid.Row="1" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128k" Click="OnBrowseRom" />
+            <TextBlock Grid.Row="2" Text="Spectrum 128Ke" VerticalAlignment="Center" />
+            <TextBox Grid.Row="2" Grid.Column="1" x:Name="Rom128ke" Margin="0,2" />
+            <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128ke" Click="OnBrowseRom" />
+            <TextBlock Grid.Row="3" Text="Spectrum +3" VerticalAlignment="Center" />
+            <TextBox Grid.Row="3" Grid.Column="1" x:Name="RomPlus3" Margin="0,2" />
+            <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPlus3" Click="OnBrowseRom" />
+            <TextBlock Grid.Row="4" Text="Pentagon 128K" VerticalAlignment="Center" />
+            <TextBox Grid.Row="4" Grid.Column="1" x:Name="RomPentagon" Margin="0,2" />
+            <Button Grid.Row="4" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPentagon" Click="OnBrowseRom" />
+          </Grid>
+          <TextBlock Text="The Pentagon also needs trdos.rom in the same folder." Foreground="#BBBBBB" />
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="Emulation">
+        <StackPanel Spacing="12" Margin="0,10,0,0">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="CPU speed multiplier" VerticalAlignment="Center" />
+            <NumericUpDown x:Name="CpuMultiplier" Minimum="1" Maximum="14" Increment="1" FormatString="0" Width="120" />
+            <TextBlock Text="(1 = original 3.5 MHz)" Foreground="#BBBBBB" VerticalAlignment="Center" />
+          </StackPanel>
+          <CheckBox x:Name="Use128ke" Content="Load 128K snapshots into the 128Ke (higher compatibility)" />
+          <CheckBox x:Name="PauseOnFocusLost" Content="Pause emulation when the window loses focus" />
+          <CheckBox x:Name="ConfirmOnExit" Content="Ask for confirmation before exiting" />
+          <CheckBox x:Name="RestoreSession" Content="Restore the previous session on start-up" />
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="Input">
+        <StackPanel Spacing="12" Margin="0,10,0,0">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="Gamepad 1 emulates" VerticalAlignment="Center" Width="140" />
+            <ComboBox x:Name="Gamepad1" Width="160" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="Gamepad 2 emulates" VerticalAlignment="Center" Width="140" />
+            <ComboBox x:Name="Gamepad2" Width="160" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="Cursor keys emulate" VerticalAlignment="Center" Width="140" />
+            <ComboBox x:Name="KeyJoy" Width="160" />
+            <CheckBox x:Name="KeyJoyEnabled" Content="Enabled" VerticalAlignment="Center" />
+          </StackPanel>
+          <CheckBox x:Name="KempstonPort1F" Content="Kempston interface decodes port 0x1F fully (more compatible)" />
+          <TextBlock x:Name="GamepadList" Foreground="#BBBBBB" TextWrapping="Wrap" />
+        </StackPanel>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</Window>

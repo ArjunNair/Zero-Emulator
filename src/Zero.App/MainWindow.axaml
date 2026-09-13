@@ -16,6 +16,7 @@
         <Separator />
         <MenuItem Header="_Save Snapshot…" x:Name="SaveSnapshotItem" Click="OnSaveSnapshot" />
         <MenuItem Header="Save S_creen (.scr)…" x:Name="SaveScreenItem" Click="OnSaveScreen" />
+        <MenuItem Header="_Options…" x:Name="OptionsItem" Click="OnOptions" />
         <Separator />
         <MenuItem Header="E_xit" Click="OnExit" />
       </MenuItem>

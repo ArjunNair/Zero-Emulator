@@ -43,6 +43,8 @@ namespace Zero.App.Windows
             bool inserted = tape.IsInserted;
 
             TitleText.Text = inserted ? tape.Title : "No tape inserted";
+            InfoText.Text = inserted ? DescribeMetadata(tape.Metadata) : "";
+            InfoText.IsVisible = !string.IsNullOrEmpty(InfoText.Text);
             EjectButton.IsEnabled = RewindButton.IsEnabled = PrevButton.IsEnabled = NextButton.IsEnabled = inserted;
             PlayButton.IsEnabled = inserted && !tape.IsPlaying;
             StopButton.IsEnabled = inserted && tape.IsPlaying;
@@ -70,6 +72,23 @@ namespace Zero.App.Windows
             StatusText.Text = !inserted ? "No tape in tape deck."
                 : tape.IsPlaying ? $"Playing block {tape.CurrentBlock + 1} of {blocks.Count}"
                 : $"Stopped at block {Math.Min(tape.CurrentBlock + 1, blocks.Count)} of {blocks.Count}";
+        }
+
+        internal static string DescribeMetadata(TapeMetadata m)
+        {
+            if (m == null || !m.HasDetails) return "";
+            var parts = new List<string>();
+            if (m.Authors.Count > 0) parts.Add("by " + string.Join(", ", m.Authors));
+            if (m.Publisher != null) parts.Add(m.Publisher);
+            if (m.Year != null) parts.Add(m.Year);
+            if (m.Type != null) parts.Add(m.Type);
+            if (m.Language != null) parts.Add(m.Language);
+            if (m.Price != null) parts.Add(m.Price);
+            if (m.Protection != null) parts.Add("protection: " + m.Protection);
+            if (m.Origin != null) parts.Add("origin: " + m.Origin);
+            string line = string.Join("  ·  ", parts);
+            if (m.Comments.Count > 0) line += (line.Length > 0 ? "\n" : "") + string.Join("\n", m.Comments);
+            return line;
         }
 
         private void OnInsert(object sender, RoutedEventArgs e) { if (_insert != null) _ = _insert(); }

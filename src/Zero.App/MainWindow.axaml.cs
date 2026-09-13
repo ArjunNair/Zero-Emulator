@@ -101,10 +101,32 @@ namespace Zero.App
             Display.Focus();
             if (!string.IsNullOrEmpty(_initialFile))
                 _session.LoadFile(Path.GetFullPath(_initialFile));
+            else if (_settings.Emulation.RestorePreviousSessionOnStart && File.Exists(SessionSnapshotPath))
+                _session.LoadFile(SessionSnapshotPath);
         }
 
-        private void OnClosing(object sender, WindowClosingEventArgs e)
+        private async void OnClosing(object sender, WindowClosingEventArgs e)
         {
+            if (!_closeConfirmed && _settings.Emulation.ConfirmOnExit && _session.IsRunning)
+            {
+                e.Cancel = true;
+                bool wasPaused = _session.IsPaused;
+                _session.Pause();
+                bool yes = await MessageDialog.ConfirmAsync(this, "Exit Zero", "Quit the emulator?", "Quit", "Cancel");
+                if (!yes) { if (!wasPaused) _session.Resume(); return; }
+                _closeConfirmed = true;
+                Close();
+                return;
+            }
+            if (_settings.Emulation.RestorePreviousSessionOnStart && _session.IsRunning)
+            {
+                try
+                {
+                    AppPaths.EnsureDirectory(AppPaths.ConfigDirectory);
+                    await _session.InvokeAsync(() => _session.Machine?.SaveSZX(SessionSnapshotPath));
+                }
+                catch { /* best effort */ }
+            }
             Zero.Emulation.Trace.Log("MainWindow.OnClosing");
             _statusTimer.Stop();
             _session.FrameReady -= OnFrameReady;
@@ -117,6 +139,29 @@ namespace Zero.App
         }
 
         private void OnExit(object sender, RoutedEventArgs e) => Close();
+
+        private bool _closeConfirmed;
+
+        private async void OnOptions(object sender, RoutedEventArgs e)
+        {
+            bool wasPaused = _session.IsPaused;
+            _session.Pause();
+            var dialog = new OptionsWindow(_settings, _session);
+            await dialog.ShowDialog(this);
+            if (dialog.Accepted)
+            {
+                _session.RomDirectory = AppPaths.Resolve(_settings.Paths.Roms, "roms");
+                _session.Post(() => _session.Tape.TapSavePath = Path.Combine(AppPaths.Resolve(_settings.Paths.Saves, "saves"), "zero_saved.tap"));
+                if (dialog.RomsChanged) _session.SwitchMachine(_session.Model);
+                else _session.ApplySettings();
+                RefreshMenuState();
+                try { _settings.Save(); } catch { }
+            }
+            if (!wasPaused) _session.Resume();
+            Display.Focus();
+        }
+
+        private static string SessionSnapshotPath => Path.Combine(AppPaths.ConfigDirectory, "last_session.szx");
 
         private Speccy.IAudioOutput CreateAudioOutput()
         {
@@ -218,6 +263,7 @@ namespace Zero.App
                 switch (e.Key)
                 {
                     case Key.O: _ = OpenFileAsync(); return true;
+                    case Key.OemComma: OnOptions(this, null); return true;
                     case Key.S: _ = SaveSnapshotAsync(); return true;
                     case Key.R: _session.Reset(shift); return true;
                     case Key.P: _session.TogglePause(); return true;
@@ -232,6 +278,7 @@ namespace Zero.App
         private void AssignGestures()
         {
             OpenItem.InputGesture = new KeyGesture(Key.O, CommandModifier);
+            OptionsItem.InputGesture = new KeyGesture(Key.OemComma, CommandModifier);
             SaveSnapshotItem.InputGesture = new KeyGesture(Key.S, CommandModifier);
             SaveScreenItem.InputGesture = new KeyGesture(Key.F12);
             ResetItem.InputGesture = new KeyGesture(Key.F9);
