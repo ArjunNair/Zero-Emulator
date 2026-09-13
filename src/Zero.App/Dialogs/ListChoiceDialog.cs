@@ -13,7 +13,7 @@ namespace Zero.App.Dialogs
         {
             string result = null;
             var list = new ListBox { ItemsSource = items, SelectedIndex = 0, MinWidth = 420, MaxHeight = 320 };
-            var ok = new Button { Content = "Open", MinWidth = 90, IsDefault = true };
+            var ok = new Button { Content = "Open", MinWidth = 90, IsDefault = true, Classes = { "accent" } };
             var cancel = new Button { Content = "Cancel", MinWidth = 90, IsCancel = true };
             var dialog = new Window
             {

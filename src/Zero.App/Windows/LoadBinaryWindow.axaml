@@ -6,7 +6,7 @@
         Width="480" SizeToContent="Height"
         CanResize="False"
         WindowStartupLocation="CenterOwner">
-  <StackPanel Margin="14" Spacing="10">
+  <StackPanel Margin="18" Spacing="10">
     <Grid ColumnDefinitions="*,Auto">
       <TextBox x:Name="FileBox" Watermark="File" />
       <Button Grid.Column="1" Content="Browse…" Margin="6,0,0,0" Click="OnBrowse" />
@@ -26,7 +26,7 @@
     <TextBlock x:Name="ErrorText" Foreground="#E06C75" TextWrapping="Wrap" IsVisible="False" />
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
       <Button x:Name="CancelButton" Content="Cancel" MinWidth="90" IsCancel="True" Click="OnCancel" />
-      <Button x:Name="GoButton" Content="Load" MinWidth="90" IsDefault="True" Click="OnGo" />
+      <Button x:Name="GoButton" Classes="accent" Content="Load" MinWidth="90" IsDefault="True" Click="OnGo" />
     </StackPanel>
   </StackPanel>
 </Window>

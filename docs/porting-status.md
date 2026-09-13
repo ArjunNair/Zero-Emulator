@@ -34,7 +34,10 @@ where the work stands and every place the implementation deliberately deviates f
   Spectrum keyboard window (original photo, keyword typer). Verified by headless UI tests with
   screenshots. The menu is a single NativeMenu tree: macOS shows it in the system menu bar (with About
   and Options in the application menu), Windows and Linux draw it in the window via NativeMenuBar.
-  Missing: file associations (packaging-level).
+  On macOS a style layer (`Styles/MacStyles.axaml`, applied only there) gives dialogs Mac conventions:
+  system font at 13 pt, compact rounded controls, small check boxes, segmented tabs, accent default
+  buttons; the theme follows the system light/dark appearance. Avalonia draws its own controls, so this
+  is convention, not native widgets. Missing: file associations (packaging-level).
 - **Phase 5** started. `dotnet publish` self-contained single-file works for all six RIDs
   (`packaging/README.md`); GitHub Actions workflow tests on three OSes and publishes artifacts;
   `packaging/macos/make-app.sh` builds `Zero.app`. Trimmed builds are 44 MB vs 109 MB and warning-free,

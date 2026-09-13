@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -219,6 +220,13 @@ namespace Zero.App.Tests
 {
     public class OptionsWindowTests
     {
+        internal static void Shoot(Window w, string name)
+        {
+            Dispatcher.UIThread.RunJobs();
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            using (var bmp = w.CaptureRenderedFrame()) bmp.Save(Path.Combine(MainWindowTests.ScreenshotDir, name + ".png"));
+        }
+
         [AvaloniaFact]
         public void Ok_writes_edits_back_and_flags_rom_changes()
         {
@@ -226,6 +234,10 @@ namespace Zero.App.Tests
             var w = new Windows.OptionsWindow(settings, null);
             w.Show();
             Dispatcher.UIThread.RunJobs();
+            Shoot(w, "options-folders");
+            w.Tabs.SelectedIndex = 2; Shoot(w, "options-emulation");
+            w.Tabs.SelectedIndex = 3; Shoot(w, "options-input");
+            w.Tabs.SelectedIndex = 0;
 
             w.CpuMultiplier.Value = 4;
             w.Gamepad2.SelectedIndex = 2;
@@ -290,6 +302,7 @@ namespace Zero.App.Tests
             var w = new Windows.GamepadWindow(settings, null, 1);
             w.Show();
             Dispatcher.UIThread.RunJobs();
+            OptionsWindowTests.Shoot(w, "gamepad");
             w.SetAction(Zero.Emulation.Input.GamepadButtons.Guide, "Key:Q");
             w.OkButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
             Dispatcher.UIThread.RunJobs();

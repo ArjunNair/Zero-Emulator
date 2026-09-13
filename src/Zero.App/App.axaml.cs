@@ -11,6 +11,8 @@ namespace Zero.App
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+                Styles.Add(new Avalonia.Markup.Xaml.Styling.StyleInclude(new Uri("avares://Zero/")) { Source = new Uri("avares://Zero/Styles/MacStyles.axaml") });
         }
 
         public override void OnFrameworkInitializationCompleted()

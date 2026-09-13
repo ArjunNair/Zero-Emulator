@@ -11,7 +11,7 @@ namespace Zero.App.Dialogs
     {
         public static Task ShowAsync(Window owner, string title, string message)
         {
-            var ok = new Button { Content = "OK", MinWidth = 90, HorizontalAlignment = HorizontalAlignment.Right, IsDefault = true, IsCancel = true };
+            var ok = new Button { Content = "OK", MinWidth = 90, HorizontalAlignment = HorizontalAlignment.Right, IsDefault = true, IsCancel = true, Classes = { "accent" } };
             var dialog = new Window
             {
                 Title = title,
@@ -25,6 +25,7 @@ namespace Zero.App.Dialogs
                     Spacing = 16,
                     Children =
                     {
+                        new TextBlock { Text = title, FontWeight = FontWeight.Bold, FontSize = 14 },
                         new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap, MaxWidth = 500 },
                         ok
                     }
@@ -37,7 +38,7 @@ namespace Zero.App.Dialogs
         public static async Task<bool> ConfirmAsync(Window owner, string title, string message, string yes = "Yes", string no = "No")
         {
             bool result = false;
-            var yesButton = new Button { Content = yes, MinWidth = 90, IsDefault = true };
+            var yesButton = new Button { Content = yes, MinWidth = 90, IsDefault = true, Classes = { "accent" } };
             var noButton = new Button { Content = no, MinWidth = 90, IsCancel = true };
             var dialog = new Window
             {
@@ -51,6 +52,7 @@ namespace Zero.App.Dialogs
                     Spacing = 16,
                     Children =
                     {
+                        new TextBlock { Text = title, FontWeight = FontWeight.Bold, FontSize = 14 },
                         new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap, MaxWidth = 500 },
                         new StackPanel
                         {
