@@ -395,8 +395,7 @@ namespace Zero.App.Tests
             MainWindow.SettingsLoader = () => { var s = new EmulatorSettings(); s.Paths.Roms = TestPaths.RomDir; s.Emulation.PauseOnFocusLost = false; s.Audio.Mute = true; return s; };
         }
 
-        private static void Click(Avalonia.Controls.MenuItem item) =>
-            item.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.MenuItem.ClickEvent));
+        private static void Click(Avalonia.Controls.NativeMenuItem item) => item.Command.Execute(null);
 
         [AvaloniaFact]
         public void Check_marks_follow_the_clicked_speed_palette_and_mute_items_immediately()
@@ -417,7 +416,6 @@ namespace Zero.App.Tests
             Assert.True(w.PaletteGray.IsChecked); Assert.False(w.PaletteNormal.IsChecked);
 
             Assert.True(w.MuteItem.IsChecked);
-            w.MuteItem.IsChecked = false; // the toggle flips before Click fires, as it does for a real click
             Click(w.MuteItem);
             Assert.False(w.MuteItem.IsChecked);
             Assert.False(w.Session.Settings.Audio.Mute);

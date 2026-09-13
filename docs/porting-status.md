@@ -32,7 +32,9 @@ where the work stands and every place the implementation deliberately deviates f
   gamepad button remapping (any button to fire/direction/Spectrum key, live highlight) and a Kempston
   mouse (click the screen to capture, Esc releases), Load/Save Binary by address or RAM bank, and the
   Spectrum keyboard window (original photo, keyword typer). Verified by headless UI tests with
-  screenshots. Missing: macOS native menu bar, file associations.
+  screenshots. The menu is a single NativeMenu tree: macOS shows it in the system menu bar (with About
+  and Options in the application menu), Windows and Linux draw it in the window via NativeMenuBar.
+  Missing: file associations (packaging-level).
 - **Phase 5** started. `dotnet publish` self-contained single-file works for all six RIDs
   (`packaging/README.md`); GitHub Actions workflow tests on three OSes and publishes artifacts;
   `packaging/macos/make-app.sh` builds `Zero.app`. Trimmed builds are 44 MB vs 109 MB and warning-free,

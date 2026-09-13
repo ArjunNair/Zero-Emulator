@@ -71,10 +71,11 @@ namespace Zero.App
             _session.Tape.Changed += () => Dispatcher.UIThread.Post(RefreshTapeStatus);
             _session.Tape.BlockSaved += path => Dispatcher.UIThread.Post(() => SetStatus("Saved block to " + Path.GetFileName(path)));
 
+            NativeMenu.SetMenu(this, BuildMenu());
+            if (IsMac && Application.Current != null) NativeMenu.SetMenu(Application.Current, BuildAppMenu());
             ApplyViewSettings();
             RefreshMenuState();
             RebuildRecentMenu();
-            AssignGestures();
 
             // Keys go to the emulator before any control (menus in particular) can swallow them.
             AddHandler(KeyDownEvent, OnWindowKeyDown, RoutingStrategies.Tunnel);
@@ -146,28 +147,7 @@ namespace Zero.App
             Zero.Emulation.Trace.Log("MainWindow.OnClosing: done");
         }
 
-        private void OnExit(object sender, RoutedEventArgs e) => Close();
-
         private bool _closeConfirmed;
-
-        private async void OnOptions(object sender, RoutedEventArgs e)
-        {
-            bool wasPaused = _session.IsPaused;
-            _session.Pause();
-            var dialog = new OptionsWindow(_settings, _session);
-            await dialog.ShowDialog(this);
-            if (dialog.Accepted)
-            {
-                _session.RomDirectory = AppPaths.Resolve(_settings.Paths.Roms, "roms");
-                _session.Post(() => _session.Tape.TapSavePath = Path.Combine(AppPaths.Resolve(_settings.Paths.Saves, "saves"), "zero_saved.tap"));
-                if (dialog.RomsChanged) _session.SwitchMachine(_session.Model);
-                else _session.ApplySettings();
-                RefreshMenuState();
-                try { _settings.Save(); } catch { }
-            }
-            if (!wasPaused) _session.Resume();
-            Display.Focus();
-        }
 
         private static string SessionSnapshotPath => Path.Combine(AppPaths.ConfigDirectory, "last_session.szx");
 
@@ -207,14 +187,12 @@ namespace Zero.App
         private void OnWindowKeyDown(object sender, KeyEventArgs e)
         {
             if (HandleShortcut(e)) { e.Handled = true; return; }
-            if (MainMenu.IsOpen) return;
             if ((e.KeyModifiers & CommandModifier) != 0 && !IsMac) return; // leave Ctrl+? shortcuts alone on Win/Linux only when unmapped... (Ctrl is symbol shift)
             ForwardKey(e, true);
         }
 
         private void OnWindowKeyUp(object sender, KeyEventArgs e)
         {
-            if (MainMenu.IsOpen) return;
             ForwardKey(e, false);
         }
 
@@ -257,11 +235,11 @@ namespace Zero.App
             {
                 case Key.F3: _ = OpenFileAsync(); return true;
                 case Key.F2: _ = SaveSnapshotAsync(); return true;
-                case Key.F1: OnKeyboardWindow(this, null); return true;
-                case Key.F4: OnShowTapeDeck(this, null); return true;
+                case Key.F1: ShowKeyboardWindow(); return true;
+                case Key.F4: ShowTapeDeck(); return true;
                 case Key.F5: ToggleTape(); return true;
                 case Key.F6: _session.Post(_session.Tape.Rewind); return true;
-                case Key.F7: _session.TogglePause(); return true;
+                case Key.F7: TogglePause(); return true;
                 case Key.F8: SetMute(!_settings.Audio.Mute); return true;
                 case Key.F9: _session.Reset(shift); return true;
                 case Key.F11: ToggleFullScreen(); return true;
@@ -273,33 +251,16 @@ namespace Zero.App
                 switch (e.Key)
                 {
                     case Key.O: _ = OpenFileAsync(); return true;
-                    case Key.OemComma: OnOptions(this, null); return true;
+                    case Key.OemComma: _ = ShowOptionsAsync(); return true;
                     case Key.S: _ = SaveSnapshotAsync(); return true;
                     case Key.R: _session.Reset(shift); return true;
-                    case Key.P: _session.TogglePause(); return true;
+                    case Key.P: TogglePause(); return true;
                     case Key.M: SetMute(!_settings.Audio.Mute); return true;
                     case Key.F: ToggleFullScreen(); return true;
                     case Key.Q: if (IsMac) { Close(); return true; } break;
                 }
             }
             return false;
-        }
-
-        private void AssignGestures()
-        {
-            OpenItem.InputGesture = new KeyGesture(Key.O, CommandModifier);
-            OptionsItem.InputGesture = new KeyGesture(Key.OemComma, CommandModifier);
-            SaveSnapshotItem.InputGesture = new KeyGesture(Key.S, CommandModifier);
-            SaveScreenItem.InputGesture = new KeyGesture(Key.F12);
-            ResetItem.InputGesture = new KeyGesture(Key.F9);
-            HardResetItem.InputGesture = new KeyGesture(Key.F9, KeyModifiers.Shift);
-            PauseItem.InputGesture = new KeyGesture(Key.F7);
-            TapePlayItem.InputGesture = new KeyGesture(Key.F5);
-            TapeDeckItem.InputGesture = new KeyGesture(Key.F4);
-            KeyboardItem.InputGesture = new KeyGesture(Key.F1);
-            TapeRewindItem.InputGesture = new KeyGesture(Key.F6);
-            MuteItem.InputGesture = new KeyGesture(Key.F8);
-            FullScreenItem.InputGesture = new KeyGesture(Key.F11);
         }
 
         // ------------------------------------------------------------------ Kempston mouse
@@ -358,22 +319,6 @@ namespace Zero.App
             Display.Cursor = Cursor.Default;
             _session.Mouse.SetButton(Emulation.Input.MouseState.LeftButton | Emulation.Input.MouseState.RightButton, false);
             SetStatus("Mouse released.");
-        }
-
-        private void OnToggleMouse(object sender, RoutedEventArgs e)
-        {
-            _settings.Input.EnableKempstonMouse = MouseItem.IsChecked;
-            if (!_settings.Input.EnableKempstonMouse) ReleaseMouse();
-            _session.ApplySettings();
-            RefreshMenuState();
-        }
-
-        private async void OnConfigureGamepads(object sender, RoutedEventArgs e)
-        {
-            var dialog = new GamepadWindow(_settings, _session, 0);
-            await dialog.ShowDialog(this);
-            if (dialog.Accepted) { try { _settings.Save(); } catch { } }
-            Display.Focus();
         }
 
         // ------------------------------------------------------------------ drag & drop
@@ -472,11 +417,6 @@ namespace Zero.App
             return Dispatcher.UIThread.InvokeAsync(() => ListChoiceDialog.ShowAsync(this, "Open Archive", "This archive contains several files. Which one do you want to open?", entries)).GetAwaiter().GetResult();
         }
 
-        private void OnOpen(object sender, RoutedEventArgs e) => _ = OpenFileAsync();
-
-        private async void OnLoadBinary(object sender, RoutedEventArgs e) => await RunBinaryDialog(false);
-        private async void OnSaveBinary(object sender, RoutedEventArgs e) => await RunBinaryDialog(true);
-
         private async Task RunBinaryDialog(bool save)
         {
             bool wasPaused = _session.IsPaused;
@@ -491,78 +431,9 @@ namespace Zero.App
 
         private KeyboardWindow _keyboardWindow;
 
-        private void OnKeyboardWindow(object sender, RoutedEventArgs e)
-        {
-            if (_keyboardWindow == null)
-            {
-                _keyboardWindow = new KeyboardWindow(_session);
-                _keyboardWindow.Closed += (_, __) => _keyboardWindow = null;
-                _keyboardWindow.Show(this);
-            }
-            else _keyboardWindow.Activate();
-        }
-        private void OnSaveSnapshot(object sender, RoutedEventArgs e) => _ = SaveSnapshotAsync();
-        private void OnSaveScreen(object sender, RoutedEventArgs e) => _ = SaveScreenAsync();
-
-        private void RebuildRecentMenu()
-        {
-            RecentMenu.Items.Clear();
-            foreach (string path in _settings.RecentFiles.Where(File.Exists).Take(EmulatorSettings.MaxRecentFiles))
-            {
-                var item = new MenuItem { Header = Path.GetFileName(path), Tag = path };
-                ToolTip.SetTip(item, path);
-                item.Click += (_, __) => _session.LoadFile((string)((MenuItem)_).Tag);
-                RecentMenu.Items.Add(item);
-            }
-            if (RecentMenu.Items.Count == 0)
-                RecentMenu.Items.Add(new MenuItem { Header = "(empty)", IsEnabled = false });
-        }
-
         // ------------------------------------------------------------------ machine menu
 
-        private void OnSelectMachine(object sender, RoutedEventArgs e)
-        {
-            if (Enum.TryParse(((MenuItem)sender).Tag as string, out MachineModel model))
-                _session.SwitchMachine(model);
-            RefreshMenuState();
-        }
-
-        private void OnReset(object sender, RoutedEventArgs e) => _session.Reset(false);
-        private void OnHardReset(object sender, RoutedEventArgs e) => _session.Reset(true);
-        private void OnTogglePause(object sender, RoutedEventArgs e) { _session.TogglePause(); RefreshMenuState(); }
-
-        private void OnSelectSpeed(object sender, RoutedEventArgs e)
-        {
-            _session.SetSpeed(int.Parse((string)((MenuItem)sender).Tag));
-            RefreshMenuState();
-        }
-
-        private void OnToggleLateTimings(object sender, RoutedEventArgs e)
-        {
-            _settings.Emulation.LateTimings = LateTimingsItem.IsChecked;
-            _session.SwitchMachine(_session.Model); // timing model is fixed at construction
-        }
-
-        private void OnToggleIssue2(object sender, RoutedEventArgs e)
-        {
-            _settings.Emulation.UseIssue2Keyboard = Issue2Item.IsChecked;
-            _session.ApplySettings();
-        }
-
         // ------------------------------------------------------------------ tape menu
-
-        private void OnShowTapeDeck(object sender, RoutedEventArgs e)
-        {
-            if (_tapeDeckWindow == null)
-            {
-                _tapeDeckWindow = new TapeDeckWindow(_session, InsertTapeAsync);
-                _tapeDeckWindow.Closed += (_, __) => _tapeDeckWindow = null;
-                _tapeDeckWindow.Show(this);
-            }
-            else _tapeDeckWindow.Activate();
-        }
-
-        private void OnInsertTape(object sender, RoutedEventArgs e) => _ = InsertTapeAsync();
 
         private async Task InsertTapeAsync()
         {
@@ -578,12 +449,78 @@ namespace Zero.App
             Display.Focus();
         }
 
-        private void OnEjectTape(object sender, RoutedEventArgs e) => _session.Post(_session.Tape.Eject);
-        private void OnTapePlay(object sender, RoutedEventArgs e) => _session.Post(_session.Tape.Play);
-        private void OnTapeStop(object sender, RoutedEventArgs e) => _session.Post(_session.Tape.Stop);
-        private void OnTapeRewind(object sender, RoutedEventArgs e) => _session.Post(_session.Tape.Rewind);
-        private void OnTapePrev(object sender, RoutedEventArgs e) => _session.Post(_session.Tape.PreviousBlock);
-        private void OnTapeNext(object sender, RoutedEventArgs e) => _session.Post(_session.Tape.NextBlock);
+        private void ShowTapeDeck()
+        {
+            if (_tapeDeckWindow == null)
+            {
+                _tapeDeckWindow = new TapeDeckWindow(_session, InsertTapeAsync);
+                _tapeDeckWindow.Closed += (_, __) => _tapeDeckWindow = null;
+                _tapeDeckWindow.Show(this);
+            }
+            else _tapeDeckWindow.Activate();
+        }
+
+        private void ShowKeyboardWindow()
+        {
+            if (_keyboardWindow == null)
+            {
+                _keyboardWindow = new KeyboardWindow(_session);
+                _keyboardWindow.Closed += (_, __) => _keyboardWindow = null;
+                _keyboardWindow.Show(this);
+            }
+            else _keyboardWindow.Activate();
+        }
+
+        private async Task ShowOptionsAsync()
+        {
+            bool wasPaused = _session.IsPaused;
+            _session.Pause();
+            var dialog = new OptionsWindow(_settings, _session);
+            await dialog.ShowDialog(this);
+            if (dialog.Accepted)
+            {
+                _session.RomDirectory = AppPaths.Resolve(_settings.Paths.Roms, "roms");
+                _session.Post(() => _session.Tape.TapSavePath = Path.Combine(AppPaths.Resolve(_settings.Paths.Saves, "saves"), "zero_saved.tap"));
+                if (dialog.RomsChanged) _session.SwitchMachine(_session.Model);
+                else _session.ApplySettings();
+                RefreshMenuState();
+                try { _settings.Save(); } catch { }
+            }
+            if (!wasPaused) _session.Resume();
+            Display.Focus();
+        }
+
+        private async Task SetTapSaveTargetAsync()
+        {
+            string path = await PickSaveFileAsync("TAP file for SAVE", "zero_saved.tap", "tap", "TAP tape");
+            if (path != null)
+            {
+                _session.Post(() => _session.Tape.TapSavePath = path);
+                SetStatus("SAVE output goes to " + Path.GetFileName(path));
+            }
+        }
+
+        private async Task ConfigureGamepadsAsync()
+        {
+            var dialog = new GamepadWindow(_settings, _session, 0);
+            await dialog.ShowDialog(this);
+            if (dialog.Accepted) { try { _settings.Save(); } catch { } }
+            Display.Focus();
+        }
+
+        private void ShowShortcutsHelp() => _ = MessageDialog.ShowAsync(this, "Keyboard Shortcuts",
+            "Shift = Caps Shift, Ctrl = Symbol Shift.\n" +
+            "Type LOAD \"\": press J, then Ctrl+P twice. Shift+Ctrl = Extended mode.\n" +
+            "PC punctuation keys (, . ; \" - = etc.) type the matching Spectrum symbol directly.\n\n" +
+            "F1 Spectrum keyboard   F3 Open   F2 Save snapshot   F12 Save screen\n" +
+            "F4 Tape deck   F5 Tape play/stop   F6 Rewind   F7 Pause   F8 Mute\n" +
+            "F9 Reset   Shift+F9 Hard reset   F11 Full screen\n" +
+            (IsMac ? "Cmd+O / Cmd+S / Cmd+R / Cmd+P / Cmd+M / Cmd+F do the same." : ""));
+
+        private void ShowAbout() => _ = MessageDialog.ShowAsync(this, "About Zero",
+            "Zero — a ZX Spectrum emulator\nCopyright © 2009-2026 Arjun Nair\n\n" +
+            "Cross-platform build: .NET " + Environment.Version + ", Avalonia UI, SDL3 audio & gamepads.\n" +
+            "Emulates the 48K, 128K, 128Ke, +3 (no disk) and Pentagon 128K.");
 
         private void ToggleTape()
         {
@@ -594,59 +531,9 @@ namespace Zero.App
             });
         }
 
-        private void OnTapeOption(object sender, RoutedEventArgs e)
-        {
-            _settings.Tape.AutoLoad = TapeAutoLoadItem.IsChecked;
-            _settings.Tape.AutoPlay = TapeAutoPlayItem.IsChecked;
-            _settings.Tape.EdgeLoad = TapeEdgeLoadItem.IsChecked;
-            _settings.Tape.FastLoad = TapeFastLoadItem.IsChecked;
-            _settings.Tape.RomTraps = TapeRomTrapsItem.IsChecked;
-            _session.ApplySettings();
-        }
-
-        private async void OnSetTapSaveTarget(object sender, RoutedEventArgs e)
-        {
-            string path = await PickSaveFileAsync("TAP file for SAVE", "zero_saved.tap", "tap", "TAP tape");
-            if (path != null)
-            {
-                _session.Post(() => _session.Tape.TapSavePath = path);
-                SetStatus("SAVE output goes to " + Path.GetFileName(path));
-            }
-        }
-
         // ------------------------------------------------------------------ sound menu
 
-        private void OnToggleMute(object sender, RoutedEventArgs e) => SetMute(MuteItem.IsChecked);
-
-        private void SetMute(bool mute)
-        {
-            _session.SetMute(mute);
-            RefreshMenuState();
-        }
-
-        private void OnSelectVolume(object sender, RoutedEventArgs e) => _session.SetVolume(int.Parse((string)((MenuItem)sender).Tag));
-
-        private void OnToggleAy48k(object sender, RoutedEventArgs e)
-        {
-            _settings.Audio.EnableAYFor48K = Ay48kItem.IsChecked;
-            _session.ApplySettings();
-        }
-
-        private void OnSelectStereo(object sender, RoutedEventArgs e)
-        {
-            _settings.Audio.StereoSoundMode = int.Parse((string)((MenuItem)sender).Tag);
-            _session.ApplySettings();
-            RefreshMenuState();
-        }
-
         // ------------------------------------------------------------------ view menu
-
-        private void OnSelectScale(object sender, RoutedEventArgs e)
-        {
-            _settings.Render.WindowScale = int.Parse((string)((MenuItem)sender).Tag);
-            if (WindowState == WindowState.FullScreen) return;
-            ApplyWindowScale();
-        }
 
         private void ApplyWindowScale()
         {
@@ -660,8 +547,6 @@ namespace Zero.App
             Width = w;
             Height = h + chrome;
         }
-
-        private void OnToggleFullScreen(object sender, RoutedEventArgs e) => ToggleFullScreen();
 
         private void ToggleFullScreen()
         {
@@ -679,30 +564,6 @@ namespace Zero.App
             RefreshMenuState();
         }
 
-        private void OnToggleSmoothing(object sender, RoutedEventArgs e)
-        {
-            _settings.Render.PixelSmoothing = SmoothingItem.IsChecked;
-            Display.Smooth = _settings.Render.PixelSmoothing;
-        }
-
-        private void OnToggleIntegerScaling(object sender, RoutedEventArgs e)
-        {
-            Display.IntegerScaling = IntegerScalingItem.IsChecked;
-        }
-
-        private void OnSelectBorder(object sender, RoutedEventArgs e)
-        {
-            _settings.Render.BorderCrop = int.Parse((string)((MenuItem)sender).Tag);
-            Display.BorderCrop = _settings.Render.BorderCrop;
-            RefreshMenuState();
-        }
-
-        private void OnSelectPalette(object sender, RoutedEventArgs e)
-        {
-            _session.SetPalette((string)((MenuItem)sender).Tag);
-            RefreshMenuState();
-        }
-
         private void ApplyViewSettings()
         {
             Display.Smooth = _settings.Render.PixelSmoothing;
@@ -714,51 +575,6 @@ namespace Zero.App
             if (_settings.Render.FullScreen) WindowState = WindowState.FullScreen;
         }
 
-        // ------------------------------------------------------------------ input menu
-
-        private void OnToggleKeyJoy(object sender, RoutedEventArgs e)
-        {
-            _settings.Input.EnableKeyboardJoystick = KeyJoyItem.IsChecked;
-            _session.ApplySettings();
-        }
-
-        private void OnSelectKeyJoyType(object sender, RoutedEventArgs e)
-        {
-            _settings.Input.KeyboardJoystickType = int.Parse((string)((MenuItem)sender).Tag);
-            _session.ApplySettings();
-            RefreshMenuState();
-        }
-
-        private void OnSelectPad1Type(object sender, RoutedEventArgs e)
-        {
-            _settings.Input.Gamepad1Emulates = int.Parse((string)((MenuItem)sender).Tag);
-            _session.ApplySettings();
-            RefreshMenuState();
-        }
-
-        private void OnToggleKempstonPort(object sender, RoutedEventArgs e)
-        {
-            _settings.Input.KempstonUsesPort1F = KempstonPortItem.IsChecked;
-            _session.ApplySettings();
-        }
-
-        private void OnTogglePauseOnFocus(object sender, RoutedEventArgs e) => _settings.Emulation.PauseOnFocusLost = PauseOnFocusItem.IsChecked;
-
-        // ------------------------------------------------------------------ help
-
-        private void OnKeyboardHelp(object sender, RoutedEventArgs e) => _ = MessageDialog.ShowAsync(this, "Keyboard",
-            "Shift = Caps Shift, Ctrl = Symbol Shift.\n" +
-            "Type LOAD \"\": press J, then Ctrl+P twice. Shift+Ctrl = Extended mode.\n" +
-            "PC punctuation keys (, . ; \" - = etc.) type the matching Spectrum symbol directly.\n\n" +
-            "F1 Spectrum keyboard   F3 Open   F2 Save snapshot   F12 Save screen\n" +
-            "F4 Tape deck   F5 Tape play/stop   F6 Rewind   F7 Pause   F8 Mute\n" +
-            "F9 Reset   Shift+F9 Hard reset   F11 Full screen\n" +
-            (IsMac ? "Cmd+O / Cmd+S / Cmd+R / Cmd+P / Cmd+M / Cmd+F do the same." : ""));
-
-        private void OnAbout(object sender, RoutedEventArgs e) => _ = MessageDialog.ShowAsync(this, "About Zero",
-            "Zero — a ZX Spectrum emulator\nCopyright © 2009-2026 Arjun Nair\n\n" +
-            "Cross-platform build: .NET " + Environment.Version + ", Avalonia UI, SDL3 audio & gamepads.\n" +
-            "Emulates the 48K, 128K, 128Ke, +3 (no disk) and Pentagon 128K.");
 
         // ------------------------------------------------------------------ status
 
@@ -792,52 +608,5 @@ namespace Zero.App
             else StatusTape.Text = $"{tape.Title}: {(tape.IsPlaying ? "playing" : "stopped")} block {Math.Min(tape.CurrentBlock + 1, Math.Max(1, tape.Blocks.Count))}/{tape.Blocks.Count}";
         }
 
-        private void RefreshMenuState()
-        {
-            MachineModel model = _session.Model;
-            Machine48k.IsChecked = model == MachineModel._48k;
-            Machine128k.IsChecked = model == MachineModel._128k;
-            Machine128ke.IsChecked = model == MachineModel._128ke;
-            MachinePlus3.IsChecked = model == MachineModel._plus3;
-            MachinePentagon.IsChecked = model == MachineModel._pentagon;
-            StatusMachine.Text = MachineFactory.DisplayName(model) + (_session.State == EmulatorState.PlayingRzx ? "  ▶ RZX" : "");
-
-            PauseItem.IsChecked = _session.IsPaused;
-            int speed = _settings.Emulation.EmulationSpeed;
-            Speed1.IsChecked = speed == 1; Speed2.IsChecked = speed == 2; Speed4.IsChecked = speed == 4; Speed10.IsChecked = speed == 10;
-            LateTimingsItem.IsChecked = _settings.Emulation.LateTimings;
-            Issue2Item.IsChecked = _settings.Emulation.UseIssue2Keyboard;
-
-            TapeAutoLoadItem.IsChecked = _settings.Tape.AutoLoad;
-            TapeAutoPlayItem.IsChecked = _settings.Tape.AutoPlay;
-            TapeEdgeLoadItem.IsChecked = _settings.Tape.EdgeLoad;
-            TapeFastLoadItem.IsChecked = _settings.Tape.FastLoad;
-            TapeRomTrapsItem.IsChecked = _settings.Tape.RomTraps;
-
-            MuteItem.IsChecked = _settings.Audio.Mute;
-            Ay48kItem.IsChecked = _settings.Audio.EnableAYFor48K;
-            StereoMono.IsChecked = _settings.Audio.StereoSoundMode == 0;
-            StereoAcb.IsChecked = _settings.Audio.StereoSoundMode == 1;
-            StereoAbc.IsChecked = _settings.Audio.StereoSoundMode == 2;
-
-            FullScreenItem.IsChecked = WindowState == WindowState.FullScreen;
-            SmoothingItem.IsChecked = _settings.Render.PixelSmoothing;
-            IntegerScalingItem.IsChecked = Display.IntegerScaling;
-            BorderFull.IsChecked = _settings.Render.BorderCrop == 0;
-            BorderMedium.IsChecked = _settings.Render.BorderCrop == 24;
-            BorderNone.IsChecked = _settings.Render.BorderCrop >= 48;
-            PaletteNormal.IsChecked = _settings.Render.Palette == "Normal";
-            PaletteGray.IsChecked = _settings.Render.Palette == "Grayscale";
-            PaletteUlaPlus.IsChecked = _settings.Render.Palette == "ULA Plus";
-
-            KeyJoyItem.IsChecked = _settings.Input.EnableKeyboardJoystick;
-            int kj = _settings.Input.KeyboardJoystickType;
-            KeyJoyKempston.IsChecked = kj == 1; KeyJoySinclair1.IsChecked = kj == 2; KeyJoySinclair2.IsChecked = kj == 3; KeyJoyCursor.IsChecked = kj == 4;
-            int p1 = _settings.Input.Gamepad1Emulates;
-            Pad1None.IsChecked = p1 == 0; Pad1Kempston.IsChecked = p1 == 1; Pad1Sinclair1.IsChecked = p1 == 2; Pad1Sinclair2.IsChecked = p1 == 3; Pad1Cursor.IsChecked = p1 == 4;
-            KempstonPortItem.IsChecked = _settings.Input.KempstonUsesPort1F;
-            MouseItem.IsChecked = _settings.Input.EnableKempstonMouse;
-            PauseOnFocusItem.IsChecked = _settings.Emulation.PauseOnFocusLost;
-        }
     }
 }
