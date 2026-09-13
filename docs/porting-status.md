@@ -12,10 +12,8 @@ where the work stands and every place the implementation deliberately deviates f
 | `src/Zero.Emulation` | Host-neutral session: emulation thread, frame hand-off, input, tape deck, file loading, settings | net10.0 |
 | `src/Zero.Sdl` | SDL3 audio output + gamepads (ppy.SDL3-CS ships the natives) | net10.0 |
 | `src/Zero.App` | Avalonia desktop shell | net10.0 |
-| `Ziggy/ZiggySound`, `ZiggyWin` | Legacy DirectSound/WinForms shell, compile-only reference | net10.0-windows |
 | `tests/Zero.Core.Tests` | xunit v2: zexall, machine boot, TAP, session, RZX | |
 | `tests/Zero.App.Tests` | xunit v3 + Avalonia.Headless: real window, real key events, PNG screenshots | |
-| `lib/mdx` | Managed DirectX + Microsoft.VisualC reference assemblies (compile-time only) | |
 
 ## Phase status
 
@@ -43,11 +41,11 @@ where the work stands and every place the implementation deliberately deviates f
 1. **Speccy depended on DirectSound, not just WinForms.** `zx_spectrum` constructed
    `ZeroSound.SoundManager` directly. Fixed in phase 0 by introducing `Speccy.IAudioOutput`, passed into
    every machine constructor. Any host can now supply audio.
-2. **Managed DirectX cannot run on .NET 8** (it is a .NET 1.1 mixed-mode assembly). So the plan's "WinForms
-   app still runs" gate for phases 0–3 is unreachable on .NET 8; `ZeroWin` is kept *compiling* only, as a
-   diff reference. The runnable baseline is the original `master` on .NET Framework. Consequently the
-   host abstraction was not implemented over DirectX first; it went straight to SDL3 + Avalonia, verified
-   through headless tests instead of the WinForms app.
+2. **Managed DirectX cannot run on modern .NET** (it is a .NET 1.1 mixed-mode assembly). So the plan's
+   "WinForms app still runs" gate for phases 0–3 was unreachable; `ZeroWin` was kept compiling as a diff
+   reference until the Avalonia shell worked, then deleted along with `ZiggySound` and `lib/mdx`
+   (2026-09-13). The WinForms sources remain on `master` for reference when porting the remaining
+   dialogs. The host abstraction went straight to SDL3 + Avalonia, verified through headless tests.
 3. **Avalonia 12, not 11.** Avalonia 12.1 is current (Sept 2026); 11.x is no longer the supported line.
    The only 12-specific API touched so far is drag-and-drop (`DataTransfer`).
 4. **`RZXFile` used `Application.LocalUserAppDataPath`** (WinForms) for temp files; now `Path.GetTempPath()`.

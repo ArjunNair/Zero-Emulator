@@ -13,9 +13,7 @@
     <Product>Zero</Product>
     <Copyright>Copyright © 2009-2026 Arjun Nair</Copyright>
     <!-- Legacy code base: silence noise that predates the port. Tighten later. -->
-    <NoWarn>$(NoWarn);CS0108;CS0114;CS0162;CS0168;CS0169;CS0219;CS0414;CS0618;CS0649;CS0652;CS0659;CS0661;CS1717;CS8981;SYSLIB0011;SYSLIB0014;CA1416</NoWarn>
-    <!-- Lets the net8.0-windows WinForms project compile on macOS/Linux CI (it can only run on Windows). -->
-    <EnableWindowsTargeting Condition="!$([MSBuild]::IsOSPlatform('Windows'))">true</EnableWindowsTargeting>
+    <NoWarn>$(NoWarn);CS0108;CS0114;CS0162;CS0168;CS0169;CS0219;CS0414;CS0618;CS0649;CS0652;CS0659;CS0661;CS1717;CS8981;SYSLIB0011;SYSLIB0014</NoWarn>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 </Project>
