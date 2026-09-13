@@ -58,7 +58,8 @@ where the work stands and every place the implementation deliberately deviates f
 ## Known gaps / v1 cut list (unchanged from the plan)
 
 TZX/CSW tapes (converter needed), +3 and TR-DOS disks (managed FDCs needed), debugger, library browser,
-BASIC importer (relied on a Windows `zmakebas.exe`), file associations.
+BASIC importer (the old one shelled out to a Windows-only `zmakebas.exe`, now removed; a C# port of
+zmakebas next to `TapFile` is the natural v1.1 replacement), file associations.
 
 ## Verifying
 
