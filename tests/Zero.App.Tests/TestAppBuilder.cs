@@ -3,6 +3,7 @@ using Avalonia.Headless;
 using Zero.App.Tests;
 
 [assembly: AvaloniaTestApplication(typeof(TestAppBuilder))]
+[assembly: Xunit.CollectionBehavior(DisableTestParallelization = true)]
 
 namespace Zero.App.Tests
 {
