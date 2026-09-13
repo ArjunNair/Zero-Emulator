@@ -8,7 +8,7 @@ The philosophy behind Zero is to provide a highly accurate emulation of the vari
 
 ## Cross-platform build (branch `crossplatform`)
 
-Zero now builds and runs on Windows, macOS (Intel and Apple Silicon) and Linux with .NET 8, Avalonia and SDL3.
+Zero now builds and runs on Windows, macOS (Intel and Apple Silicon) and Linux with .NET 10, Avalonia and SDL3.
 
 ```bash
 dotnet run --project src/Zero.App          # run the emulator

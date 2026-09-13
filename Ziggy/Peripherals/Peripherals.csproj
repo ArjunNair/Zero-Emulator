@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(ZeroTargetFramework)</TargetFramework>
     <AssemblyName>Peripherals</AssemblyName>
     <RootNamespace>Peripherals</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

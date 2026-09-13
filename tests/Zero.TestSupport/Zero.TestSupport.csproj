@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Helpers shared by the xunit v2 (core) and xunit v3 (Avalonia headless) test projects. -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(ZeroTargetFramework)</TargetFramework>
     <RootNamespace>Zero.TestSupport</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

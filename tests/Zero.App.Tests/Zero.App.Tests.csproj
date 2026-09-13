@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Avalonia.Headless.XUnit 12 is built against xunit v3, so this project uses v3 (the core tests stay on v2). -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(ZeroTargetFramework)</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>Zero.App.Tests</RootNamespace>

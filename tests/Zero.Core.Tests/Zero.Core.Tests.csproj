@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(ZeroTargetFramework)</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>Zero.Core.Tests</RootNamespace>

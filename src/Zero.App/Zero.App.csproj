@@ -2,7 +2,7 @@
   <!-- Cross-platform desktop shell (Avalonia). Windows, macOS (x64/arm64), Linux. -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(ZeroTargetFramework)</TargetFramework>
     <RootNamespace>Zero.App</RootNamespace>
     <AssemblyName>Zero</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

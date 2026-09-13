@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(ZeroTargetFramework)</TargetFramework>
     <AssemblyName>Speccy</AssemblyName>
     <RootNamespace>Speccy</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- SDL3 implementations of the host interfaces: audio output and gamepads. ppy.SDL3-CS ships the native SDL3 for every desktop RID. -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(ZeroTargetFramework)</TargetFramework>
     <RootNamespace>Zero.Sdl</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>

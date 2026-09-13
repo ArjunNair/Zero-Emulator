@@ -5,7 +5,7 @@
   -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>$(ZeroTargetFramework)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>Zero</AssemblyName>
     <RootNamespace>ZeroWin</RootNamespace>
@@ -15,6 +15,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <!-- Legacy designer code predates the .NET 9+ WinForms serialization analyzer. -->
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />

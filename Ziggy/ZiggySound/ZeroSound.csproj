@@ -4,7 +4,7 @@
     still builds; MDX cannot load on .NET 8 at runtime, so this backend is replaced by SDL3 in phase 3.
   -->
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>$(ZeroTargetFramework)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>ZeroSound</AssemblyName>
     <RootNamespace>ZeroSound</RootNamespace>

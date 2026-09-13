@@ -7,12 +7,12 @@ where the work stands and every place the implementation deliberately deviates f
 
 | Path | What | Target |
 |---|---|---|
-| `Ziggy/Speccy` | Emulation core (Z80, ULA, machines, tape, RZX) | net8.0, no UI deps |
-| `Ziggy/Peripherals` | File formats (SZX/SNA/Z80/PZX/RZX/TAP), FDC stubs | net8.0 |
-| `src/Zero.Emulation` | Host-neutral session: emulation thread, frame hand-off, input, tape deck, file loading, settings | net8.0 |
-| `src/Zero.Sdl` | SDL3 audio output + gamepads (ppy.SDL3-CS ships the natives) | net8.0 |
-| `src/Zero.App` | Avalonia desktop shell | net8.0 |
-| `Ziggy/ZiggySound`, `ZiggyWin` | Legacy DirectSound/WinForms shell, compile-only reference | net8.0-windows |
+| `Ziggy/Speccy` | Emulation core (Z80, ULA, machines, tape, RZX) | net10.0, no UI deps |
+| `Ziggy/Peripherals` | File formats (SZX/SNA/Z80/PZX/RZX/TAP), FDC stubs | net10.0 |
+| `src/Zero.Emulation` | Host-neutral session: emulation thread, frame hand-off, input, tape deck, file loading, settings | net10.0 |
+| `src/Zero.Sdl` | SDL3 audio output + gamepads (ppy.SDL3-CS ships the natives) | net10.0 |
+| `src/Zero.App` | Avalonia desktop shell | net10.0 |
+| `Ziggy/ZiggySound`, `ZiggyWin` | Legacy DirectSound/WinForms shell, compile-only reference | net10.0-windows |
 | `tests/Zero.Core.Tests` | xunit v2: zexall, machine boot, TAP, session, RZX | |
 | `tests/Zero.App.Tests` | xunit v3 + Avalonia.Headless: real window, real key events, PNG screenshots | |
 | `lib/mdx` | Managed DirectX + Microsoft.VisualC reference assemblies (compile-time only) | |
