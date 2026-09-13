@@ -456,29 +456,34 @@ namespace Zero.Emulation
             _autoLoadPending = false;
         }
 
-        public void SetSpeed(int speed) => Post(() =>
-        {
-            Settings.Emulation.EmulationSpeed = Math.Clamp(speed, 1, 10);
-            _zx?.SetEmulationSpeed(Settings.Emulation.EmulationSpeed);
-        });
+        // Settings change synchronously so callers (menus) can read them back at once;
+        // only the machine update is deferred to the emulation thread.
 
-        public void SetVolume(int percent) => Post(() =>
+        public void SetSpeed(int speed)
         {
-            Settings.Audio.Volume = Math.Clamp(percent, 0, 100);
-            _zx?.SetSoundVolume(Settings.Audio.Volume / 100.0f);
-        });
+            int clamped = Math.Clamp(speed, 1, 10);
+            Settings.Emulation.EmulationSpeed = clamped;
+            Post(() => _zx?.SetEmulationSpeed(clamped));
+        }
 
-        public void SetMute(bool mute) => Post(() =>
+        public void SetVolume(int percent)
+        {
+            int clamped = Math.Clamp(percent, 0, 100);
+            Settings.Audio.Volume = clamped;
+            Post(() => _zx?.SetSoundVolume(clamped / 100.0f));
+        }
+
+        public void SetMute(bool mute)
         {
             Settings.Audio.Mute = mute;
-            _zx?.MuteSound(mute);
-        });
+            Post(() => _zx?.MuteSound(mute));
+        }
 
-        public void SetPalette(string palette) => Post(() =>
+        public void SetPalette(string palette)
         {
             Settings.Render.Palette = palette;
-            if (_zx != null) ApplyPalette(_zx, palette);
-        });
+            Post(() => { if (_zx != null) ApplyPalette(_zx, palette); });
+        }
 
         // ------------------------------------------------------------------ tape auto-load
 
