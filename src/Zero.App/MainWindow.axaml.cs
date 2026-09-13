@@ -37,6 +37,9 @@ namespace Zero.App
         private bool _audioFallback;
         private WindowState _stateBeforeFullScreen = WindowState.Normal;
         private TapeDeckWindow _tapeDeckWindow;
+        private bool _mouseCaptured;
+        private Point _lastPointer;
+        private double _mouseRemainderX, _mouseRemainderY;
 
         /// <summary>Test hook: where settings come from (defaults to the user config file).</summary>
         internal static Func<EmulatorSettings> SettingsLoader = () => EmulatorSettings.Load();
@@ -77,6 +80,10 @@ namespace Zero.App
             AddHandler(KeyDownEvent, OnWindowKeyDown, RoutingStrategies.Tunnel);
             AddHandler(KeyUpEvent, OnWindowKeyUp, RoutingStrategies.Tunnel);
 
+            Display.PointerPressed += OnDisplayPointerPressed;
+            Display.PointerReleased += OnDisplayPointerReleased;
+            Display.PointerMoved += OnDisplayPointerMoved;
+
             DragDrop.SetAllowDrop(this, true);
             AddHandler(DragDrop.DropEvent, OnDrop);
 
@@ -87,6 +94,7 @@ namespace Zero.App
             Activated += (_, __) => { if (_pausedByFocusLoss) { _pausedByFocusLoss = false; _session.Resume(); } _session.Keyboard.ReleaseAll(); };
             Deactivated += (_, __) =>
             {
+                ReleaseMouse();
                 _session.Keyboard.ReleaseAll();
                 if (_settings.Emulation.PauseOnFocusLost && !_session.IsPaused) { _pausedByFocusLoss = true; _session.Pause(); }
             };
@@ -242,6 +250,7 @@ namespace Zero.App
 
         private bool HandleShortcut(KeyEventArgs e)
         {
+            if (e.Key == Key.Escape && _mouseCaptured) { ReleaseMouse(); return true; }
             bool cmd = (e.KeyModifiers & CommandModifier) != 0;
             bool shift = (e.KeyModifiers & KeyModifiers.Shift) != 0;
             switch (e.Key)
@@ -289,6 +298,80 @@ namespace Zero.App
             TapeRewindItem.InputGesture = new KeyGesture(Key.F6);
             MuteItem.InputGesture = new KeyGesture(Key.F8);
             FullScreenItem.InputGesture = new KeyGesture(Key.F11);
+        }
+
+        // ------------------------------------------------------------------ Kempston mouse
+
+        internal bool MouseCaptured => _mouseCaptured;
+
+        private void OnDisplayPointerPressed(object sender, PointerPressedEventArgs e)
+        {
+            if (!_settings.Input.EnableKempstonMouse) { Display.Focus(); return; }
+            PointerPoint p = e.GetCurrentPoint(Display);
+            if (!_mouseCaptured)
+            {
+                CaptureMouse(p.Position);
+                e.Handled = true;
+                return;
+            }
+            if (p.Properties.IsLeftButtonPressed) _session.Mouse.SetButton(Emulation.Input.MouseState.LeftButton, true);
+            if (p.Properties.IsRightButtonPressed) _session.Mouse.SetButton(Emulation.Input.MouseState.RightButton, true);
+            e.Handled = true;
+        }
+
+        private void OnDisplayPointerReleased(object sender, PointerReleasedEventArgs e)
+        {
+            if (!_mouseCaptured) return;
+            if (e.InitialPressMouseButton == MouseButton.Left) _session.Mouse.SetButton(Emulation.Input.MouseState.LeftButton, false);
+            if (e.InitialPressMouseButton == MouseButton.Right) _session.Mouse.SetButton(Emulation.Input.MouseState.RightButton, false);
+            e.Handled = true;
+        }
+
+        private void OnDisplayPointerMoved(object sender, PointerEventArgs e)
+        {
+            if (!_mouseCaptured) return;
+            Point pos = e.GetPosition(Display);
+            double scale = Math.Max(0.01, Display.Scale) * (3.0 / Math.Max(1, _settings.Input.MouseSensitivity));
+            _mouseRemainderX += (pos.X - _lastPointer.X) / scale;
+            _mouseRemainderY += (pos.Y - _lastPointer.Y) / scale;
+            _lastPointer = pos;
+            int dx = (int)_mouseRemainderX, dy = (int)_mouseRemainderY;
+            _mouseRemainderX -= dx; _mouseRemainderY -= dy;
+            if (dx != 0 || dy != 0) _session.Mouse.Move(dx, dy);
+        }
+
+        private void CaptureMouse(Point at)
+        {
+            _mouseCaptured = true;
+            _lastPointer = at;
+            _mouseRemainderX = _mouseRemainderY = 0;
+            Display.Cursor = new Cursor(StandardCursorType.None);
+            SetStatus("Mouse captured. Press Esc to release.");
+        }
+
+        private void ReleaseMouse()
+        {
+            if (!_mouseCaptured) return;
+            _mouseCaptured = false;
+            Display.Cursor = Cursor.Default;
+            _session.Mouse.SetButton(Emulation.Input.MouseState.LeftButton | Emulation.Input.MouseState.RightButton, false);
+            SetStatus("Mouse released.");
+        }
+
+        private void OnToggleMouse(object sender, RoutedEventArgs e)
+        {
+            _settings.Input.EnableKempstonMouse = MouseItem.IsChecked;
+            if (!_settings.Input.EnableKempstonMouse) ReleaseMouse();
+            _session.ApplySettings();
+            RefreshMenuState();
+        }
+
+        private async void OnConfigureGamepads(object sender, RoutedEventArgs e)
+        {
+            var dialog = new GamepadWindow(_settings, _session, 0);
+            await dialog.ShowDialog(this);
+            if (dialog.Accepted) { try { _settings.Save(); } catch { } }
+            Display.Focus();
         }
 
         // ------------------------------------------------------------------ drag & drop
@@ -723,6 +806,7 @@ namespace Zero.App
             int p1 = _settings.Input.Gamepad1Emulates;
             Pad1None.IsChecked = p1 == 0; Pad1Kempston.IsChecked = p1 == 1; Pad1Sinclair1.IsChecked = p1 == 2; Pad1Sinclair2.IsChecked = p1 == 3; Pad1Cursor.IsChecked = p1 == 4;
             KempstonPortItem.IsChecked = _settings.Input.KempstonUsesPort1F;
+            MouseItem.IsChecked = _settings.Input.EnableKempstonMouse;
             PauseOnFocusItem.IsChecked = _settings.Emulation.PauseOnFocusLost;
         }
     }

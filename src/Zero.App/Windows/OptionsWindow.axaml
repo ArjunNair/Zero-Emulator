@@ -83,6 +83,14 @@
             <CheckBox x:Name="KeyJoyEnabled" Content="Enabled" VerticalAlignment="Center" />
           </StackPanel>
           <CheckBox x:Name="KempstonPort1F" Content="Kempston interface decodes port 0x1F fully (more compatible)" />
+          <Button Content="Configure gamepad buttons…" Click="OnConfigureButtons" HorizontalAlignment="Left" />
+          <Separator />
+          <CheckBox x:Name="MouseEnabled" Content="Kempston mouse (click the screen to capture the pointer, Esc releases it)" />
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="Mouse sensitivity" VerticalAlignment="Center" Width="140" />
+            <NumericUpDown x:Name="MouseSensitivity" Minimum="1" Maximum="10" Increment="1" FormatString="0" Width="120" />
+            <TextBlock Text="(3 = one count per Spectrum pixel)" Foreground="#BBBBBB" VerticalAlignment="Center" />
+          </StackPanel>
           <TextBlock x:Name="GamepadList" Foreground="#BBBBBB" TextWrapping="Wrap" />
         </StackPanel>
       </TabItem>

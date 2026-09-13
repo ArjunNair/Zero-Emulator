@@ -42,6 +42,9 @@ namespace Zero.App.Controls
 
         public long FramesPresented { get; private set; }
 
+        /// <summary>Screen pixels per Spectrum pixel at the current window size (1 until first render).</summary>
+        public double Scale { get; private set; } = 1;
+
         static SpectrumDisplay()
         {
             AffectsRender<SpectrumDisplay>(SmoothProperty, KeepAspectRatioProperty, IntegerScalingProperty);
@@ -117,6 +120,7 @@ namespace Zero.App.Controls
                 dest = new Rect(Bounds.Size);
             }
 
+            Scale = dest.Width / source.Width;
             context.DrawImage(_bitmap, source, dest);
         }
     }

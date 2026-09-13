@@ -13,8 +13,6 @@ namespace Zero.Sdl
     /// </summary>
     public sealed unsafe class SdlGamepadSource : IGamepadSource
     {
-        private const short AxisThreshold = 12000;
-
         private readonly List<SDL_JoystickID> _order = new List<SDL_JoystickID>();
         private readonly Dictionary<uint, IntPtr> _open = new Dictionary<uint, IntPtr>();
         private bool _initialised;
@@ -81,22 +79,19 @@ namespace Zero.Sdl
             return SDL_GetGamepadName((SDL_Gamepad*)_open[(uint)_order[index]]);
         }
 
-        public GamepadState Poll(int index)
+        public GamepadInput Poll(int index)
         {
             if (index < 0 || index >= _order.Count) return default;
             var pad = (SDL_Gamepad*)_open[(uint)_order[index]];
-            short x = SDL_GetGamepadAxis(pad, SDL_GamepadAxis.SDL_GAMEPAD_AXIS_LEFTX);
-            short y = SDL_GetGamepadAxis(pad, SDL_GamepadAxis.SDL_GAMEPAD_AXIS_LEFTY);
-            return new GamepadState
+            uint buttons = 0;
+            for (int b = 0; b < 26; b++)
+                if (SDL_GetGamepadButton(pad, (SDL_GamepadButton)b)) buttons |= 1u << b;
+            return new GamepadInput
             {
                 Connected = true,
-                Left = x < -AxisThreshold || SDL_GetGamepadButton(pad, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_DPAD_LEFT),
-                Right = x > AxisThreshold || SDL_GetGamepadButton(pad, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_DPAD_RIGHT),
-                Up = y < -AxisThreshold || SDL_GetGamepadButton(pad, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_DPAD_UP),
-                Down = y > AxisThreshold || SDL_GetGamepadButton(pad, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_DPAD_DOWN),
-                Fire1 = SDL_GetGamepadButton(pad, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_SOUTH),
-                Fire2 = SDL_GetGamepadButton(pad, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_EAST),
-                Fire3 = SDL_GetGamepadButton(pad, SDL_GamepadButton.SDL_GAMEPAD_BUTTON_WEST)
+                LeftX = SDL_GetGamepadAxis(pad, SDL_GamepadAxis.SDL_GAMEPAD_AXIS_LEFTX),
+                LeftY = SDL_GetGamepadAxis(pad, SDL_GamepadAxis.SDL_GAMEPAD_AXIS_LEFTY),
+                Buttons = buttons
             };
         }
 

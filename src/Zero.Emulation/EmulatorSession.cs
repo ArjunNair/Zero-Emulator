@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,6 +37,9 @@ namespace Zero.Emulation
         private zx_spectrum _zx;
         private IAudioOutput _audio;
         private KempstonJoystick _kempston;
+        private KempstonMouse _mouse;
+        private readonly GamepadInput[] _lastGamepad = new GamepadInput[2];
+        private readonly List<keyCode> _gamepadKeys = new List<keyCode>();
         private EmulatorState _state = EmulatorState.Stopped;
         private MachineModel _modelBeforeRzx;
         private bool _autoLoadPending;
@@ -44,6 +48,13 @@ namespace Zero.Emulation
         public EmulatorSettings Settings { get; }
         public KeyboardState Keyboard { get; } = new KeyboardState();
         public TapeDeck Tape { get; } = new TapeDeck();
+        public MouseState Mouse { get; } = new MouseState();
+
+        /// <summary>The Kempston mouse interface while enabled in settings, else null. Emulation thread state.</summary>
+        public KempstonMouse KempstonMouseDevice => _mouse;
+
+        /// <summary>Raw state of gamepad 0 or 1 as sampled on the last frame (for remapping UIs).</summary>
+        public GamepadInput LastGamepadInput(int index) => index >= 0 && index < _lastGamepad.Length ? _lastGamepad[index] : default;
         public FrameQueue Frames { get; } = new FrameQueue();
 
         /// <summary>Creates the audio sink for each new machine. Default paces silently from the wall clock.</summary>
@@ -280,10 +291,29 @@ namespace Zero.Emulation
             if (pads != null)
             {
                 pads.Update();
-                if (pads.Count > 0 && input.Gamepad1Emulates != 0)
-                    JoystickRouter.Apply(zx, _kempston, input.Gamepad1Emulates, pads.Poll(0));
-                if (pads.Count > 1 && input.Gamepad2Emulates != 0)
-                    JoystickRouter.Apply(zx, _kempston, input.Gamepad2Emulates, pads.Poll(1));
+                for (int i = 0; i < 2; i++)
+                {
+                    GamepadInput raw = pads.Count > i ? pads.Poll(i) : default;
+                    _lastGamepad[i] = raw;
+                    int type = i == 0 ? input.Gamepad1Emulates : input.Gamepad2Emulates;
+                    if (!raw.Connected) continue;
+                    _gamepadKeys.Clear();
+                    GamepadState mapped = Settings.Input.BindingsFor(i).Resolve(raw, _gamepadKeys);
+                    if (type != 0) JoystickRouter.Apply(zx, _kempston, type, mapped);
+                    foreach (keyCode k in _gamepadKeys) zx.keyBuffer[(int)k] = true;
+                }
+            }
+
+            if (_mouse != null)
+            {
+                Mouse.Consume(out int dx, out int dy);
+                _mouse.MouseX += (byte)dx;
+                _mouse.MouseY -= (byte)dy; // Kempston Y grows upwards
+                int buttons = Mouse.Buttons;
+                byte b = 0xFF;
+                if ((buttons & MouseState.LeftButton) != 0) b &= unchecked((byte)~0x2);
+                if ((buttons & MouseState.RightButton) != 0) b &= unchecked((byte)~0x1);
+                _mouse.MouseButton = b;
             }
         }
 
@@ -303,6 +333,14 @@ namespace Zero.Emulation
                 zx.AddDevice(_kempston);
             }
             zx.UseKempstonPort1F = input.KempstonUsesPort1F;
+
+            zx.RemoveDevice(SPECCY_DEVICE.KEMPSTON_MOUSE);
+            _mouse = null;
+            if (input.EnableKempstonMouse)
+            {
+                _mouse = new KempstonMouse();
+                zx.AddDevice(_mouse);
+            }
         }
 
         // ------------------------------------------------------------------ machine management

@@ -95,6 +95,10 @@ namespace Zero.Emulation.Settings
         public int Gamepad2Emulates { get; set; } = 0;
         public string Gamepad1Name { get; set; } = "";
         public string Gamepad2Name { get; set; } = "";
+        public Input.GamepadMapping Gamepad1Buttons { get; set; } = Input.GamepadMapping.Default();
+        public Input.GamepadMapping Gamepad2Buttons { get; set; } = Input.GamepadMapping.Default();
+
+        public Input.GamepadMapping BindingsFor(int pad) => pad == 0 ? Gamepad1Buttons : Gamepad2Buttons;
     }
 
     /// <summary>

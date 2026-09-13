@@ -29,8 +29,9 @@ where the work stands and every place the implementation deliberately deviates f
   v1 menu set (machine, tape, sound, view, input), a tape-deck window (block list, transport, options,
   PZX header metadata), an Options window (folders, ROM images, CPU multiplier, session and gamepad
   options), confirm-on-exit, restore-last-session, archive chooser, drag & drop, keyboard help and About.
-  Verified by headless UI tests with screenshots. Missing: gamepad button remapping UI, Kempston mouse,
-  LoadBinary, keyboard-layout picture, macOS native menu bar, file associations.
+  gamepad button remapping (any button to fire/direction/Spectrum key, live highlight) and a Kempston
+  mouse (click the screen to capture, Esc releases). Verified by headless UI tests with screenshots.
+  Missing: LoadBinary, keyboard-layout picture, macOS native menu bar, file associations.
 - **Phase 5** started. `dotnet publish` self-contained single-file works for all six RIDs
   (`packaging/README.md`); GitHub Actions workflow tests on three OSes and publishes artifacts;
   `packaging/macos/make-app.sh` builds `Zero.app`. Trimmed builds are 44 MB vs 109 MB and warning-free,

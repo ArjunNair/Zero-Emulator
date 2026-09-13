@@ -275,3 +275,67 @@ namespace Zero.App.Tests
         }
     }
 }
+
+namespace Zero.App.Tests
+{
+    public class GamepadWindowTests
+    {
+        [AvaloniaFact]
+        public void Ok_stores_edited_binding()
+        {
+            var settings = new EmulatorSettings();
+            var w = new Windows.GamepadWindow(settings, null, 1);
+            w.Show();
+            Dispatcher.UIThread.RunJobs();
+            w.SetAction(Zero.Emulation.Input.GamepadButtons.Guide, "Key:Q");
+            w.OkButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(w.Accepted);
+            Assert.Equal("Key:Q", settings.Input.Gamepad2Buttons.ActionFor(Zero.Emulation.Input.GamepadButtons.Guide));
+            Assert.Equal("Fire 1", settings.Input.Gamepad1Buttons.ActionFor(Zero.Emulation.Input.GamepadButtons.South));
+        }
+    }
+
+    public class MouseCaptureTests
+    {
+        public MouseCaptureTests()
+        {
+            MainWindow.SettingsLoader = () =>
+            {
+                var s = new EmulatorSettings();
+                s.Paths.Roms = TestPaths.RomDir; s.Emulation.PauseOnFocusLost = false; s.Audio.Mute = true;
+                s.Input.EnableKempstonMouse = true;
+                return s;
+            };
+        }
+
+        [AvaloniaFact]
+        public void Click_captures_moves_feed_the_mouse_and_escape_releases()
+        {
+            var w = new MainWindow();
+            w.Show();
+            long t = w.Session.FrameCount + 20;
+            while (w.Session.FrameCount < t) { Thread.Sleep(10); Dispatcher.UIThread.RunJobs(); }
+
+            var origin = w.Display.Bounds.TopLeft;
+            var p = new Avalonia.Point(origin.X + 100, origin.Y + 100);
+            w.MouseDown(p, MouseButton.Left); w.MouseUp(p, MouseButton.Left);
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(w.MouseCaptured);
+
+            byte x0 = w.Session.InvokeAsync(() => w.Session.KempstonMouseDevice.MouseX).Result;
+            w.MouseMove(new Avalonia.Point(p.X + 40, p.Y));
+            Dispatcher.UIThread.RunJobs();
+            t = w.Session.FrameCount + 3;
+            while (w.Session.FrameCount < t) { Thread.Sleep(10); Dispatcher.UIThread.RunJobs(); }
+            byte x1 = w.Session.InvokeAsync(() => w.Session.KempstonMouseDevice.MouseX).Result;
+            Assert.NotEqual(x0, x1);
+
+            w.KeyPressQwerty(PhysicalKey.Escape, RawInputModifiers.None);
+            w.KeyReleaseQwerty(PhysicalKey.Escape, RawInputModifiers.None);
+            Dispatcher.UIThread.RunJobs();
+            Assert.False(w.MouseCaptured);
+            w.Close();
+        }
+    }
+}

@@ -111,7 +111,10 @@
           <MenuItem Header="Sinclair 2" x:Name="Pad1Sinclair2" ToggleType="CheckBox" Tag="3" Click="OnSelectPad1Type" />
           <MenuItem Header="Cursor" x:Name="Pad1Cursor" ToggleType="CheckBox" Tag="4" Click="OnSelectPad1Type" />
         </MenuItem>
+        <MenuItem Header="Configure Gamepad _Buttons…" x:Name="GamepadButtonsItem" Click="OnConfigureGamepads" />
         <MenuItem Header="Kempston uses port 0x1F" x:Name="KempstonPortItem" ToggleType="CheckBox" Click="OnToggleKempstonPort" />
+        <Separator />
+        <MenuItem Header="Kempston _Mouse (click screen to capture, Esc releases)" x:Name="MouseItem" ToggleType="CheckBox" Click="OnToggleMouse" />
         <Separator />
         <MenuItem Header="Pause when window loses focus" x:Name="PauseOnFocusItem" ToggleType="CheckBox" Click="OnTogglePauseOnFocus" />
       </MenuItem>

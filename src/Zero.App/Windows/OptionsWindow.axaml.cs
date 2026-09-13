@@ -55,6 +55,8 @@ namespace Zero.App.Windows
             KeyJoy.ItemsSource = JoystickNames; KeyJoy.SelectedIndex = Math.Clamp(settings.Input.KeyboardJoystickType, 0, 4);
             KeyJoyEnabled.IsChecked = settings.Input.EnableKeyboardJoystick;
             KempstonPort1F.IsChecked = settings.Input.KempstonUsesPort1F;
+            MouseEnabled.IsChecked = settings.Input.EnableKempstonMouse;
+            MouseSensitivity.Value = Math.Clamp(settings.Input.MouseSensitivity, 1, 10);
 
             var pads = session?.Gamepads;
             if (pads != null)
@@ -125,9 +127,17 @@ namespace Zero.App.Windows
             _settings.Input.KeyboardJoystickType = Math.Max(0, KeyJoy.SelectedIndex);
             _settings.Input.EnableKeyboardJoystick = KeyJoyEnabled.IsChecked == true;
             _settings.Input.KempstonUsesPort1F = KempstonPort1F.IsChecked == true;
+            _settings.Input.EnableKempstonMouse = MouseEnabled.IsChecked == true;
+            _settings.Input.MouseSensitivity = (int)Math.Clamp(MouseSensitivity.Value ?? 3, 1, 10);
 
             Accepted = true;
             Close();
+        }
+
+        private async void OnConfigureButtons(object sender, RoutedEventArgs e)
+        {
+            var dialog = new GamepadWindow(_settings, _session, Math.Max(0, Gamepad1.SelectedIndex == 0 && Gamepad2.SelectedIndex > 0 ? 1 : 0));
+            await dialog.ShowDialog(this);
         }
 
         private void OnCancel(object sender, RoutedEventArgs e) => Close();
