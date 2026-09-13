@@ -20,8 +20,8 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
-    <ProjectReference Include="..\..\Ziggy\Peripherals\Peripherals.csproj" />
+    <ProjectReference Include="..\Speccy\Speccy.csproj" />
+    <ProjectReference Include="..\Peripherals\Peripherals.csproj" />
     <ProjectReference Include="..\Zero.Emulation\Zero.Emulation.csproj" />
     <ProjectReference Include="..\Zero.Sdl\Zero.Sdl.csproj" />
   </ItemGroup>

@@ -6,6 +6,6 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
+    <ProjectReference Include="..\..\src\Speccy\Speccy.csproj" />
   </ItemGroup>
 </Project>

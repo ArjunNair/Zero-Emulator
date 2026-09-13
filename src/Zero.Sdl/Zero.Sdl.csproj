@@ -6,7 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
+    <ProjectReference Include="..\Speccy\Speccy.csproj" />
     <ProjectReference Include="..\Zero.Emulation\Zero.Emulation.csproj" />
     <PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
   </ItemGroup>

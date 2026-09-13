@@ -9,7 +9,7 @@
     <RootNamespace>Zero.Emulation</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
-    <ProjectReference Include="..\..\Ziggy\Peripherals\Peripherals.csproj" />
+    <ProjectReference Include="..\Speccy\Speccy.csproj" />
+    <ProjectReference Include="..\Peripherals\Peripherals.csproj" />
   </ItemGroup>
 </Project>

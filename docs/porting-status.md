@@ -7,8 +7,8 @@ where the work stands and every place the implementation deliberately deviates f
 
 | Path | What | Target |
 |---|---|---|
-| `Ziggy/Speccy` | Emulation core (Z80, ULA, machines, tape, RZX) | net10.0, no UI deps |
-| `Ziggy/Peripherals` | File formats (SZX/SNA/Z80/PZX/RZX/TAP), FDC stubs | net10.0 |
+| `src/Speccy` | Emulation core (Z80, ULA, machines, tape, RZX) | net10.0, no UI deps |
+| `src/Peripherals` | File formats (SZX/SNA/Z80/PZX/RZX/TAP), FDC stubs | net10.0 |
 | `src/Zero.Emulation` | Host-neutral session: emulation thread, frame hand-off, input, tape deck, file loading, settings | net10.0 |
 | `src/Zero.Sdl` | SDL3 audio output + gamepads (ppy.SDL3-CS ships the natives) | net10.0 |
 | `src/Zero.App` | Avalonia desktop shell | net10.0 |

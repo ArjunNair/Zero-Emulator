@@ -11,8 +11,8 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Ziggy\Speccy\Speccy.csproj" />
-    <ProjectReference Include="..\..\Ziggy\Peripherals\Peripherals.csproj" />
+    <ProjectReference Include="..\..\src\Speccy\Speccy.csproj" />
+    <ProjectReference Include="..\..\src\Peripherals\Peripherals.csproj" />
     <ProjectReference Include="..\..\src\Zero.Emulation\Zero.Emulation.csproj" />
     <ProjectReference Include="..\Zero.TestSupport\Zero.TestSupport.csproj" />
     <ProjectReference Include="..\..\src\Zero.Sdl\Zero.Sdl.csproj" />
