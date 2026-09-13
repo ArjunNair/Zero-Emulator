@@ -541,10 +541,9 @@ namespace Zero.App
         private void ApplyWindowScale()
         {
             int scale = Math.Clamp(_settings.Render.WindowScale, 1, 6);
-            PixelSize frame = Display.FrameSize;
-            int crop = Display.BorderCrop;
-            double w = (frame.Width - 2 * crop) * scale;
-            double h = (frame.Height - 2 * crop) * scale;
+            Rect source = Display.SourceRect;
+            double w = source.Width * scale;
+            double h = source.Height * scale;
             double chrome = ClientSize.Height - Display.Bounds.Height;
             if (chrome < 0 || double.IsNaN(chrome) || Display.Bounds.Height <= 0) chrome = 56;
             double sideChrome = Math.Max(0, ClientSize.Width - Display.Bounds.Width);
@@ -574,8 +573,9 @@ namespace Zero.App
             Display.BorderCrop = _settings.Render.BorderCrop;
             Display.KeepAspectRatio = _settings.Render.MaintainAspectRatio;
             int scale = Math.Clamp(_settings.Render.WindowScale, 1, 6);
-            Width = (352 - 2 * _settings.Render.BorderCrop) * scale;
-            Height = (296 - 2 * _settings.Render.BorderCrop) * scale + 56;
+            Rect source = Display.SourceRect;
+            Width = source.Width * scale;
+            Height = source.Height * scale + 56; // refined from the real layout once the window has opened
             if (_settings.Render.FullScreen) WindowState = WindowState.FullScreen;
         }
 

@@ -33,14 +33,32 @@ namespace Zero.App.Controls
         public bool KeepAspectRatio { get => GetValue(KeepAspectRatioProperty); set => SetValue(KeepAspectRatioProperty, value); }
         public bool IntegerScaling { get => GetValue(IntegerScalingProperty); set => SetValue(IntegerScalingProperty, value); }
 
-        /// <summary>Pixels of border to hide on each edge.</summary>
+        // Spectrum border geometry: 48 px left/right/top, 56 px bottom around the 256x192 paper.
+        private const int SideBorder = 48, BottomBorder = 56;
+
+        /// <summary>
+        /// Border pixels to hide on the left, right and top edges (0 = full border, 48 = none). The bottom
+        /// edge is cropped in the same proportion of its 56 px so "none" really leaves none.
+        /// </summary>
         public int BorderCrop
         {
             get => _borderCrop;
-            set { _borderCrop = Math.Max(0, value); InvalidateVisual(); }
+            set { _borderCrop = Math.Clamp(value, 0, SideBorder); InvalidateVisual(); }
         }
 
         public PixelSize FrameSize => _bitmap?.PixelSize ?? new PixelSize(352, 296);
+
+        /// <summary>The part of the frame actually shown after border cropping.</summary>
+        public Rect SourceRect
+        {
+            get
+            {
+                PixelSize f = FrameSize;
+                int side = Math.Min(_borderCrop, Math.Min(f.Width, f.Height) / 2 - 1);
+                int bottom = side * BottomBorder / SideBorder;
+                return new Rect(side, side, f.Width - 2 * side, f.Height - side - bottom);
+            }
+        }
 
         public long FramesPresented { get; private set; }
 
@@ -111,8 +129,7 @@ namespace Zero.App.Controls
             context.FillRectangle(_bitmap == null ? Brushes.Black : _surround, new Rect(Bounds.Size));
             if (_bitmap == null) return;
 
-            int crop = Math.Min(_borderCrop, Math.Min(_bitmap.PixelSize.Width, _bitmap.PixelSize.Height) / 2 - 1);
-            var source = new Rect(crop, crop, _bitmap.PixelSize.Width - 2 * crop, _bitmap.PixelSize.Height - 2 * crop);
+            Rect source = SourceRect;
 
             Rect dest;
             if (KeepAspectRatio)

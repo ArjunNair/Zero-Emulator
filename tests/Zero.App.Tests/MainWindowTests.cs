@@ -391,6 +391,37 @@ namespace Zero.App.Tests
 
 namespace Zero.App.Tests
 {
+    public class BorderTests
+    {
+        public BorderTests()
+        {
+            MainWindow.SettingsLoader = () => { var s = new EmulatorSettings(); s.Paths.Roms = TestPaths.RomDir; s.Emulation.PauseOnFocusLost = false; s.Audio.Mute = true; return s; };
+        }
+
+        [AvaloniaFact]
+        public void Border_none_shows_exactly_the_paper_and_refits_the_window()
+        {
+            var w = new MainWindow();
+            w.Show();
+            long t = w.Session.FrameCount + 20;
+            while (w.Session.FrameCount < t) { Thread.Sleep(10); Dispatcher.UIThread.RunJobs(); }
+
+            w.BorderNone.Command.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(new Avalonia.Rect(48, 48, 256, 192), w.Display.SourceRect);
+            double ratio = w.Display.Bounds.Width / w.Display.Bounds.Height;
+            Assert.InRange(ratio, 256.0 / 192 - 0.02, 256.0 / 192 + 0.02);
+            Assert.True(w.BorderNone.IsChecked);
+
+            w.BorderMedium.Command.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(new Avalonia.Rect(24, 24, 304, 244), w.Display.SourceRect); // bottom loses 28 of its 56
+            ratio = w.Display.Bounds.Width / w.Display.Bounds.Height;
+            Assert.InRange(ratio, 304.0 / 244 - 0.02, 304.0 / 244 + 0.02);
+            w.Close();
+        }
+    }
+
     public class MenuStateTests
     {
         public MenuStateTests()

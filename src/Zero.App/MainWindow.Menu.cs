@@ -246,6 +246,7 @@ namespace Zero.App
         {
             _settings.Render.BorderCrop = crop;
             Display.BorderCrop = crop;
+            if (WindowState == WindowState.Normal) ApplyWindowScale(); // keep the window snug: no letterbox
             RefreshMenuState();
         }
 
