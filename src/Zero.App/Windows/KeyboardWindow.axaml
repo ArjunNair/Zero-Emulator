@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Zero.App.Windows.KeyboardWindow"
+        Title="Spectrum Keyboard"
+        Icon="/Assets/zero.ico"
+        Width="900" Height="520"
+        MinWidth="600" MinHeight="380"
+        WindowStartupLocation="CenterOwner">
+  <DockPanel Margin="10">
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,8,0,0">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="Type keyword" VerticalAlignment="Center" />
+        <ComboBox x:Name="KeywordBox" Width="180" />
+        <Button x:Name="TypeButton" Content="Type" Click="OnTypeKeyword" />
+        <TextBlock Foreground="#BBBBBB" VerticalAlignment="Center" Text="drops the keyword into the BASIC editor" />
+      </StackPanel>
+      <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
+                 Text="PC Shift = CAPS SHIFT, Ctrl = SYMBOL SHIFT, Shift+Ctrl = Extended mode (E cursor). Keywords in white type themselves in K mode; red symbols need SYMBOL SHIFT; green and red words above and below the keys need Extended mode, with SYMBOL SHIFT for red. PC punctuation keys type the matching symbol directly." />
+    </StackPanel>
+    <Image x:Name="KeyboardImage" Source="avares://Zero/Assets/zx_kb.jpg" Stretch="Uniform" />
+  </DockPanel>
+</Window>

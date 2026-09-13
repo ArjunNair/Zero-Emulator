@@ -339,3 +339,49 @@ namespace Zero.App.Tests
         }
     }
 }
+
+namespace Zero.App.Tests
+{
+    public class ToolWindowTests
+    {
+        private readonly ITestOutputHelper _output;
+        public ToolWindowTests(ITestOutputHelper output) { _output = output; }
+
+        [AvaloniaFact]
+        public void Keyboard_window_shows_picture_and_keywords()
+        {
+            var w = new Windows.KeyboardWindow(null);
+            w.Show();
+            Dispatcher.UIThread.RunJobs();
+            Assert.NotNull(w.KeyboardImage.Source);
+            Assert.Equal("ABS", w.KeywordBox.SelectedItem);
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            using (var bmp = w.CaptureRenderedFrame())
+            {
+                string path = Path.Combine(MainWindowTests.ScreenshotDir, "keyboard.png");
+                bmp.Save(path);
+                _output.WriteLine("screenshot: " + path);
+            }
+            w.Close();
+        }
+
+        [AvaloniaFact]
+        public void Load_binary_window_validates_input()
+        {
+            var w = new Windows.LoadBinaryWindow(null, false);
+            w.Show();
+            Dispatcher.UIThread.RunJobs();
+            Assert.False(w.BankRadio.IsEnabled); // no session: treated like a 48K
+            w.GoButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(w.ErrorText.IsVisible);
+            Assert.Contains("Choose a file", w.ErrorText.Text);
+            w.FileBox.Text = "/definitely/not/here.bin";
+            w.GoButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs();
+            Assert.Contains("not found", w.ErrorText.Text);
+            Assert.Equal(-1, w.BytesTransferred);
+            w.Close();
+        }
+    }
+}

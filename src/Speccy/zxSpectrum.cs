@@ -6840,6 +6840,14 @@ namespace Speccy
             }
         }
 
+        //Returns a copy of a full 16K RAM bank (both 8K halves).
+        public byte[] GetRAMBank(int bank) {
+            byte[] result = new byte[16384];
+            System.Buffer.BlockCopy(RAMpage[bank * 2], 0, result, 0, 8192);
+            System.Buffer.BlockCopy(RAMpage[bank * 2 + 1], 0, result, 8192, 8192);
+            return result;
+        }
+
         //Pokes bytes from an array into contiguous rom banks.
         public void PokeROMPages(int bank, int dataLength, byte[] data) {
             for (int f = 0; f < dataLength; f++) {

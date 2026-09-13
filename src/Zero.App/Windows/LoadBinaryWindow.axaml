@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Zero.App.Windows.LoadBinaryWindow"
+        Title="Load Binary"
+        Icon="/Assets/zero.ico"
+        Width="480" SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <StackPanel Margin="14" Spacing="10">
+    <Grid ColumnDefinitions="*,Auto">
+      <TextBox x:Name="FileBox" Watermark="File" />
+      <Button Grid.Column="1" Content="Browse…" Margin="6,0,0,0" Click="OnBrowse" />
+    </Grid>
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <RadioButton x:Name="AddressRadio" Content="Address" GroupName="target" IsChecked="True" />
+      <RadioButton x:Name="BankRadio" Content="RAM bank (128K)" GroupName="target" />
+    </StackPanel>
+    <Grid ColumnDefinitions="110,150" RowDefinitions="Auto,Auto,Auto">
+      <TextBlock Grid.Row="0" Text="Address" VerticalAlignment="Center" />
+      <NumericUpDown Grid.Row="0" Grid.Column="1" x:Name="AddressBox" Minimum="0" Maximum="65535" Increment="256" FormatString="0" Value="32768" Margin="0,2" />
+      <TextBlock Grid.Row="1" Text="Bank" VerticalAlignment="Center" />
+      <ComboBox Grid.Row="1" Grid.Column="1" x:Name="BankBox" Margin="0,2" />
+      <TextBlock Grid.Row="2" x:Name="LengthLabel" Text="Length" VerticalAlignment="Center" />
+      <NumericUpDown Grid.Row="2" Grid.Column="1" x:Name="LengthBox" Minimum="1" Maximum="65536" Increment="256" FormatString="0" Value="6912" Margin="0,2" />
+    </Grid>
+    <TextBlock x:Name="ErrorText" Foreground="#E06C75" TextWrapping="Wrap" IsVisible="False" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button x:Name="CancelButton" Content="Cancel" MinWidth="90" IsCancel="True" Click="OnCancel" />
+      <Button x:Name="GoButton" Content="Load" MinWidth="90" IsDefault="True" Click="OnGo" />
+    </StackPanel>
+  </StackPanel>
+</Window>

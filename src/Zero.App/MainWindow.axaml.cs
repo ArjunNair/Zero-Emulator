@@ -257,6 +257,7 @@ namespace Zero.App
             {
                 case Key.F3: _ = OpenFileAsync(); return true;
                 case Key.F2: _ = SaveSnapshotAsync(); return true;
+                case Key.F1: OnKeyboardWindow(this, null); return true;
                 case Key.F4: OnShowTapeDeck(this, null); return true;
                 case Key.F5: ToggleTape(); return true;
                 case Key.F6: _session.Post(_session.Tape.Rewind); return true;
@@ -295,6 +296,7 @@ namespace Zero.App
             PauseItem.InputGesture = new KeyGesture(Key.F7);
             TapePlayItem.InputGesture = new KeyGesture(Key.F5);
             TapeDeckItem.InputGesture = new KeyGesture(Key.F4);
+            KeyboardItem.InputGesture = new KeyGesture(Key.F1);
             TapeRewindItem.InputGesture = new KeyGesture(Key.F6);
             MuteItem.InputGesture = new KeyGesture(Key.F8);
             FullScreenItem.InputGesture = new KeyGesture(Key.F11);
@@ -471,6 +473,34 @@ namespace Zero.App
         }
 
         private void OnOpen(object sender, RoutedEventArgs e) => _ = OpenFileAsync();
+
+        private async void OnLoadBinary(object sender, RoutedEventArgs e) => await RunBinaryDialog(false);
+        private async void OnSaveBinary(object sender, RoutedEventArgs e) => await RunBinaryDialog(true);
+
+        private async Task RunBinaryDialog(bool save)
+        {
+            bool wasPaused = _session.IsPaused;
+            _session.Pause();
+            var dialog = new LoadBinaryWindow(_session, save);
+            await dialog.ShowDialog(this);
+            if (dialog.BytesTransferred >= 0)
+                SetStatus($"{(save ? "Saved" : "Loaded")} {dialog.BytesTransferred} bytes.");
+            if (!wasPaused) _session.Resume();
+            Display.Focus();
+        }
+
+        private KeyboardWindow _keyboardWindow;
+
+        private void OnKeyboardWindow(object sender, RoutedEventArgs e)
+        {
+            if (_keyboardWindow == null)
+            {
+                _keyboardWindow = new KeyboardWindow(_session);
+                _keyboardWindow.Closed += (_, __) => _keyboardWindow = null;
+                _keyboardWindow.Show(this);
+            }
+            else _keyboardWindow.Activate();
+        }
         private void OnSaveSnapshot(object sender, RoutedEventArgs e) => _ = SaveSnapshotAsync();
         private void OnSaveScreen(object sender, RoutedEventArgs e) => _ = SaveScreenAsync();
 
@@ -720,7 +750,7 @@ namespace Zero.App
             "Shift = Caps Shift, Ctrl = Symbol Shift.\n" +
             "Type LOAD \"\": press J, then Ctrl+P twice. Shift+Ctrl = Extended mode.\n" +
             "PC punctuation keys (, . ; \" - = etc.) type the matching Spectrum symbol directly.\n\n" +
-            "F3 Open   F2 Save snapshot   F12 Save screen\n" +
+            "F1 Spectrum keyboard   F3 Open   F2 Save snapshot   F12 Save screen\n" +
             "F4 Tape deck   F5 Tape play/stop   F6 Rewind   F7 Pause   F8 Mute\n" +
             "F9 Reset   Shift+F9 Hard reset   F11 Full screen\n" +
             (IsMac ? "Cmd+O / Cmd+S / Cmd+R / Cmd+P / Cmd+M / Cmd+F do the same." : ""));

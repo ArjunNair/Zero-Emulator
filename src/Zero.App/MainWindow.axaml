@@ -16,6 +16,9 @@
         <Separator />
         <MenuItem Header="_Save Snapshot…" x:Name="SaveSnapshotItem" Click="OnSaveSnapshot" />
         <MenuItem Header="Save S_creen (.scr)…" x:Name="SaveScreenItem" Click="OnSaveScreen" />
+        <Separator />
+        <MenuItem Header="Load _Binary…" Click="OnLoadBinary" />
+        <MenuItem Header="Save _Binary…" Click="OnSaveBinary" />
         <MenuItem Header="_Options…" x:Name="OptionsItem" Click="OnOptions" />
         <Separator />
         <MenuItem Header="E_xit" Click="OnExit" />
@@ -119,7 +122,8 @@
         <MenuItem Header="Pause when window loses focus" x:Name="PauseOnFocusItem" ToggleType="CheckBox" Click="OnTogglePauseOnFocus" />
       </MenuItem>
       <MenuItem Header="_Help">
-        <MenuItem Header="_Keyboard Help" Click="OnKeyboardHelp" />
+        <MenuItem Header="Spectrum _Keyboard…" x:Name="KeyboardItem" Click="OnKeyboardWindow" />
+        <MenuItem Header="Keyboard _Shortcuts" Click="OnKeyboardHelp" />
         <MenuItem Header="_About Zero" Click="OnAbout" />
       </MenuItem>
     </Menu>
