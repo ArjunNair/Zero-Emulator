@@ -3,7 +3,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using System.Linq;
+using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Xunit;
 using Avalonia.Media;
 
@@ -30,6 +33,8 @@ namespace Zero.App.Tests
             var scaled = new LayoutTransformControl { Child = stack, LayoutTransform = new ScaleTransform(4, 4) };
             var w = new Window { Content = scaled, Width = 900, Height = 1100, Background = Brushes.White };
             w.Show();
+            Dispatcher.UIThread.RunJobs();
+            w.Measure(new Size(900, 1100)); w.Arrange(new Rect(0, 0, 900, 1100));
             Dispatcher.UIThread.RunJobs();
             Avalonia.Headless.AvaloniaHeadlessPlatform.ForceRenderTimerTick();
             using (var bmp = w.CaptureRenderedFrame())

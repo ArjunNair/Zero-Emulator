@@ -17,12 +17,13 @@
     </StackPanel>
     <Grid ColumnDefinitions="110,150" RowDefinitions="Auto,Auto,Auto">
       <TextBlock Grid.Row="0" Text="Address" VerticalAlignment="Center" />
-      <NumericUpDown Grid.Row="0" Grid.Column="1" x:Name="AddressBox" Minimum="0" Maximum="65535" Increment="256" FormatString="0" Value="32768" Margin="0,2" />
+      <TextBox Grid.Row="0" Grid.Column="1" x:Name="AddressBox" Text="32768" Margin="0,2" />
       <TextBlock Grid.Row="1" Text="Bank" VerticalAlignment="Center" />
       <ComboBox Grid.Row="1" Grid.Column="1" x:Name="BankBox" Margin="0,2" />
       <TextBlock Grid.Row="2" x:Name="LengthLabel" Text="Length" VerticalAlignment="Center" />
-      <NumericUpDown Grid.Row="2" Grid.Column="1" x:Name="LengthBox" Minimum="1" Maximum="65536" Increment="256" FormatString="0" Value="6912" Margin="0,2" />
+      <TextBox Grid.Row="2" Grid.Column="1" x:Name="LengthBox" Text="6912" Margin="0,2" />
     </Grid>
+    <TextBlock Foreground="#888888" FontSize="12" Text="Numbers may be decimal, or hexadecimal with a 0x or $ prefix." />
     <TextBlock x:Name="ErrorText" Foreground="#E06C75" TextWrapping="Wrap" IsVisible="False" />
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
       <Button x:Name="CancelButton" Content="Cancel" MinWidth="90" IsCancel="True" Click="OnCancel" />

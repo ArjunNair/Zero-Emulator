@@ -44,7 +44,8 @@ namespace Zero.App.Windows
             RomPlus3.Text = settings.Roms.RomPlus3;
             RomPentagon.Text = settings.Roms.RomPentagon;
 
-            CpuMultiplier.Value = Math.Clamp(settings.Emulation.CpuMultiplier, 1, 14);
+            CpuMultiplier.ItemsSource = Enumerable.Range(1, 14).Select(i => i.ToString()).ToArray();
+            CpuMultiplier.SelectedIndex = Math.Clamp(settings.Emulation.CpuMultiplier, 1, 14) - 1;
             Use128ke.IsChecked = settings.Emulation.Use128keForSnapshots;
             PauseOnFocusLost.IsChecked = settings.Emulation.PauseOnFocusLost;
             ConfirmOnExit.IsChecked = settings.Emulation.ConfirmOnExit;
@@ -56,7 +57,8 @@ namespace Zero.App.Windows
             KeyJoyEnabled.IsChecked = settings.Input.EnableKeyboardJoystick;
             KempstonPort1F.IsChecked = settings.Input.KempstonUsesPort1F;
             MouseEnabled.IsChecked = settings.Input.EnableKempstonMouse;
-            MouseSensitivity.Value = Math.Clamp(settings.Input.MouseSensitivity, 1, 10);
+            MouseSensitivity.ItemsSource = Enumerable.Range(1, 10).Select(i => i.ToString()).ToArray();
+            MouseSensitivity.SelectedIndex = Math.Clamp(settings.Input.MouseSensitivity, 1, 10) - 1;
 
             var pads = session?.Gamepads;
             if (pads != null)
@@ -116,7 +118,7 @@ namespace Zero.App.Windows
             _settings.Roms.RomPlus3 = RomPlus3.Text;
             _settings.Roms.RomPentagon = RomPentagon.Text;
 
-            _settings.Emulation.CpuMultiplier = (int)Math.Clamp(CpuMultiplier.Value ?? 1, 1, 14);
+            _settings.Emulation.CpuMultiplier = Math.Max(0, CpuMultiplier.SelectedIndex) + 1;
             _settings.Emulation.Use128keForSnapshots = Use128ke.IsChecked == true;
             _settings.Emulation.PauseOnFocusLost = PauseOnFocusLost.IsChecked == true;
             _settings.Emulation.ConfirmOnExit = ConfirmOnExit.IsChecked == true;
@@ -128,7 +130,7 @@ namespace Zero.App.Windows
             _settings.Input.EnableKeyboardJoystick = KeyJoyEnabled.IsChecked == true;
             _settings.Input.KempstonUsesPort1F = KempstonPort1F.IsChecked == true;
             _settings.Input.EnableKempstonMouse = MouseEnabled.IsChecked == true;
-            _settings.Input.MouseSensitivity = (int)Math.Clamp(MouseSensitivity.Value ?? 3, 1, 10);
+            _settings.Input.MouseSensitivity = Math.Max(0, MouseSensitivity.SelectedIndex) + 1;
 
             Accepted = true;
             Close();

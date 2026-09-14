@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
@@ -28,7 +29,6 @@ namespace Zero.App.Windows
             Title = saveMode ? "Save Binary" : "Load Binary";
             GoButton.Content = saveMode ? "Save" : "Load";
             LengthLabel.IsVisible = LengthBox.IsVisible = saveMode;
-            AddressBox.Minimum = saveMode ? 0 : 16384;
             BankBox.ItemsSource = Enumerable.Range(0, 8).Select(i => "Bank " + i).ToArray();
             BankBox.SelectedIndex = 0;
             bool banks = session?.HasRamBanks ?? false;
@@ -54,15 +54,30 @@ namespace Zero.App.Windows
 
         private void ShowError(string text) { ErrorText.Text = text; ErrorText.IsVisible = true; }
 
+        /// <summary>Decimal, or hexadecimal written as 0x1234 or $1234 (both common in Spectrum tooling).</summary>
+        internal static bool TryParseNumber(string text, out int value)
+        {
+            value = 0;
+            if (string.IsNullOrWhiteSpace(text)) return false;
+            string digits = text.Trim();
+            NumberStyles style = NumberStyles.Integer;
+            if (digits.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) { digits = digits.Substring(2); style = NumberStyles.HexNumber; }
+            else if (digits.StartsWith("$", StringComparison.Ordinal) || digits.StartsWith("#", StringComparison.Ordinal)) { digits = digits.Substring(1); style = NumberStyles.HexNumber; }
+            return digits.Length > 0 && int.TryParse(digits, style, CultureInfo.InvariantCulture, out value) && value >= 0;
+        }
+
         private async void OnGo(object sender, RoutedEventArgs e)
         {
             ErrorText.IsVisible = false;
             string file = FileBox.Text?.Trim();
             if (string.IsNullOrEmpty(file)) { ShowError("Choose a file."); return; }
             bool byAddress = AddressRadio.IsChecked == true;
-            int address = (int)(AddressBox.Value ?? 0);
             int bank = Math.Max(0, BankBox.SelectedIndex);
-            int length = (int)(LengthBox.Value ?? 0);
+
+            int address = 0, length = 0;
+            if (byAddress && !TryParseNumber(AddressBox.Text, out address)) { ShowError("Enter an address as a number, for example 32768 or 0x8000."); return; }
+            if (_saveMode && !TryParseNumber(LengthBox.Text, out length)) { ShowError("Enter a length as a number, for example 6912 or 0x1B00."); return; }
+            if (_saveMode && length < 1) { ShowError("Length must be at least 1."); return; }
 
             try
             {

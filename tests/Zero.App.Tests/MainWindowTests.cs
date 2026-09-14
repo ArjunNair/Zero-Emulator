@@ -239,7 +239,7 @@ namespace Zero.App.Tests
             w.Tabs.SelectedIndex = 3; Shoot(w, "options-input");
             w.Tabs.SelectedIndex = 0;
 
-            w.CpuMultiplier.Value = 4;
+            w.CpuMultiplier.SelectedIndex = 3; // "4"
             w.Gamepad2.SelectedIndex = 2;
             w.ConfirmOnExit.IsChecked = false;
             w.OkButton.Command = null;
@@ -267,7 +267,7 @@ namespace Zero.App.Tests
             var settings = new EmulatorSettings();
             var w = new Windows.OptionsWindow(settings, null);
             w.Show();
-            w.CpuMultiplier.Value = 9;
+            w.CpuMultiplier.SelectedIndex = 8; // "9"
             w.CancelButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
             Dispatcher.UIThread.RunJobs();
             Assert.False(w.Accepted);

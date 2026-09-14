@@ -58,7 +58,7 @@
         <StackPanel Spacing="12" Margin="0,10,0,0">
           <StackPanel Orientation="Horizontal" Spacing="10">
             <TextBlock Text="CPU speed multiplier" VerticalAlignment="Center" />
-            <NumericUpDown x:Name="CpuMultiplier" Minimum="1" Maximum="14" Increment="1" FormatString="0" Width="120" />
+            <ComboBox x:Name="CpuMultiplier" Width="90" />
             <TextBlock Text="(1 = original 3.5 MHz)" Foreground="#BBBBBB" VerticalAlignment="Center" />
           </StackPanel>
           <CheckBox x:Name="Use128ke" Content="Load 128K snapshots into the 128Ke (higher compatibility)" />
@@ -88,7 +88,7 @@
           <CheckBox x:Name="MouseEnabled" Content="Kempston mouse (click the screen to capture the pointer, Esc releases it)" />
           <StackPanel Orientation="Horizontal" Spacing="10">
             <TextBlock Text="Mouse sensitivity" VerticalAlignment="Center" Width="140" />
-            <NumericUpDown x:Name="MouseSensitivity" Minimum="1" Maximum="10" Increment="1" FormatString="0" Width="120" />
+            <ComboBox x:Name="MouseSensitivity" Width="90" />
             <TextBlock Text="(3 = one count per Spectrum pixel)" Foreground="#BBBBBB" VerticalAlignment="Center" />
           </StackPanel>
           <TextBlock x:Name="GamepadList" Foreground="#BBBBBB" TextWrapping="Wrap" />

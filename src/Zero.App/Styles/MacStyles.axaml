@@ -30,16 +30,18 @@
     <Setter Property="FontSize" Value="13" />
   </Style>
 
-  <!-- Buttons: push-button height and rounding -->
+  <!-- Buttons: push-button height and rounding. The vertical padding is deliberately asymmetric:
+       centring the text's line box leaves the ink of a caption without descenders (OK, Cancel,
+       Browse…) looking high, so the extra top padding pushes it down onto the optical centre. -->
   <Style Selector="Button">
     <Setter Property="MinHeight" Value="24" />
-    <Setter Property="Padding" Value="14,2" />
+    <Setter Property="Padding" Value="14,4,14,1" />
     <Setter Property="CornerRadius" Value="6" />
     <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
 
   <!-- Fields -->
-  <Style Selector="TextBox, ComboBox, NumericUpDown">
+  <Style Selector="TextBox, ComboBox">
     <Setter Property="MinHeight" Value="24" />
     <Setter Property="CornerRadius" Value="5" />
   </Style>
