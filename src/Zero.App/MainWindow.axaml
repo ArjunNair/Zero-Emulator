@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="using:Zero.App.Controls"
+        xmlns:fx="using:Pipboy.Avalonia.Fx.Controls"
         x:Class="Zero.App.MainWindow"
         Title="Zero"
         Icon="/Assets/zero.ico"
@@ -21,6 +22,11 @@
       </DockPanel>
     </Border>
 
-    <c:SpectrumDisplay x:Name="Display" />
+    <!-- CRT effects are drawn over the emulated screen, never over the chrome. All off unless enabled. -->
+    <fx:CrtDisplay x:Name="CrtLayer"
+                   EnableScanlines="False" EnableVignette="False" EnableScanBeam="False"
+                   EnableFlicker="False" EnableNoise="False">
+      <c:SpectrumDisplay x:Name="Display" />
+    </fx:CrtDisplay>
   </DockPanel>
 </Window>

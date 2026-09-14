@@ -61,6 +61,18 @@ namespace Zero.Emulation.Settings
         public int WindowScale { get; set; } = 2;
         /// <summary>UI theme for the windows and dialogs. Applied at start-up; unknown names fall back to the default.</summary>
         public string UiTheme { get; set; } = "Semi";
+        public CrtSettings Crt { get; set; } = new CrtSettings();
+    }
+
+    /// <summary>CRT effects drawn over the emulated screen. Cosmetic only; they never touch emulation.</summary>
+    public sealed class CrtSettings
+    {
+        public bool Enabled { get; set; }
+        public bool Scanlines { get; set; } = true;
+        public bool Vignette { get; set; } = true;
+        public bool ScanBeam { get; set; }
+        public bool Flicker { get; set; }
+        public bool Noise { get; set; }
     }
 
     public sealed class AudioSettings

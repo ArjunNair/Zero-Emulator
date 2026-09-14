@@ -64,6 +64,13 @@ namespace Zero.App.Windows
             MouseSensitivity.ItemsSource = Enumerable.Range(1, 10).Select(i => i.ToString()).ToArray();
             MouseSensitivity.SelectedIndex = Math.Clamp(settings.Input.MouseSensitivity, 1, 10) - 1;
 
+            CrtEnabled.IsChecked = settings.Render.Crt.Enabled;
+            CrtScanlines.IsChecked = settings.Render.Crt.Scanlines;
+            CrtVignette.IsChecked = settings.Render.Crt.Vignette;
+            CrtScanBeam.IsChecked = settings.Render.Crt.ScanBeam;
+            CrtFlicker.IsChecked = settings.Render.Crt.Flicker;
+            CrtNoise.IsChecked = settings.Render.Crt.Noise;
+
             ThemeBox.ItemsSource = ThemeCatalog.Names;
             ThemeBox.SelectedItem = ThemeCatalog.Normalise(settings.Render.UiTheme);
 
@@ -140,6 +147,13 @@ namespace Zero.App.Windows
             _settings.Input.Gamepad2Emulates = Math.Max(0, Gamepad2.SelectedIndex);
             _settings.Input.KeyboardJoystickType = Math.Max(0, KeyJoy.SelectedIndex);
             _settings.Input.EnableKeyboardJoystick = KeyJoyEnabled.IsChecked == true;
+            _settings.Render.Crt.Enabled = CrtEnabled.IsChecked == true;
+            _settings.Render.Crt.Scanlines = CrtScanlines.IsChecked == true;
+            _settings.Render.Crt.Vignette = CrtVignette.IsChecked == true;
+            _settings.Render.Crt.ScanBeam = CrtScanBeam.IsChecked == true;
+            _settings.Render.Crt.Flicker = CrtFlicker.IsChecked == true;
+            _settings.Render.Crt.Noise = CrtNoise.IsChecked == true;
+
             string theme = ThemeCatalog.Normalise(ThemeBox.SelectedItem as string);
             ThemeChanged = theme != ThemeCatalog.Normalise(_settings.Render.UiTheme);
             _settings.Render.UiTheme = theme;

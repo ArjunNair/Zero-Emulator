@@ -102,6 +102,17 @@
           <TextBlock x:Name="ThemeDescription" Foreground="#BBBBBB" TextWrapping="Wrap" />
           <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
                      Text="The theme changes the windows and dialogs, never the emulated screen. Zero applies it when it next starts, because control templates cannot be swapped under open windows." />
+          <Separator />
+          <CheckBox x:Name="CrtEnabled" Content="CRT effects over the emulated screen" />
+          <StackPanel Margin="24,0,0,0" Spacing="6">
+            <CheckBox x:Name="CrtScanlines" Content="Scanlines" />
+            <CheckBox x:Name="CrtVignette" Content="Vignette (darkened corners)" />
+            <CheckBox x:Name="CrtScanBeam" Content="Rolling scan beam" />
+            <CheckBox x:Name="CrtFlicker" Content="Flicker" />
+            <CheckBox x:Name="CrtNoise" Content="Noise" />
+          </StackPanel>
+          <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
+                     Text="Scanlines and the vignette are drawn once per frame. The beam, flicker and noise animate continuously, which costs a little more." />
         </StackPanel>
       </TabItem>
     </TabControl>

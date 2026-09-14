@@ -19,6 +19,7 @@ using Zero.Emulation;
 using Zero.Emulation.Host;
 using Zero.Emulation.Machines;
 using Zero.Emulation.Settings;
+using CrtSettings = Zero.Emulation.Settings.CrtSettings;
 using Zero.Emulation.Tape;
 using Zero.Sdl;
 
@@ -73,6 +74,7 @@ namespace Zero.App
 
             NativeMenu.SetMenu(this, BuildMenu());
             if (IsMac && Application.Current != null) NativeMenu.SetMenu(Application.Current, BuildAppMenu());
+            ApplyCrtSettings();
             ApplyViewSettings();
             RefreshMenuState();
             RebuildRecentMenu();
@@ -488,6 +490,7 @@ namespace Zero.App
                 else _session.ApplySettings();
                 RefreshMenuState();
                 try { _settings.Save(); } catch { }
+                ApplyCrtSettings();
                 if (dialog.ThemeChanged)
                     await MessageDialog.ShowAsync(this, "Theme",
                         $"Zero will use the {_settings.Render.UiTheme} theme the next time it starts.");
@@ -568,6 +571,18 @@ namespace Zero.App
                 _settings.Render.FullScreen = true;
             }
             RefreshMenuState();
+        }
+
+        /// <summary>Push the CRT settings into the overlay. Cheap, and safe to call at any time.</summary>
+        internal void ApplyCrtSettings()
+        {
+            CrtSettings crt = _settings.Render.Crt;
+            bool on = crt.Enabled;
+            CrtLayer.EnableScanlines = on && crt.Scanlines;
+            CrtLayer.EnableVignette = on && crt.Vignette;
+            CrtLayer.EnableScanBeam = on && crt.ScanBeam;
+            CrtLayer.EnableFlicker = on && crt.Flicker;
+            CrtLayer.EnableNoise = on && crt.Noise;
         }
 
         private void ApplyViewSettings()

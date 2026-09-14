@@ -21,6 +21,7 @@ namespace Zero.App
         internal NativeMenuItem TapeDeckItem, TapePlayItem, TapeStopItem, TapeRewindItem;
         internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFastLoadItem, TapeRomTrapsItem;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
+        internal NativeMenuItem CrtItem;
         internal NativeMenuItem FullScreenItem, SmoothingItem, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
         internal NativeMenuItem KeyJoyItem, KeyJoyKempston, KeyJoySinclair1, KeyJoySinclair2, KeyJoyCursor;
         internal NativeMenuItem Pad1None, Pad1Kempston, Pad1Sinclair1, Pad1Sinclair2, Pad1Cursor, KempstonPortItem, MouseItem, PauseOnFocusItem;
@@ -121,6 +122,7 @@ namespace Zero.App
                     Item("3x", () => SelectScale(3)), Item("4x", () => SelectScale(4))),
                 FullScreenItem = Item("Full Screen", ToggleFullScreen, G(Key.F11), checkable: true),
                 SmoothingItem = Item("Pixel Smoothing", ToggleSmoothing, checkable: true),
+                CrtItem = Item("CRT Effects", ToggleCrt, checkable: true),
                 IntegerScalingItem = Item("Integer Scaling", ToggleIntegerScaling, checkable: true),
                 Submenu("Border",
                     BorderFull = Item("Full", () => SelectBorder(0), checkable: true),
@@ -240,6 +242,13 @@ namespace Zero.App
             RefreshMenuState();
         }
 
+        private void ToggleCrt()
+        {
+            _settings.Render.Crt.Enabled = !_settings.Render.Crt.Enabled;
+            ApplyCrtSettings();
+            RefreshMenuState();
+        }
+
         private void ToggleIntegerScaling() { Display.IntegerScaling = !Display.IntegerScaling; RefreshMenuState(); }
 
         private void SelectBorder(int crop)
@@ -309,6 +318,7 @@ namespace Zero.App
 
             FullScreenItem.IsChecked = WindowState == WindowState.FullScreen;
             SmoothingItem.IsChecked = _settings.Render.PixelSmoothing;
+            CrtItem.IsChecked = _settings.Render.Crt.Enabled;
             IntegerScalingItem.IsChecked = Display.IntegerScaling;
             BorderFull.IsChecked = _settings.Render.BorderCrop == 0;
             BorderMedium.IsChecked = _settings.Render.BorderCrop == 24;
