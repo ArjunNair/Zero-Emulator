@@ -5,6 +5,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>Zero.App.Tests</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputType>Exe</OutputType>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>

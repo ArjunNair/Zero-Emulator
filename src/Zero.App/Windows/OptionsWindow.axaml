@@ -94,6 +94,17 @@
           <TextBlock x:Name="GamepadList" Foreground="#BBBBBB" TextWrapping="Wrap" />
         </StackPanel>
       </TabItem>
+      <TabItem Header="Appearance">
+        <StackPanel Spacing="12" Margin="0,10,0,0">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="Theme" VerticalAlignment="Center" Width="60" />
+            <ComboBox x:Name="ThemeBox" Width="160" SelectionChanged="OnThemeChanged" />
+          </StackPanel>
+          <TextBlock x:Name="ThemeDescription" Foreground="#BBBBBB" TextWrapping="Wrap" />
+          <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
+                     Text="The theme changes the windows and dialogs, never the emulated screen. Zero applies it when it next starts, because control templates cannot be swapped under open windows." />
+        </StackPanel>
+      </TabItem>
     </TabControl>
   </DockPanel>
 </Window>

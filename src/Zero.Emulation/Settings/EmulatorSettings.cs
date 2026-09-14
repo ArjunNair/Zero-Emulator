@@ -59,6 +59,8 @@ namespace Zero.Emulation.Settings
         public int BorderCrop { get; set; }
         /// <summary>Integer window scale factor.</summary>
         public int WindowScale { get; set; } = 2;
+        /// <summary>UI theme for the windows and dialogs: Fluent, Semi, Simple or Classic. Applied at start-up.</summary>
+        public string UiTheme { get; set; } = "Fluent";
     }
 
     public sealed class AudioSettings

@@ -6,19 +6,18 @@
         Icon="/Assets/zero.ico"
         Width="760" Height="672"
         MinWidth="400" MinHeight="360"
-        Background="Black"
         WindowStartupLocation="CenterScreen">
   <!-- The menu tree is a NativeMenu built in MainWindow.Menu.cs: macOS exports it to the system
        menu bar; elsewhere NativeMenuBar draws it here. One tree, one source of check-mark truth. -->
   <DockPanel>
     <NativeMenuBar DockPanel.Dock="Top" x:Name="MenuBar" />
 
-    <Border DockPanel.Dock="Bottom" Background="#1E1E1E" Padding="8,3">
+    <Border DockPanel.Dock="Bottom" Background="#18000000" Padding="8,3">
       <DockPanel>
-        <TextBlock x:Name="StatusTape" DockPanel.Dock="Right" Foreground="#BBBBBB" Margin="12,0,0,0" />
-        <TextBlock x:Name="StatusFps" DockPanel.Dock="Right" Foreground="#BBBBBB" Margin="12,0,0,0" />
-        <TextBlock x:Name="StatusMachine" Foreground="#DDDDDD" FontWeight="SemiBold" />
-        <TextBlock x:Name="StatusMessage" Foreground="#F0C674" Margin="16,0,0,0" TextTrimming="CharacterEllipsis" />
+        <TextBlock x:Name="StatusTape" DockPanel.Dock="Right" Opacity="0.7" Margin="12,0,0,0" />
+        <TextBlock x:Name="StatusFps" DockPanel.Dock="Right" Opacity="0.7" Margin="12,0,0,0" />
+        <TextBlock x:Name="StatusMachine" FontWeight="SemiBold" />
+        <TextBlock x:Name="StatusMessage" Opacity="0.85" Margin="16,0,0,0" TextTrimming="CharacterEllipsis" />
       </DockPanel>
     </Border>
 

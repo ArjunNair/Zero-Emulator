@@ -34,7 +34,12 @@ where the work stands and every place the implementation deliberately deviates f
   Spectrum keyboard window (original photo, keyword typer). Verified by headless UI tests with
   screenshots. The menu is a single NativeMenu tree: macOS shows it in the system menu bar (with About
   and Options in the application menu), Windows and Linux draw it in the window via NativeMenuBar.
-  On macOS a style layer (`Styles/MacStyles.axaml`, applied only there) gives dialogs Mac conventions:
+  The UI theme is selectable in Options > Appearance: Fluent (default), Semi, Simple or Classic
+  (Windows 95 chrome). A theme is installed at start-up by `Styles/ThemeCatalog.cs`; it cannot be
+  swapped under open windows, because replacing it leaves existing controls without templates, so the
+  setting takes effect on restart. `ZERO_THEME` overrides it for tests and tooling. Classic has no
+  stable Avalonia 12 release yet, so it is pinned to `12.0.1-beta1`.
+  On macOS a style layer (`Styles/MacStyles.axaml`, applied only to Fluent) gives dialogs Mac conventions:
   system font at 13 pt, compact rounded controls, small check boxes, segmented tabs, accent default
   buttons; the theme follows the system light/dark appearance. Avalonia draws its own controls, so this
   is convention, not native widgets. Missing: file associations (packaging-level).

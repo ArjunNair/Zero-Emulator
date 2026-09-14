@@ -488,6 +488,9 @@ namespace Zero.App
                 else _session.ApplySettings();
                 RefreshMenuState();
                 try { _settings.Save(); } catch { }
+                if (dialog.ThemeChanged)
+                    await MessageDialog.ShowAsync(this, "Theme",
+                        $"Zero will use the {_settings.Render.UiTheme} theme the next time it starts.");
             }
             if (!wasPaused) _session.Resume();
             Display.Focus();

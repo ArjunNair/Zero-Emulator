@@ -3,6 +3,8 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Zero.App.Styles;
+using Zero.Emulation.Settings;
 
 namespace Zero.App
 {
@@ -11,9 +13,16 @@ namespace Zero.App
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX)
-                && Environment.GetEnvironmentVariable("ZERO_NO_MAC_STYLES") != "1")
-                Styles.Add(new Avalonia.Markup.Xaml.Styling.StyleInclude(new Uri("avares://Zero/")) { Source = new Uri("avares://Zero/Styles/MacStyles.axaml") });
+
+            // The theme has to be in place before any window is created. ZERO_THEME lets the tests and
+            // the preview tooling pin one; otherwise it comes from the user's settings.
+            string theme = Environment.GetEnvironmentVariable("ZERO_THEME");
+            if (string.IsNullOrWhiteSpace(theme))
+            {
+                try { theme = EmulatorSettings.Load().Render.UiTheme; }
+                catch (Exception) { theme = ThemeCatalog.Fluent; }
+            }
+            ThemeCatalog.Apply(this, theme);
         }
 
         public override void OnFrameworkInitializationCompleted()

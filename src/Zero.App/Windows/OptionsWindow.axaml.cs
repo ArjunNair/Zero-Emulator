@@ -5,6 +5,7 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Zero.App.Styles;
 using Zero.Emulation;
 using Zero.Emulation.Settings;
 
@@ -23,6 +24,9 @@ namespace Zero.App.Windows
 
         /// <summary>True after OK when the ROM folder or a ROM file changed (machine must be recreated).</summary>
         public bool RomsChanged { get; private set; }
+
+        /// <summary>True after OK when a different UI theme was chosen (takes effect on restart).</summary>
+        public bool ThemeChanged { get; private set; }
         public bool Accepted { get; private set; }
 
         public OptionsWindow() : this(new EmulatorSettings(), null) { }
@@ -60,6 +64,9 @@ namespace Zero.App.Windows
             MouseSensitivity.ItemsSource = Enumerable.Range(1, 10).Select(i => i.ToString()).ToArray();
             MouseSensitivity.SelectedIndex = Math.Clamp(settings.Input.MouseSensitivity, 1, 10) - 1;
 
+            ThemeBox.ItemsSource = ThemeCatalog.Names;
+            ThemeBox.SelectedItem = ThemeCatalog.Normalise(settings.Render.UiTheme);
+
             var pads = session?.Gamepads;
             if (pads != null)
             {
@@ -67,6 +74,11 @@ namespace Zero.App.Windows
                 for (int i = 0; i < pads.Count; i++) names.Add($"{i + 1}: {pads.GetName(i)}");
                 GamepadList.Text = names.Count == 0 ? "No gamepads detected." : "Detected: " + string.Join(", ", names);
             }
+        }
+
+        private void OnThemeChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ThemeDescription.Text = ThemeCatalog.Describe(ThemeBox.SelectedItem as string);
         }
 
         private async void OnBrowseFolder(object sender, RoutedEventArgs e)
@@ -128,6 +140,10 @@ namespace Zero.App.Windows
             _settings.Input.Gamepad2Emulates = Math.Max(0, Gamepad2.SelectedIndex);
             _settings.Input.KeyboardJoystickType = Math.Max(0, KeyJoy.SelectedIndex);
             _settings.Input.EnableKeyboardJoystick = KeyJoyEnabled.IsChecked == true;
+            string theme = ThemeCatalog.Normalise(ThemeBox.SelectedItem as string);
+            ThemeChanged = theme != ThemeCatalog.Normalise(_settings.Render.UiTheme);
+            _settings.Render.UiTheme = theme;
+
             _settings.Input.KempstonUsesPort1F = KempstonPort1F.IsChecked == true;
             _settings.Input.EnableKempstonMouse = MouseEnabled.IsChecked == true;
             _settings.Input.MouseSensitivity = Math.Max(0, MouseSensitivity.SelectedIndex) + 1;

@@ -105,7 +105,7 @@ namespace Zero.App.Tests
         {
             var w = new Windows.OptionsWindow(new Zero.Emulation.Settings.EmulatorSettings(), null);
             w.Show();
-            foreach (int tab in new[] { 0, 1, 2, 3 })
+            for (int tab = 0; tab < w.Tabs.ItemCount; tab++)
             {
                 w.Tabs.SelectedIndex = tab;
                 Dispatcher.UIThread.RunJobs();

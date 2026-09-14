@@ -218,6 +218,51 @@ namespace Zero.App.Tests
 
 namespace Zero.App.Tests
 {
+    public class ThemeTests
+    {
+        [AvaloniaFact]
+        public void Every_listed_theme_can_be_created()
+        {
+            foreach (string name in Zero.App.Styles.ThemeCatalog.Names)
+            {
+                Assert.NotNull(Zero.App.Styles.ThemeCatalog.Create(name));
+                Assert.False(string.IsNullOrWhiteSpace(Zero.App.Styles.ThemeCatalog.Describe(name)));
+            }
+            // Unknown or missing names fall back rather than throwing.
+            Assert.Equal("Fluent", Zero.App.Styles.ThemeCatalog.Normalise("nonsense"));
+            Assert.Equal("Fluent", Zero.App.Styles.ThemeCatalog.Normalise(null));
+            Assert.Equal("Classic", Zero.App.Styles.ThemeCatalog.Normalise("classic"));
+        }
+
+        [AvaloniaFact]
+        public void Options_stores_the_chosen_theme_and_reports_the_change()
+        {
+            var settings = new EmulatorSettings();
+            var w = new Windows.OptionsWindow(settings, null);
+            w.Show();
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal("Fluent", w.ThemeBox.SelectedItem);
+
+            w.ThemeBox.SelectedItem = "Classic";
+            Dispatcher.UIThread.RunJobs();
+            Assert.Contains("Windows 95", w.ThemeDescription.Text);
+            w.OkButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.True(w.ThemeChanged);
+            Assert.Equal("Classic", settings.Render.UiTheme);
+
+            // Re-opening with the stored theme selected is not a change.
+            var w2 = new Windows.OptionsWindow(settings, null);
+            w2.Show();
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal("Classic", w2.ThemeBox.SelectedItem);
+            w2.OkButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs();
+            Assert.False(w2.ThemeChanged);
+        }
+    }
+
     public class OptionsWindowTests
     {
         internal static void Shoot(Window w, string name)
