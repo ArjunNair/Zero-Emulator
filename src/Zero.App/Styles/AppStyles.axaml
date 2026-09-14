@@ -1,0 +1,17 @@
+<!-- Cross-platform corrections applied on every platform, loaded from App.axaml. -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Button (and TabItem) default to Stretch content alignment, so the label is stretched to fill
+       the content box and its glyphs are drawn at the top left of that box rather than centred in
+       the control. Every button in Zero holds a plain label, so centre it. -->
+  <Style Selector="Button">
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="TabItem">
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+</Styles>
