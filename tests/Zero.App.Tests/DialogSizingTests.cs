@@ -35,7 +35,7 @@ namespace Zero.App.Tests
 
         private static void Layout(Window w)
         {
-            w.Show();
+            if (!w.IsVisible) w.Show();
             Dispatcher.UIThread.RunJobs();
             w.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             Dispatcher.UIThread.RunJobs();
@@ -48,6 +48,20 @@ namespace Zero.App.Tests
             Window w = Create(name);
             Layout(w);
 
+            // A TabControl only builds the selected tab, so every tab has to be visited or most of the
+            // dialog is never measured at all.
+            var tabs = w.GetVisualDescendants().OfType<TabControl>().FirstOrDefault();
+            int tabCount = tabs?.ItemCount ?? 1;
+            for (int tab = 0; tab < tabCount; tab++)
+            {
+                if (tabs != null) { tabs.SelectedIndex = tab; Layout(w); }
+                CheckContent(w, tabs == null ? name : $"{name} tab {tab}");
+            }
+            w.Close();
+        }
+
+        private static void CheckContent(Window w, string name)
+        {
             var root = w.Content as Control;
             Assert.NotNull(root);
             // DesiredSize includes the root's own margin, so compare against the client area, not its bounds.
@@ -70,7 +84,6 @@ namespace Zero.App.Tests
                 Assert.True(label.Bounds.Width + 1 >= natural.DesiredSize.Width,
                     $"{name}: '{label.Text}' is {label.Bounds.Width:F0}px wide but its text needs {natural.DesiredSize.Width:F0}px");
             }
-            w.Close();
         }
 
         [AvaloniaFact]
