@@ -20,18 +20,32 @@ namespace Zero.App.Tests
         /// <summary>Renders a flat grey frame through the shader and returns the result.</summary>
         private static SKBitmap Render(CrtShaderOptions options)
         {
-            Assert.True(CrtShader.IsAvailable, "the CRT shader did not compile");
+            using SKBitmap frame = Frame(new SKColor(205, 205, 205), new SKColor(205, 205, 205));
+            return Render(options, frame, smooth: true);
+        }
 
-            using var frame = new SKBitmap(new SKImageInfo(FrameWidth, FrameHeight, SKColorType.Bgra8888, SKAlphaType.Premul));
-            using (var c = new SKCanvas(frame)) c.Clear(new SKColor(205, 205, 205));
+        /// <summary>A frame with the given border round the given screen, as the core hands one over.</summary>
+        private static SKBitmap Frame(SKColor border, SKColor screen)
+        {
+            var bmp = new SKBitmap(new SKImageInfo(FrameWidth, FrameHeight, SKColorType.Bgra8888, SKAlphaType.Premul));
+            using var c = new SKCanvas(bmp);
+            c.Clear(border);
+            using var paint = new SKPaint { Color = screen };
+            c.DrawRect(new SKRect(48, 48, 48 + 256, 48 + 192), paint);
+            return bmp;
+        }
+
+        private static SKBitmap Render(CrtShaderOptions options, SKBitmap frame, bool smooth)
+        {
+            Assert.True(CrtShader.IsAvailable, "the CRT shader did not compile");
 
             var source = new Rect(48, 48, FrameWidth - 96, FrameHeight - 48 - 56);  // border fully cropped
             var dest = new Rect(0, 0, Width, Height);
-            var op = new CrtDrawOperation(dest, frame, source, dest, options, true, null, 0f);
+            var op = new CrtDrawOperation(dest, frame, source, dest, options, smooth, null, 0f);
 
             using var surface = SKSurface.Create(new SKImageInfo(Width, Height, SKColorType.Bgra8888, SKAlphaType.Premul));
             op.DrawShaded(surface.Canvas, CrtShader.Effect, Width, Height,
-                new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None));
+                new SKSamplingOptions(smooth ? SKFilterMode.Linear : SKFilterMode.Nearest, SKMipmapMode.None));
             using SKImage image = surface.Snapshot();
             return SKBitmap.FromImage(image);
         }
@@ -109,6 +123,30 @@ namespace Zero.App.Tests
             double right = Band(bmp, Width - 6, Width, Height / 4, 3 * Height / 4);
             double spread = Math.Abs(left - right);
             Assert.True(spread < 2.0, $"the spill is uneven: left={left:F1} right={right:F1}");
+        }
+
+        [Theory]
+        [InlineData(true)]    // PixelSmoothing on
+        [InlineData(false)]   // and off, which is the default
+        public void The_edge_light_never_spills_the_colour_of_a_cropped_away_border(bool smooth)
+        {
+            // A red border round a white screen, with the border cropped out of view. Whatever the
+            // edge light picks up must come from the screen, so the spill has to be neutral: any red
+            // in it is the hidden border leaking back in through the sampling.
+            using SKBitmap frame = Frame(new SKColor(0xC0, 0x00, 0x00), new SKColor(0xC0, 0xC0, 0xC0));
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            using SKBitmap bmp = Render(options, frame, smooth);
+
+            foreach ((string name, int x, int y) in new[]
+                     {
+                         ("left", 1, Height / 2), ("right", Width - 2, Height / 2),
+                         ("top", Width / 2, 1), ("bottom", Width / 2, Height - 2),
+                     })
+            {
+                SKColor c = bmp.GetPixel(x, y);
+                Assert.True(Math.Abs(c.Red - c.Blue) <= 2 && Math.Abs(c.Red - c.Green) <= 2,
+                    $"the {name} edge spills the hidden border's colour: #{c.Red:X2}{c.Green:X2}{c.Blue:X2}");
+            }
         }
     }
 }

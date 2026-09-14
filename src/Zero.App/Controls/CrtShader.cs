@@ -63,14 +63,24 @@ half4 main(float2 xy) {
     float2 c  = uv * 2.0 - 1.0;                       // -1..1 from the centre
     c *= 1.0 + curvature * dot(c.yx, c.yx) * 0.25;    // bulge the glass
 
+    // Keep every sample half a source pixel inside the visible frame. The frame we are handed still
+    // has its border attached and the tile mode clamps to the whole of it, so a sample taken exactly
+    // on the edge lands on the boundary between the last visible pixel and the first cropped-away
+    // border pixel: which one it returns is then decided by rounding, and it rounds differently at
+    // the two ends. That is what made the edge light spill the hidden border's colour down one side
+    // of the screen and the picture's colour down the other.
+    float2 texel = dest / max(srcSize, float2(1.0, 1.0));
+    float2 lo = texel * 0.5, hi = dest - texel * 0.5;
+
     float2 inside = clamp(c, -1.0, 1.0);
-    float2 p = (inside * 0.5 + 0.5) * dest;           // nearest point on the glass
+    float2 p = clamp((inside * 0.5 + 0.5) * dest, lo, hi);   // nearest point on the glass
     half4 col = src.eval(p);
 
     if (glow > 0.0) {                                 // phosphor bleeding into the neighbouring lines
         float rows = max(srcSize.y, 1.0);
         float step = dest.y / rows;
-        half4 bleed = src.eval(p - float2(0.0, step)) * 0.6 + src.eval(p + float2(0.0, step)) * 0.4;
+        half4 bleed = src.eval(clamp(p - float2(0.0, step), lo, hi)) * 0.6
+                    + src.eval(clamp(p + float2(0.0, step), lo, hi)) * 0.4;
         col = (col + bleed * glow) / (1.0 + glow);    // normalised, so the picture keeps its exposure
     }
 
