@@ -19,8 +19,10 @@ namespace Zero.App.Tests
     /// </summary>
     public class ButtonAlignmentTests
     {
-        /// <summary>macOS nudges the label down a little so the ink, not the line box, looks centred.</summary>
-        private const double MaxAbove = 1.5, MaxBelow = 3.5;
+        // Tolerances are in (top - bottom) gap difference, so twice the actual offset. They allow the
+        // deliberate downward nudge on macOS, and Classic's raised bevel, which seats the label a
+        // pixel above the geometric centre of the button face on purpose.
+        private const double MaxAbove = 2.5, MaxBelow = 3.5;
 
         private static void Layout(Window w)
         {
