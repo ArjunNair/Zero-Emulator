@@ -73,8 +73,21 @@ namespace Zero.App.Tests
             w.ApplyCrtSettings();
             long plainAgain = Capture(w);
 
+            // Every effect at once, to prove none of them depends on a particular theme's resources.
+            CrtSettings crt = w.Session.Settings.Render.Crt;
+            crt.Enabled = crt.Scanlines = crt.Vignette = crt.ScanBeam = crt.Flicker = crt.Noise = true;
+            w.ApplyCrtSettings();
+            long everything = Capture(w, "crt-all");
+
+            crt.Enabled = false;
+            crt.ScanBeam = crt.Flicker = crt.Noise = false;
+            w.ApplyCrtSettings();
+            long plainOnceMore = Capture(w);
+
+            Assert.Equal(plain, plainOnceMore);
             Assert.True(w.CrtLayer != null);
             Assert.NotEqual(plain, withEffects);
+            Assert.NotEqual(plain, everything);
             Assert.Equal(plain, plainAgain);
             w.Close();
         }
