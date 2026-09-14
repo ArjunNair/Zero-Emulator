@@ -93,8 +93,14 @@ half4 main(float2 xy) {
         picture += half3(half((n - 0.5) * noise * 0.18));
     }
     if (reflection > 0.0) {                           // a soft sheen across the glass
-        float sheen = clamp(1.0 - distance(uv, float2(0.28, 0.22)) * 1.7, 0.0, 1.0);
-        picture += half3(half(sheen * sheen * reflection * 0.25));
+        // Measured in units of the screen's height, so the highlight stays round whatever shape the
+        // window is rather than stretching with it, and faded out before the rim. A highlight that
+        // runs off an edge lights that edge instead of falling away, which is what made the left and
+        // top of the screen brighter than the right and bottom.
+        float2 q = (uv - float2(0.32, 0.26)) * float2(dest.x / max(dest.y, 1.0), 1.0);
+        float sheen = clamp(1.0 - length(q) * 2.2, 0.0, 1.0);
+        float contain = smoothstep(0.0, 0.45, 1.0 - max(abs(c.x), abs(c.y)));
+        picture += half3(half(sheen * sheen * contain * reflection * 0.3));
     }
 
     // The surround, lit by the picture it frames.
@@ -228,7 +234,7 @@ half4 main(float2 xy) {
         }
 
         /// <summary>Runs the shader over a rectangle of the given size, starting at the canvas origin.</summary>
-        private void DrawShaded(SKCanvas canvas, SKRuntimeEffect effect, double width, double height, SKSamplingOptions sampling)
+        internal void DrawShaded(SKCanvas canvas, SKRuntimeEffect effect, double width, double height, SKSamplingOptions sampling)
         {
             // Map output pixels back onto the visible part of the frame.
             float sx = (float)(width / _source.Width);
