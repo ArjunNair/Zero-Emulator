@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Styling;
 using Avalonia.Themes.Simple;
+using Pipboy.Avalonia;
 using Semi.Avalonia;
 
 namespace Zero.App.Styles
@@ -15,9 +16,10 @@ namespace Zero.App.Styles
     {
         public const string Semi = "Semi";
         public const string Simple = "Simple";
+        public const string Pipboy = "Pipboy";
 
         /// <summary>Selectable themes. The first is the default.</summary>
-        public static readonly string[] Names = { Semi, Simple };
+        public static readonly string[] Names = { Semi, Simple, Pipboy };
 
         public static string Default => Names[0];
 
@@ -26,6 +28,7 @@ namespace Zero.App.Styles
             switch (Normalise(name))
             {
                 case Simple: return "Plain and compact, in the style of an older desktop application. Fits the most rows in the tape deck and button lists.";
+                case Pipboy: return "Green phosphor on black in a monospace face, like a CRT terminal.";
                 default: return "Zero's default: modern and roomy, with a light and a dark appearance.";
             }
         }
@@ -44,6 +47,7 @@ namespace Zero.App.Styles
             switch (Normalise(name))
             {
                 case Simple: return new SimpleTheme();
+                case Pipboy: return new PipboyTheme();
                 default: return new SemiTheme();
             }
         }

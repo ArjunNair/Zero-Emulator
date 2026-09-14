@@ -3,15 +3,17 @@
         x:Class="Zero.App.Windows.OptionsWindow"
         Title="Options"
         Icon="/Assets/zero.ico"
-        Width="560" Height="440"
-        CanResize="False"
+        SizeToContent="WidthAndHeight"
+        MinWidth="520" MaxWidth="900"
+        CanResize="True"
         WindowStartupLocation="CenterOwner">
   <DockPanel Margin="18">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
       <Button x:Name="CancelButton" Content="Cancel" MinWidth="90" IsCancel="True" Click="OnCancel" />
       <Button x:Name="OkButton" Classes="accent" Content="OK" MinWidth="90" IsDefault="True" Click="OnOk" />
     </StackPanel>
-    <TabControl x:Name="Tabs">
+    <!-- MinHeight keeps the window from resizing every time a shorter tab is selected. -->
+    <TabControl x:Name="Tabs" MinHeight="340">
       <TabItem Header="Folders">
         <StackPanel Spacing="10" Margin="0,10,0,0">
           <TextBlock Text="Relative paths are resolved from the folder Zero runs in." Foreground="#BBBBBB" />
@@ -69,35 +71,32 @@
       </TabItem>
       <TabItem Header="Input">
         <StackPanel Spacing="12" Margin="0,10,0,0">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="Gamepad 1 emulates" VerticalAlignment="Center" Width="140" />
-            <ComboBox x:Name="Gamepad1" Width="160" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="Gamepad 2 emulates" VerticalAlignment="Center" Width="140" />
-            <ComboBox x:Name="Gamepad2" Width="160" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="Cursor keys emulate" VerticalAlignment="Center" Width="140" />
-            <ComboBox x:Name="KeyJoy" Width="160" />
-            <CheckBox x:Name="KeyJoyEnabled" Content="Enabled" VerticalAlignment="Center" />
-          </StackPanel>
+          <!-- Auto-sized label column: a fixed width would cut the labels off under a wider font. -->
+          <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Text="Gamepad 1 emulates" VerticalAlignment="Center" Margin="0,2,10,2" />
+            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="Gamepad1" Width="160" Margin="0,2" />
+            <TextBlock Grid.Row="1" Text="Gamepad 2 emulates" VerticalAlignment="Center" Margin="0,2,10,2" />
+            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="Gamepad2" Width="160" Margin="0,2" />
+            <TextBlock Grid.Row="2" Text="Cursor keys emulate" VerticalAlignment="Center" Margin="0,2,10,2" />
+            <ComboBox Grid.Row="2" Grid.Column="1" x:Name="KeyJoy" Width="160" Margin="0,2" />
+            <CheckBox Grid.Row="2" Grid.Column="2" x:Name="KeyJoyEnabled" Content="Enabled" VerticalAlignment="Center" Margin="10,2,0,2" />
+          </Grid>
           <CheckBox x:Name="KempstonPort1F" Content="Kempston interface decodes port 0x1F fully (more compatible)" />
           <Button Content="Configure gamepad buttons…" Click="OnConfigureButtons" HorizontalAlignment="Left" />
           <Separator />
           <CheckBox x:Name="MouseEnabled" Content="Kempston mouse (click the screen to capture the pointer, Esc releases it)" />
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="Mouse sensitivity" VerticalAlignment="Center" Width="140" />
-            <ComboBox x:Name="MouseSensitivity" Width="90" />
-            <TextBlock Text="(3 = one count per Spectrum pixel)" Foreground="#BBBBBB" VerticalAlignment="Center" />
-          </StackPanel>
+          <Grid ColumnDefinitions="Auto,Auto,Auto">
+            <TextBlock Text="Mouse sensitivity" VerticalAlignment="Center" Margin="0,0,10,0" />
+            <ComboBox Grid.Column="1" x:Name="MouseSensitivity" Width="90" />
+            <TextBlock Grid.Column="2" Text="(3 = one count per Spectrum pixel)" Foreground="#BBBBBB" VerticalAlignment="Center" Margin="10,0,0,0" />
+          </Grid>
           <TextBlock x:Name="GamepadList" Foreground="#BBBBBB" TextWrapping="Wrap" />
         </StackPanel>
       </TabItem>
       <TabItem Header="Appearance">
         <StackPanel Spacing="12" Margin="0,10,0,0">
           <StackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="Theme" VerticalAlignment="Center" Width="60" />
+            <TextBlock Text="Theme" VerticalAlignment="Center" />
             <ComboBox x:Name="ThemeBox" Width="160" SelectionChanged="OnThemeChanged" />
           </StackPanel>
           <TextBlock x:Name="ThemeDescription" Foreground="#BBBBBB" TextWrapping="Wrap" />

@@ -4,8 +4,8 @@
         x:Class="Zero.App.Windows.TapeDeckWindow"
         Title="Tape Deck"
         Icon="/Assets/zero.ico"
-        Width="520" Height="420"
-        MinWidth="420" MinHeight="300"
+        SizeToContent="Width"
+        Height="440" MinWidth="460" MaxWidth="1000" MinHeight="300"
         WindowStartupLocation="CenterOwner">
   <DockPanel Margin="16">
     <TextBlock DockPanel.Dock="Top" x:Name="TitleText" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,2" />

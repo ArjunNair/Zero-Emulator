@@ -3,8 +3,9 @@
         x:Class="Zero.App.Windows.LoadBinaryWindow"
         Title="Load Binary"
         Icon="/Assets/zero.ico"
-        Width="480" SizeToContent="Height"
-        CanResize="False"
+        SizeToContent="WidthAndHeight"
+        MinWidth="440" MaxWidth="820"
+        CanResize="True"
         WindowStartupLocation="CenterOwner">
   <StackPanel Margin="18" Spacing="10">
     <Grid ColumnDefinitions="*,Auto">

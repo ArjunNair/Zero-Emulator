@@ -3,8 +3,9 @@
         x:Class="Zero.App.Windows.GamepadWindow"
         Title="Gamepad Buttons"
         Icon="/Assets/zero.ico"
-        Width="520" Height="600"
-        CanResize="False"
+        SizeToContent="Width"
+        Height="600" MinWidth="480" MaxWidth="900"
+        CanResize="True"
         WindowStartupLocation="CenterOwner">
   <DockPanel Margin="18">
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">

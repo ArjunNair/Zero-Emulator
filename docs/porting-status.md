@@ -34,12 +34,16 @@ where the work stands and every place the implementation deliberately deviates f
   Spectrum keyboard window (original photo, keyword typer). Verified by headless UI tests with
   screenshots. The menu is a single NativeMenu tree: macOS shows it in the system menu bar (with About
   and Options in the application menu), Windows and Linux draw it in the window via NativeMenuBar.
-  The UI theme is selectable in Options > Appearance: Semi (default) or Simple. A theme is installed at
+  The UI theme is selectable in Options > Appearance: Semi (default), Simple or Pipboy (green phosphor
+  on black, monospace). A theme is installed at
   start-up by `Styles/ThemeCatalog.cs`; it cannot be swapped under open windows, because replacing it
   leaves existing controls without templates, so the setting takes effect on restart. `ZERO_THEME`
   overrides it for tests and tooling, and unknown or dropped names fall back to the default. Fluent and
   Classic (Windows 95 chrome) were offered briefly and removed on preference; `MacStyles.axaml` went
-  with Fluent, since it tuned Fluent's own templates for macOS. Zero runs in globalization-invariant
+  with Fluent, since it tuned Fluent's own templates for macOS. Dialogs size themselves to their
+  content (`SizeToContent` with a MinWidth/MaxWidth, and no fixed-width labels), because a theme's
+  metrics decide how much room the text needs; `DialogSizingTests` fails if any label ends up narrower
+  than its text. Zero runs in globalization-invariant
   mode to keep the published output small, with `PredefinedCulturesOnly=false` because Semi constructs
   a `CultureInfo` for its own localisation; the test project mirrors both settings, so a theme that
   trips over them fails in tests rather than on the user's next start-up.
