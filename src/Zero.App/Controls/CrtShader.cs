@@ -58,6 +58,23 @@ float hash(float2 p) {
     return fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
 }
 
+/// Light coming off the edge of the picture. Taking the single nearest pixel would let one dark pixel
+/// at the edge paint a hard bar all the way out to the frame, so this averages a patch of the picture
+/// instead. The offsets are axis-aligned rather than turned to follow the edge: a direction that
+/// turns as it goes round a corner sweeps the taps across the picture and fans the corner with rays.
+half3 edgeSample(float2 p, float2 lo, float2 hi, float2 r) {
+    half3 sum = src.eval(clamp(p, lo, hi)).rgb;
+    sum += src.eval(clamp(p + float2(-r.x, -r.y), lo, hi)).rgb;
+    sum += src.eval(clamp(p + float2( 0.0, -r.y), lo, hi)).rgb;
+    sum += src.eval(clamp(p + float2( r.x, -r.y), lo, hi)).rgb;
+    sum += src.eval(clamp(p + float2(-r.x,  0.0), lo, hi)).rgb;
+    sum += src.eval(clamp(p + float2( r.x,  0.0), lo, hi)).rgb;
+    sum += src.eval(clamp(p + float2(-r.x,  r.y), lo, hi)).rgb;
+    sum += src.eval(clamp(p + float2( 0.0,  r.y), lo, hi)).rgb;
+    sum += src.eval(clamp(p + float2( r.x,  r.y), lo, hi)).rgb;
+    return sum / 9.0;
+}
+
 half4 main(float2 xy) {
     float2 uv = xy / dest;
     float2 c  = uv * 2.0 - 1.0;                       // -1..1 from the centre
@@ -113,15 +130,19 @@ half4 main(float2 xy) {
         picture += half3(half(sheen * sheen * contain * reflection * 0.3));
     }
 
-    // The surround, lit by the picture it frames.
-    float beyond = distance(c, inside);
-    half3 spill = col.rgb * exp(-beyond * 13.0) * edgeLight;
-
     // Blend across the rim rather than switching at it, or the curve stair-steps. 'pixel' is one
     // output pixel expressed in this -1..1 space; three of them is the narrowest band that still
     // reads as smooth once the software path scales its output up.
+    float beyond = distance(c, inside);
     float pixel = 2.0 / max(min(dest.x, dest.y), 1.0);
     float rim = smoothstep(0.0, pixel * 3.0, beyond);
+
+    // The surround, lit by the picture it frames. The patch averaged widens as the light travels out.
+    half3 spill = half3(0.0);
+    if (rim > 0.0 && edgeLight > 0.0) {
+        float2 r = texel * (6.0 + beyond * 40.0);
+        spill = edgeSample(p, lo, hi, r) * exp(-beyond * 13.0) * edgeLight;
+    }
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";
 

@@ -148,5 +148,31 @@ namespace Zero.App.Tests
                     $"the {name} edge spills the hidden border's colour: #{c.Red:X2}{c.Green:X2}{c.Blue:X2}");
             }
         }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void A_dark_pixel_at_the_screen_edge_does_not_paint_a_bar_across_the_surround(bool smooth)
+        {
+            // The BASIC cursor sits hard against the left edge of the screen. Light leaving the edge
+            // of a picture is diffuse, so a single black block there must not reach the frame as a
+            // solid bar: the surround beside it should stay close to the surround above and below.
+            using SKBitmap frame = Frame(new SKColor(0xC0, 0xC0, 0xC0), new SKColor(0xC0, 0xC0, 0xC0));
+            using (var c = new SKCanvas(frame))
+            using (var black = new SKPaint { Color = SKColors.Black })
+                c.DrawRect(new SKRect(48, 48 + 92, 48 + 16, 48 + 100), black);   // 16x8, on the left edge
+
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            using SKBitmap bmp = Render(options, frame, smooth);
+
+            // The block is at 92/192 of the way down the screen, so a little above the middle.
+            int row = (int)(Height * 96.0 / 192.0);
+            double beside = Band(bmp, 1, 3, row - 4, row + 4);
+            double above = Band(bmp, 1, 3, row - 60, row - 40);
+            double below = Band(bmp, 1, 3, row + 40, row + 60);
+            double clear = (above + below) / 2;
+            Assert.True(clear - beside < clear * 0.5,
+                $"the dark block bars the surround: beside it {beside:F1}, clear of it {clear:F1}");
+        }
     }
 }
