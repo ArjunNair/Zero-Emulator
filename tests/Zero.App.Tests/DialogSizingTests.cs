@@ -100,8 +100,8 @@ namespace Zero.App.Tests
                 Dispatcher.UIThread.RunJobs();
                 double h = w.Tabs.Bounds.Height;
                 if (tab == 0) first = h;
-                // A floor on the tab body keeps the window from jumping as tabs are selected.
-                Assert.True(Math.Abs(h - first) < 80, $"tab {tab} is {h:F0}px tall against {first:F0}px for the first");
+                // The tab body is a fixed height, so the window must not move at all as tabs are selected.
+                Assert.True(Math.Abs(h - first) < 1, $"tab {tab} is {h:F0}px tall against {first:F0}px for the first");
             }
             w.Close();
         }

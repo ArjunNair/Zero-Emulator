@@ -12,121 +12,126 @@
       <Button x:Name="CancelButton" Content="Cancel" MinWidth="90" IsCancel="True" Click="OnCancel" />
       <Button x:Name="OkButton" Classes="accent" Content="OK" MinWidth="90" IsDefault="True" Click="OnOk" />
     </StackPanel>
-    <!-- MinHeight keeps the window from resizing every time a shorter tab is selected. -->
-    <TabControl x:Name="Tabs" MinHeight="340">
+    <!-- A fixed tab body: the window keeps one size whichever tab is selected, and a taller tab scrolls. -->
+    <TabControl x:Name="Tabs" Height="420">
       <TabItem Header="Folders">
-        <StackPanel Spacing="10" Margin="0,10,0,0">
-          <TextBlock Text="Relative paths are resolved from the folder Zero runs in." Foreground="#BBBBBB" />
-          <Grid ColumnDefinitions="110,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" x:Name="PathGrid">
-            <TextBlock Grid.Row="0" Text="ROMs" VerticalAlignment="Center" />
-            <TextBox Grid.Row="0" Grid.Column="1" x:Name="RomsPath" Margin="0,2" />
-            <Button Grid.Row="0" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomsPath" Click="OnBrowseFolder" />
-            <TextBlock Grid.Row="1" Text="Programs" VerticalAlignment="Center" />
-            <TextBox Grid.Row="1" Grid.Column="1" x:Name="ProgramsPath" Margin="0,2" />
-            <Button Grid.Row="1" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="ProgramsPath" Click="OnBrowseFolder" />
-            <TextBlock Grid.Row="2" Text="Saves" VerticalAlignment="Center" />
-            <TextBox Grid.Row="2" Grid.Column="1" x:Name="SavesPath" Margin="0,2" />
-            <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="SavesPath" Click="OnBrowseFolder" />
-            <TextBlock Grid.Row="3" Text="Screenshots" VerticalAlignment="Center" />
-            <TextBox Grid.Row="3" Grid.Column="1" x:Name="ScreenshotsPath" Margin="0,2" />
-            <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="ScreenshotsPath" Click="OnBrowseFolder" />
-          </Grid>
-        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">          <StackPanel Spacing="10" Margin="0,10,0,0">
+            <TextBlock Text="Relative paths are resolved from the folder Zero runs in." Foreground="#BBBBBB" />
+            <Grid ColumnDefinitions="110,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" x:Name="PathGrid">
+              <TextBlock Grid.Row="0" Text="ROMs" VerticalAlignment="Center" />
+              <TextBox Grid.Row="0" Grid.Column="1" x:Name="RomsPath" Margin="0,2" />
+              <Button Grid.Row="0" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomsPath" Click="OnBrowseFolder" />
+              <TextBlock Grid.Row="1" Text="Programs" VerticalAlignment="Center" />
+              <TextBox Grid.Row="1" Grid.Column="1" x:Name="ProgramsPath" Margin="0,2" />
+              <Button Grid.Row="1" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="ProgramsPath" Click="OnBrowseFolder" />
+              <TextBlock Grid.Row="2" Text="Saves" VerticalAlignment="Center" />
+              <TextBox Grid.Row="2" Grid.Column="1" x:Name="SavesPath" Margin="0,2" />
+              <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="SavesPath" Click="OnBrowseFolder" />
+              <TextBlock Grid.Row="3" Text="Screenshots" VerticalAlignment="Center" />
+              <TextBox Grid.Row="3" Grid.Column="1" x:Name="ScreenshotsPath" Margin="0,2" />
+              <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="ScreenshotsPath" Click="OnBrowseFolder" />
+            </Grid>
+          </StackPanel>
+        </ScrollViewer>
       </TabItem>
       <TabItem Header="ROMs">
-        <StackPanel Spacing="10" Margin="0,10,0,0">
-          <TextBlock Text="ROM image for each machine, inside the ROMs folder. Changing one restarts that machine." Foreground="#BBBBBB" TextWrapping="Wrap" />
-          <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
-            <TextBlock Grid.Row="0" Text="Spectrum 48K" VerticalAlignment="Center" />
-            <TextBox Grid.Row="0" Grid.Column="1" x:Name="Rom48k" Margin="0,2" />
-            <Button Grid.Row="0" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom48k" Click="OnBrowseRom" />
-            <TextBlock Grid.Row="1" Text="Spectrum 128K" VerticalAlignment="Center" />
-            <TextBox Grid.Row="1" Grid.Column="1" x:Name="Rom128k" Margin="0,2" />
-            <Button Grid.Row="1" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128k" Click="OnBrowseRom" />
-            <TextBlock Grid.Row="2" Text="Spectrum 128Ke" VerticalAlignment="Center" />
-            <TextBox Grid.Row="2" Grid.Column="1" x:Name="Rom128ke" Margin="0,2" />
-            <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128ke" Click="OnBrowseRom" />
-            <TextBlock Grid.Row="3" Text="Spectrum +3" VerticalAlignment="Center" />
-            <TextBox Grid.Row="3" Grid.Column="1" x:Name="RomPlus3" Margin="0,2" />
-            <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPlus3" Click="OnBrowseRom" />
-            <TextBlock Grid.Row="4" Text="Pentagon 128K" VerticalAlignment="Center" />
-            <TextBox Grid.Row="4" Grid.Column="1" x:Name="RomPentagon" Margin="0,2" />
-            <Button Grid.Row="4" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPentagon" Click="OnBrowseRom" />
-          </Grid>
-          <TextBlock Text="The Pentagon also needs trdos.rom in the same folder." Foreground="#BBBBBB" />
-        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">          <StackPanel Spacing="10" Margin="0,10,0,0">
+            <TextBlock Text="ROM image for each machine, inside the ROMs folder. Changing one restarts that machine." Foreground="#BBBBBB" TextWrapping="Wrap" />
+            <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+              <TextBlock Grid.Row="0" Text="Spectrum 48K" VerticalAlignment="Center" />
+              <TextBox Grid.Row="0" Grid.Column="1" x:Name="Rom48k" Margin="0,2" />
+              <Button Grid.Row="0" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom48k" Click="OnBrowseRom" />
+              <TextBlock Grid.Row="1" Text="Spectrum 128K" VerticalAlignment="Center" />
+              <TextBox Grid.Row="1" Grid.Column="1" x:Name="Rom128k" Margin="0,2" />
+              <Button Grid.Row="1" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128k" Click="OnBrowseRom" />
+              <TextBlock Grid.Row="2" Text="Spectrum 128Ke" VerticalAlignment="Center" />
+              <TextBox Grid.Row="2" Grid.Column="1" x:Name="Rom128ke" Margin="0,2" />
+              <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128ke" Click="OnBrowseRom" />
+              <TextBlock Grid.Row="3" Text="Spectrum +3" VerticalAlignment="Center" />
+              <TextBox Grid.Row="3" Grid.Column="1" x:Name="RomPlus3" Margin="0,2" />
+              <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPlus3" Click="OnBrowseRom" />
+              <TextBlock Grid.Row="4" Text="Pentagon 128K" VerticalAlignment="Center" />
+              <TextBox Grid.Row="4" Grid.Column="1" x:Name="RomPentagon" Margin="0,2" />
+              <Button Grid.Row="4" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPentagon" Click="OnBrowseRom" />
+            </Grid>
+            <TextBlock Text="The Pentagon also needs trdos.rom in the same folder." Foreground="#BBBBBB" />
+          </StackPanel>
+        </ScrollViewer>
       </TabItem>
       <TabItem Header="Emulation">
-        <StackPanel Spacing="12" Margin="0,10,0,0">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="CPU speed multiplier" VerticalAlignment="Center" />
-            <ComboBox x:Name="CpuMultiplier" Width="90" />
-            <TextBlock Text="(1 = original 3.5 MHz)" Foreground="#BBBBBB" VerticalAlignment="Center" />
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">          <StackPanel Spacing="12" Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <TextBlock Text="CPU speed multiplier" VerticalAlignment="Center" />
+              <ComboBox x:Name="CpuMultiplier" Width="90" />
+              <TextBlock Text="(1 = original 3.5 MHz)" Foreground="#BBBBBB" VerticalAlignment="Center" />
+            </StackPanel>
+            <CheckBox x:Name="Use128ke" Content="Load 128K snapshots into the 128Ke (higher compatibility)" />
+            <CheckBox x:Name="PauseOnFocusLost" Content="Pause emulation when the window loses focus" />
+            <CheckBox x:Name="ConfirmOnExit" Content="Ask for confirmation before exiting" />
+            <CheckBox x:Name="RestoreSession" Content="Restore the previous session on start-up" />
           </StackPanel>
-          <CheckBox x:Name="Use128ke" Content="Load 128K snapshots into the 128Ke (higher compatibility)" />
-          <CheckBox x:Name="PauseOnFocusLost" Content="Pause emulation when the window loses focus" />
-          <CheckBox x:Name="ConfirmOnExit" Content="Ask for confirmation before exiting" />
-          <CheckBox x:Name="RestoreSession" Content="Restore the previous session on start-up" />
-        </StackPanel>
+        </ScrollViewer>
       </TabItem>
       <TabItem Header="Input">
-        <StackPanel Spacing="12" Margin="0,10,0,0">
-          <!-- Auto-sized label column: a fixed width would cut the labels off under a wider font. -->
-          <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto">
-            <TextBlock Grid.Row="0" Text="Gamepad 1 emulates" VerticalAlignment="Center" Margin="0,2,10,2" />
-            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="Gamepad1" Width="160" Margin="0,2" />
-            <TextBlock Grid.Row="1" Text="Gamepad 2 emulates" VerticalAlignment="Center" Margin="0,2,10,2" />
-            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="Gamepad2" Width="160" Margin="0,2" />
-            <TextBlock Grid.Row="2" Text="Cursor keys emulate" VerticalAlignment="Center" Margin="0,2,10,2" />
-            <ComboBox Grid.Row="2" Grid.Column="1" x:Name="KeyJoy" Width="160" Margin="0,2" />
-            <CheckBox Grid.Row="2" Grid.Column="2" x:Name="KeyJoyEnabled" Content="Enabled" VerticalAlignment="Center" Margin="10,2,0,2" />
-          </Grid>
-          <CheckBox x:Name="KempstonPort1F" Content="Kempston interface decodes port 0x1F fully (more compatible)" />
-          <Button Content="Configure gamepad buttons…" Click="OnConfigureButtons" HorizontalAlignment="Left" />
-          <Separator />
-          <CheckBox x:Name="MouseEnabled" Content="Kempston mouse (click the screen to capture the pointer, Esc releases it)" />
-          <Grid ColumnDefinitions="Auto,Auto,Auto">
-            <TextBlock Text="Mouse sensitivity" VerticalAlignment="Center" Margin="0,0,10,0" />
-            <ComboBox Grid.Column="1" x:Name="MouseSensitivity" Width="90" />
-            <TextBlock Grid.Column="2" Text="(3 = one count per Spectrum pixel)" Foreground="#BBBBBB" VerticalAlignment="Center" Margin="10,0,0,0" />
-          </Grid>
-          <TextBlock x:Name="GamepadList" Foreground="#BBBBBB" TextWrapping="Wrap" />
-        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">          <StackPanel Spacing="12" Margin="0,10,0,0">
+            <!-- Auto-sized label column: a fixed width would cut the labels off under a wider font. -->
+            <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto">
+              <TextBlock Grid.Row="0" Text="Gamepad 1 emulates" VerticalAlignment="Center" Margin="0,2,10,2" />
+              <ComboBox Grid.Row="0" Grid.Column="1" x:Name="Gamepad1" Width="160" Margin="0,2" />
+              <TextBlock Grid.Row="1" Text="Gamepad 2 emulates" VerticalAlignment="Center" Margin="0,2,10,2" />
+              <ComboBox Grid.Row="1" Grid.Column="1" x:Name="Gamepad2" Width="160" Margin="0,2" />
+              <TextBlock Grid.Row="2" Text="Cursor keys emulate" VerticalAlignment="Center" Margin="0,2,10,2" />
+              <ComboBox Grid.Row="2" Grid.Column="1" x:Name="KeyJoy" Width="160" Margin="0,2" />
+              <CheckBox Grid.Row="2" Grid.Column="2" x:Name="KeyJoyEnabled" Content="Enabled" VerticalAlignment="Center" Margin="10,2,0,2" />
+            </Grid>
+            <CheckBox x:Name="KempstonPort1F" Content="Kempston interface decodes port 0x1F fully (more compatible)" />
+            <Button Content="Configure gamepad buttons…" Click="OnConfigureButtons" HorizontalAlignment="Left" />
+            <Separator />
+            <CheckBox x:Name="MouseEnabled" Content="Kempston mouse (click the screen to capture the pointer, Esc releases it)" />
+            <Grid ColumnDefinitions="Auto,Auto,Auto">
+              <TextBlock Text="Mouse sensitivity" VerticalAlignment="Center" Margin="0,0,10,0" />
+              <ComboBox Grid.Column="1" x:Name="MouseSensitivity" Width="90" />
+              <TextBlock Grid.Column="2" Text="(3 = one count per Spectrum pixel)" Foreground="#BBBBBB" VerticalAlignment="Center" Margin="10,0,0,0" />
+            </Grid>
+            <TextBlock x:Name="GamepadList" Foreground="#BBBBBB" TextWrapping="Wrap" />
+          </StackPanel>
+        </ScrollViewer>
       </TabItem>
       <TabItem Header="Appearance">
-        <StackPanel Spacing="12" Margin="0,10,0,0">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="Theme" VerticalAlignment="Center" />
-            <ComboBox x:Name="ThemeBox" Width="160" SelectionChanged="OnThemeChanged" />
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">          <StackPanel Spacing="12" Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <TextBlock Text="Theme" VerticalAlignment="Center" />
+              <ComboBox x:Name="ThemeBox" Width="160" SelectionChanged="OnThemeChanged" />
+            </StackPanel>
+            <TextBlock x:Name="ThemeDescription" Foreground="#BBBBBB" TextWrapping="Wrap" />
+            <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
+                       Text="Applies when Zero next starts. Themes change the windows and dialogs, never the emulated screen." />
+            <Separator />
+            <CheckBox x:Name="CrtEnabled" Content="CRT effects over the emulated screen" />
+            <StackPanel Margin="24,0,0,0" Spacing="6">
+              <CheckBox x:Name="CrtScanlines" Content="Scanlines" />
+              <CheckBox x:Name="CrtVignette" Content="Vignette (darkened corners)" />
+              <CheckBox x:Name="CrtFlicker" Content="Flicker" />
+              <CheckBox x:Name="CrtNoise" Content="Noise" />
+            </StackPanel>
+            <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
+                       Text="Flicker and noise animate continuously and cost a little more than the other two." />
+            <CheckBox x:Name="CrtAdvanced" Content="Curved glass, glow and reflection (GPU)" />
+            <Grid ColumnDefinitions="Auto,160,Auto" RowDefinitions="Auto,Auto,Auto" Margin="24,0,0,0">
+              <TextBlock Grid.Row="0" Text="Glow" VerticalAlignment="Center" Margin="0,0,10,0" />
+              <Slider Grid.Row="0" Grid.Column="1" x:Name="CrtGlow" Minimum="0" Maximum="1" />
+              <TextBlock Grid.Row="0" Grid.Column="2" x:Name="CrtGlowValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+              <TextBlock Grid.Row="1" Text="Curvature" VerticalAlignment="Center" Margin="0,0,10,0" />
+              <Slider Grid.Row="1" Grid.Column="1" x:Name="CrtCurvature" Minimum="0" Maximum="1" />
+              <TextBlock Grid.Row="1" Grid.Column="2" x:Name="CrtCurvatureValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+              <TextBlock Grid.Row="2" Text="Reflection" VerticalAlignment="Center" Margin="0,0,10,0" />
+              <Slider Grid.Row="2" Grid.Column="1" x:Name="CrtGlass" Minimum="0" Maximum="1" />
+              <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CrtGlassValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+            </Grid>
+            <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
+                       Text="Drawn by a GPU shader, so these need working OpenGL. Without it the picture still shows, without the effects." />
           </StackPanel>
-          <TextBlock x:Name="ThemeDescription" Foreground="#BBBBBB" TextWrapping="Wrap" />
-          <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
-                     Text="The theme changes the windows and dialogs, never the emulated screen. Zero applies it when it next starts, because control templates cannot be swapped under open windows." />
-          <Separator />
-          <CheckBox x:Name="CrtEnabled" Content="CRT effects over the emulated screen" />
-          <StackPanel Margin="24,0,0,0" Spacing="6">
-            <CheckBox x:Name="CrtScanlines" Content="Scanlines" />
-            <CheckBox x:Name="CrtVignette" Content="Vignette (darkened corners)" />
-            <CheckBox x:Name="CrtFlicker" Content="Flicker" />
-            <CheckBox x:Name="CrtNoise" Content="Noise" />
-          </StackPanel>
-          <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
-                     Text="Scanlines and the vignette are drawn once per frame. Flicker and noise animate continuously, which costs a little more." />
-          <CheckBox x:Name="CrtAdvanced" Content="Curved glass, glow and reflection (GPU)" />
-          <Grid ColumnDefinitions="Auto,160,Auto" RowDefinitions="Auto,Auto,Auto" Margin="24,0,0,0">
-            <TextBlock Grid.Row="0" Text="Glow" VerticalAlignment="Center" Margin="0,0,10,0" />
-            <Slider Grid.Row="0" Grid.Column="1" x:Name="CrtGlow" Minimum="0" Maximum="1" />
-            <TextBlock Grid.Row="0" Grid.Column="2" x:Name="CrtGlowValue" VerticalAlignment="Center" Margin="10,0,0,0" />
-            <TextBlock Grid.Row="1" Text="Curvature" VerticalAlignment="Center" Margin="0,0,10,0" />
-            <Slider Grid.Row="1" Grid.Column="1" x:Name="CrtCurvature" Minimum="0" Maximum="1" />
-            <TextBlock Grid.Row="1" Grid.Column="2" x:Name="CrtCurvatureValue" VerticalAlignment="Center" Margin="10,0,0,0" />
-            <TextBlock Grid.Row="2" Text="Reflection" VerticalAlignment="Center" Margin="0,0,10,0" />
-            <Slider Grid.Row="2" Grid.Column="1" x:Name="CrtGlass" Minimum="0" Maximum="1" />
-            <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CrtGlassValue" VerticalAlignment="Center" Margin="10,0,0,0" />
-          </Grid>
-          <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
-                     Text="These three are drawn by a GPU shader and need working OpenGL. Where it is unavailable the picture still shows, without them." />
-        </StackPanel>
+        </ScrollViewer>
       </TabItem>
     </TabControl>
   </DockPanel>
