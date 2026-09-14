@@ -120,9 +120,12 @@ half4 main(float2 xy) {
     float pixel = 2.0 / max(min(dest.x, dest.y), 1.0);
     float rim = smoothstep(0.0, pixel * 3.0, beyond);
 
-    // The surround, lit by the picture it frames: the colour of the picture's own edge, dimmed with
-    // distance. 'col' is the pixel at p, which for anywhere outside the glass is the nearest pixel on
-    // it, so each place in the surround takes the colour of the picture directly in front of it.
+    // The surround, lit by the picture it frames -- as a mirror of it. Clamping to the glass gives
+    // each place in the surround the picture directly in front of it, which is right along a panel
+    // but not across one: the edge pixel then repeats outwards, all the way to the frame, and a dark
+    // pixel at the edge of the picture draws a bar. Reflecting instead of clamping steps a pixel back
+    // into the picture for every pixel out across the panel, so the panel carries the edge of the
+    // picture turned back on itself. At the glass the two agree, so the seam stays invisible.
     //
     // 'reach' is how far out we are as a fraction of the panel's own depth: 0 against the glass, 1 at
     // the frame. A plain distance leaves the corners dark, because the curve cuts a corner about four
@@ -135,7 +138,9 @@ half4 main(float2 xy) {
     }
     float2 t = (abs(c0) - abs(qc)) / max(1.0 - abs(qc), float2(0.0001, 0.0001));
     float reach = clamp(max(t.x, t.y), 0.0, 1.0);
-    half3 spill = col.rgb * exp(-reach * 0.7) * edgeLight;
+    float2 reflected = clamp(2.0 * inside - c, -1.0, 1.0);
+    float2 mirror = clamp((reflected * 0.5 + 0.5) * dest, lo, hi);
+    half3 spill = src.eval(mirror).rgb * exp(-reach * 0.7) * edgeLight;
 
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";

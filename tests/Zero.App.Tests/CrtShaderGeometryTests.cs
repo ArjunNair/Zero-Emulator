@@ -189,5 +189,71 @@ namespace Zero.App.Tests
                     $"the {name} corner of the surround is unlit next to the sides: {corner:F1} against {side:F1}");
         }
 
+
+        [Fact]
+        public void The_panel_mirrors_the_picture_across_its_depth()
+        {
+            // Along a panel the light already follows the picture: each row of the left panel takes
+            // its own row. Across one it must too, or the edge pixel repeats outwards to the frame
+            // and a dark pixel at the edge of the picture draws a bar. Three single-pixel columns at
+            // the very left of the screen: reflected, the panel shows red, then green, then blue
+            // going outwards. Clamped to the edge, it would be red the whole way.
+            using var frame = new SKBitmap(new SKImageInfo(FrameWidth, FrameHeight, SKColorType.Bgra8888, SKAlphaType.Premul));
+            using (var c = new SKCanvas(frame))
+            {
+                c.Clear(new SKColor(0x40, 0x40, 0x40));
+                SKColor[] bars = { SKColors.Red, SKColors.Lime, SKColors.Blue };
+                for (int i = 0; i < bars.Length; i++)
+                {
+                    using var paint = new SKPaint { Color = bars[i] };
+                    c.DrawRect(new SKRect(48 + i, 48, 48 + i + 1, 48 + 192), paint);
+                }
+            }
+
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            using SKBitmap bmp = Render(options, frame, smooth: true);
+
+            bool green = false, blue = false;
+            for (int x = 0; x < 40; x++)
+            {
+                SKColor c = bmp.GetPixel(x, Height / 2);
+                if (c.Green > c.Red && c.Green > c.Blue) green = true;
+                if (c.Blue > c.Red && c.Blue > c.Green) blue = true;
+            }
+
+            Assert.True(green && blue,
+                "the panel does not mirror the picture across its depth: the second and third columns "
+                + $"of the screen never reach it (green seen: {green}, blue seen: {blue})");
+        }
+
+        [Theory]
+        [InlineData(true)]    // PixelSmoothing on
+        [InlineData(false)]   // and off, which is the default
+        public void A_cropped_away_border_never_reaches_the_screen(bool smooth)
+        {
+            // A red border round a white screen, with the border cropped out of view. The frame still
+            // carries its border and the tile mode clamps to the whole of it, so a sample taken
+            // exactly on the edge of the visible part lands on the boundary between the last visible
+            // pixel and the first cropped-away one, and rounding decides which comes back -- one way
+            // at the left and top, the other at the right and bottom. Every sample is held half a
+            // pixel inside to stop that, so the outermost column of picture must stay neutral.
+            using SKBitmap frame = Frame(new SKColor(0xC0, 0x00, 0x00), new SKColor(0xC0, 0xC0, 0xC0));
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            using SKBitmap bmp = Render(options, frame, smooth);
+
+            // The screen is grey and the border red, and the border is not shown. So nothing in the
+            // output may be red: not the picture, not the surround, not the rim between them.
+            int worstX = 0, worstY = 0, worst = 0;
+            for (int y = 0; y < Height; y++)
+                for (int x = 0; x < Width; x++)
+                {
+                    SKColor c = bmp.GetPixel(x, y);
+                    int tint = c.Red - Math.Max(c.Green, c.Blue);
+                    if (tint > worst) { worst = tint; worstX = x; worstY = y; }
+                }
+
+            Assert.True(worst <= 3,
+                $"the hidden border tints the output at {worstX},{worstY} by {worst} of 255");
+        }
     }
 }
