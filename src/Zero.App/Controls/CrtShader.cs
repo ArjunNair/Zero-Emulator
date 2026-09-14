@@ -74,34 +74,39 @@ half4 main(float2 xy) {
         col = (col + bleed * glow) / (1.0 + glow);    // normalised, so the picture keeps its exposure
     }
 
-    float beyond = distance(c, inside);
-    if (beyond > 0.0) {                               // the surround: lit by the picture it frames
-        half3 spill = col.rgb * exp(-beyond * 13.0) * edgeLight;
-        return half4(spill, 1.0);
-    }
-
+    half3 picture = col.rgb;
     if (scanline > 0.0) {
         // One dark band per emulated line, but never more than one per two output pixels: asking for
         // more bands than the surface can hold turns them into moire instead of scanlines.
         float rows = min(max(srcSize.y, 1.0), dest.y * 0.5);
         float row = (p.y / dest.y) * rows;
-        col.rgb *= 1.0 - scanline * (0.5 - 0.5 * cos(row * 6.2831853));
+        picture *= 1.0 - scanline * (0.5 - 0.5 * cos(row * 6.2831853));
     }
     if (vignette > 0.0) {
-        col.rgb *= 1.0 - vignette * dot(c, c) * 0.35;
+        picture *= 1.0 - vignette * dot(c, c) * 0.35;
     }
     if (flicker > 0.0) {                              // mains hum on the brightness
-        col.rgb *= 1.0 - flicker * 0.12 * (0.5 + 0.5 * sin(time * 37.0));
+        picture *= 1.0 - flicker * 0.12 * (0.5 + 0.5 * sin(time * 37.0));
     }
     if (noise > 0.0) {
         float n = hash(floor(p) + floor(time * 24.0));
-        col.rgb += half3(half((n - 0.5) * noise * 0.18));
+        picture += half3(half((n - 0.5) * noise * 0.18));
     }
     if (reflection > 0.0) {                           // a soft sheen across the glass
         float sheen = clamp(1.0 - distance(uv, float2(0.28, 0.22)) * 1.7, 0.0, 1.0);
-        col.rgb += half3(half(sheen * sheen * reflection * 0.25));
+        picture += half3(half(sheen * sheen * reflection * 0.25));
     }
-    return half4(col.rgb, 1.0);
+
+    // The surround, lit by the picture it frames.
+    float beyond = distance(c, inside);
+    half3 spill = col.rgb * exp(-beyond * 13.0) * edgeLight;
+
+    // Blend across the rim rather than switching at it, or the curve stair-steps. 'pixel' is one
+    // output pixel expressed in this -1..1 space; three of them is the narrowest band that still
+    // reads as smooth once the software path scales its output up.
+    float pixel = 2.0 / max(min(dest.x, dest.y), 1.0);
+    float rim = smoothstep(0.0, pixel * 3.0, beyond);
+    return half4(mix(picture, spill, half(rim)), 1.0);
 }";
 
 
