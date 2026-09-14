@@ -20,7 +20,7 @@ namespace Zero.App
             if (string.IsNullOrWhiteSpace(theme))
             {
                 try { theme = EmulatorSettings.Load().Render.UiTheme; }
-                catch (Exception) { theme = ThemeCatalog.Fluent; }
+                catch (Exception) { theme = ThemeCatalog.Default; }
             }
             ThemeCatalog.Apply(this, theme);
         }

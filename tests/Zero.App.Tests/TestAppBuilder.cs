@@ -14,7 +14,7 @@ namespace Zero.App.Tests
         {
             // Pin the theme: otherwise these tests would render under whatever the developer has
             // configured in their own settings file.
-            Environment.SetEnvironmentVariable("ZERO_THEME", Environment.GetEnvironmentVariable("ZERO_THEME") ?? "Fluent");
+            Environment.SetEnvironmentVariable("ZERO_THEME", Environment.GetEnvironmentVariable("ZERO_THEME") ?? "Semi");
             return Build();
         }
 

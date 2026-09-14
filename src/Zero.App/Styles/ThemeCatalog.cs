@@ -1,11 +1,7 @@
 using System;
-using System.Runtime.InteropServices;
 using Avalonia;
-using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
-using Avalonia.Themes.Fluent;
 using Avalonia.Themes.Simple;
-using Classic.Avalonia.Theme;
 using Semi.Avalonia;
 
 namespace Zero.App.Styles
@@ -17,56 +13,45 @@ namespace Zero.App.Styles
     /// </summary>
     public static class ThemeCatalog
     {
-        public const string Fluent = "Fluent";
         public const string Semi = "Semi";
         public const string Simple = "Simple";
-        public const string Classic = "Classic";
 
-        public static readonly string[] Names = { Fluent, Semi, Simple, Classic };
+        /// <summary>Selectable themes. The first is the default.</summary>
+        public static readonly string[] Names = { Semi, Simple };
+
+        public static string Default => Names[0];
 
         public static string Describe(string name)
         {
             switch (Normalise(name))
             {
-                case Semi: return "Modern and roomy; fewer rows fit in the tape deck and button lists.";
-                case Simple: return "Plain and compact, in the style of an older desktop application.";
-                case Classic: return "Windows 95 chrome, in keeping with the machine being emulated.";
-                default: return "Zero's default. The macOS refinements apply only to this theme.";
+                case Simple: return "Plain and compact, in the style of an older desktop application. Fits the most rows in the tape deck and button lists.";
+                default: return "Zero's default: modern and roomy, with a light and a dark appearance.";
             }
         }
 
+        /// <summary>Maps a stored or user-supplied name to a supported one, falling back to the default.</summary>
         public static string Normalise(string name)
         {
             foreach (string known in Names)
                 if (string.Equals(known, name, StringComparison.OrdinalIgnoreCase))
                     return known;
-            return Fluent;
+            return Default;
         }
 
         public static IStyle Create(string name)
         {
             switch (Normalise(name))
             {
-                case Semi: return new SemiTheme();
                 case Simple: return new SimpleTheme();
-                case Classic: return new ClassicTheme();
-                default: return new FluentTheme();
+                default: return new SemiTheme();
             }
         }
 
-        /// <summary>
-        /// Install a theme into the application. App.axaml keeps the theme at Styles[0]; the macOS
-        /// refinements are appended afterwards, and only for Fluent, because they reach into Fluent's
-        /// own control templates by name.
-        /// </summary>
+        /// <summary>Install a theme as the application's base styles. Call before any window is created.</summary>
         public static void Apply(Application app, string name)
         {
-            string theme = Normalise(name);
-            app.Styles[0] = Create(theme);
-
-            bool mac = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-            if (mac && theme == Fluent && Environment.GetEnvironmentVariable("ZERO_NO_MAC_STYLES") != "1")
-                app.Styles.Add(new StyleInclude(new Uri("avares://Zero/")) { Source = new Uri("avares://Zero/Styles/MacStyles.axaml") });
+            app.Styles.Insert(0, Create(Normalise(name)));
         }
     }
 }

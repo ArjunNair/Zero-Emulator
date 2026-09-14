@@ -2,8 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Zero.App.App"
              RequestedThemeVariant="Default">
+  <!-- The base theme is inserted at index 0 by ThemeCatalog during start-up (Options > Appearance). -->
   <Application.Styles>
-    <FluentTheme />
     <StyleInclude Source="avares://Zero/Styles/AppStyles.axaml" />
   </Application.Styles>
 </Application>

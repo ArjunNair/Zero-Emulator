@@ -228,10 +228,12 @@ namespace Zero.App.Tests
                 Assert.NotNull(Zero.App.Styles.ThemeCatalog.Create(name));
                 Assert.False(string.IsNullOrWhiteSpace(Zero.App.Styles.ThemeCatalog.Describe(name)));
             }
-            // Unknown or missing names fall back rather than throwing.
-            Assert.Equal("Fluent", Zero.App.Styles.ThemeCatalog.Normalise("nonsense"));
-            Assert.Equal("Fluent", Zero.App.Styles.ThemeCatalog.Normalise(null));
-            Assert.Equal("Classic", Zero.App.Styles.ThemeCatalog.Normalise("classic"));
+            // Unknown names, missing names, and themes that were dropped all fall back to the default.
+            Assert.Equal("Semi", Zero.App.Styles.ThemeCatalog.Normalise("nonsense"));
+            Assert.Equal("Semi", Zero.App.Styles.ThemeCatalog.Normalise(null));
+            Assert.Equal("Semi", Zero.App.Styles.ThemeCatalog.Normalise("Fluent"));
+            Assert.Equal("Semi", Zero.App.Styles.ThemeCatalog.Normalise("Classic"));
+            Assert.Equal("Simple", Zero.App.Styles.ThemeCatalog.Normalise("simple"));
         }
 
         [AvaloniaFact]
@@ -241,22 +243,22 @@ namespace Zero.App.Tests
             var w = new Windows.OptionsWindow(settings, null);
             w.Show();
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal("Fluent", w.ThemeBox.SelectedItem);
+            Assert.Equal("Semi", w.ThemeBox.SelectedItem);
 
-            w.ThemeBox.SelectedItem = "Classic";
+            w.ThemeBox.SelectedItem = "Simple";
             Dispatcher.UIThread.RunJobs();
-            Assert.Contains("Windows 95", w.ThemeDescription.Text);
+            Assert.Contains("compact", w.ThemeDescription.Text);
             w.OkButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
             Dispatcher.UIThread.RunJobs();
 
             Assert.True(w.ThemeChanged);
-            Assert.Equal("Classic", settings.Render.UiTheme);
+            Assert.Equal("Simple", settings.Render.UiTheme);
 
             // Re-opening with the stored theme selected is not a change.
             var w2 = new Windows.OptionsWindow(settings, null);
             w2.Show();
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal("Classic", w2.ThemeBox.SelectedItem);
+            Assert.Equal("Simple", w2.ThemeBox.SelectedItem);
             w2.OkButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
             Dispatcher.UIThread.RunJobs();
             Assert.False(w2.ThemeChanged);

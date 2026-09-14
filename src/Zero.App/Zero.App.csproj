@@ -20,12 +20,10 @@
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.2" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
-    <!-- Selectable UI themes (Options > Appearance). Classic has no stable Avalonia 12 build yet. -->
+    <!-- Selectable UI themes (Options > Appearance). -->
     <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.2" />
     <PackageReference Include="Semi.Avalonia" Version="12.1.0.1" />
-    <PackageReference Include="Classic.Avalonia.Theme" Version="12.0.1-beta1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Speccy\Speccy.csproj" />

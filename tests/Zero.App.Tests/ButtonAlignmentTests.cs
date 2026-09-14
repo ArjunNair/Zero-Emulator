@@ -19,9 +19,9 @@ namespace Zero.App.Tests
     /// </summary>
     public class ButtonAlignmentTests
     {
-        // Tolerances are in (top - bottom) gap difference, so twice the actual offset. They allow the
-        // deliberate downward nudge on macOS, and Classic's raised bevel, which seats the label a
-        // pixel above the geometric centre of the button face on purpose.
+        // Tolerances are in (top - bottom) gap difference, so twice the actual offset. A theme may
+        // seat the label a pixel off the geometric centre on purpose, to allow for a bevel or for the
+        // ink of a caption without descenders.
         private const double MaxAbove = 2.5, MaxBelow = 3.5;
 
         private static void Layout(Window w)
