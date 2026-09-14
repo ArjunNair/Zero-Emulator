@@ -41,6 +41,7 @@ namespace Zero.App.Controls
     {
         private const string Source = @"
 uniform shader src;
+uniform shader srcSmooth;   // the same frame, always filtered, for the diffuse edge light
 uniform float2 dest;        // destination size in pixels
 uniform float2 srcOrigin;   // top-left of the visible part of the frame
 uniform float2 srcSize;     // size of the visible part of the frame
@@ -59,20 +60,25 @@ float hash(float2 p) {
 }
 
 /// Light coming off the edge of the picture. Taking the single nearest pixel would let one dark pixel
-/// at the edge paint a hard bar all the way out to the frame, so this averages a patch of the picture
-/// instead. The offsets are axis-aligned rather than turned to follow the edge: a direction that
-/// turns as it goes round a corner sweeps the taps across the picture and fans the corner with rays.
+/// at the edge paint a hard bar all the way out to the frame, so this averages a patch of it instead.
+///
+/// Three things about the kernel matter. The taps are spaced closer than a character cell, or an
+/// eight pixel block falls between them and each tap throws its own shadow with a gap beside it. The
+/// spacing is fixed rather than widening with distance: widening separates those shadows as they
+/// travel, which fans the corners with rays. And it reads the filtered copy of the frame whatever
+/// the picture itself is set to, because with nearest sampling each tap's contribution steps as it
+/// crosses a pixel and the steps show up as ripples in the glow.
 half3 edgeSample(float2 p, float2 lo, float2 hi, float2 r) {
-    half3 sum = src.eval(clamp(p, lo, hi)).rgb;
-    sum += src.eval(clamp(p + float2(-r.x, -r.y), lo, hi)).rgb;
-    sum += src.eval(clamp(p + float2( 0.0, -r.y), lo, hi)).rgb;
-    sum += src.eval(clamp(p + float2( r.x, -r.y), lo, hi)).rgb;
-    sum += src.eval(clamp(p + float2(-r.x,  0.0), lo, hi)).rgb;
-    sum += src.eval(clamp(p + float2( r.x,  0.0), lo, hi)).rgb;
-    sum += src.eval(clamp(p + float2(-r.x,  r.y), lo, hi)).rgb;
-    sum += src.eval(clamp(p + float2( 0.0,  r.y), lo, hi)).rgb;
-    sum += src.eval(clamp(p + float2( r.x,  r.y), lo, hi)).rgb;
-    return sum / 9.0;
+    half3 sum = half3(0.0);
+    float total = 0.0;
+    for (int i = -2; i <= 2; ++i) {
+        for (int j = -2; j <= 2; ++j) {
+            float w = (3.0 - abs(float(i))) * (3.0 - abs(float(j)));   // a tent, so the patch has no edge
+            sum += srcSmooth.eval(clamp(p + float2(float(i), float(j)) * r, lo, hi)).rgb * half(w);
+            total += w;
+        }
+    }
+    return sum / half(total);
 }
 
 half4 main(float2 xy) {
@@ -140,7 +146,7 @@ half4 main(float2 xy) {
     // The surround, lit by the picture it frames. The patch averaged widens as the light travels out.
     half3 spill = half3(0.0);
     if (rim > 0.0 && edgeLight > 0.0) {
-        float2 r = texel * (6.0 + beyond * 40.0);
+        float2 r = texel * 3.5;
         spill = edgeSample(p, lo, hi, r) * exp(-beyond * 13.0) * edgeLight;
     }
     return half4(mix(picture, spill, half(rim)), 1.0);
@@ -273,6 +279,12 @@ half4 main(float2 xy) {
             var local = SKMatrix.CreateScaleTranslation(sx, sy, (float)(-_source.X * sx), (float)(-_source.Y * sy));
 
             using SKShader source = _frame.ToShader(SKShaderTileMode.Clamp, SKShaderTileMode.Clamp, sampling, local);
+            // The edge light is a diffuse glow, so it always reads a filtered copy of the frame even
+            // when the picture itself is drawn with nearest sampling.
+            using SKShader smooth = _smooth
+                ? null
+                : _frame.ToShader(SKShaderTileMode.Clamp, SKShaderTileMode.Clamp,
+                                  new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None), local);
             var uniforms = new SKRuntimeEffectUniforms(effect)
             {
                 ["dest"] = new[] { (float)width, (float)height },
@@ -288,7 +300,7 @@ half4 main(float2 xy) {
                 ["flicker"] = _options.Flicker,
                 ["noise"] = _options.Noise,
             };
-            var children = new SKRuntimeEffectChildren(effect) { ["src"] = source };
+            var children = new SKRuntimeEffectChildren(effect) { ["src"] = source, ["srcSmooth"] = smooth ?? source };
 
             using SKShader shader = effect.ToShader(uniforms, children);
             using var paint = new SKPaint { Shader = shader };

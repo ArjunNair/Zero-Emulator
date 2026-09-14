@@ -171,7 +171,11 @@ namespace Zero.App.Tests
             double above = Band(bmp, 1, 3, row - 60, row - 40);
             double below = Band(bmp, 1, 3, row + 40, row + 60);
             double clear = (above + below) / 2;
-            Assert.True(clear - beside < clear * 0.5,
+
+            // A soft shadow beside the block is right: no light leaves the screen there. What must not
+            // happen is the block being clamped outwards as a solid bar, which takes the surround to
+            // black. The threshold is set against that failure, not against a particular blur width.
+            Assert.True(beside > clear * 0.25,
                 $"the dark block bars the surround: beside it {beside:F1}, clear of it {clear:F1}");
         }
     }
