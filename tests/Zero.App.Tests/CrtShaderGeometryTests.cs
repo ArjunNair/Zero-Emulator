@@ -238,5 +238,31 @@ namespace Zero.App.Tests
                 Assert.True(corner > side * 0.7,
                     $"the {name} corner of the surround is unlit next to the sides: {corner:F1} against {side:F1}");
         }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void A_dark_character_at_the_edge_does_not_darken_the_surround(bool smooth)
+        {
+            // A dark part of the picture gives off no light, so it has nothing to contribute to the
+            // surround -- which is not the same as contributing darkness. Averaged in plainly it
+            // drags down the light coming from the lit picture beside it, and one character at the
+            // edge of the screen leaves a heavy shadow on the panel behind it. Weighted by what each
+            // piece of picture actually emits, it is simply passed over.
+            using SKBitmap frame = Frame(new SKColor(0xC0, 0xC0, 0xC0), new SKColor(0xC0, 0xC0, 0xC0));
+            using (var c = new SKCanvas(frame))
+            using (var black = new SKPaint { Color = SKColors.Black })
+                c.DrawRect(new SKRect(48, 48 + 92, 48 + 16, 48 + 100), black);   // one character, on the edge
+
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            using SKBitmap bmp = Render(options, frame, smooth);
+
+            int row = (int)(Height * 96.0 / 192.0);
+            double beside = Band(bmp, 1, 4, row - 4, row + 4);
+            double clear = (Band(bmp, 1, 4, row - 60, row - 40) + Band(bmp, 1, 4, row + 40, row + 60)) / 2;
+
+            Assert.True(beside > clear * 0.6,
+                $"one dark character shades the surround behind it: {beside:F1} against {clear:F1} clear of it");
+        }
     }
 }
