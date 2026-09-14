@@ -21,6 +21,9 @@
     <PackageReference Include="Avalonia" Version="12.1.2" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
+    <!-- The CRT shader is SkSL run through Avalonia's Skia canvas, so both are direct dependencies. -->
+    <PackageReference Include="Avalonia.Skia" Version="12.1.2" />
+    <PackageReference Include="SkiaSharp" Version="3.119.4" />
     <!-- Selectable UI themes (Options > Appearance). -->
     <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.2" />
     <PackageReference Include="Semi.Avalonia" Version="12.1.0.1" />

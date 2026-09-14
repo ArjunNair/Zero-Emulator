@@ -116,7 +116,7 @@
             </StackPanel>
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
                        Text="Flicker and noise animate continuously and cost a little more than the other two." />
-            <CheckBox x:Name="CrtAdvanced" Content="Curved glass, glow and reflection (GPU)" />
+            <CheckBox x:Name="CrtAdvanced" Content="Curved glass, glow and reflection" />
             <Grid ColumnDefinitions="Auto,160,Auto" RowDefinitions="Auto,Auto,Auto" Margin="24,0,0,0">
               <TextBlock Grid.Row="0" Text="Glow" VerticalAlignment="Center" Margin="0,0,10,0" />
               <Slider Grid.Row="0" Grid.Column="1" x:Name="CrtGlow" Minimum="0" Maximum="1" />
@@ -129,7 +129,7 @@
               <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CrtGlassValue" VerticalAlignment="Center" Margin="10,0,0,0" />
             </Grid>
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
-                       Text="Drawn by a GPU shader, so these need working OpenGL. Without it the picture still shows, without the effects." />
+                       Text="Drawn by a shader that Skia runs on the GPU where there is one, and on the CPU otherwise." />
           </StackPanel>
         </ScrollViewer>
       </TabItem>

@@ -23,13 +23,11 @@
     </Border>
 
     <!-- CRT effects are drawn over the emulated screen, never over the chrome. All off unless enabled. -->
-    <Panel x:Name="DisplayHost">
-      <fx:CrtDisplay x:Name="CrtLayer"
+    <fx:CrtDisplay x:Name="CrtLayer"
                    EnableScanlines="False" EnableVignette="False"
                    EnableFlicker="False" EnableNoise="False"
                    EnableScanBeam="False">
-        <c:SpectrumDisplay x:Name="Display" />
-      </fx:CrtDisplay>
-    </Panel>
+      <c:SpectrumDisplay x:Name="Display" />
+    </fx:CrtDisplay>
   </DockPanel>
 </Window>

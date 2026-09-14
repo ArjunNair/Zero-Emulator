@@ -87,14 +87,15 @@ namespace Zero.App.Tests
 
             Assert.Equal(plain, plainOnceMore);
 
-            // The GPU shader: it must go into the tree only while wanted, must not tint the picture
-            // green (its default), and must still show the picture where OpenGL is missing, as here.
-            Assert.Null(w.ProCrt);
+            // The SkSL shader. Unlike the OpenGL control it replaced, this renders here, so the test
+            // can check the picture actually changes rather than merely that nothing crashed.
+            Assert.True(Zero.App.Controls.CrtShader.IsAvailable, "the CRT shader did not compile");
+            Assert.False(w.Display.CrtOptions.Enabled);
             crt.Enabled = crt.Advanced = true;
             w.ApplyCrtSettings();
             Dispatcher.UIThread.RunJobs();
-            Assert.NotNull(w.ProCrt);
-            Assert.Equal(Avalonia.Media.Colors.White, w.ProCrt.Tint);
+            Assert.True(w.Display.CrtOptions.Enabled);
+            Assert.True(w.Display.CrtOptions.Curvature > 0);
 
             long before = w.Display.FramesPresented;
             w.Session.Resume();
@@ -104,14 +105,14 @@ namespace Zero.App.Tests
             Thread.Sleep(50);
             Dispatcher.UIThread.RunJobs();
             Assert.True(w.Display.FramesPresented > before, "frames stopped reaching the display through the shader");
-            long shaded = Capture(w, "crt-advanced");
-            Assert.NotEqual(0, shaded); // a blank frame would sum to nothing
+            long shaded = Capture(w, "crt-shader");
+            Assert.NotEqual(0, shaded);       // a blank frame would sum to nothing
+            Assert.NotEqual(plain, shaded);   // the shader really did change the picture
 
             crt.Advanced = crt.Enabled = false;
             w.ApplyCrtSettings();
             Dispatcher.UIThread.RunJobs();
-            Assert.Null(w.ProCrt);
-            Assert.True(w.CrtLayer.Parent != null, "the overlay was not put back after the shader was removed");
+            Assert.False(w.Display.CrtOptions.Enabled);
             Assert.True(w.CrtLayer != null);
             Assert.NotEqual(plain, withEffects);
             Assert.NotEqual(plain, everything);

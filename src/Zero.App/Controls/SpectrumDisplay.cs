@@ -17,6 +17,8 @@ namespace Zero.App.Controls
     public sealed class SpectrumDisplay : Control
     {
         private WriteableBitmap _bitmap;
+        private SkiaSharp.SKBitmap _shaderFrame;   // only kept while the CRT shader is running
+        private readonly CrtSurfaceCache _crtSurfaces = new CrtSurfaceCache();
         private int _borderCrop;
         private ISolidColorBrush _surround = Brushes.Black;
 
@@ -61,6 +63,11 @@ namespace Zero.App.Controls
         }
 
         public long FramesPresented { get; private set; }
+
+        /// <summary>CRT shader settings. Assigning takes effect on the next frame.</summary>
+        public CrtShaderOptions CrtOptions { get; set; }
+
+        private bool UseShader => CrtOptions.Any && CrtShader.IsAvailable;
 
         /// <summary>Screen pixels per Spectrum pixel at the current window size (1 until first render).</summary>
         public double Scale { get; private set; } = 1;
@@ -120,6 +127,28 @@ namespace Zero.App.Controls
             if (_surround.Color.ToUInt32() != (0xFF000000u | rgb))
                 _surround = new ImmutableSolidColorBrush(Color.FromUInt32(0xFF000000u | rgb));
 
+            if (UseShader)
+            {
+                if (_shaderFrame == null || _shaderFrame.Width != frame.Width || _shaderFrame.Height != frame.Height)
+                {
+                    _shaderFrame?.Dispose();
+                    _shaderFrame = new SkiaSharp.SKBitmap(new SkiaSharp.SKImageInfo(frame.Width, frame.Height,
+                        SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Opaque));
+                }
+                unsafe
+                {
+                    int* dst = (int*)_shaderFrame.GetPixels();
+                    int[] src = frame.Pixels;
+                    for (int i = 0; i < src.Length; i++) dst[i] = src[i] | unchecked((int)0xFF000000);
+                }
+            }
+            else if (_shaderFrame != null)
+            {
+                _shaderFrame.Dispose();
+                _shaderFrame = null;
+                _crtSurfaces.Dispose();
+            }
+
             FramesPresented++;
             InvalidateVisual();
         }
@@ -145,6 +174,12 @@ namespace Zero.App.Controls
             }
 
             Scale = dest.Width / source.Width;
+
+            if (UseShader && _shaderFrame != null)
+            {
+                context.Custom(new CrtDrawOperation(new Rect(Bounds.Size), _shaderFrame, source, dest, CrtOptions, Smooth, _crtSurfaces));
+                return;
+            }
             context.DrawImage(_bitmap, source, dest);
         }
     }
