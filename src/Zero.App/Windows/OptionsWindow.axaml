@@ -107,12 +107,11 @@
           <StackPanel Margin="24,0,0,0" Spacing="6">
             <CheckBox x:Name="CrtScanlines" Content="Scanlines" />
             <CheckBox x:Name="CrtVignette" Content="Vignette (darkened corners)" />
-            <CheckBox x:Name="CrtScanBeam" Content="Rolling scan beam" />
             <CheckBox x:Name="CrtFlicker" Content="Flicker" />
             <CheckBox x:Name="CrtNoise" Content="Noise" />
           </StackPanel>
           <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
-                     Text="Scanlines and the vignette are drawn once per frame. The beam, flicker and noise animate continuously, which costs a little more." />
+                     Text="Scanlines and the vignette are drawn once per frame. Flicker and noise animate continuously, which costs a little more." />
         </StackPanel>
       </TabItem>
     </TabControl>

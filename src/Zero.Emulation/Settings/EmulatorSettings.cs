@@ -70,7 +70,6 @@ namespace Zero.Emulation.Settings
         public bool Enabled { get; set; }
         public bool Scanlines { get; set; } = true;
         public bool Vignette { get; set; } = true;
-        public bool ScanBeam { get; set; }
         public bool Flicker { get; set; }
         public bool Noise { get; set; }
     }

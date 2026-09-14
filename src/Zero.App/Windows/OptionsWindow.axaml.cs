@@ -67,7 +67,6 @@ namespace Zero.App.Windows
             CrtEnabled.IsChecked = settings.Render.Crt.Enabled;
             CrtScanlines.IsChecked = settings.Render.Crt.Scanlines;
             CrtVignette.IsChecked = settings.Render.Crt.Vignette;
-            CrtScanBeam.IsChecked = settings.Render.Crt.ScanBeam;
             CrtFlicker.IsChecked = settings.Render.Crt.Flicker;
             CrtNoise.IsChecked = settings.Render.Crt.Noise;
 
@@ -150,7 +149,6 @@ namespace Zero.App.Windows
             _settings.Render.Crt.Enabled = CrtEnabled.IsChecked == true;
             _settings.Render.Crt.Scanlines = CrtScanlines.IsChecked == true;
             _settings.Render.Crt.Vignette = CrtVignette.IsChecked == true;
-            _settings.Render.Crt.ScanBeam = CrtScanBeam.IsChecked == true;
             _settings.Render.Crt.Flicker = CrtFlicker.IsChecked == true;
             _settings.Render.Crt.Noise = CrtNoise.IsChecked == true;
 

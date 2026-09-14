@@ -24,8 +24,9 @@
 
     <!-- CRT effects are drawn over the emulated screen, never over the chrome. All off unless enabled. -->
     <fx:CrtDisplay x:Name="CrtLayer"
-                   EnableScanlines="False" EnableVignette="False" EnableScanBeam="False"
-                   EnableFlicker="False" EnableNoise="False">
+                   EnableScanlines="False" EnableVignette="False"
+                   EnableFlicker="False" EnableNoise="False"
+                   EnableScanBeam="False">
       <c:SpectrumDisplay x:Name="Display" />
     </fx:CrtDisplay>
   </DockPanel>

@@ -44,7 +44,8 @@ where the work stands and every place the implementation deliberately deviates f
   content (`SizeToContent` with a MinWidth/MaxWidth, and no fixed-width labels), because a theme's
   metrics decide how much room the text needs; `DialogSizingTests` fails if any label ends up narrower
   than its text. `Pipboy.Avalonia.Fx` supplies a `CrtDisplay` panel wrapped around the emulated screen:
-  scanlines, vignette, scan beam, flicker and noise, off by default, toggled from View > CRT Effects or
+  scanlines, vignette, flicker and noise, off by default (the scan beam it also offers was dropped: it
+  drew phosphor green under every theme), toggled from View > CRT Effects or
   Options > Appearance and applied without a restart. The effects are cosmetic and never touch
   emulation; a test asserts that enabling them changes the rendered pixels and disabling them restores
   them exactly. Zero runs in globalization-invariant

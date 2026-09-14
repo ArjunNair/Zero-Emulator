@@ -580,7 +580,7 @@ namespace Zero.App
             bool on = crt.Enabled;
             CrtLayer.EnableScanlines = on && crt.Scanlines;
             CrtLayer.EnableVignette = on && crt.Vignette;
-            CrtLayer.EnableScanBeam = on && crt.ScanBeam;
+            CrtLayer.EnableScanBeam = false; // dropped: its phosphor green ignores the chosen theme
             CrtLayer.EnableFlicker = on && crt.Flicker;
             CrtLayer.EnableNoise = on && crt.Noise;
         }
