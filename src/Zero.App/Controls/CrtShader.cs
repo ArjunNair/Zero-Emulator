@@ -167,15 +167,23 @@ half4 main(float2 xy) {
     half3 spill = half3(0.0);
     if (rim > 0.0 && edgeLight > 0.0) {
         float2 d = 5.0 * 2.0 / dest;      // tap step: five pixels of screen, in this -1..1 space
-        // Close to the glass the surround takes its colour from the picture right beside it. Further
-        // out it settles towards the screen's light as a whole: light spreads as it travels, and
-        // without this a dark character at the edge of the picture lays a black bar out to the frame.
-        half3 near = edgeSample(c0, lo, hi, d);
-        half3 far = (srcSmooth.eval(mix(lo, hi, float2(0.25, 0.25))).rgb
-                   + srcSmooth.eval(mix(lo, hi, float2(0.75, 0.25))).rgb
-                   + srcSmooth.eval(mix(lo, hi, float2(0.25, 0.75))).rgb
-                   + srcSmooth.eval(mix(lo, hi, float2(0.75, 0.75))).rgb) * 0.25;
-        spill = mix(near, far, half(smoothstep(0.0, 0.10, beyond))) * exp(-beyond * 13.0) * edgeLight;
+        // Averaging the patch is all the model there is: a black part of the picture emits nothing and
+        // so contributes nothing, and the surround behind it stays dark. Nothing is mixed in to lift
+        // it -- there would be nothing for that light to have come from.
+        // How far out we are as a fraction of the panel's own depth: 0 against the glass, 1 at the
+        // frame. A plain distance leaves the corners dark. The curve cuts a corner about four times
+        // deeper than it cuts the sides, so light that fades over the width of a side panel has run
+        // out long before it crosses a corner, and the surround reads as four lit panels with dark
+        // gaps where they meet.
+        float2 qc = c0;
+        for (int k = 0; k < 2; ++k) {
+            float wq = 1.0 + curvature * dot(qc, qc) * 0.25;
+            qc = clamp(qc * wq, -1.0, 1.0) / wq;
+        }
+        float2 depth = max(1.0 - abs(qc), float2(0.0001, 0.0001));
+        float2 t = (abs(c0) - abs(qc)) / depth;
+        float reach = clamp(max(t.x, t.y), 0.0, 1.0);
+        spill = edgeSample(c0, lo, hi, d) * exp(-reach * 0.7) * edgeLight;   // about half as bright at the frame as against the glass
     }
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";

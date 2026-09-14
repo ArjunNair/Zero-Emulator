@@ -152,11 +152,12 @@ namespace Zero.App.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void A_dark_pixel_at_the_screen_edge_does_not_paint_a_bar_across_the_surround(bool smooth)
+        public void A_dark_block_at_the_screen_edge_shades_the_surround_without_a_step(bool smooth)
         {
-            // The BASIC cursor sits hard against the left edge of the screen. Light leaving the edge
-            // of a picture is diffuse, so a single black block there must not reach the frame as a
-            // solid bar: the surround beside it should stay close to the surround above and below.
+            // The BASIC cursor sits hard against the left edge of the screen. The surround behind it
+            // is meant to go dark -- that part of the picture emits nothing, so there is nothing to
+            // light it -- but the darkness has to arrive gradually. Clamping one pixel outwards puts
+            // a hard edge there instead, and that is what reads as a bar painted across the surround.
             using SKBitmap frame = Frame(new SKColor(0xC0, 0xC0, 0xC0), new SKColor(0xC0, 0xC0, 0xC0));
             using (var c = new SKCanvas(frame))
             using (var black = new SKPaint { Color = SKColors.Black })
@@ -165,18 +166,18 @@ namespace Zero.App.Tests
             var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
             using SKBitmap bmp = Render(options, frame, smooth);
 
-            // The block is at 92/192 of the way down the screen, so a little above the middle.
             int row = (int)(Height * 96.0 / 192.0);
-            double beside = Band(bmp, 1, 3, row - 4, row + 4);
-            double above = Band(bmp, 1, 3, row - 60, row - 40);
-            double below = Band(bmp, 1, 3, row + 40, row + 60);
-            double clear = (above + below) / 2;
+            double biggest = 0;
+            double previous = Band(bmp, 1, 4, row - 60, row - 59);
+            for (int y = row - 59; y < row + 60; y++)
+            {
+                double here = Band(bmp, 1, 4, y, y + 1);
+                biggest = Math.Max(biggest, Math.Abs(here - previous));
+                previous = here;
+            }
 
-            // A soft shadow beside the block is right: no light leaves the screen there. What must not
-            // happen is the block being clamped outwards as a solid bar, which takes the surround to
-            // black. The threshold is set against that failure, not against a particular blur width.
-            Assert.True(beside > clear * 0.25,
-                $"the dark block bars the surround: beside it {beside:F1}, clear of it {clear:F1}");
+            Assert.True(biggest < 20.0,
+                $"the surround steps by {biggest:F1} of 255 from one row to the next beside the block");
         }
 
         [Theory]
@@ -214,6 +215,28 @@ namespace Zero.App.Tests
             }
 
             Assert.True(shadows <= 1, $"the block casts {shadows} separate shadows on the surround");
+        }
+
+        [Fact]
+        public void The_edge_light_fills_the_corners_of_the_surround()
+        {
+            // The curve cuts a corner of the glass far deeper than it cuts the sides, so light that
+            // fades over the width of a side panel has run out long before it crosses a corner. The
+            // surround then reads as four lit panels with dark gaps where they meet, rather than as
+            // one lit frame. On a picture that is the same colour everywhere, a corner of the frame
+            // should be lit much like the middle of a side.
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            using SKBitmap bmp = Render(options);
+
+            double side = Band(bmp, 0, 10, Height / 2 - 40, Height / 2 + 40);
+            double topLeft = Band(bmp, 0, 10, 0, 40);
+            double topRight = Band(bmp, Width - 10, Width, 0, 40);
+            double bottomLeft = Band(bmp, 0, 10, Height - 40, Height);
+
+            foreach ((string name, double corner) in new[]
+                     { ("top left", topLeft), ("top right", topRight), ("bottom left", bottomLeft) })
+                Assert.True(corner > side * 0.7,
+                    $"the {name} corner of the surround is unlit next to the sides: {corner:F1} against {side:F1}");
         }
     }
 }
