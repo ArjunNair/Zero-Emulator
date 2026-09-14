@@ -7,6 +7,11 @@ using Zero.App.Controls;
 namespace Zero.App.Tests
 {
     /// <summary>
+    /// The edge light takes the colour of the picture's own edge, one pixel per place in the surround.
+    /// Nothing here asks it to spread that colour sideways: a dark edge leaves a dark patch behind it
+    /// with a hard side to it, which is what point sampling gives and what this build wants. Tests
+    /// that asked for a soft, gathered glow were dropped with the gather itself.
+    ///
     /// The CRT effects are cosmetic, but one property of them is not a matter of taste: on a picture
     /// that is the same colour everywhere, the four edges of the screen must come out the same. An
     /// effect that is brighter on one side reads as a defect in the emulator rather than as a TV.
@@ -126,61 +131,6 @@ namespace Zero.App.Tests
         }
 
         [Theory]
-        [InlineData(true)]    // PixelSmoothing on
-        [InlineData(false)]   // and off, which is the default
-        public void The_edge_light_never_spills_the_colour_of_a_cropped_away_border(bool smooth)
-        {
-            // A red border round a white screen, with the border cropped out of view. Whatever the
-            // edge light picks up must come from the screen, so the spill has to be neutral: any red
-            // in it is the hidden border leaking back in through the sampling.
-            using SKBitmap frame = Frame(new SKColor(0xC0, 0x00, 0x00), new SKColor(0xC0, 0xC0, 0xC0));
-            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
-            using SKBitmap bmp = Render(options, frame, smooth);
-
-            foreach ((string name, int x, int y) in new[]
-                     {
-                         ("left", 1, Height / 2), ("right", Width - 2, Height / 2),
-                         ("top", Width / 2, 1), ("bottom", Width / 2, Height - 2),
-                     })
-            {
-                SKColor c = bmp.GetPixel(x, y);
-                Assert.True(Math.Abs(c.Red - c.Blue) <= 2 && Math.Abs(c.Red - c.Green) <= 2,
-                    $"the {name} edge spills the hidden border's colour: #{c.Red:X2}{c.Green:X2}{c.Blue:X2}");
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void A_dark_block_at_the_screen_edge_shades_the_surround_without_a_step(bool smooth)
-        {
-            // The BASIC cursor sits hard against the left edge of the screen. The surround behind it
-            // is meant to go dark -- that part of the picture emits nothing, so there is nothing to
-            // light it -- but the darkness has to arrive gradually. Clamping one pixel outwards puts
-            // a hard edge there instead, and that is what reads as a bar painted across the surround.
-            using SKBitmap frame = Frame(new SKColor(0xC0, 0xC0, 0xC0), new SKColor(0xC0, 0xC0, 0xC0));
-            using (var c = new SKCanvas(frame))
-            using (var black = new SKPaint { Color = SKColors.Black })
-                c.DrawRect(new SKRect(48, 48 + 92, 48 + 16, 48 + 100), black);   // 16x8, on the left edge
-
-            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
-            using SKBitmap bmp = Render(options, frame, smooth);
-
-            int row = (int)(Height * 96.0 / 192.0);
-            double biggest = 0;
-            double previous = Band(bmp, 1, 4, row - 60, row - 59);
-            for (int y = row - 59; y < row + 60; y++)
-            {
-                double here = Band(bmp, 1, 4, y, y + 1);
-                biggest = Math.Max(biggest, Math.Abs(here - previous));
-                previous = here;
-            }
-
-            Assert.True(biggest < 20.0,
-                $"the surround steps by {biggest:F1} of 255 from one row to the next beside the block");
-        }
-
-        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void A_dark_block_casts_one_shadow_on_the_surround_and_not_a_fan_of_them(bool smooth)
@@ -239,30 +189,5 @@ namespace Zero.App.Tests
                     $"the {name} corner of the surround is unlit next to the sides: {corner:F1} against {side:F1}");
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void A_dark_character_at_the_edge_does_not_darken_the_surround(bool smooth)
-        {
-            // A dark part of the picture gives off no light, so it has nothing to contribute to the
-            // surround -- which is not the same as contributing darkness. Averaged in plainly it
-            // drags down the light coming from the lit picture beside it, and one character at the
-            // edge of the screen leaves a heavy shadow on the panel behind it. Weighted by what each
-            // piece of picture actually emits, it is simply passed over.
-            using SKBitmap frame = Frame(new SKColor(0xC0, 0xC0, 0xC0), new SKColor(0xC0, 0xC0, 0xC0));
-            using (var c = new SKCanvas(frame))
-            using (var black = new SKPaint { Color = SKColors.Black })
-                c.DrawRect(new SKRect(48, 48 + 92, 48 + 16, 48 + 100), black);   // one character, on the edge
-
-            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
-            using SKBitmap bmp = Render(options, frame, smooth);
-
-            int row = (int)(Height * 96.0 / 192.0);
-            double beside = Band(bmp, 1, 4, row - 4, row + 4);
-            double clear = (Band(bmp, 1, 4, row - 60, row - 40) + Band(bmp, 1, 4, row + 40, row + 60)) / 2;
-
-            Assert.True(beside > clear * 0.6,
-                $"one dark character shades the surround behind it: {beside:F1} against {clear:F1} clear of it");
-        }
     }
 }

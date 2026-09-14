@@ -41,7 +41,6 @@ namespace Zero.App.Controls
     {
         private const string Source = @"
 uniform shader src;
-uniform shader srcSmooth;   // the same frame, always filtered, for the diffuse edge light
 uniform float2 dest;        // destination size in pixels
 uniform float2 srcOrigin;   // top-left of the visible part of the frame
 uniform float2 srcSize;     // size of the visible part of the frame
@@ -57,57 +56,6 @@ uniform float noise;
 
 float hash(float2 p) {
     return fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
-}
-
-/// Undo the bulge and project again, giving a point on the glass that depends only on the position
-/// along the edge.
-///
-/// Not simply clamp(c, -1, 1): the bulge scales both coordinates by an amount that grows with
-/// distance from the centre, so out in the surround the clamped point keeps sliding along the edge as
-/// it goes. The row being sampled drifts sideways as the light travels and a dark pixel's shadow is
-/// dragged out into a ray.
-float2 unbulge(float2 g) {
-    float2 q = g;
-    for (int k = 0; k < 2; ++k) {
-        float wq = 1.0 + curvature * dot(q, q) * 0.25;
-        q = clamp(q * wq, -1.0, 1.0) / wq;
-    }
-    return q;
-}
-
-/// Light coming off the edge of the picture, for a place in the surround given in the -1..1 space the
-/// screen is measured in. 'bulge' is that place's own bulge factor, shared by every tap: over a patch
-/// this size it barely varies, and sharing it keeps the patch an even shape.
-///
-/// Each tap is weighted by how much light that piece of picture gives off. A dark patch of picture
-/// emits nothing, so it has nothing to add and is passed over -- rather than being averaged in, which
-/// would let it drag down the light coming from the lit picture beside it. Where nothing within reach
-/// is lit at all the surround stays dark, which is right: there is nothing for light to come from.
-///
-/// The patch is spread over the screen, not over the picture. Offsetting in the picture's own pixels
-/// looks even in the middle of an edge but not in the corners: the bulge packs many screen pixels into
-/// few rows of picture there, so a step of a few pixels of picture becomes a long step across the
-/// screen, and one shadow separates into several -- the fan of rays, and why blurring never cured it.
-///
-/// It reads the filtered copy of the frame whatever the picture itself is set to, because with
-/// nearest sampling each tap's contribution steps as it crosses a pixel and the steps show as ripples.
-half3 edgeSample(float2 g, float bulge, float2 lo, float2 hi, float2 d) {
-    half3 sum = half3(0.0);
-    float total = 0.0;
-    for (int i = -2; i <= 2; ++i) {
-        for (int j = -2; j <= 2; ++j) {
-            float2 at = clamp((g + float2(float(i), float(j)) * d) * bulge, -1.0, 1.0);
-            half3 col = srcSmooth.eval(clamp((at * 0.5 + 0.5) * dest, lo, hi)).rgb;
-            // How much light this piece of picture gives off, squared: a pixel half in shadow is
-            // half a light, not half a weight, and leaving it at first power lets the part-lit pixels
-            // along the edge of a dark character pull the glow down in steps as the taps cross them.
-            float lit = float(dot(col, half3(0.30, 0.59, 0.11)));
-            float w = (3.0 - abs(float(i))) * (3.0 - abs(float(j))) * lit * lit;
-            sum += col * half(w);
-            total += w;
-        }
-    }
-    return total > 0.0001 ? sum / half(total) : half3(0.0);
 }
 
 half4 main(float2 xy) {
@@ -172,25 +120,22 @@ half4 main(float2 xy) {
     float pixel = 2.0 / max(min(dest.x, dest.y), 1.0);
     float rim = smoothstep(0.0, pixel * 3.0, beyond);
 
-    // The surround, lit by the picture it frames.
-    half3 spill = half3(0.0);
-    if (rim > 0.0 && edgeLight > 0.0) {
-        float2 qc = unbulge(c0);
-        float bulge = 1.0 + curvature * dot(qc, qc) * 0.25;
-
-        // How far out we are as a fraction of the panel's own depth: 0 against the glass, 1 at the
-        // frame. A plain distance leaves the corners dark. The curve cuts a corner about four times
-        // deeper than it cuts the sides, so light that fades over the width of a side panel has run
-        // out long before it crosses a corner, and the surround reads as four lit panels with dark
-        // gaps where they meet.
-        float2 depth = max(1.0 - abs(qc), float2(0.0001, 0.0001));
-        float2 t = (abs(c0) - abs(qc)) / depth;
-        float reach = clamp(max(t.x, t.y), 0.0, 1.0);
-
-        // Wide enough that a single dark character never fills the patch on its own.
-        float2 d = 14.0 * 2.0 / dest;
-        spill = edgeSample(c0, bulge, lo, hi, d) * exp(-reach * 0.7) * edgeLight;
+    // The surround, lit by the picture it frames: the colour of the picture's own edge, dimmed with
+    // distance. 'col' is the pixel at p, which for anywhere outside the glass is the nearest pixel on
+    // it, so each place in the surround takes the colour of the picture directly in front of it.
+    //
+    // 'reach' is how far out we are as a fraction of the panel's own depth: 0 against the glass, 1 at
+    // the frame. A plain distance leaves the corners dark, because the curve cuts a corner about four
+    // times deeper than it cuts the sides, so light fading over the width of a side panel has run out
+    // long before it crosses a corner.
+    float2 qc = c0;
+    for (int k = 0; k < 2; ++k) {
+        float wq = 1.0 + curvature * dot(qc, qc) * 0.25;
+        qc = clamp(qc * wq, -1.0, 1.0) / wq;
     }
+    float2 t = (abs(c0) - abs(qc)) / max(1.0 - abs(qc), float2(0.0001, 0.0001));
+    float reach = clamp(max(t.x, t.y), 0.0, 1.0);
+    half3 spill = col.rgb * exp(-reach * 0.7) * edgeLight;
 
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";
@@ -256,13 +201,11 @@ half4 main(float2 xy) {
         private readonly CrtShaderOptions _options;
         private readonly bool _smooth;
         private readonly CrtSurfaceCache _cache;
-        private readonly CrtSurfaceCache _glow;
         private readonly float _time;
 
-        public CrtDrawOperation(Rect bounds, SKBitmap frame, Rect source, Rect dest, CrtShaderOptions options, bool smooth, CrtSurfaceCache cache, float time, CrtSurfaceCache glow = null)
+        public CrtDrawOperation(Rect bounds, SKBitmap frame, Rect source, Rect dest, CrtShaderOptions options, bool smooth, CrtSurfaceCache cache, float time)
         {
             _cache = cache;
-            _glow = glow;
             _time = time;
             Bounds = bounds;
             _frame = frame;
@@ -315,38 +258,6 @@ half4 main(float2 xy) {
             }
         }
 
-        /// <summary>
-        /// A quarter-size copy of the visible part of the frame, for the edge light to gather from.
-        ///
-        /// The glow is built from a handful of taps, and taken from the picture at full resolution
-        /// each tap steps as it crosses a sharp edge: the steps land at the spacing of the taps and
-        /// read as bands in the glow. Gathering from a copy that is already soft settles that where
-        /// it starts, and lets the gather be coarser than it would otherwise have to be.
-        ///
-        /// It holds only the visible part, so the cropped-away border cannot reach the glow at all.
-        /// </summary>
-        private SKImage SoftCopy(out SKSurface owned)
-        {
-            int w = Math.Max(1, (int)Math.Round(_source.Width / 4));
-            int h = Math.Max(1, (int)Math.Round(_source.Height / 4));
-
-            SKSurface surface = _glow?.GetOrCreate(w, h);
-            owned = surface == null
-                ? SKSurface.Create(new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Premul))
-                : null;                                  // the cache owns it; do not dispose it here
-            surface ??= owned;
-
-            using SKImage whole = SKImage.FromBitmap(_frame);
-            surface.Canvas.DrawImage(whole,
-                new SKRect((float)_source.X, (float)_source.Y, (float)_source.Right, (float)_source.Bottom),
-                new SKRect(0, 0, w, h),
-                // A wide resampler, not plain bilinear: bilinear reads four pixels whatever the
-                // reduction, so shrinking this far with it drops most of the picture on the floor
-                // instead of averaging it, and single characters land whole on single pixels.
-                new SKSamplingOptions(SKCubicResampler.Mitchell));
-            return surface.Snapshot();
-        }
-
         /// <summary>Runs the shader over a rectangle of the given size, starting at the canvas origin.</summary>
         internal void DrawShaded(SKCanvas canvas, SKRuntimeEffect effect, double width, double height, SKSamplingOptions sampling)
         {
@@ -356,12 +267,6 @@ half4 main(float2 xy) {
             var local = SKMatrix.CreateScaleTranslation(sx, sy, (float)(-_source.X * sx), (float)(-_source.Y * sy));
 
             using SKShader source = _frame.ToShader(SKShaderTileMode.Clamp, SKShaderTileMode.Clamp, sampling, local);
-            using SKImage glowFrame = SoftCopy(out SKSurface owned);
-            using SKSurface disposeWithUs = owned;
-            using SKShader smooth = glowFrame.ToShader(
-                SKShaderTileMode.Clamp, SKShaderTileMode.Clamp,
-                new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None),
-                SKMatrix.CreateScale((float)(width / glowFrame.Width), (float)(height / glowFrame.Height)));
             var uniforms = new SKRuntimeEffectUniforms(effect)
             {
                 ["dest"] = new[] { (float)width, (float)height },
@@ -377,7 +282,7 @@ half4 main(float2 xy) {
                 ["flicker"] = _options.Flicker,
                 ["noise"] = _options.Noise,
             };
-            var children = new SKRuntimeEffectChildren(effect) { ["src"] = source, ["srcSmooth"] = smooth };
+            var children = new SKRuntimeEffectChildren(effect) { ["src"] = source };
 
             using SKShader shader = effect.ToShader(uniforms, children);
             using var paint = new SKPaint { Shader = shader };
