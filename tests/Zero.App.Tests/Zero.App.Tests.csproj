@@ -6,6 +6,11 @@
     <IsTestProject>true</IsTestProject>
     <RootNamespace>Zero.App.Tests</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Mirror the runtime knobs from Zero.App so the tests run in the same mode the app does.
+         Without this, a theme that trips over globalization-invariant mode passes here and
+         crashes on start-up in the real app. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PredefinedCulturesOnly>false</PredefinedCulturesOnly>
     <OutputType>Exe</OutputType>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>

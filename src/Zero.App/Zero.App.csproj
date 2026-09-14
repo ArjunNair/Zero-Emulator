@@ -11,6 +11,10 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <ApplicationIcon>Assets/zero.ico</ApplicationIcon>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Zero is English-only, so invariant globalization keeps the published output small. Themes may
+         still construct a CultureInfo for their own localisation (Semi builds one for zh-CN), which
+         throws in invariant mode unless arbitrary culture names are allowed to resolve to invariant data. -->
+    <PredefinedCulturesOnly>false</PredefinedCulturesOnly>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   <ItemGroup>

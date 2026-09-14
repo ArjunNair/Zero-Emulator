@@ -38,7 +38,10 @@ where the work stands and every place the implementation deliberately deviates f
   (Windows 95 chrome). A theme is installed at start-up by `Styles/ThemeCatalog.cs`; it cannot be
   swapped under open windows, because replacing it leaves existing controls without templates, so the
   setting takes effect on restart. `ZERO_THEME` overrides it for tests and tooling. Classic has no
-  stable Avalonia 12 release yet, so it is pinned to `12.0.1-beta1`.
+  stable Avalonia 12 release yet, so it is pinned to `12.0.1-beta1`. Zero runs in globalization-invariant
+  mode to keep the published output small, with `PredefinedCulturesOnly=false` because Semi constructs a
+  `CultureInfo` for its own localisation; the test project mirrors both settings, so a theme that trips
+  over them fails in tests rather than on the user's next start-up.
   On macOS a style layer (`Styles/MacStyles.axaml`, applied only to Fluent) gives dialogs Mac conventions:
   system font at 13 pt, compact rounded controls, small check boxes, segmented tabs, accent default
   buttons; the theme follows the system light/dark appearance. Avalonia draws its own controls, so this
