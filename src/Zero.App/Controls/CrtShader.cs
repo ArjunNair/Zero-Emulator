@@ -59,22 +59,42 @@ float hash(float2 p) {
     return fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
 }
 
+/// The point on the picture's edge that lights a given place in the surround, for a place given in
+/// the -1..1 space the screen is measured in.
+///
+/// Not simply clamp(c, -1, 1): the bulge scales both coordinates by an amount that grows with
+/// distance from the centre, so out in the surround the clamped point keeps sliding along the edge
+/// as it goes. The row being sampled drifts sideways as the light travels and a dark pixel's shadow
+/// is dragged out into a ray. Undoing the bulge and projecting again settles on a point that depends
+/// only on the position along the edge.
+float2 glassPoint(float2 g, float2 lo, float2 hi) {
+    float2 q = g;
+    for (int k = 0; k < 2; ++k) {
+        float wq = 1.0 + curvature * dot(q, q) * 0.25;
+        q = clamp(q * wq, -1.0, 1.0) / wq;
+    }
+    float wq = 1.0 + curvature * dot(q, q) * 0.25;
+    return clamp((clamp(q * wq, -1.0, 1.0) * 0.5 + 0.5) * dest, lo, hi);
+}
+
 /// Light coming off the edge of the picture. Taking the single nearest pixel would let one dark pixel
 /// at the edge paint a hard bar all the way out to the frame, so this averages a patch of it instead.
 ///
-/// Three things about the kernel matter. The taps are spaced closer than a character cell, or an
-/// eight pixel block falls between them and each tap throws its own shadow with a gap beside it. The
-/// spacing is fixed rather than widening with distance: widening separates those shadows as they
-/// travel, which fans the corners with rays. And it reads the filtered copy of the frame whatever
-/// the picture itself is set to, because with nearest sampling each tap's contribution steps as it
-/// crosses a pixel and the steps show up as ripples in the glow.
-half3 edgeSample(float2 p, float2 lo, float2 hi, float2 r) {
+/// The patch is spread over the screen, not over the picture, and each tap is projected onto the edge
+/// separately. Offsetting in the picture's own pixels looks even in the middle of an edge but not in
+/// the corners: the bulge packs many screen pixels into few rows of picture there, so a step of a few
+/// pixels of picture becomes a long step across the screen, and the one shadow separates into several
+/// -- which is the fan of rays, and why blurring harder never cured it.
+///
+/// It reads the filtered copy of the frame whatever the picture itself is set to, because with
+/// nearest sampling each tap's contribution steps as it crosses a pixel and the steps show as ripples.
+half3 edgeSample(float2 g, float2 lo, float2 hi, float2 d) {
     half3 sum = half3(0.0);
     float total = 0.0;
-    for (int i = -2; i <= 2; ++i) {
-        for (int j = -2; j <= 2; ++j) {
-            float w = (3.0 - abs(float(i))) * (3.0 - abs(float(j)));   // a tent, so the patch has no edge
-            sum += srcSmooth.eval(clamp(p + float2(float(i), float(j)) * r, lo, hi)).rgb * half(w);
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            float w = (2.0 - abs(float(i))) * (2.0 - abs(float(j)));   // a tent, so the patch has no edge
+            sum += srcSmooth.eval(glassPoint(g + float2(float(i), float(j)) * d, lo, hi)).rgb * half(w);
             total += w;
         }
     }
@@ -83,8 +103,8 @@ half3 edgeSample(float2 p, float2 lo, float2 hi, float2 r) {
 
 half4 main(float2 xy) {
     float2 uv = xy / dest;
-    float2 c  = uv * 2.0 - 1.0;                       // -1..1 from the centre
-    c *= 1.0 + curvature * dot(c.yx, c.yx) * 0.25;    // bulge the glass
+    float2 c0 = uv * 2.0 - 1.0;                       // -1..1 from the centre
+    float2 c = c0 * (1.0 + curvature * dot(c0, c0) * 0.25);   // bulge the glass
 
     // Keep every sample half a source pixel inside the visible frame. The frame we are handed still
     // has its border attached and the tile mode clamps to the whole of it, so a sample taken exactly
@@ -146,8 +166,16 @@ half4 main(float2 xy) {
     // The surround, lit by the picture it frames. The patch averaged widens as the light travels out.
     half3 spill = half3(0.0);
     if (rim > 0.0 && edgeLight > 0.0) {
-        float2 r = texel * 3.5;
-        spill = edgeSample(p, lo, hi, r) * exp(-beyond * 13.0) * edgeLight;
+        float2 d = 5.0 * 2.0 / dest;      // tap step: five pixels of screen, in this -1..1 space
+        // Close to the glass the surround takes its colour from the picture right beside it. Further
+        // out it settles towards the screen's light as a whole: light spreads as it travels, and
+        // without this a dark character at the edge of the picture lays a black bar out to the frame.
+        half3 near = edgeSample(c0, lo, hi, d);
+        half3 far = (srcSmooth.eval(mix(lo, hi, float2(0.25, 0.25))).rgb
+                   + srcSmooth.eval(mix(lo, hi, float2(0.75, 0.25))).rgb
+                   + srcSmooth.eval(mix(lo, hi, float2(0.25, 0.75))).rgb
+                   + srcSmooth.eval(mix(lo, hi, float2(0.75, 0.75))).rgb) * 0.25;
+        spill = mix(near, far, half(smoothstep(0.0, 0.10, beyond))) * exp(-beyond * 13.0) * edgeLight;
     }
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";

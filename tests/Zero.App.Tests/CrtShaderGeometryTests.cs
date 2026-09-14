@@ -178,5 +178,42 @@ namespace Zero.App.Tests
             Assert.True(beside > clear * 0.25,
                 $"the dark block bars the surround: beside it {beside:F1}, clear of it {clear:F1}");
         }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void A_dark_block_casts_one_shadow_on_the_surround_and_not_a_fan_of_them(bool smooth)
+        {
+            // The light in the surround is gathered from a patch of the picture. If that patch is
+            // measured in the picture's own pixels, the bulge -- which packs many screen pixels into
+            // few rows of picture near the edges -- stretches it into a long step across the screen,
+            // and the one shadow breaks into several that spread apart as they travel: the fan of
+            // rays. One dark block must leave one dark region behind it, however dark.
+            using SKBitmap frame = Frame(new SKColor(0xC0, 0xC0, 0xC0), new SKColor(0xC0, 0xC0, 0xC0));
+            using (var c = new SKCanvas(frame))
+            using (var black = new SKPaint { Color = SKColors.Black })
+                c.DrawRect(new SKRect(48, 48 + 92, 48 + 16, 48 + 100), black);
+
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            using SKBitmap bmp = Render(options, frame, smooth);
+
+            int row = (int)(Height * 96.0 / 192.0);
+            var profile = new double[121];
+            for (int i = 0; i < profile.Length; i++) profile[i] = Band(bmp, 1, 4, row - 60 + i, row - 59 + i);
+
+            // A dip counts as its own shadow only if the surround climbs back out of it by a couple of
+            // levels on both sides, so the gentle ripple of a single soft shadow is not counted twice.
+            int shadows = 0;
+            for (int i = 1; i < profile.Length - 1; i++)
+            {
+                if (profile[i] >= profile[i - 1] || profile[i] >= profile[i + 1]) continue;
+                double leftPeak = 0, rightPeak = 0;
+                for (int k = 0; k < i; k++) leftPeak = Math.Max(leftPeak, profile[k]);
+                for (int k = i + 1; k < profile.Length; k++) rightPeak = Math.Max(rightPeak, profile[k]);
+                if (Math.Min(leftPeak, rightPeak) - profile[i] > 2.0) shadows++;
+            }
+
+            Assert.True(shadows <= 1, $"the block casts {shadows} separate shadows on the surround");
+        }
     }
 }
