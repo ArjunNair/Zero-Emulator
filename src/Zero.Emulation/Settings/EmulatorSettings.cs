@@ -64,7 +64,10 @@ namespace Zero.Emulation.Settings
         public CrtSettings Crt { get; set; } = new CrtSettings();
     }
 
-    /// <summary>CRT effects drawn over the emulated screen. Cosmetic only; they never touch emulation.</summary>
+    /// <summary>
+    /// CRT effects drawn over the emulated screen by Zero's own shader. Cosmetic only; they never
+    /// touch emulation. Strengths run 0..1, and 0 switches an effect off entirely.
+    /// </summary>
     public sealed class CrtSettings
     {
         public bool Enabled { get; set; }
@@ -72,15 +75,11 @@ namespace Zero.Emulation.Settings
         public bool Vignette { get; set; } = true;
         public bool Flicker { get; set; }
         public bool Noise { get; set; }
-
-        /// <summary>
-        /// Curved glass, phosphor glow and a glass reflection, drawn by a GPU shader. Needs working
-        /// OpenGL; where it is missing the picture still shows, just without the effects.
-        /// </summary>
-        public bool Advanced { get; set; }
-        public double Glow { get; set; } = 0.35;
         public double Curvature { get; set; } = 0.2;
+        public double Glow { get; set; } = 0.35;
         public double GlassReflect { get; set; } = 0.2;
+        /// <summary>Light from the picture spilling onto the surround, in place of plain black.</summary>
+        public double EdgeLight { get; set; } = 0.5;
     }
 
     public sealed class AudioSettings

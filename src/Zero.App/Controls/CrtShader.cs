@@ -15,12 +15,21 @@ namespace Zero.App.Controls
         public float Curvature;
         public float Glow;
         public float Reflection;
+        /// <summary>Light from the picture spilling onto the surround, instead of plain black.</summary>
+        public float EdgeLight;
+        public float Scanlines;
+        public float Vignette;
+        public float Flicker;
+        public float Noise;
 
-        public bool Any => Enabled && (Curvature > 0 || Glow > 0 || Reflection > 0);
+        public bool Any => Enabled && (Curvature > 0 || Glow > 0 || Reflection > 0 || EdgeLight > 0
+                                       || Scanlines > 0 || Vignette > 0 || Flicker > 0 || Noise > 0);
 
         public bool Equals(CrtShaderOptions other) =>
-            Enabled == other.Enabled && Curvature.Equals(other.Curvature)
-            && Glow.Equals(other.Glow) && Reflection.Equals(other.Reflection);
+            Enabled == other.Enabled && Curvature.Equals(other.Curvature) && Glow.Equals(other.Glow)
+            && Reflection.Equals(other.Reflection) && EdgeLight.Equals(other.EdgeLight)
+            && Scanlines.Equals(other.Scanlines) && Vignette.Equals(other.Vignette)
+            && Flicker.Equals(other.Flicker) && Noise.Equals(other.Noise);
     }
 
     /// <summary>
@@ -35,33 +44,66 @@ uniform shader src;
 uniform float2 dest;        // destination size in pixels
 uniform float2 srcOrigin;   // top-left of the visible part of the frame
 uniform float2 srcSize;     // size of the visible part of the frame
+uniform float time;         // seconds, for the effects that move
 uniform float curvature;
 uniform float glow;
 uniform float reflection;
+uniform float edgeLight;
+uniform float scanline;
+uniform float vignette;
+uniform float flicker;
+uniform float noise;
+
+float hash(float2 p) {
+    return fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
+}
 
 half4 main(float2 xy) {
     float2 uv = xy / dest;
     float2 c  = uv * 2.0 - 1.0;                       // -1..1 from the centre
     c *= 1.0 + curvature * dot(c.yx, c.yx) * 0.25;    // bulge the glass
-    if (abs(c.x) > 1.0 || abs(c.y) > 1.0) return half4(0.0, 0.0, 0.0, 1.0);
 
-    float2 p = (c * 0.5 + 0.5) * dest;                // curved position in destination pixels
+    float2 inside = clamp(c, -1.0, 1.0);
+    float2 p = (inside * 0.5 + 0.5) * dest;           // nearest point on the glass
     half4 col = src.eval(p);
 
     if (glow > 0.0) {                                 // phosphor bleeding into the neighbouring lines
         float rows = max(srcSize.y, 1.0);
         float step = dest.y / rows;
         half4 bleed = src.eval(p - float2(0.0, step)) * 0.6 + src.eval(p + float2(0.0, step)) * 0.4;
-        // Normalised, so the picture keeps its exposure instead of washing out.
-        col = (col + bleed * glow) / (1.0 + glow);
+        col = (col + bleed * glow) / (1.0 + glow);    // normalised, so the picture keeps its exposure
     }
 
+    float beyond = distance(c, inside);
+    if (beyond > 0.0) {                               // the surround: lit by the picture it frames
+        half3 spill = col.rgb * exp(-beyond * 13.0) * edgeLight;
+        return half4(spill, 1.0);
+    }
+
+    if (scanline > 0.0) {
+        // One dark band per emulated line, but never more than one per two output pixels: asking for
+        // more bands than the surface can hold turns them into moire instead of scanlines.
+        float rows = min(max(srcSize.y, 1.0), dest.y * 0.5);
+        float row = (p.y / dest.y) * rows;
+        col.rgb *= 1.0 - scanline * (0.5 - 0.5 * cos(row * 6.2831853));
+    }
+    if (vignette > 0.0) {
+        col.rgb *= 1.0 - vignette * dot(c, c) * 0.35;
+    }
+    if (flicker > 0.0) {                              // mains hum on the brightness
+        col.rgb *= 1.0 - flicker * 0.12 * (0.5 + 0.5 * sin(time * 37.0));
+    }
+    if (noise > 0.0) {
+        float n = hash(floor(p) + floor(time * 24.0));
+        col.rgb += half3(half((n - 0.5) * noise * 0.18));
+    }
     if (reflection > 0.0) {                           // a soft sheen across the glass
         float sheen = clamp(1.0 - distance(uv, float2(0.28, 0.22)) * 1.7, 0.0, 1.0);
-        col += half4(half3(sheen * sheen * reflection * 0.25), 0.0);
+        col.rgb += half3(half(sheen * sheen * reflection * 0.25));
     }
     return half4(col.rgb, 1.0);
 }";
+
 
         private static SKRuntimeEffect _effect;
         private static bool _tried;
@@ -123,10 +165,12 @@ half4 main(float2 xy) {
         private readonly CrtShaderOptions _options;
         private readonly bool _smooth;
         private readonly CrtSurfaceCache _cache;
+        private readonly float _time;
 
-        public CrtDrawOperation(Rect bounds, SKBitmap frame, Rect source, Rect dest, CrtShaderOptions options, bool smooth, CrtSurfaceCache cache)
+        public CrtDrawOperation(Rect bounds, SKBitmap frame, Rect source, Rect dest, CrtShaderOptions options, bool smooth, CrtSurfaceCache cache, float time)
         {
             _cache = cache;
+            _time = time;
             Bounds = bounds;
             _frame = frame;
             _source = source;
@@ -192,9 +236,15 @@ half4 main(float2 xy) {
                 ["dest"] = new[] { (float)width, (float)height },
                 ["srcOrigin"] = new[] { (float)_source.X, (float)_source.Y },
                 ["srcSize"] = new[] { (float)_source.Width, (float)_source.Height },
+                ["time"] = _time,
                 ["curvature"] = _options.Curvature,
                 ["glow"] = _options.Glow,
                 ["reflection"] = _options.Reflection,
+                ["edgeLight"] = _options.EdgeLight,
+                ["scanline"] = _options.Scanlines,
+                ["vignette"] = _options.Vignette,
+                ["flicker"] = _options.Flicker,
+                ["noise"] = _options.Noise,
             };
             var children = new SKRuntimeEffectChildren(effect) { ["src"] = source };
 

@@ -70,11 +70,11 @@ namespace Zero.App.Windows
             CrtVignette.IsChecked = settings.Render.Crt.Vignette;
             CrtFlicker.IsChecked = settings.Render.Crt.Flicker;
             CrtNoise.IsChecked = settings.Render.Crt.Noise;
-            CrtAdvanced.IsChecked = settings.Render.Crt.Advanced;
             CrtGlow.Value = settings.Render.Crt.Glow;
             CrtCurvature.Value = settings.Render.Crt.Curvature;
             CrtGlass.Value = settings.Render.Crt.GlassReflect;
-            foreach ((Slider slider, TextBlock label) in new[] { (CrtGlow, CrtGlowValue), (CrtCurvature, CrtCurvatureValue), (CrtGlass, CrtGlassValue) })
+            CrtEdge.Value = settings.Render.Crt.EdgeLight;
+            foreach ((Slider slider, TextBlock label) in new[] { (CrtGlow, CrtGlowValue), (CrtCurvature, CrtCurvatureValue), (CrtGlass, CrtGlassValue), (CrtEdge, CrtEdgeValue) })
             {
                 Slider s = slider; TextBlock l = label;
                 void Show() => l.Text = ((int)Math.Round(s.Value * 100)) + "%";
@@ -163,10 +163,10 @@ namespace Zero.App.Windows
             _settings.Render.Crt.Vignette = CrtVignette.IsChecked == true;
             _settings.Render.Crt.Flicker = CrtFlicker.IsChecked == true;
             _settings.Render.Crt.Noise = CrtNoise.IsChecked == true;
-            _settings.Render.Crt.Advanced = CrtAdvanced.IsChecked == true;
             _settings.Render.Crt.Glow = CrtGlow.Value;
             _settings.Render.Crt.Curvature = CrtCurvature.Value;
             _settings.Render.Crt.GlassReflect = CrtGlass.Value;
+            _settings.Render.Crt.EdgeLight = CrtEdge.Value;
 
             string theme = ThemeCatalog.Normalise(ThemeBox.SelectedItem as string);
             ThemeChanged = theme != ThemeCatalog.Normalise(_settings.Render.UiTheme);

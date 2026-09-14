@@ -43,23 +43,17 @@ where the work stands and every place the implementation deliberately deviates f
   with Fluent, since it tuned Fluent's own templates for macOS. Dialogs size themselves to their
   content (`SizeToContent` with a MinWidth/MaxWidth, and no fixed-width labels), because a theme's
   metrics decide how much room the text needs; `DialogSizingTests` fails if any label ends up narrower
-  than its text. `Pipboy.Avalonia.Fx` supplies a `CrtDisplay` panel wrapped around the emulated screen:
-  scanlines, vignette, flicker and noise, off by default (the scan beam it also offers was dropped: it
-  drew phosphor green under every theme), toggled from View > CRT Effects or
-  Options > Appearance and applied without a restart. The effects are cosmetic and never touch
-  emulation; a test asserts that enabling them changes the rendered pixels and disabling them restores
-  them exactly. Curvature, phosphor glow and a glass reflection come from
-  `Controls/CrtShader.cs`, an SkSL fragment shader compiled by Skia at run time and drawn through
-  Avalonia's Skia canvas (`ISkiaSharpApiLeaseFeature`). Skia targets whichever backend it already uses,
-  so this needs no OpenGL and still renders on the software pipeline. Cost is per output pixel, and on
-  the software path that matters (measured on an M-series Mac: 3.4 ms at 352x296, 14 ms at 704x592,
-  70 ms at 1920x1080), so with a GPU context the shader runs at the size it is seen at, and without one
-  it runs at the frame's own resolution into a cached surface and is scaled up. This replaced the Fx
-  package's `ProCrtControl`, which needed OpenGL, drew nothing without it, and could not be verified
-  here at all. Zero runs in globalization-invariant
-  mode to keep the published output small, with `PredefinedCulturesOnly=false` because Semi constructs
-  a `CultureInfo` for its own localisation; the test project mirrors both settings, so a theme that
-  trips over them fails in tests rather than on the user's next start-up.
+  than its text. CRT effects over the emulated screen come from Zero's own SkSL shader in
+  `Controls/CrtShader.cs`, compiled by Skia at run time and drawn through Avalonia's Skia canvas
+  (`ISkiaSharpApiLeaseFeature`): scanlines, vignette, flicker, noise, curvature, phosphor glow, a glass
+  sheen, and edge light that spills the picture onto the surround instead of leaving it black. All off
+  by default, toggled from View > CRT Effects and tuned in Options > Appearance, applied without a
+  restart. Skia targets whichever backend it already uses, so there is no OpenGL anywhere; cost is per
+  output pixel, so with a GPU context the shader runs at display size and without one it runs at the
+  frame's own resolution into a cached surface and is scaled up (measured on an M-series Mac: 3.4 ms at
+  352x296 against 70 ms at 1920x1080). Scanline frequency is capped at one band per two output pixels,
+  or the bands alias into moire. Earlier versions of this used `Pipboy.Avalonia.Fx`, first its
+  `CrtDisplay` overlay and then its OpenGL `ProCrtControl`; both are gone and so is the package.
   Missing: file associations (packaging-level).
 - **Phase 5** started. `dotnet publish` self-contained single-file works for all six RIDs
   (`packaging/README.md`); GitHub Actions workflow tests on three OSes and publishes artifacts;

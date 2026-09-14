@@ -574,23 +574,24 @@ namespace Zero.App
             RefreshMenuState();
         }
 
-        /// <summary>Push the CRT settings into the overlay. Cheap, and safe to call at any time.</summary>
+        /// <summary>Push the CRT settings into the display's shader. Safe to call at any time.</summary>
         internal void ApplyCrtSettings()
         {
             CrtSettings crt = _settings.Render.Crt;
             bool on = crt.Enabled;
+            float Strength(double value) => on ? (float)Math.Clamp(value, 0, 1) : 0f;
             Display.CrtOptions = new Controls.CrtShaderOptions
             {
-                Enabled = on && crt.Advanced,
-                Curvature = (float)Math.Clamp(crt.Curvature, 0, 1),
-                Glow = (float)Math.Clamp(crt.Glow, 0, 1),
-                Reflection = (float)Math.Clamp(crt.GlassReflect, 0, 1)
+                Enabled = on,
+                Curvature = Strength(crt.Curvature),
+                Glow = Strength(crt.Glow),
+                Reflection = Strength(crt.GlassReflect),
+                EdgeLight = Strength(crt.EdgeLight),
+                Scanlines = on && crt.Scanlines ? 0.35f : 0f,
+                Vignette = on && crt.Vignette ? 0.6f : 0f,
+                Flicker = on && crt.Flicker ? 1f : 0f,
+                Noise = on && crt.Noise ? 1f : 0f
             };
-            CrtLayer.EnableScanlines = on && crt.Scanlines;
-            CrtLayer.EnableVignette = on && crt.Vignette;
-            CrtLayer.EnableScanBeam = false; // dropped: its phosphor green ignores the chosen theme
-            CrtLayer.EnableFlicker = on && crt.Flicker;
-            CrtLayer.EnableNoise = on && crt.Noise;
         }
 
         private void ApplyViewSettings()

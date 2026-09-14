@@ -91,7 +91,7 @@ namespace Zero.App.Tests
             // can check the picture actually changes rather than merely that nothing crashed.
             Assert.True(Zero.App.Controls.CrtShader.IsAvailable, "the CRT shader did not compile");
             Assert.False(w.Display.CrtOptions.Enabled);
-            crt.Enabled = crt.Advanced = true;
+            crt.Enabled = true;
             w.ApplyCrtSettings();
             Dispatcher.UIThread.RunJobs();
             Assert.True(w.Display.CrtOptions.Enabled);
@@ -109,11 +109,10 @@ namespace Zero.App.Tests
             Assert.NotEqual(0, shaded);       // a blank frame would sum to nothing
             Assert.NotEqual(plain, shaded);   // the shader really did change the picture
 
-            crt.Advanced = crt.Enabled = false;
+            crt.Enabled = false;
             w.ApplyCrtSettings();
             Dispatcher.UIThread.RunJobs();
             Assert.False(w.Display.CrtOptions.Enabled);
-            Assert.True(w.CrtLayer != null);
             Assert.NotEqual(plain, withEffects);
             Assert.NotEqual(plain, everything);
             Assert.Equal(plain, plainAgain);

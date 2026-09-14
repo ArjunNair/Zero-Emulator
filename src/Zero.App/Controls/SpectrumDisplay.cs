@@ -19,6 +19,7 @@ namespace Zero.App.Controls
         private WriteableBitmap _bitmap;
         private SkiaSharp.SKBitmap _shaderFrame;   // only kept while the CRT shader is running
         private readonly CrtSurfaceCache _crtSurfaces = new CrtSurfaceCache();
+        private readonly System.Diagnostics.Stopwatch _crtClock = System.Diagnostics.Stopwatch.StartNew();
         private int _borderCrop;
         private ISolidColorBrush _surround = Brushes.Black;
 
@@ -64,8 +65,19 @@ namespace Zero.App.Controls
 
         public long FramesPresented { get; private set; }
 
-        /// <summary>CRT shader settings. Assigning takes effect on the next frame.</summary>
-        public CrtShaderOptions CrtOptions { get; set; }
+        private CrtShaderOptions _crtOptions;
+
+        /// <summary>CRT shader settings. Assigning repaints at once, so it works while paused too.</summary>
+        public CrtShaderOptions CrtOptions
+        {
+            get => _crtOptions;
+            set
+            {
+                if (_crtOptions.Equals(value)) return;
+                _crtOptions = value;
+                InvalidateVisual();
+            }
+        }
 
         private bool UseShader => CrtOptions.Any && CrtShader.IsAvailable;
 
@@ -127,26 +139,19 @@ namespace Zero.App.Controls
             if (_surround.Color.ToUInt32() != (0xFF000000u | rgb))
                 _surround = new ImmutableSolidColorBrush(Color.FromUInt32(0xFF000000u | rgb));
 
-            if (UseShader)
+            // The Skia copy is kept whether or not the shader is running, so switching the effects on
+            // shows the current picture immediately instead of waiting for the next frame.
+            if (_shaderFrame == null || _shaderFrame.Width != frame.Width || _shaderFrame.Height != frame.Height)
             {
-                if (_shaderFrame == null || _shaderFrame.Width != frame.Width || _shaderFrame.Height != frame.Height)
-                {
-                    _shaderFrame?.Dispose();
-                    _shaderFrame = new SkiaSharp.SKBitmap(new SkiaSharp.SKImageInfo(frame.Width, frame.Height,
-                        SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Opaque));
-                }
-                unsafe
-                {
-                    int* dst = (int*)_shaderFrame.GetPixels();
-                    int[] src = frame.Pixels;
-                    for (int i = 0; i < src.Length; i++) dst[i] = src[i] | unchecked((int)0xFF000000);
-                }
+                _shaderFrame?.Dispose();
+                _shaderFrame = new SkiaSharp.SKBitmap(new SkiaSharp.SKImageInfo(frame.Width, frame.Height,
+                    SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Opaque));
             }
-            else if (_shaderFrame != null)
+            unsafe
             {
-                _shaderFrame.Dispose();
-                _shaderFrame = null;
-                _crtSurfaces.Dispose();
+                int* dst = (int*)_shaderFrame.GetPixels();
+                int[] src = frame.Pixels;
+                for (int i = 0; i < src.Length; i++) dst[i] = src[i] | unchecked((int)0xFF000000);
             }
 
             FramesPresented++;
@@ -177,7 +182,7 @@ namespace Zero.App.Controls
 
             if (UseShader && _shaderFrame != null)
             {
-                context.Custom(new CrtDrawOperation(new Rect(Bounds.Size), _shaderFrame, source, dest, CrtOptions, Smooth, _crtSurfaces));
+                context.Custom(new CrtDrawOperation(new Rect(Bounds.Size), _shaderFrame, source, dest, CrtOptions, Smooth, _crtSurfaces, (float)_crtClock.Elapsed.TotalSeconds));
                 return;
             }
             context.DrawImage(_bitmap, source, dest);
