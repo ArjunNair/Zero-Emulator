@@ -112,6 +112,20 @@
           </StackPanel>
           <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
                      Text="Scanlines and the vignette are drawn once per frame. Flicker and noise animate continuously, which costs a little more." />
+          <CheckBox x:Name="CrtAdvanced" Content="Curved glass, glow and reflection (GPU)" />
+          <Grid ColumnDefinitions="Auto,160,Auto" RowDefinitions="Auto,Auto,Auto" Margin="24,0,0,0">
+            <TextBlock Grid.Row="0" Text="Glow" VerticalAlignment="Center" Margin="0,0,10,0" />
+            <Slider Grid.Row="0" Grid.Column="1" x:Name="CrtGlow" Minimum="0" Maximum="1" />
+            <TextBlock Grid.Row="0" Grid.Column="2" x:Name="CrtGlowValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+            <TextBlock Grid.Row="1" Text="Curvature" VerticalAlignment="Center" Margin="0,0,10,0" />
+            <Slider Grid.Row="1" Grid.Column="1" x:Name="CrtCurvature" Minimum="0" Maximum="1" />
+            <TextBlock Grid.Row="1" Grid.Column="2" x:Name="CrtCurvatureValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+            <TextBlock Grid.Row="2" Text="Reflection" VerticalAlignment="Center" Margin="0,0,10,0" />
+            <Slider Grid.Row="2" Grid.Column="1" x:Name="CrtGlass" Minimum="0" Maximum="1" />
+            <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CrtGlassValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+          </Grid>
+          <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
+                     Text="These three are drawn by a GPU shader and need working OpenGL. Where it is unavailable the picture still shows, without them." />
         </StackPanel>
       </TabItem>
     </TabControl>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Zero.App.Styles;
@@ -69,6 +70,17 @@ namespace Zero.App.Windows
             CrtVignette.IsChecked = settings.Render.Crt.Vignette;
             CrtFlicker.IsChecked = settings.Render.Crt.Flicker;
             CrtNoise.IsChecked = settings.Render.Crt.Noise;
+            CrtAdvanced.IsChecked = settings.Render.Crt.Advanced;
+            CrtGlow.Value = settings.Render.Crt.Glow;
+            CrtCurvature.Value = settings.Render.Crt.Curvature;
+            CrtGlass.Value = settings.Render.Crt.GlassReflect;
+            foreach ((Slider slider, TextBlock label) in new[] { (CrtGlow, CrtGlowValue), (CrtCurvature, CrtCurvatureValue), (CrtGlass, CrtGlassValue) })
+            {
+                Slider s = slider; TextBlock l = label;
+                void Show() => l.Text = ((int)Math.Round(s.Value * 100)) + "%";
+                s.PropertyChanged += (_, e) => { if (e.Property == RangeBase.ValueProperty) Show(); };
+                Show();
+            }
 
             ThemeBox.ItemsSource = ThemeCatalog.Names;
             ThemeBox.SelectedItem = ThemeCatalog.Normalise(settings.Render.UiTheme);
@@ -151,6 +163,10 @@ namespace Zero.App.Windows
             _settings.Render.Crt.Vignette = CrtVignette.IsChecked == true;
             _settings.Render.Crt.Flicker = CrtFlicker.IsChecked == true;
             _settings.Render.Crt.Noise = CrtNoise.IsChecked == true;
+            _settings.Render.Crt.Advanced = CrtAdvanced.IsChecked == true;
+            _settings.Render.Crt.Glow = CrtGlow.Value;
+            _settings.Render.Crt.Curvature = CrtCurvature.Value;
+            _settings.Render.Crt.GlassReflect = CrtGlass.Value;
 
             string theme = ThemeCatalog.Normalise(ThemeBox.SelectedItem as string);
             ThemeChanged = theme != ThemeCatalog.Normalise(_settings.Render.UiTheme);

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -573,16 +574,55 @@ namespace Zero.App
             RefreshMenuState();
         }
 
+        private Pipboy.Avalonia.Fx.Controls.ProCrtControl _proCrt;
+
+        /// <summary>The GPU CRT control while it is in the tree, else null. For tests.</summary>
+        internal Pipboy.Avalonia.Fx.Controls.ProCrtControl ProCrt => _proCrt;
+
         /// <summary>Push the CRT settings into the overlay. Cheap, and safe to call at any time.</summary>
         internal void ApplyCrtSettings()
         {
             CrtSettings crt = _settings.Render.Crt;
             bool on = crt.Enabled;
+            ApplyAdvancedCrt(crt, on);
             CrtLayer.EnableScanlines = on && crt.Scanlines;
             CrtLayer.EnableVignette = on && crt.Vignette;
             CrtLayer.EnableScanBeam = false; // dropped: its phosphor green ignores the chosen theme
             CrtLayer.EnableFlicker = on && crt.Flicker;
             CrtLayer.EnableNoise = on && crt.Noise;
+        }
+
+        /// <summary>
+        /// The GPU shader lives in the tree only while it is wanted, so nothing goes through OpenGL
+        /// otherwise. It wraps the Skia overlay, which in turn wraps the display.
+        /// </summary>
+        private void ApplyAdvancedCrt(CrtSettings crt, bool on)
+        {
+            bool want = on && crt.Advanced;
+            if (want && _proCrt == null)
+            {
+                DisplayHost.Children.Remove(CrtLayer);
+                _proCrt = new Pipboy.Avalonia.Fx.Controls.ProCrtControl { Content = CrtLayer };
+                DisplayHost.Children.Add(_proCrt);
+            }
+            else if (!want && _proCrt != null)
+            {
+                _proCrt.Content = null;
+                DisplayHost.Children.Remove(_proCrt);
+                _proCrt = null;
+                if (!DisplayHost.Children.Contains(CrtLayer)) DisplayHost.Children.Add(CrtLayer);
+            }
+
+            if (_proCrt == null) return;
+            _proCrt.PhosphorGlow = (float)Math.Clamp(crt.Glow, 0, 1);
+            _proCrt.Curvature = (float)Math.Clamp(crt.Curvature, 0, 1);
+            _proCrt.GlassReflect = (float)Math.Clamp(crt.GlassReflect, 0, 1);
+            // Its own layers would double up with the Skia overlay above, so leave them to that one.
+            _proCrt.Scanlines = 0f;
+            _proCrt.Vignette = 0f;
+            _proCrt.Flicker = 0f;
+            // The control tints its output Pip-Boy green by default, which would recolour the Spectrum picture.
+            _proCrt.Tint = Colors.White;
         }
 
         private void ApplyViewSettings()

@@ -72,6 +72,15 @@ namespace Zero.Emulation.Settings
         public bool Vignette { get; set; } = true;
         public bool Flicker { get; set; }
         public bool Noise { get; set; }
+
+        /// <summary>
+        /// Curved glass, phosphor glow and a glass reflection, drawn by a GPU shader. Needs working
+        /// OpenGL; where it is missing the picture still shows, just without the effects.
+        /// </summary>
+        public bool Advanced { get; set; }
+        public double Glow { get; set; } = 0.35;
+        public double Curvature { get; set; } = 0.2;
+        public double GlassReflect { get; set; } = 0.2;
     }
 
     public sealed class AudioSettings

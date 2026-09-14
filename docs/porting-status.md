@@ -48,7 +48,12 @@ where the work stands and every place the implementation deliberately deviates f
   drew phosphor green under every theme), toggled from View > CRT Effects or
   Options > Appearance and applied without a restart. The effects are cosmetic and never touch
   emulation; a test asserts that enabling them changes the rendered pixels and disabling them restores
-  them exactly. Zero runs in globalization-invariant
+  them exactly. The package's `ProCrtControl` adds curvature, phosphor glow and a glass reflection
+  through an OpenGL shader; it is a separate opt-in (Options > Appearance) and is placed in the visual
+  tree only while enabled, so nothing touches OpenGL otherwise. Its default green tint is overridden to
+  white, or it would recolour the Spectrum picture. Where OpenGL is unavailable, as in the headless
+  tests, it passes its content through and the picture still shows; the effects themselves have not
+  been seen rendered, since this environment has no GPU context. Zero runs in globalization-invariant
   mode to keep the published output small, with `PredefinedCulturesOnly=false` because Semi constructs
   a `CultureInfo` for its own localisation; the test project mirrors both settings, so a theme that
   trips over them fails in tests rather than on the user's next start-up.

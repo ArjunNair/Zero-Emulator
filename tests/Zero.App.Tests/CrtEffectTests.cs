@@ -86,6 +86,32 @@ namespace Zero.App.Tests
             long plainOnceMore = Capture(w);
 
             Assert.Equal(plain, plainOnceMore);
+
+            // The GPU shader: it must go into the tree only while wanted, must not tint the picture
+            // green (its default), and must still show the picture where OpenGL is missing, as here.
+            Assert.Null(w.ProCrt);
+            crt.Enabled = crt.Advanced = true;
+            w.ApplyCrtSettings();
+            Dispatcher.UIThread.RunJobs();
+            Assert.NotNull(w.ProCrt);
+            Assert.Equal(Avalonia.Media.Colors.White, w.ProCrt.Tint);
+
+            long before = w.Display.FramesPresented;
+            w.Session.Resume();
+            long target2 = w.Session.FrameCount + 20;
+            while (w.Session.FrameCount < target2) { Thread.Sleep(10); Dispatcher.UIThread.RunJobs(); }
+            w.Session.Pause();
+            Thread.Sleep(50);
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(w.Display.FramesPresented > before, "frames stopped reaching the display through the shader");
+            long shaded = Capture(w, "crt-advanced");
+            Assert.NotEqual(0, shaded); // a blank frame would sum to nothing
+
+            crt.Advanced = crt.Enabled = false;
+            w.ApplyCrtSettings();
+            Dispatcher.UIThread.RunJobs();
+            Assert.Null(w.ProCrt);
+            Assert.True(w.CrtLayer.Parent != null, "the overlay was not put back after the shader was removed");
             Assert.True(w.CrtLayer != null);
             Assert.NotEqual(plain, withEffects);
             Assert.NotEqual(plain, everything);
