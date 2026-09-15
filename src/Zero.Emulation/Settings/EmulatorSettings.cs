@@ -80,6 +80,11 @@ namespace Zero.Emulation.Settings
         public double GlassReflect { get; set; } = 0.2;
         /// <summary>Light from the picture spilling onto the surround, in place of plain black.</summary>
         public double EdgeLight { get; set; } = 0.5;
+        /// <summary>
+        /// Share of the window given to the cabinet the screen sits in, 0 for none. The picture is
+        /// pushed in by this much to make room for it, so it is a trade against picture size.
+        /// </summary>
+        public double Bezel { get; set; } = 0.1;
     }
 
     public sealed class AudioSettings

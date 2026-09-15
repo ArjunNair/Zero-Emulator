@@ -116,7 +116,7 @@
             </StackPanel>
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
                        Text="Flicker and noise animate continuously and cost a little more than the other two." />
-              <Grid ColumnDefinitions="Auto,160,Auto" RowDefinitions="Auto,Auto,Auto,Auto" Margin="24,0,0,0">
+              <Grid ColumnDefinitions="Auto,160,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" Margin="24,0,0,0">
               <TextBlock Grid.Row="0" Text="Glow" VerticalAlignment="Center" Margin="0,0,10,0" />
               <Slider Grid.Row="0" Grid.Column="1" x:Name="CrtGlow" Minimum="0" Maximum="1" />
               <TextBlock Grid.Row="0" Grid.Column="2" x:Name="CrtGlowValue" VerticalAlignment="Center" Margin="10,0,0,0" />
@@ -129,9 +129,12 @@
               <TextBlock Grid.Row="3" Text="Edge light" VerticalAlignment="Center" Margin="0,0,10,0" />
               <Slider Grid.Row="3" Grid.Column="1" x:Name="CrtEdge" Minimum="0" Maximum="1" />
               <TextBlock Grid.Row="3" Grid.Column="2" x:Name="CrtEdgeValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+              <TextBlock Grid.Row="4" Text="Cabinet" VerticalAlignment="Center" Margin="0,0,10,0" />
+              <Slider Grid.Row="4" Grid.Column="1" x:Name="CrtBezel" Minimum="0" Maximum="0.4" />
+              <TextBlock Grid.Row="4" Grid.Column="2" x:Name="CrtBezelValue" VerticalAlignment="Center" Margin="10,0,0,0" />
             </Grid>
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
-                       Text="Zero&apos;s own shader, which Skia runs on the GPU where there is one and on the CPU otherwise. Edge light spills the picture onto the surround instead of leaving it black." />
+                       Text="Zero&apos;s own shader, which Skia runs on the GPU where there is one and on the CPU otherwise. Edge light spills the picture onto the surround instead of leaving it black. The cabinet is the moulded frame round the screen; the picture is pushed in to make room for it, so widening it trades picture size for the illusion of a set." />
           </StackPanel>
         </ScrollViewer>
       </TabItem>

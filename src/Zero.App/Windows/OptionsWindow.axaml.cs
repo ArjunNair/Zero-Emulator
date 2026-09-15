@@ -74,7 +74,8 @@ namespace Zero.App.Windows
             CrtCurvature.Value = settings.Render.Crt.Curvature;
             CrtGlass.Value = settings.Render.Crt.GlassReflect;
             CrtEdge.Value = settings.Render.Crt.EdgeLight;
-            foreach ((Slider slider, TextBlock label) in new[] { (CrtGlow, CrtGlowValue), (CrtCurvature, CrtCurvatureValue), (CrtGlass, CrtGlassValue), (CrtEdge, CrtEdgeValue) })
+            CrtBezel.Value = settings.Render.Crt.Bezel;
+            foreach ((Slider slider, TextBlock label) in new[] { (CrtGlow, CrtGlowValue), (CrtCurvature, CrtCurvatureValue), (CrtGlass, CrtGlassValue), (CrtEdge, CrtEdgeValue), (CrtBezel, CrtBezelValue) })
             {
                 Slider s = slider; TextBlock l = label;
                 void Show() => l.Text = ((int)Math.Round(s.Value * 100)) + "%";
@@ -167,6 +168,7 @@ namespace Zero.App.Windows
             _settings.Render.Crt.Curvature = CrtCurvature.Value;
             _settings.Render.Crt.GlassReflect = CrtGlass.Value;
             _settings.Render.Crt.EdgeLight = CrtEdge.Value;
+            _settings.Render.Crt.Bezel = CrtBezel.Value;
 
             string theme = ThemeCatalog.Normalise(ThemeBox.SelectedItem as string);
             ThemeChanged = theme != ThemeCatalog.Normalise(_settings.Render.UiTheme);

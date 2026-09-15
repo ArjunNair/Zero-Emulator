@@ -266,5 +266,40 @@ namespace Zero.App.Tests
             Assert.True(worst <= 3,
                 $"the hidden border tints the output at {worstX},{worstY} by {worst} of 255");
         }
+
+        [Fact]
+        public void The_cabinet_frames_the_picture_and_pushes_it_in()
+        {
+            // The cabinet is the moulded fascia the screen sits in. It has to take room from the
+            // picture to exist, which is the trade: the opening shrinks by the width of the frame.
+            var bare = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            var framed = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.12f };
+
+            using SKBitmap without = Render(bare);
+            using SKBitmap with = Render(framed);
+
+            // Walk in along the middle row to where the picture starts, in each.
+            int Opening(SKBitmap bmp)
+            {
+                for (int x = 0; x < Width / 2; x++)
+                {
+                    SKColor c = bmp.GetPixel(x, Height / 2);
+                    if ((c.Red * 30 + c.Green * 59 + c.Blue * 11) / 100 > 150) return x;
+                }
+                return Width / 2;
+            }
+
+            int bareEdge = Opening(without), framedEdge = Opening(with);
+            Assert.True(framedEdge > bareEdge + Width * 0.05,
+                $"the cabinet did not push the picture in: it starts at {framedEdge} against {bareEdge}");
+
+            // And the frame itself is there: a band outside the opening that is neither picture nor
+            // the black of an empty window, and the same on all four sides.
+            double left = Band(with, 6, 16, Height / 2 - 30, Height / 2 + 30);
+            double right = Band(with, Width - 16, Width - 6, Height / 2 - 30, Height / 2 + 30);
+            double top = Band(with, Width / 2 - 30, Width / 2 + 30, 6, 16);
+            foreach ((string name, double v) in new[] { ("left", left), ("right", right), ("top", top) })
+                Assert.True(v > 8 && v < 90, $"the {name} of the cabinet does not read as a frame: {v:F1}");
+        }
     }
 }
