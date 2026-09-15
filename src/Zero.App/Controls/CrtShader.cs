@@ -163,18 +163,20 @@ half4 main(float2 xy) {
 
     // The screen's own light on it, close in. It falls away far faster than it used to: over the
     // depth of a housing rather than the width of a thin panel, it washed the whole moulding out.
-    // Each face's light also fades towards its ends, or the two meeting at a corner both light it
-    // and the corner carries a third reflection -- the picture turned back on itself diagonally.
-    float2 along = exp(-2.2 * w * w);        // 1 opposite the middle of a face, small towards its ends
-    float sides = exp(-t.x * 3.2) * along.y;     // light from the left and right edges
-    float ends = exp(-t.y * 3.2) * along.x;      // and from the top and bottom
+    //
+    // Evenly along each face. It used to fade towards the ends as well, to stop a corner -- lit by
+    // the two faces that meet there -- carrying a third reflection of the picture turned back on
+    // itself diagonally. Reflecting a blurred copy settles that at the source: there is no longer a
+    // second legible copy of anything for a corner to show a third of.
+    // How far into its own face a point is -- which is max(t.x, t.y), so it runs smoothly across a
+    // mitre even though which face it belongs to switches there.
+    //
+    // Not the brighter of a left-right term and a top-bottom term. Halfway along the bottom face
+    // nothing is past the left or right edge at all, so the left-right term is exp(0) and lights it
+    // at full strength from an edge it is nowhere near.
     float2 reflected = clamp(2.0 * inside - c, -1.0, 1.0);
     float2 mirror = clamp((reflected * 0.5 + 0.5) * dest, lo, hi);
-
-    // The brighter of the two, not the one belonging to this face. Which face a point is on switches
-    // hard at the mitre -- that is what draws the seam -- but light does not, and picking the light
-    // that way with it put a hard edge down the diagonal of every corner.
-    half3 spill = housing + srcSoft.eval(mirror).rgb * half(max(sides, ends)) * edgeLight;
+    half3 spill = housing + srcSoft.eval(mirror).rgb * half(exp(-depth * 3.2)) * edgeLight;
 
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";

@@ -179,26 +179,25 @@ namespace Zero.App.Tests
         }
 
         [Fact]
-        public void Each_panel_tapers_towards_the_corners_without_a_step()
+        public void The_light_on_the_housing_reaches_the_corners_without_a_step()
         {
-            // Two panels meet at every corner, so a corner that is lit as strongly as a side carries
-            // a third reflection there -- the picture turned back on itself diagonally -- as bright
-            // as the two straight ones beside it. Each panel is brightest opposite the middle of the
-            // screen and fades towards its ends, so the corner gets only the tail of both.
+            // Each face used to fade towards its ends, to stop a corner -- lit by the two faces that
+            // meet there -- carrying a third reflection of the picture turned back on itself
+            // diagonally. Reflecting a blurred copy settles that at the source, so the light runs
+            // evenly along each face again and a corner is lit much like the middle of one.
             //
-            // Fading, though, not stopping: the first thing tried here was measuring the light from
-            // the nearest edge alone, which left the corners black and the surround reading as four
-            // separate panels with gaps between them.
+            // What must not come back is the earlier failure: measuring the light from the nearer
+            // edge alone, which left the corners black and the housing reading as four separate
+            // panels with gaps between them.
             var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
             using SKBitmap bmp = Render(options);
 
             double middle = Band(bmp, Width / 2 - 40, Width / 2 + 40, Height - 10, Height);
             double corner = Band(bmp, 0, 20, Height - 20, Height);
-            Assert.True(corner < middle * 0.5,
-                $"the corner is lit like the middle of a panel: {corner:F1} against {middle:F1}");
+            Assert.True(corner > middle * 0.5,
+                $"the corner of the housing is unlit next to the middle of a face: {corner:F1} against {middle:F1}");
 
-            // Walk the bottom of the frame from the middle out to the corner: it must fall away, not
-            // drop off a cliff.
+            // And the way out to it falls away rather than dropping off a cliff.
             double biggest = 0, previous = Band(bmp, Width / 2, Width / 2 + 10, Height - 10, Height);
             for (int x = Width / 2 - 10; x >= 10; x -= 10)
             {
@@ -208,7 +207,7 @@ namespace Zero.App.Tests
             }
 
             Assert.True(biggest < 12.0,
-                $"the surround steps by {biggest:F1} of 255 on the way to the corner");
+                $"the housing steps by {biggest:F1} of 255 on the way to the corner");
         }
 
 
@@ -391,6 +390,23 @@ namespace Zero.App.Tests
             Assert.True(onPicture > 20, $"the comb is not where the test thinks it is: {onPicture:F1}");
             Assert.True(onHousing < onPicture * 0.25,
                 $"the housing reflects the picture sharply: {onHousing:F1} against {onPicture:F1} on the picture");
+        }
+
+        [Fact]
+        public void The_light_on_a_face_comes_from_the_edge_that_face_is_behind()
+        {
+            // Halfway along the bottom face nothing is past the left or right edge of the screen, so
+            // a left-right term there is exp(0) -- full strength -- and lights the bottom from an
+            // edge it is nowhere near. Taking the brighter of a left-right and a top-bottom term does
+            // exactly that, and the outer row of the bottom face comes back at the brightness of the
+            // picture instead of the near-darkness of a moulding that far from the opening.
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            using SKBitmap bmp = Render(options);
+
+            double outerRow = Band(bmp, Width / 2 - 40, Width / 2 + 40, Height - 1, Height);
+            double picture = Band(bmp, Width / 2 - 40, Width / 2 + 40, Height / 2, Height / 2 + 1);
+            Assert.True(outerRow < picture * 0.25,
+                $"the outer row of the bottom face is lit like the picture: {outerRow:F1} against {picture:F1}");
         }
     }
 }
