@@ -50,13 +50,13 @@ namespace Zero.Emulation.Settings
     {
         public bool FullScreen { get; set; }
         public bool MaintainAspectRatio { get; set; } = true;
-        public bool PixelSmoothing { get; set; } = false;
+        public bool PixelSmoothing { get; set; } = true;
         /// <summary>
         /// With smoothing on, confine the blend to the pixel boundaries instead of spreading it
         /// across the whole pixel. Kept separate from <see cref="PixelSmoothing"/> rather than folded
         /// into one setting, so a config written before this existed still reads back as it was.
         /// </summary>
-        public bool SharpPixelEdges { get; set; } = false;
+        public bool SharpPixelEdges { get; set; } = true;
 
         /// <summary>0 none, 1 smooth, 2 sharp.</summary>
         [JsonIgnore]
