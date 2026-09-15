@@ -37,7 +37,7 @@ namespace Zero.App.Tests
                 Glow = 0.42,
                 GlassReflect = 0.53,
                 EdgeLight = 0.64,
-                Bezel = 0.07,
+                Bezel = 0.04,
             };
             var w = Open(crt);
             Controls.CrtShaderOptions o = w.Display.CrtOptions;
@@ -47,7 +47,7 @@ namespace Zero.App.Tests
             Assert.Equal(0.42f, o.Glow, 3);
             Assert.Equal(0.53f, o.Reflection, 3);
             Assert.Equal(0.64f, o.EdgeLight, 3);
-            Assert.Equal(0.07f, o.Bezel, 3);
+            Assert.Equal(0.04f, o.Bezel, 3);
             w.Close();
         }
 
@@ -55,7 +55,7 @@ namespace Zero.App.Tests
         public void Turning_the_effect_off_takes_the_housing_with_it()
         {
             // The housing is part of the effect, not a separate frame that outlives it.
-            var w = Open(new CrtSettings { Enabled = false, Bezel = 0.07 });
+            var w = Open(new CrtSettings { Enabled = false, Bezel = 0.04 });
             Assert.Equal(0f, w.Display.CrtOptions.Bezel);
             w.Close();
         }

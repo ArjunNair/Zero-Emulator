@@ -19,6 +19,7 @@ namespace Zero.App.Controls
         private WriteableBitmap _bitmap;
         private SkiaSharp.SKBitmap _shaderFrame;   // only kept while the CRT shader is running
         private readonly CrtSurfaceCache _crtSurfaces = new CrtSurfaceCache();
+        private readonly CrtSurfaceCache _crtSoft = new CrtSurfaceCache();
         private readonly System.Diagnostics.Stopwatch _crtClock = System.Diagnostics.Stopwatch.StartNew();
         private int _borderCrop;
         private ISolidColorBrush _surround = Brushes.Black;
@@ -182,7 +183,7 @@ namespace Zero.App.Controls
 
             if (UseShader && _shaderFrame != null)
             {
-                context.Custom(new CrtDrawOperation(new Rect(Bounds.Size), _shaderFrame, source, dest, CrtOptions, Smooth, _crtSurfaces, (float)_crtClock.Elapsed.TotalSeconds));
+                context.Custom(new CrtDrawOperation(new Rect(Bounds.Size), _shaderFrame, source, dest, CrtOptions, Smooth, _crtSurfaces, (float)_crtClock.Elapsed.TotalSeconds, _crtSoft));
                 return;
             }
             context.DrawImage(_bitmap, source, dest);

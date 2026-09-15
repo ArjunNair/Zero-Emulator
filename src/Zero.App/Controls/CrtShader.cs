@@ -43,6 +43,7 @@ namespace Zero.App.Controls
     {
         private const string Source = @"
 uniform shader src;
+uniform shader srcSoft;     // the same picture, blurred, for the housing to reflect
 uniform float2 dest;        // destination size in pixels
 uniform float2 srcOrigin;   // top-left of the visible part of the frame
 uniform float2 srcSize;     // size of the visible part of the frame
@@ -152,7 +153,7 @@ half4 main(float2 xy) {
     // seam between two of them runs out from the corner of the screen to the corner of the window.
     float2 w = c0 * opening;                 // back to -1..1 across the window
     float sideFace = step(t.y, t.x);         // 1 on the left and right faces, 0 on the top and bottom
-    float depth = mix(t.y, t.x, sideFace);   // 0 against the glass, 1 at the window
+    float depth = mix(t.y, t.x, sideFace);   // into this face: 0 against the glass, 1 at the window
 
     // Each face takes a slightly different shade, as though lit from above: that difference is the
     // only thing that makes a mitre visible, and without it the housing is one flat rectangle.
@@ -165,10 +166,15 @@ half4 main(float2 xy) {
     // Each face's light also fades towards its ends, or the two meeting at a corner both light it
     // and the corner carries a third reflection -- the picture turned back on itself diagonally.
     float2 along = exp(-2.2 * w * w);        // 1 opposite the middle of a face, small towards its ends
-    float taper = mix(along.x, along.y, sideFace);
+    float sides = exp(-t.x * 3.2) * along.y;     // light from the left and right edges
+    float ends = exp(-t.y * 3.2) * along.x;      // and from the top and bottom
     float2 reflected = clamp(2.0 * inside - c, -1.0, 1.0);
     float2 mirror = clamp((reflected * 0.5 + 0.5) * dest, lo, hi);
-    half3 spill = housing + src.eval(mirror).rgb * half(exp(-depth * 3.2) * taper) * edgeLight;
+
+    // The brighter of the two, not the one belonging to this face. Which face a point is on switches
+    // hard at the mitre -- that is what draws the seam -- but light does not, and picking the light
+    // that way with it put a hard edge down the diagonal of every corner.
+    half3 spill = housing + srcSoft.eval(mirror).rgb * half(max(sides, ends)) * edgeLight;
 
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";
@@ -234,11 +240,13 @@ half4 main(float2 xy) {
         private readonly CrtShaderOptions _options;
         private readonly bool _smooth;
         private readonly CrtSurfaceCache _cache;
+        private readonly CrtSurfaceCache _soft;
         private readonly float _time;
 
-        public CrtDrawOperation(Rect bounds, SKBitmap frame, Rect source, Rect dest, CrtShaderOptions options, bool smooth, CrtSurfaceCache cache, float time)
+        public CrtDrawOperation(Rect bounds, SKBitmap frame, Rect source, Rect dest, CrtShaderOptions options, bool smooth, CrtSurfaceCache cache, float time, CrtSurfaceCache soft = null)
         {
             _cache = cache;
+            _soft = soft;
             _time = time;
             Bounds = bounds;
             _frame = frame;
@@ -291,6 +299,38 @@ half4 main(float2 xy) {
             }
         }
 
+        /// <summary>
+        /// A sixth-size copy of the visible part of the frame, for the housing to reflect.
+        ///
+        /// Light off a moulding is diffuse, and reflecting the picture pixel for pixel gives back a
+        /// second, sharp copy of whatever is at the edge of the screen. Blurring it at the source
+        /// costs one small draw, where blurring it at the sampling site costs a tap for every pixel
+        /// of housing and brings its own trouble with it.
+        ///
+        /// It holds only the visible part, so the cropped-away border cannot reach it at all.
+        /// </summary>
+        private SKImage SoftCopy(out SKSurface owned)
+        {
+            int w = Math.Max(1, (int)Math.Round(_source.Width / 6));
+            int h = Math.Max(1, (int)Math.Round(_source.Height / 6));
+
+            SKSurface surface = _soft?.GetOrCreate(w, h);
+            owned = surface == null
+                ? SKSurface.Create(new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Premul))
+                : null;                                  // the cache owns it; do not dispose it here
+            surface ??= owned;
+
+            using SKImage whole = SKImage.FromBitmap(_frame);
+            surface.Canvas.DrawImage(whole,
+                new SKRect((float)_source.X, (float)_source.Y, (float)_source.Right, (float)_source.Bottom),
+                new SKRect(0, 0, w, h),
+                // A wide resampler, not plain bilinear: bilinear reads four pixels whatever the
+                // reduction, so shrinking this far with it drops most of the picture on the floor
+                // instead of averaging it, and single characters land whole on single pixels.
+                new SKSamplingOptions(SKCubicResampler.Mitchell));
+            return surface.Snapshot();
+        }
+
         /// <summary>Runs the shader over a rectangle of the given size, starting at the canvas origin.</summary>
         internal void DrawShaded(SKCanvas canvas, SKRuntimeEffect effect, double width, double height, SKSamplingOptions sampling)
         {
@@ -300,6 +340,12 @@ half4 main(float2 xy) {
             var local = SKMatrix.CreateScaleTranslation(sx, sy, (float)(-_source.X * sx), (float)(-_source.Y * sy));
 
             using SKShader source = _frame.ToShader(SKShaderTileMode.Clamp, SKShaderTileMode.Clamp, sampling, local);
+            using SKImage soft = SoftCopy(out SKSurface owned);
+            using SKSurface disposeWithUs = owned;
+            using SKShader softSource = soft.ToShader(
+                SKShaderTileMode.Clamp, SKShaderTileMode.Clamp,
+                new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None),
+                SKMatrix.CreateScale((float)(width / soft.Width), (float)(height / soft.Height)));
             var uniforms = new SKRuntimeEffectUniforms(effect)
             {
                 ["dest"] = new[] { (float)width, (float)height },
@@ -316,7 +362,7 @@ half4 main(float2 xy) {
                 ["flicker"] = _options.Flicker,
                 ["noise"] = _options.Noise,
             };
-            var children = new SKRuntimeEffectChildren(effect) { ["src"] = source };
+            var children = new SKRuntimeEffectChildren(effect) { ["src"] = source, ["srcSoft"] = softSource };
 
             using SKShader shader = effect.ToShader(uniforms, children);
             using var paint = new SKPaint { Shader = shader };

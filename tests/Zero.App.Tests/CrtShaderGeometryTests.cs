@@ -311,13 +311,13 @@ namespace Zero.App.Tests
             }
 
             var bare = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
-            var housed = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.12f };
+            var housed = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.05f };
             using SKBitmap without = Render(bare, frame, smooth: true);
             using SKBitmap with = Render(housed, frame, smooth: true);
 
             double shrunk = Apart(with) / Apart(without);
-            Assert.True(shrunk > 0.83 && shrunk < 0.93,
-                $"the housing should shrink the picture to about 0.88 of the window, not {shrunk:F2}");
+            Assert.True(shrunk > 0.92 && shrunk < 0.98,
+                $"the housing should shrink the picture to about 0.95 of the window, not {shrunk:F2}");
 
             // And the room it took is lit, on every side: it is housing catching the screen's light,
             // not an empty margin.
@@ -334,7 +334,7 @@ namespace Zero.App.Tests
             // A moulding is cut at forty-five degrees where two lengths meet, and the seam that
             // leaves is what says the housing is four faces rather than one flat rectangle. Two
             // points either side of that seam, out beyond the corner of the screen, must differ.
-            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 0f, Bezel = 0.12f };
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 0f, Bezel = 0.05f };
             using SKBitmap bmp = Render(options);
 
             // Well out in the top-left corner: one point above the diagonal, on the top face, and one
@@ -343,6 +343,54 @@ namespace Zero.App.Tests
             double onSide = Band(bmp, 10, 20, 40, 60);
             Assert.True(Math.Abs(onTop - onSide) > 2.0,
                 $"the corner shows no mitre: the top face reads {onTop:F1} and the left {onSide:F1}");
+        }
+
+        [Fact]
+        public void The_housing_reflects_the_picture_softly()
+        {
+            // Light off a moulding is diffuse. Reflecting the picture pixel for pixel hands back a
+            // second, sharp copy of whatever sits at the edge of the screen -- legible text, in
+            // practice. Fine detail at the edge must arrive on the housing blurred away.
+            using SKBitmap frame = Frame(new SKColor(0xC0, 0xC0, 0xC0), new SKColor(0xC0, 0xC0, 0xC0));
+            using (var c = new SKCanvas(frame))
+            using (var black = new SKPaint { Color = SKColors.Black })
+                for (int x = 0; x < 256; x += 4)        // a comb along the bottom of the screen
+                    c.DrawRect(new SKRect(48 + x, 48 + 184, 48 + x + 2, 48 + 192), black);
+
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.05f };
+            using SKBitmap bmp = Render(options, frame, smooth: true);
+
+            double Roughness(int y)
+            {
+                var v = new double[600];
+                for (int i = 0; i < v.Length; i++) v[i] = Band(bmp, 300 + i, 301 + i, y, y + 1);
+                double mean = 0;
+                foreach (double t in v) mean += t;
+                mean /= v.Length;
+                double sum = 0;
+                foreach (double t in v) sum += (t - mean) * (t - mean);
+                return Math.Sqrt(sum / v.Length);
+            }
+
+            // Find the comb, and the bottom of the opening, rather than assume where either lands:
+            // the opening is inset by the housing, so a row of the screen does not sit at a fixed
+            // fraction of the window.
+            double onPicture = 0;
+            int lastPictureRow = 0;
+            for (int y = (int)(Height * 0.80); y < Height - 4; y++)
+            {
+                if (Band(bmp, 300, 900, y, y + 1) < 60) continue;     // past the opening, into the housing
+                onPicture = Math.Max(onPicture, Roughness(y));
+                lastPictureRow = y;
+            }
+
+            // Just beyond the opening, where the light off the picture is strongest. Further out it
+            // has faded to nothing and would read as smooth however sharply it was reflected.
+            double onHousing = Roughness(lastPictureRow + 4);
+
+            Assert.True(onPicture > 20, $"the comb is not where the test thinks it is: {onPicture:F1}");
+            Assert.True(onHousing < onPicture * 0.25,
+                $"the housing reflects the picture sharply: {onHousing:F1} against {onPicture:F1} on the picture");
         }
     }
 }

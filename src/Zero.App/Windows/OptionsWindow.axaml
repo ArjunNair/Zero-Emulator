@@ -130,7 +130,7 @@
               <Slider Grid.Row="3" Grid.Column="1" x:Name="CrtEdge" Minimum="0" Maximum="1" />
               <TextBlock Grid.Row="3" Grid.Column="2" x:Name="CrtEdgeValue" VerticalAlignment="Center" Margin="10,0,0,0" />
               <TextBlock Grid.Row="4" Text="Housing" VerticalAlignment="Center" Margin="0,0,10,0" />
-              <Slider Grid.Row="4" Grid.Column="1" x:Name="CrtBezel" Minimum="0" Maximum="0.2" />
+              <Slider Grid.Row="4" Grid.Column="1" x:Name="CrtBezel" Minimum="0" Maximum="0.05" />
               <TextBlock Grid.Row="4" Grid.Column="2" x:Name="CrtBezelValue" VerticalAlignment="Center" Margin="10,0,0,0" />
             </Grid>
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
