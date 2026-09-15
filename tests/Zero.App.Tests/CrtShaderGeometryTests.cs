@@ -120,14 +120,25 @@ namespace Zero.App.Tests
         [Fact]
         public void The_edge_light_spills_evenly_on_all_four_sides()
         {
-            // The surround is lit by the picture it frames, and a flat picture must light it evenly.
+            // The housing is lit by the picture it frames, and a picture that is the same colour
+            // everywhere must light it evenly.
+            //
+            // Measured as the difference the light makes, not as the brightness of the housing: the
+            // four faces of the moulding are deliberately different shades -- that difference is the
+            // only thing that makes a mitre visible -- so reading the housing directly measures the
+            // moulding rather than the light falling on it.
             var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
-            using SKBitmap bmp = Render(options);
-            // Just outside the glass: the corners of the render, where only spill reaches.
-            double left = Band(bmp, 0, 6, Height / 4, 3 * Height / 4);
-            double right = Band(bmp, Width - 6, Width, Height / 4, 3 * Height / 4);
-            double spread = Math.Abs(left - right);
-            Assert.True(spread < 2.0, $"the spill is uneven: left={left:F1} right={right:F1}");
+            var unlit = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 0f };
+            using SKBitmap on = Render(options);
+            using SKBitmap off = Render(unlit);
+
+            double Light(int x0, int x1, int y0, int y1) =>
+                Band(on, x0, x1, y0, y1) - Band(off, x0, x1, y0, y1);
+
+            double left = Light(0, 6, Height / 4, 3 * Height / 4);
+            double right = Light(Width - 6, Width, Height / 4, 3 * Height / 4);
+            Assert.True(Math.Abs(left - right) < 2.0,
+                $"the light on the housing is uneven: left={left:F1} right={right:F1}");
         }
 
         [Theory]
@@ -315,6 +326,23 @@ namespace Zero.App.Tests
             double bottom = Band(with, Width / 2 - 30, Width / 2 + 30, Height - 16, Height - 6);
             foreach ((string name, double v) in new[] { ("side", side), ("top", top), ("bottom", bottom) })
                 Assert.True(v > 12, $"the {name} of the housing is unlit: {v:F1}");
+        }
+
+        [Fact]
+        public void The_housing_is_mitred_at_the_corners()
+        {
+            // A moulding is cut at forty-five degrees where two lengths meet, and the seam that
+            // leaves is what says the housing is four faces rather than one flat rectangle. Two
+            // points either side of that seam, out beyond the corner of the screen, must differ.
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 0f, Bezel = 0.12f };
+            using SKBitmap bmp = Render(options);
+
+            // Well out in the top-left corner: one point above the diagonal, on the top face, and one
+            // below it, on the left face.
+            double onTop = Band(bmp, 40, 60, 10, 20);
+            double onSide = Band(bmp, 10, 20, 40, 60);
+            Assert.True(Math.Abs(onTop - onSide) > 2.0,
+                $"the corner shows no mitre: the top face reads {onTop:F1} and the left {onSide:F1}");
         }
     }
 }

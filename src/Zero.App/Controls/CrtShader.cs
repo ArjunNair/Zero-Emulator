@@ -147,17 +147,29 @@ half4 main(float2 xy) {
     }
     float2 t = clamp((abs(c0) - abs(qc)) / max(outer - abs(qc), float2(0.0001, 0.0001)), 0.0, 1.0);
 
-    // Each panel is brightest opposite the middle of the screen and tapers towards its ends, so the
-    // two panels meeting at a corner are both at their dimmest there. Taking the nearer edge alone
-    // would light a corner as strongly as a side, and the corner then carries a third reflection --
-    // the picture turned back on itself diagonally -- as bright as the two straight ones beside it.
+    // The housing is four flat faces meeting at mitres, the way a moulding is cut. Which face a
+    // point belongs to is whichever it is further past in units of that face's own depth, so the
+    // seam between two of them runs out from the corner of the screen to the corner of the window.
     float2 w = c0 * opening;                 // back to -1..1 across the window
-    float2 along = exp(-2.2 * w * w);        // 1 opposite the middle of a side, small towards its ends
-    float sides = exp(-t.x * 0.7) * along.y;     // light from the left and right edges
-    float ends = exp(-t.y * 0.7) * along.x;      // and from the top and bottom
+    float sideFace = step(t.y, t.x);         // 1 on the left and right faces, 0 on the top and bottom
+    float depth = mix(t.y, t.x, sideFace);   // 0 against the glass, 1 at the window
+
+    // Each face takes a slightly different shade, as though lit from above: that difference is the
+    // only thing that makes a mitre visible, and without it the housing is one flat rectangle.
+    float shade = sideFace > 0.5 ? (w.x < 0.0 ? 0.013 : -0.013) : (w.y < 0.0 ? 0.030 : -0.018);
+    half3 housing = half3(half(0.055 + shade));
+    housing += half3(half(0.045 * exp(-depth * 26.0)));   // the lip round the opening, standing proud
+
+    // The screen's own light on it, close in. It falls away far faster than it used to: over the
+    // depth of a housing rather than the width of a thin panel, it washed the whole moulding out.
+    // Each face's light also fades towards its ends, or the two meeting at a corner both light it
+    // and the corner carries a third reflection -- the picture turned back on itself diagonally.
+    float2 along = exp(-2.2 * w * w);        // 1 opposite the middle of a face, small towards its ends
+    float taper = mix(along.x, along.y, sideFace);
     float2 reflected = clamp(2.0 * inside - c, -1.0, 1.0);
     float2 mirror = clamp((reflected * 0.5 + 0.5) * dest, lo, hi);
-    half3 spill = src.eval(mirror).rgb * max(sides, ends) * edgeLight;
+    half3 spill = housing + src.eval(mirror).rgb * half(exp(-depth * 3.2) * taper) * edgeLight;
+
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";
 
