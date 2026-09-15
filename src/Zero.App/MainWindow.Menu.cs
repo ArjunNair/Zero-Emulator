@@ -22,7 +22,7 @@ namespace Zero.App
         internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFastLoadItem, TapeRomTrapsItem;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
         internal NativeMenuItem CrtItem;
-        internal NativeMenuItem FullScreenItem, SmoothingItem, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
+        internal NativeMenuItem FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
         internal NativeMenuItem KeyJoyItem, KeyJoyKempston, KeyJoySinclair1, KeyJoySinclair2, KeyJoyCursor;
         internal NativeMenuItem Pad1None, Pad1Kempston, Pad1Sinclair1, Pad1Sinclair2, Pad1Cursor, KempstonPortItem, MouseItem, PauseOnFocusItem;
         internal NativeMenuItem KeyboardItem;
@@ -121,7 +121,10 @@ namespace Zero.App
                     Item("1x", () => SelectScale(1)), Item("2x", () => SelectScale(2)),
                     Item("3x", () => SelectScale(3)), Item("4x", () => SelectScale(4))),
                 FullScreenItem = Item("Full Screen", ToggleFullScreen, G(Key.F11), checkable: true),
-                SmoothingItem = Item("Pixel Smoothing", ToggleSmoothing, checkable: true),
+                Submenu("Pixel Filter",
+                    FilterNone = Item("None", () => SelectFilter(false, false), checkable: true),
+                    FilterSmooth = Item("Smooth", () => SelectFilter(true, false), checkable: true),
+                    FilterSharp = Item("Sharp", () => SelectFilter(true, true), checkable: true)),
                 CrtItem = Item("CRT Effects", ToggleCrt, checkable: true),
                 IntegerScalingItem = Item("Integer Scaling", ToggleIntegerScaling, checkable: true),
                 Submenu("Border",
@@ -235,10 +238,12 @@ namespace Zero.App
             if (WindowState != WindowState.FullScreen) ApplyWindowScale();
         }
 
-        private void ToggleSmoothing()
+        private void SelectFilter(bool smooth, bool sharp)
         {
-            _settings.Render.PixelSmoothing = !_settings.Render.PixelSmoothing;
-            Display.Smooth = _settings.Render.PixelSmoothing;
+            _settings.Render.PixelSmoothing = smooth;
+            _settings.Render.SharpPixelEdges = sharp;
+            Display.Smooth = smooth;
+            Display.SharpPixels = sharp;
             RefreshMenuState();
         }
 
@@ -317,7 +322,9 @@ namespace Zero.App
             StereoAbc.IsChecked = _settings.Audio.StereoSoundMode == 2;
 
             FullScreenItem.IsChecked = WindowState == WindowState.FullScreen;
-            SmoothingItem.IsChecked = _settings.Render.PixelSmoothing;
+            FilterNone.IsChecked = _settings.Render.PixelFilter == 0;
+            FilterSmooth.IsChecked = _settings.Render.PixelFilter == 1;
+            FilterSharp.IsChecked = _settings.Render.PixelFilter == 2;
             CrtItem.IsChecked = _settings.Render.Crt.Enabled;
             IntegerScalingItem.IsChecked = Display.IntegerScaling;
             BorderFull.IsChecked = _settings.Render.BorderCrop == 0;

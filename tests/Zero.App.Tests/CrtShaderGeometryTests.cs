@@ -421,5 +421,40 @@ namespace Zero.App.Tests
             Assert.True(outerRow < picture * 0.25,
                 $"the outer row of the bottom face is lit like the picture: {outerRow:F1} against {picture:F1}");
         }
+
+        [Fact]
+        public void Sharp_pixels_blend_only_at_the_boundary_between_them()
+        {
+            // Plain bilinear ramps all the way from one pixel's centre to the next, so at four screen
+            // pixels to the picture's one every edge becomes a four pixel gradient. Sharp holds the
+            // sample at the centre through the body of a pixel and turns it over at the seam, so an
+            // edge crosses in about a pixel -- while still placing the seam to sub-pixel accuracy,
+            // which is what nearest cannot do and why a fractional scale makes its pixels uneven.
+            using var frame = new SKBitmap(new SKImageInfo(FrameWidth, FrameHeight, SKColorType.Bgra8888, SKAlphaType.Premul));
+            using (var c = new SKCanvas(frame))
+            using (var white = new SKPaint { Color = SKColors.White })
+            {
+                c.Clear(SKColors.Black);
+                c.DrawRect(new SKRect(48 + 128, 48, 48 + 256, 48 + 192), white);   // one hard edge
+            }
+
+            int Crossing(bool sharp)
+            {
+                var options = new CrtShaderOptions { Enabled = true, Sharp = sharp };
+                using SKBitmap bmp = Render(options, frame, smooth: true);
+                int between = 0;
+                for (int x = Width / 2 - 20; x < Width / 2 + 20; x++)
+                {
+                    SKColor c = bmp.GetPixel(x, Height / 2);
+                    int l = (c.Red * 30 + c.Green * 59 + c.Blue * 11) / 100;
+                    if (l > 25 && l < 195) between++;      // neither black nor white
+                }
+                return between;
+            }
+
+            int smooth = Crossing(false), sharp = Crossing(true);
+            Assert.True(smooth >= 3, $"the edge is not where the test thinks it is: {smooth} pixels");
+            Assert.True(sharp <= 1, $"sharp spreads the edge over {sharp} pixels, against {smooth} smoothed");
+        }
     }
 }

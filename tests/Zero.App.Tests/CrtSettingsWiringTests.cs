@@ -61,5 +61,33 @@ namespace Zero.App.Tests
             Assert.Equal(0f, w.Display.CrtOptions.Bezel);
             w.Close();
         }
+
+        [AvaloniaTheory]
+        [InlineData(false, false, false)]   // none
+        [InlineData(true, false, false)]    // smooth
+        [InlineData(true, true, true)]      // sharp
+        public void The_pixel_filter_reaches_the_display(bool smoothing, bool sharpEdges, bool expectShader)
+        {
+            // Sharp is the shader placing the sample, so the picture has to go through the shader for
+            // it -- including with every CRT effect switched off, which is the case this covers.
+            MainWindow.SettingsLoader = () =>
+            {
+                var s = new EmulatorSettings();
+                s.Paths.Roms = TestPaths.RomDir;
+                s.Emulation.PauseOnFocusLost = false;
+                s.Audio.Mute = true;
+                s.Render.Crt = new CrtSettings { Enabled = false };
+                s.Render.PixelSmoothing = smoothing;
+                s.Render.SharpPixelEdges = sharpEdges;
+                return s;
+            };
+            var w = new MainWindow();
+            w.Show();
+
+            Assert.Equal(smoothing, w.Display.Smooth);
+            Assert.Equal(sharpEdges, w.Display.SharpPixels);
+            Assert.Equal(expectShader, w.Display.UseShader);
+            w.Close();
+        }
     }
 }

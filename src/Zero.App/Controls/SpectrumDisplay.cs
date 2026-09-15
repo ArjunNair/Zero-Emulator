@@ -34,6 +34,12 @@ namespace Zero.App.Controls
             AvaloniaProperty.Register<SpectrumDisplay, bool>(nameof(IntegerScaling));
 
         public bool Smooth { get => GetValue(SmoothProperty); set => SetValue(SmoothProperty, value); }
+
+        public static readonly StyledProperty<bool> SharpPixelsProperty =
+            AvaloniaProperty.Register<SpectrumDisplay, bool>(nameof(SharpPixels));
+
+        /// <summary>With <see cref="Smooth"/>, blend only at the boundary between pixels.</summary>
+        public bool SharpPixels { get => GetValue(SharpPixelsProperty); set => SetValue(SharpPixelsProperty, value); }
         public bool KeepAspectRatio { get => GetValue(KeepAspectRatioProperty); set => SetValue(KeepAspectRatioProperty, value); }
         public bool IntegerScaling { get => GetValue(IntegerScalingProperty); set => SetValue(IntegerScalingProperty, value); }
 
@@ -80,14 +86,15 @@ namespace Zero.App.Controls
             }
         }
 
-        private bool UseShader => CrtOptions.Any && CrtShader.IsAvailable;
+        /// <summary>Whether the picture goes through the shader at all. Internal so a test can read it.</summary>
+        internal bool UseShader => (CrtOptions.Any || (Smooth && SharpPixels)) && CrtShader.IsAvailable;
 
         /// <summary>Screen pixels per Spectrum pixel at the current window size (1 until first render).</summary>
         public double Scale { get; private set; } = 1;
 
         static SpectrumDisplay()
         {
-            AffectsRender<SpectrumDisplay>(SmoothProperty, KeepAspectRatioProperty, IntegerScalingProperty);
+            AffectsRender<SpectrumDisplay>(SmoothProperty, SharpPixelsProperty, KeepAspectRatioProperty, IntegerScalingProperty);
         }
 
         public SpectrumDisplay()
@@ -183,7 +190,7 @@ namespace Zero.App.Controls
 
             if (UseShader && _shaderFrame != null)
             {
-                context.Custom(new CrtDrawOperation(new Rect(Bounds.Size), _shaderFrame, source, dest, CrtOptions, Smooth, _crtSurfaces, (float)_crtClock.Elapsed.TotalSeconds, _crtSoft));
+                context.Custom(new CrtDrawOperation(new Rect(Bounds.Size), _shaderFrame, source, dest, CrtOptions with { Sharp = Smooth && SharpPixels }, Smooth, _crtSurfaces, (float)_crtClock.Elapsed.TotalSeconds, _crtSoft));
                 return;
             }
             context.DrawImage(_bitmap, source, dest);

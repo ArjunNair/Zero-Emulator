@@ -51,6 +51,16 @@ namespace Zero.Emulation.Settings
         public bool FullScreen { get; set; }
         public bool MaintainAspectRatio { get; set; } = true;
         public bool PixelSmoothing { get; set; } = false;
+        /// <summary>
+        /// With smoothing on, confine the blend to the pixel boundaries instead of spreading it
+        /// across the whole pixel. Kept separate from <see cref="PixelSmoothing"/> rather than folded
+        /// into one setting, so a config written before this existed still reads back as it was.
+        /// </summary>
+        public bool SharpPixelEdges { get; set; } = false;
+
+        /// <summary>0 none, 1 smooth, 2 sharp.</summary>
+        [JsonIgnore]
+        public int PixelFilter => !PixelSmoothing ? 0 : SharpPixelEdges ? 2 : 1;
         public bool Scanlines { get; set; }
         public bool Vsync { get; set; } = true;
         /// <summary>"Normal", "Grayscale" or "ULA Plus".</summary>

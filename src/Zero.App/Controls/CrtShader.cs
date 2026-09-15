@@ -20,6 +20,8 @@ namespace Zero.App.Controls
         public float Bezel;
         /// <summary>How blurred the picture is before the housing reflects it, 0 for not at all.</summary>
         public float Diffuse;
+        /// <summary>Confine the blend between pixels to the boundary between them.</summary>
+        public bool Sharp;
         /// <summary>Light from the picture spilling onto the surround, instead of plain black.</summary>
         public float EdgeLight;
         public float Scanlines;
@@ -27,13 +29,15 @@ namespace Zero.App.Controls
         public float Flicker;
         public float Noise;
 
-        public bool Any => Enabled && (Curvature > 0 || Glow > 0 || Reflection > 0 || Bezel > 0 || EdgeLight > 0
-                                       || Scanlines > 0 || Vignette > 0 || Flicker > 0 || Noise > 0);
+        // Sharp counts: it is the shader that places the sample, so the picture has to go through it
+        // even when every effect is off.
+        public bool Any => Sharp || (Enabled && (Curvature > 0 || Glow > 0 || Reflection > 0 || Bezel > 0
+                                     || EdgeLight > 0 || Scanlines > 0 || Vignette > 0 || Flicker > 0 || Noise > 0));
 
         public bool Equals(CrtShaderOptions other) =>
             Enabled == other.Enabled && Curvature.Equals(other.Curvature) && Glow.Equals(other.Glow)
             && Reflection.Equals(other.Reflection) && Bezel.Equals(other.Bezel)
-            && Diffuse.Equals(other.Diffuse) && EdgeLight.Equals(other.EdgeLight)
+            && Diffuse.Equals(other.Diffuse) && Sharp == other.Sharp && EdgeLight.Equals(other.EdgeLight)
             && Scanlines.Equals(other.Scanlines) && Vignette.Equals(other.Vignette)
             && Flicker.Equals(other.Flicker) && Noise.Equals(other.Noise);
     }
@@ -55,12 +59,28 @@ uniform float time;         // seconds, for the effects that move
 uniform float curvature;
 uniform float glow;
 uniform float reflection;
+uniform float sharp;        // confine the blend to the pixel boundaries
 uniform float bezel;        // share of the window given to the housing the screen sits in
 uniform float edgeLight;
 uniform float scanline;
 uniform float vignette;
 uniform float flicker;
 uniform float noise;
+
+/// Where to sample the picture so that a blend between neighbouring pixels happens only at the
+/// boundary between them, and only across a pixel of the screen.
+///
+/// Plain bilinear ramps all the way from one pixel's centre to the next, so at four screen pixels to
+/// the picture's one every edge in the picture becomes a four pixel gradient -- which is the blur.
+/// This holds the sample at the centre through the body of a pixel and turns it over at the seam,
+/// keeping the picture crisp while still placing the seams to sub-pixel accuracy, which is what
+/// stops a fractional scale from making some pixels wider than others.
+float2 atPixel(float2 q) {
+    float2 size = dest / max(srcSize, float2(1.0, 1.0));   // screen pixels to one of the picture's
+    float2 inPixels = q / size;
+    float2 seam = floor(inPixels + 0.5);                   // the boundary, not the centre
+    return (seam + clamp((inPixels - seam) * size, -0.5, 0.5)) * size;
+}
 
 float hash(float2 p) {
     return fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
@@ -88,13 +108,14 @@ half4 main(float2 xy) {
 
     float2 inside = clamp(c, -1.0, 1.0);
     float2 p = clamp((inside * 0.5 + 0.5) * dest, lo, hi);   // nearest point on the glass
-    half4 col = src.eval(p);
+    float2 at = sharp > 0.0 ? atPixel(p) : p;
+    half4 col = src.eval(at);
 
     if (glow > 0.0) {                                 // phosphor bleeding into the neighbouring lines
         float rows = max(srcSize.y, 1.0);
         float step = dest.y / rows;
-        half4 bleed = src.eval(clamp(p - float2(0.0, step), lo, hi)) * 0.6
-                    + src.eval(clamp(p + float2(0.0, step), lo, hi)) * 0.4;
+        half4 bleed = src.eval(clamp(at - float2(0.0, step), lo, hi)) * 0.6
+                    + src.eval(clamp(at + float2(0.0, step), lo, hi)) * 0.4;
         col = (col + bleed * glow) / (1.0 + glow);    // normalised, so the picture keeps its exposure
     }
 
@@ -393,6 +414,7 @@ half4 main(float2 xy) {
                 ["glow"] = _options.Glow,
                 ["reflection"] = _options.Reflection,
                 ["bezel"] = _options.Bezel,
+                ["sharp"] = _options.Sharp ? 1f : 0f,
                 ["edgeLight"] = _options.EdgeLight,
                 ["scanline"] = _options.Scanlines,
                 ["vignette"] = _options.Vignette,

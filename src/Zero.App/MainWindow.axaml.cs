@@ -599,6 +599,7 @@ namespace Zero.App
         private void ApplyViewSettings()
         {
             Display.Smooth = _settings.Render.PixelSmoothing;
+            Display.SharpPixels = _settings.Render.SharpPixelEdges;
             Display.BorderCrop = _settings.Render.BorderCrop;
             Display.KeepAspectRatio = _settings.Render.MaintainAspectRatio;
             int scale = Math.Clamp(_settings.Render.WindowScale, 1, 6);
