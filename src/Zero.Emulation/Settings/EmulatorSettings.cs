@@ -84,7 +84,7 @@ namespace Zero.Emulation.Settings
         /// Share of the window given to the housing the screen sits in, 0 for none. The picture is
         /// pushed in by this much to make room for it, so it is a trade against picture size.
         /// </summary>
-        public double Bezel { get; set; } = 0.1;
+        public double Bezel { get; set; } = 0.05;
     }
 
     public sealed class AudioSettings
