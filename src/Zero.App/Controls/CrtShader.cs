@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Platform;
@@ -17,6 +18,8 @@ namespace Zero.App.Controls
         public float Reflection;
         /// <summary>How much of the window the cabinet round the screen takes, 0 for none.</summary>
         public float Bezel;
+        /// <summary>How blurred the picture is before the housing reflects it, 0 for not at all.</summary>
+        public float Diffuse;
         /// <summary>Light from the picture spilling onto the surround, instead of plain black.</summary>
         public float EdgeLight;
         public float Scanlines;
@@ -29,7 +32,8 @@ namespace Zero.App.Controls
 
         public bool Equals(CrtShaderOptions other) =>
             Enabled == other.Enabled && Curvature.Equals(other.Curvature) && Glow.Equals(other.Glow)
-            && Reflection.Equals(other.Reflection) && Bezel.Equals(other.Bezel) && EdgeLight.Equals(other.EdgeLight)
+            && Reflection.Equals(other.Reflection) && Bezel.Equals(other.Bezel)
+            && Diffuse.Equals(other.Diffuse) && EdgeLight.Equals(other.EdgeLight)
             && Scanlines.Equals(other.Scanlines) && Vignette.Equals(other.Vignette)
             && Flicker.Equals(other.Flicker) && Noise.Equals(other.Noise);
     }
@@ -213,23 +217,29 @@ half4 main(float2 xy) {
     /// </summary>
     internal sealed class CrtSurfaceCache : IDisposable
     {
-        private SKSurface _surface;
-        private int _width, _height;
+        private readonly List<(int Width, int Height, SKSurface Surface)> _surfaces = new();
 
         public SKSurface GetOrCreate(int width, int height)
         {
-            if (_surface != null && _width == width && _height == height) return _surface;
-            _surface?.Dispose();
-            _surface = SKSurface.Create(new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul));
-            _width = width;
-            _height = height;
-            return _surface;
+            foreach ((int w, int h, SKSurface surface) in _surfaces)
+                if (w == width && h == height) return surface;
+
+            var made = SKSurface.Create(new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul));
+            // A handful at most: the frame's own size, and the steps the soft copy is halved through.
+            // Anything beyond that is a size nobody is asking for any more.
+            if (_surfaces.Count >= 6)
+            {
+                _surfaces[0].Surface.Dispose();
+                _surfaces.RemoveAt(0);
+            }
+            _surfaces.Add((width, height, made));
+            return made;
         }
 
         public void Dispose()
         {
-            _surface?.Dispose();
-            _surface = null;
+            foreach ((int _, int _, SKSurface surface) in _surfaces) surface.Dispose();
+            _surfaces.Clear();
         }
     }
 
@@ -302,35 +312,57 @@ half4 main(float2 xy) {
         }
 
         /// <summary>
-        /// A sixth-size copy of the visible part of the frame, for the housing to reflect.
+        /// A shrunken copy of the visible part of the frame, for the housing to reflect. How far it
+        /// shrinks is how diffuse the reflection is: same size is a mirror, a tenth is a wash.
         ///
         /// Light off a moulding is diffuse, and reflecting the picture pixel for pixel gives back a
         /// second, sharp copy of whatever is at the edge of the screen. Blurring it at the source
-        /// costs one small draw, where blurring it at the sampling site costs a tap for every pixel
-        /// of housing and brings its own trouble with it.
+        /// costs a few small draws, where blurring it at the sampling site costs a tap for every
+        /// pixel of housing and brings its own trouble with it.
         ///
         /// It holds only the visible part, so the cropped-away border cannot reach it at all.
         /// </summary>
-        private SKImage SoftCopy(out SKSurface owned)
+        private SKImage SoftCopy(List<IDisposable> trash)
         {
-            int w = Math.Max(1, (int)Math.Round(_source.Width / 6));
-            int h = Math.Max(1, (int)Math.Round(_source.Height / 6));
+            float shrink = 1f + Math.Clamp(_options.Diffuse, 0f, 1f) * 9f;
+            int targetWidth = Math.Max(1, (int)Math.Round(_source.Width / shrink));
+            int targetHeight = Math.Max(1, (int)Math.Round(_source.Height / shrink));
 
-            SKSurface surface = _soft?.GetOrCreate(w, h);
-            owned = surface == null
-                ? SKSurface.Create(new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Premul))
-                : null;                                  // the cache owns it; do not dispose it here
-            surface ??= owned;
+            var sampling = new SKSamplingOptions(SKCubicResampler.Mitchell);
+            SKImage current = SKImage.FromBitmap(_frame);
+            trash.Add(current);
+            var from = new SKRect((float)_source.X, (float)_source.Y, (float)_source.Right, (float)_source.Bottom);
+            int width = (int)Math.Round(_source.Width), height = (int)Math.Round(_source.Height);
 
-            using SKImage whole = SKImage.FromBitmap(_frame);
-            surface.Canvas.DrawImage(whole,
-                new SKRect((float)_source.X, (float)_source.Y, (float)_source.Right, (float)_source.Bottom),
-                new SKRect(0, 0, w, h),
-                // A wide resampler, not plain bilinear: bilinear reads four pixels whatever the
-                // reduction, so shrinking this far with it drops most of the picture on the floor
-                // instead of averaging it, and single characters land whole on single pixels.
-                new SKSamplingOptions(SKCubicResampler.Mitchell));
-            return surface.Snapshot();
+            // Halve, and halve again, until one more would overshoot. Neither bilinear nor a cubic
+            // widens its kernel as the reduction grows -- both read a handful of pixels however far
+            // the picture is being shrunk -- so going straight to a tenth aliases the picture instead
+            // of averaging it, and a comb of thin lines comes back as a coarser pattern rather than a
+            // wash. Each step here is a halving, which they do handle.
+            while (width / 2 > targetWidth && height / 2 > targetHeight)
+            {
+                width /= 2;
+                height /= 2;
+                current = Step(current, from, width, height, sampling, trash);
+                from = new SKRect(0, 0, width, height);
+            }
+
+            return Step(current, from, targetWidth, targetHeight, sampling, trash);
+        }
+
+        private SKImage Step(SKImage from, SKRect fromRect, int width, int height, SKSamplingOptions sampling,
+                             List<IDisposable> trash)
+        {
+            SKSurface surface = _soft?.GetOrCreate(width, height);
+            if (surface == null)
+            {
+                surface = SKSurface.Create(new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul));
+                trash.Add(surface);
+            }
+            surface.Canvas.DrawImage(from, fromRect, new SKRect(0, 0, width, height), sampling);
+            SKImage made = surface.Snapshot();
+            trash.Add(made);
+            return made;
         }
 
         /// <summary>Runs the shader over a rectangle of the given size, starting at the canvas origin.</summary>
@@ -342,9 +374,12 @@ half4 main(float2 xy) {
             var local = SKMatrix.CreateScaleTranslation(sx, sy, (float)(-_source.X * sx), (float)(-_source.Y * sy));
 
             using SKShader source = _frame.ToShader(SKShaderTileMode.Clamp, SKShaderTileMode.Clamp, sampling, local);
-            using SKImage soft = SoftCopy(out SKSurface owned);
-            using SKSurface disposeWithUs = owned;
-            using SKShader softSource = soft.ToShader(
+            // At the sharp end of the slider the copy would be the picture at its own size, so skip
+            // making one and reflect the picture itself.
+            bool blurred = _options.Diffuse > 0.02f;
+            var trash = new List<IDisposable>();
+            SKImage soft = blurred ? SoftCopy(trash) : null;
+            using SKShader softSource = !blurred ? null : soft.ToShader(
                 SKShaderTileMode.Clamp, SKShaderTileMode.Clamp,
                 new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None),
                 SKMatrix.CreateScale((float)(width / soft.Width), (float)(height / soft.Height)));
@@ -364,11 +399,13 @@ half4 main(float2 xy) {
                 ["flicker"] = _options.Flicker,
                 ["noise"] = _options.Noise,
             };
-            var children = new SKRuntimeEffectChildren(effect) { ["src"] = source, ["srcSoft"] = softSource };
+            var children = new SKRuntimeEffectChildren(effect) { ["src"] = source, ["srcSoft"] = softSource ?? source };
 
-            using SKShader shader = effect.ToShader(uniforms, children);
-            using var paint = new SKPaint { Shader = shader };
-            canvas.DrawRect(new SKRect(0, 0, (float)width, (float)height), paint);
+            using (SKShader shader = effect.ToShader(uniforms, children))
+            using (var paint = new SKPaint { Shader = shader })
+                canvas.DrawRect(new SKRect(0, 0, (float)width, (float)height), paint);
+
+            for (int i = trash.Count - 1; i >= 0; i--) trash[i].Dispose();
         }
     }
 }

@@ -38,6 +38,7 @@ namespace Zero.App.Tests
                 GlassReflect = 0.53,
                 EdgeLight = 0.64,
                 Bezel = 0.04,
+                Diffuse = 0.62,
             };
             var w = Open(crt);
             Controls.CrtShaderOptions o = w.Display.CrtOptions;
@@ -48,6 +49,7 @@ namespace Zero.App.Tests
             Assert.Equal(0.53f, o.Reflection, 3);
             Assert.Equal(0.64f, o.EdgeLight, 3);
             Assert.Equal(0.04f, o.Bezel, 3);
+            Assert.Equal(0.62f, o.Diffuse, 3);
             w.Close();
         }
 

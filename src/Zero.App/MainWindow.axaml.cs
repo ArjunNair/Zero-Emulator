@@ -588,6 +588,7 @@ namespace Zero.App
                 Reflection = Strength(crt.GlassReflect),
                 EdgeLight = Strength(crt.EdgeLight),
                 Bezel = on ? (float)Math.Clamp(crt.Bezel, 0, 0.05) : 0f,
+                Diffuse = Strength(crt.Diffuse),
                 Scanlines = on && crt.Scanlines ? 0.35f : 0f,
                 Vignette = on && crt.Vignette ? 0.6f : 0f,
                 Flicker = on && crt.Flicker ? 1f : 0f,

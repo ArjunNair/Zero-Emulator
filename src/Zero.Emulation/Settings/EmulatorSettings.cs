@@ -85,6 +85,10 @@ namespace Zero.Emulation.Settings
         /// pushed in by this much to make room for it, so it is a trade against picture size.
         /// </summary>
         public double Bezel { get; set; } = 0.03;
+        /// <summary>
+        /// How blurred the picture is before the housing reflects it: 0 is a mirror, 1 a wash.
+        /// </summary>
+        public double Diffuse { get; set; } = 0.55;
     }
 
     public sealed class AudioSettings

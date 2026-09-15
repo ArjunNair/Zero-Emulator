@@ -345,51 +345,64 @@ namespace Zero.App.Tests
         }
 
         [Fact]
-        public void The_housing_reflects_the_picture_softly()
+        public void Diffusion_decides_how_sharply_the_housing_reflects()
         {
             // Light off a moulding is diffuse. Reflecting the picture pixel for pixel hands back a
             // second, sharp copy of whatever sits at the edge of the screen -- legible text, in
-            // practice. Fine detail at the edge must arrive on the housing blurred away.
+            // practice -- and turning the slider up has to blur that away.
             using SKBitmap frame = Frame(new SKColor(0xC0, 0xC0, 0xC0), new SKColor(0xC0, 0xC0, 0xC0));
             using (var c = new SKCanvas(frame))
             using (var black = new SKPaint { Color = SKColors.Black })
                 for (int x = 0; x < 256; x += 4)        // a comb along the bottom of the screen
                     c.DrawRect(new SKRect(48 + x, 48 + 184, 48 + x + 2, 48 + 192), black);
 
-            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.05f };
-            using SKBitmap bmp = Render(options, frame, smooth: true);
-
-            double Roughness(int y)
+            (double onPicture, double onHousing) Reflected(float diffuse)
             {
-                var v = new double[600];
-                for (int i = 0; i < v.Length; i++) v[i] = Band(bmp, 300 + i, 301 + i, y, y + 1);
-                double mean = 0;
-                foreach (double t in v) mean += t;
-                mean /= v.Length;
-                double sum = 0;
-                foreach (double t in v) sum += (t - mean) * (t - mean);
-                return Math.Sqrt(sum / v.Length);
+                var options = new CrtShaderOptions
+                {
+                    Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.05f, Diffuse = diffuse,
+                };
+                using SKBitmap bmp = Render(options, frame, smooth: true);
+
+                double Roughness(int y)
+                {
+                    var v = new double[600];
+                    for (int i = 0; i < v.Length; i++) v[i] = Band(bmp, 300 + i, 301 + i, y, y + 1);
+                    double mean = 0;
+                    foreach (double t in v) mean += t;
+                    mean /= v.Length;
+                    double sum = 0;
+                    foreach (double t in v) sum += (t - mean) * (t - mean);
+                    return Math.Sqrt(sum / v.Length);
+                }
+
+                // Find the comb, and the bottom of the opening, rather than assume where either
+                // lands: the opening is inset by the housing, so a row of the screen does not sit at
+                // a fixed fraction of the window.
+                double picture = 0;
+                int lastPictureRow = 0;
+                for (int y = (int)(Height * 0.80); y < Height - 4; y++)
+                {
+                    if (Band(bmp, 300, 900, y, y + 1) < 60) continue;   // past the opening, into the housing
+                    picture = Math.Max(picture, Roughness(y));
+                    lastPictureRow = y;
+                }
+
+                // Just beyond the opening, where the light off the picture is strongest -- but clear
+                // of the rim, where picture and housing are blended and the picture's own detail
+                // shows through whatever the reflection is doing. Further out again the light has
+                // faded to nothing and reads as smooth however sharply it was reflected.
+                return (picture, Roughness(lastPictureRow + 8));
             }
 
-            // Find the comb, and the bottom of the opening, rather than assume where either lands:
-            // the opening is inset by the housing, so a row of the screen does not sit at a fixed
-            // fraction of the window.
-            double onPicture = 0;
-            int lastPictureRow = 0;
-            for (int y = (int)(Height * 0.80); y < Height - 4; y++)
-            {
-                if (Band(bmp, 300, 900, y, y + 1) < 60) continue;     // past the opening, into the housing
-                onPicture = Math.Max(onPicture, Roughness(y));
-                lastPictureRow = y;
-            }
+            (double comb, double mirrored) sharp = Reflected(0f);
+            (double _, double washed) = Reflected(1f);
 
-            // Just beyond the opening, where the light off the picture is strongest. Further out it
-            // has faded to nothing and would read as smooth however sharply it was reflected.
-            double onHousing = Roughness(lastPictureRow + 4);
-
-            Assert.True(onPicture > 20, $"the comb is not where the test thinks it is: {onPicture:F1}");
-            Assert.True(onHousing < onPicture * 0.25,
-                $"the housing reflects the picture sharply: {onHousing:F1} against {onPicture:F1} on the picture");
+            Assert.True(sharp.comb > 20, $"the comb is not where the test thinks it is: {sharp.comb:F1}");
+            Assert.True(sharp.mirrored > sharp.comb * 0.25,
+                $"with diffusion off the housing should mirror the comb, not blur it: {sharp.mirrored:F1}");
+            Assert.True(washed < sharp.mirrored * 0.25,
+                $"turning diffusion up did not blur the reflection: {washed:F1} against {sharp.mirrored:F1}");
         }
 
         [Fact]
