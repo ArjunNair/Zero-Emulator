@@ -136,11 +136,18 @@ half4 main(float2 xy) {
         float wq = 1.0 + curvature * dot(qc, qc) * 0.25;
         qc = clamp(qc * wq, -1.0, 1.0) / wq;
     }
-    float2 t = (abs(c0) - abs(qc)) / max(1.0 - abs(qc), float2(0.0001, 0.0001));
-    float reach = clamp(max(t.x, t.y), 0.0, 1.0);
+    float2 t = clamp((abs(c0) - abs(qc)) / max(1.0 - abs(qc), float2(0.0001, 0.0001)), 0.0, 1.0);
+
+    // Each panel is brightest opposite the middle of the screen and tapers towards its ends, so the
+    // two panels meeting at a corner are both at their dimmest there. Taking the nearer edge alone
+    // would light a corner as strongly as a side, and the corner then carries a third reflection --
+    // the picture turned back on itself diagonally -- as bright as the two straight ones beside it.
+    float2 along = exp(-2.2 * c0 * c0);      // 1 opposite the middle of a side, small towards its ends
+    float sides = exp(-t.x * 0.7) * along.y;     // light from the left and right edges
+    float ends = exp(-t.y * 0.7) * along.x;      // and from the top and bottom
     float2 reflected = clamp(2.0 * inside - c, -1.0, 1.0);
     float2 mirror = clamp((reflected * 0.5 + 0.5) * dest, lo, hi);
-    half3 spill = src.eval(mirror).rgb * exp(-reach * 0.7) * edgeLight;
+    half3 spill = src.eval(mirror).rgb * max(sides, ends) * edgeLight;
 
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";

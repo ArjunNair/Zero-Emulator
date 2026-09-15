@@ -168,25 +168,36 @@ namespace Zero.App.Tests
         }
 
         [Fact]
-        public void The_edge_light_fills_the_corners_of_the_surround()
+        public void Each_panel_tapers_towards_the_corners_without_a_step()
         {
-            // The curve cuts a corner of the glass far deeper than it cuts the sides, so light that
-            // fades over the width of a side panel has run out long before it crosses a corner. The
-            // surround then reads as four lit panels with dark gaps where they meet, rather than as
-            // one lit frame. On a picture that is the same colour everywhere, a corner of the frame
-            // should be lit much like the middle of a side.
+            // Two panels meet at every corner, so a corner that is lit as strongly as a side carries
+            // a third reflection there -- the picture turned back on itself diagonally -- as bright
+            // as the two straight ones beside it. Each panel is brightest opposite the middle of the
+            // screen and fades towards its ends, so the corner gets only the tail of both.
+            //
+            // Fading, though, not stopping: the first thing tried here was measuring the light from
+            // the nearest edge alone, which left the corners black and the surround reading as four
+            // separate panels with gaps between them.
             var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
             using SKBitmap bmp = Render(options);
 
-            double side = Band(bmp, 0, 10, Height / 2 - 40, Height / 2 + 40);
-            double topLeft = Band(bmp, 0, 10, 0, 40);
-            double topRight = Band(bmp, Width - 10, Width, 0, 40);
-            double bottomLeft = Band(bmp, 0, 10, Height - 40, Height);
+            double middle = Band(bmp, Width / 2 - 40, Width / 2 + 40, Height - 10, Height);
+            double corner = Band(bmp, 0, 20, Height - 20, Height);
+            Assert.True(corner < middle * 0.5,
+                $"the corner is lit like the middle of a panel: {corner:F1} against {middle:F1}");
 
-            foreach ((string name, double corner) in new[]
-                     { ("top left", topLeft), ("top right", topRight), ("bottom left", bottomLeft) })
-                Assert.True(corner > side * 0.7,
-                    $"the {name} corner of the surround is unlit next to the sides: {corner:F1} against {side:F1}");
+            // Walk the bottom of the frame from the middle out to the corner: it must fall away, not
+            // drop off a cliff.
+            double biggest = 0, previous = Band(bmp, Width / 2, Width / 2 + 10, Height - 10, Height);
+            for (int x = Width / 2 - 10; x >= 10; x -= 10)
+            {
+                double here = Band(bmp, x, x + 10, Height - 10, Height);
+                biggest = Math.Max(biggest, Math.Abs(here - previous));
+                previous = here;
+            }
+
+            Assert.True(biggest < 12.0,
+                $"the surround steps by {biggest:F1} of 255 on the way to the corner");
         }
 
 
