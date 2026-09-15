@@ -268,38 +268,53 @@ namespace Zero.App.Tests
         }
 
         [Fact]
-        public void The_cabinet_frames_the_picture_and_pushes_it_in()
+        public void The_housing_pushes_the_picture_in_and_is_lit_all_round()
         {
-            // The cabinet is the moulded fascia the screen sits in. It has to take room from the
-            // picture to exist, which is the trade: the opening shrinks by the width of the frame.
-            var bare = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
-            var framed = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.12f };
-
-            using SKBitmap without = Render(bare);
-            using SKBitmap with = Render(framed);
-
-            // Walk in along the middle row to where the picture starts, in each.
-            int Opening(SKBitmap bmp)
+            // The housing is the casing the screen is sunk into, and it is the only frame there is:
+            // the edge light falls on it. It has to take room from the picture to exist, which is the
+            // trade -- the opening shrinks by the depth of the housing.
+            //
+            // Measured by how far apart two marks in the picture land, not by where light starts:
+            // the housing mirrors the picture, so with the edge light up it is just as bright as the
+            // picture and there is no brightness that tells one from the other.
+            using SKBitmap frame = Frame(new SKColor(0xC0, 0xC0, 0xC0), new SKColor(0xC0, 0xC0, 0xC0));
+            using (var c = new SKCanvas(frame))
+            using (var red = new SKPaint { Color = SKColors.Red })
             {
-                for (int x = 0; x < Width / 2; x++)
-                {
-                    SKColor c = bmp.GetPixel(x, Height / 2);
-                    if ((c.Red * 30 + c.Green * 59 + c.Blue * 11) / 100 > 150) return x;
-                }
-                return Width / 2;
+                c.DrawRect(new SKRect(48 + 64, 48, 48 + 68, 48 + 192), red);    // a quarter across
+                c.DrawRect(new SKRect(48 + 188, 48, 48 + 192, 48 + 192), red);  // and three quarters
             }
 
-            int bareEdge = Opening(without), framedEdge = Opening(with);
-            Assert.True(framedEdge > bareEdge + Width * 0.05,
-                $"the cabinet did not push the picture in: it starts at {framedEdge} against {bareEdge}");
+            double Apart(SKBitmap bmp)
+            {
+                int first = -1, last = -1;
+                for (int x = Width / 6; x < Width * 5 / 6; x++)
+                {
+                    SKColor c = bmp.GetPixel(x, Height / 2);
+                    if (c.Red - Math.Max(c.Green, c.Blue) < 40) continue;
+                    if (first < 0) first = x;
+                    last = x;
+                }
+                Assert.True(first >= 0, "the marks in the picture were not found at all");
+                return last - first;
+            }
 
-            // And the frame itself is there: a band outside the opening that is neither picture nor
-            // the black of an empty window, and the same on all four sides.
-            double left = Band(with, 6, 16, Height / 2 - 30, Height / 2 + 30);
-            double right = Band(with, Width - 16, Width - 6, Height / 2 - 30, Height / 2 + 30);
+            var bare = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            var housed = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.12f };
+            using SKBitmap without = Render(bare, frame, smooth: true);
+            using SKBitmap with = Render(housed, frame, smooth: true);
+
+            double shrunk = Apart(with) / Apart(without);
+            Assert.True(shrunk > 0.83 && shrunk < 0.93,
+                $"the housing should shrink the picture to about 0.88 of the window, not {shrunk:F2}");
+
+            // And the room it took is lit, on every side: it is housing catching the screen's light,
+            // not an empty margin.
+            double side = Band(with, 6, 16, Height / 2 - 30, Height / 2 + 30);
             double top = Band(with, Width / 2 - 30, Width / 2 + 30, 6, 16);
-            foreach ((string name, double v) in new[] { ("left", left), ("right", right), ("top", top) })
-                Assert.True(v > 8 && v < 90, $"the {name} of the cabinet does not read as a frame: {v:F1}");
+            double bottom = Band(with, Width / 2 - 30, Width / 2 + 30, Height - 16, Height - 6);
+            foreach ((string name, double v) in new[] { ("side", side), ("top", top), ("bottom", bottom) })
+                Assert.True(v > 12, $"the {name} of the housing is unlit: {v:F1}");
         }
     }
 }

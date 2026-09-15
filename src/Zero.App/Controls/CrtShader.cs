@@ -50,7 +50,7 @@ uniform float time;         // seconds, for the effects that move
 uniform float curvature;
 uniform float glow;
 uniform float reflection;
-uniform float bezel;        // share of the window given to the cabinet round the screen
+uniform float bezel;        // share of the window given to the housing the screen sits in
 uniform float edgeLight;
 uniform float scanline;
 uniform float vignette;
@@ -63,9 +63,10 @@ float hash(float2 p) {
 
 half4 main(float2 xy) {
     float2 uv = xy / dest;
-    // The screen and the panel round it are pushed in to leave room for the cabinet, so -1..1 is the
-    // opening rather than the window: |c0| = 1 is the lip of the fascia, and the window edge is at
-    // 'outer'. The picture itself still spans the whole of that opening.
+    // The picture is pushed in to leave room for the housing it sits in, so -1..1 is the opening
+    // rather than the window and the window edge is at 'outer'. Everything from the glass out to
+    // there is housing, lit by the picture; there is no second frame around it. The picture itself
+    // still spans the whole of the opening.
     float opening = max(1.0 - bezel, 0.05);
     float outer = 1.0 / opening;
     float2 c0 = (uv * 2.0 - 1.0) / opening;           // -1..1 across the opening, from the centre
@@ -144,52 +145,20 @@ half4 main(float2 xy) {
         float wq = 1.0 + curvature * dot(qc, qc) * 0.25;
         qc = clamp(qc * wq, -1.0, 1.0) / wq;
     }
-    float2 t = clamp((abs(c0) - abs(qc)) / max(1.0 - abs(qc), float2(0.0001, 0.0001)), 0.0, 1.0);
+    float2 t = clamp((abs(c0) - abs(qc)) / max(outer - abs(qc), float2(0.0001, 0.0001)), 0.0, 1.0);
 
     // Each panel is brightest opposite the middle of the screen and tapers towards its ends, so the
     // two panels meeting at a corner are both at their dimmest there. Taking the nearer edge alone
     // would light a corner as strongly as a side, and the corner then carries a third reflection --
     // the picture turned back on itself diagonally -- as bright as the two straight ones beside it.
-    float2 along = exp(-2.2 * c0 * c0);      // 1 opposite the middle of a side, small towards its ends
+    float2 w = c0 * opening;                 // back to -1..1 across the window
+    float2 along = exp(-2.2 * w * w);        // 1 opposite the middle of a side, small towards its ends
     float sides = exp(-t.x * 0.7) * along.y;     // light from the left and right edges
     float ends = exp(-t.y * 0.7) * along.x;      // and from the top and bottom
     float2 reflected = clamp(2.0 * inside - c, -1.0, 1.0);
     float2 mirror = clamp((reflected * 0.5 + 0.5) * dest, lo, hi);
     half3 spill = src.eval(mirror).rgb * max(sides, ends) * edgeLight;
-    half3 lit = mix(picture, spill, half(rim));
-    if (bezel <= 0.0) {
-        return half4(lit, 1.0);
-    }
-
-    // The cabinet: the moulded fascia the screen is sunk into, from the lip of the opening out to the
-    // window. Without something solid round it the picture floats on the desktop and the lit panel
-    // reads as a halo rather than as light falling on a surface.
-    float2 over = max(abs(c0) - 1.0, 0.0);
-    float depth = clamp(max(over.x, over.y) / max(outer - 1.0, 0.0001), 0.0, 1.0);
-
-    // Which way the face points, so the moulding catches a light from the upper left: the top and
-    // left faces take it, the bottom and right fall away. Taken from how far past the opening we are
-    // on each axis, which turns smoothly through a corner -- deciding it by which side we are on
-    // instead snaps at the corners and blocks them out in flat rectangles.
-    float2 outward = over * sign(c0);
-    outward /= max(length(outward), 0.0001);
-    half3 cabinet = half3(half(0.115 + 0.05 * dot(outward, float2(-0.55, -0.83))));
-
-    // The lip round the opening stands proud of the rest and catches the screen's own light.
-    float lip = exp(-depth * 13.0);
-    cabinet += half3(half(0.10 * lip)) + spill * half(0.9 * lip);
-    cabinet *= half(1.0 - 0.45 * depth * depth);      // and the face falls away towards the outside
-
-    // Rounded outer corners, so the whole thing reads as an object standing on the desktop rather
-    // than as a rectangle of colour filling the window.
-    float radius = min(dest.x, dest.y) * 0.035;
-    float2 arm = dest * 0.5 - radius;
-    float2 fromCorner = max(abs(xy - dest * 0.5) - arm, 0.0);
-    cabinet *= half(1.0 - smoothstep(-1.0, 1.5, length(fromCorner) - radius));
-
-    // Anti-alias the opening, which is a hard rectangular edge against the lit panel.
-    float pixelOpening = 2.0 / max(min(dest.x, dest.y), 1.0) / opening;
-    return half4(mix(lit, cabinet, half(smoothstep(0.0, pixelOpening * 1.5, max(over.x, over.y)))), 1.0);
+    return half4(mix(picture, spill, half(rim)), 1.0);
 }";
 
 
