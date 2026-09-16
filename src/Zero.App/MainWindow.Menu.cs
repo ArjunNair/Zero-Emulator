@@ -17,7 +17,8 @@ namespace Zero.App
     {
         internal NativeMenuItem OpenItem, RecentMenu, SaveSnapshotItem, SaveScreenItem, OptionsItem;
         internal NativeMenuItem Machine48k, Machine128k, Machine128ke, MachinePlus3, MachinePentagon;
-        internal NativeMenuItem ResetItem, HardResetItem, PauseItem, Speed1, Speed2, Speed4, Speed10, LateTimingsItem, Issue2Item;
+        internal NativeMenuItem ResetItem, HardResetItem, PauseItem, FullSpeedItem,
+                                Cpu1, Cpu2, Cpu4, Cpu10, LateTimingsItem, Issue2Item;
         internal NativeMenuItem TapeDeckItem, TapePlayItem, TapeStopItem, TapeRewindItem;
         internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFastLoadItem, TapeRomTrapsItem;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
@@ -75,11 +76,12 @@ namespace Zero.App
                 HardResetItem = Item("Hard Reset", () => _session.Reset(true), G(Key.F9, KeyModifiers.Shift)),
                 Sep(),
                 PauseItem = Item("Pause", TogglePause, G(Key.F7), checkable: true),
-                Submenu("Speed",
-                    Speed1 = Item("1x (normal)", () => SelectSpeed(1), checkable: true),
-                    Speed2 = Item("2x", () => SelectSpeed(2), checkable: true),
-                    Speed4 = Item("4x", () => SelectSpeed(4), checkable: true),
-                    Speed10 = Item("10x", () => SelectSpeed(10), checkable: true)),
+                Submenu("CPU Speed",
+                    Cpu1 = Item("1x (3.5 MHz)", () => SelectCpuSpeed(1), checkable: true),
+                    Cpu2 = Item("2x (7 MHz)", () => SelectCpuSpeed(2), checkable: true),
+                    Cpu4 = Item("4x (14 MHz)", () => SelectCpuSpeed(4), checkable: true),
+                    Cpu10 = Item("10x (35 MHz)", () => SelectCpuSpeed(10), checkable: true)),
+                FullSpeedItem = Item("Full Speed", ToggleFullSpeed, checkable: true),
                 LateTimingsItem = Item("Late Timings", ToggleLateTimings, checkable: true),
                 Issue2Item = Item("Issue 2 Keyboard", ToggleIssue2, checkable: true));
 
@@ -193,7 +195,21 @@ namespace Zero.App
 
         private void SelectMachine(MachineModel model) { _session.SwitchMachine(model); RefreshMenuState(); }
         private void TogglePause() { _session.TogglePause(); RefreshMenuState(); }
-        private void SelectSpeed(int speed) { _session.SetSpeed(speed); RefreshMenuState(); }
+        private void SelectCpuSpeed(int multiple) { _session.SetCpuMultiplier(multiple); RefreshMenuState(); }
+
+        /// <summary>
+        /// Fast forward: the machine runs flat out, painting every fourth frame. Not a multiple --
+        /// above 1x there is no pacing at all, and how fast it goes is whatever the host manages.
+        /// Four frames to a repaint measured no slower than any other value and keeps the picture
+        /// smooth; ten repaints so rarely that it looks worse while running no faster.
+        /// </summary>
+        private void ToggleFullSpeed()
+        {
+            _session.SetSpeed(_settings.Emulation.EmulationSpeed > 1 ? 1 : FullSpeedFrames);
+            RefreshMenuState();
+        }
+
+        internal const int FullSpeedFrames = 4;
 
         private void ToggleLateTimings()
         {
@@ -304,8 +320,9 @@ namespace Zero.App
             StatusMachine.Text = MachineFactory.DisplayName(model) + (_session.State == EmulatorState.PlayingRzx ? "  ▶ RZX" : "");
 
             PauseItem.IsChecked = _session.IsPaused;
-            int speed = _settings.Emulation.EmulationSpeed;
-            Speed1.IsChecked = speed == 1; Speed2.IsChecked = speed == 2; Speed4.IsChecked = speed == 4; Speed10.IsChecked = speed == 10;
+            FullSpeedItem.IsChecked = _settings.Emulation.EmulationSpeed > 1;
+            int cpu = _settings.Emulation.CpuMultiplier;
+            Cpu1.IsChecked = cpu == 1; Cpu2.IsChecked = cpu == 2; Cpu4.IsChecked = cpu == 4; Cpu10.IsChecked = cpu == 10;
             LateTimingsItem.IsChecked = _settings.Emulation.LateTimings;
             Issue2Item.IsChecked = _settings.Emulation.UseIssue2Keyboard;
 

@@ -492,19 +492,19 @@ namespace Zero.App.Tests
         private static void Click(Avalonia.Controls.NativeMenuItem item) => item.Command.Execute(null);
 
         [AvaloniaFact]
-        public void Check_marks_follow_the_clicked_speed_palette_and_mute_items_immediately()
+        public void Check_marks_follow_the_clicked_cpu_speed_palette_and_mute_items_immediately()
         {
             var w = new MainWindow();
             w.Show();
             Dispatcher.UIThread.RunJobs();
-            Assert.True(w.Speed1.IsChecked);
+            Assert.True(w.Cpu1.IsChecked);
 
-            Click(w.Speed2);
-            Assert.True(w.Speed2.IsChecked); Assert.False(w.Speed1.IsChecked); Assert.False(w.Speed4.IsChecked);
-            Click(w.Speed10);
-            Assert.True(w.Speed10.IsChecked); Assert.False(w.Speed2.IsChecked);
-            Click(w.Speed1);
-            Assert.True(w.Speed1.IsChecked); Assert.False(w.Speed10.IsChecked);
+            Click(w.Cpu2);
+            Assert.True(w.Cpu2.IsChecked); Assert.False(w.Cpu1.IsChecked); Assert.False(w.Cpu4.IsChecked);
+            Click(w.Cpu10);
+            Assert.True(w.Cpu10.IsChecked); Assert.False(w.Cpu2.IsChecked);
+            Click(w.Cpu1);
+            Assert.True(w.Cpu1.IsChecked); Assert.False(w.Cpu10.IsChecked);
 
             Click(w.PaletteGray);
             Assert.True(w.PaletteGray.IsChecked); Assert.False(w.PaletteNormal.IsChecked);

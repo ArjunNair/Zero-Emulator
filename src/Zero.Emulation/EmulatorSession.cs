@@ -472,11 +472,28 @@ namespace Zero.Emulation
         // Settings change synchronously so callers (menus) can read them back at once;
         // only the machine update is deferred to the emulation thread.
 
+        /// <summary>
+        /// Frames the machine runs for each one it paints, with the pacing switched off: a fast
+        /// forward. It is not a multiple of anything -- above 1 the machine simply runs as fast as
+        /// the host allows, and the number only decides how often the picture is refreshed.
+        /// </summary>
         public void SetSpeed(int speed)
         {
             int clamped = Math.Clamp(speed, 1, 10);
             Settings.Emulation.EmulationSpeed = clamped;
             Post(() => _zx?.SetEmulationSpeed(clamped));
+        }
+
+        /// <summary>
+        /// How much faster than 3.5 MHz the Z80 runs. The frame is still 69888 T states long and the
+        /// display still refreshes fifty times a second; more instructions simply fit inside a frame.
+        /// This is the one that means 2x = 7 MHz.
+        /// </summary>
+        public void SetCpuMultiplier(int multiple)
+        {
+            int clamped = Math.Clamp(multiple, 1, 14);
+            Settings.Emulation.CpuMultiplier = clamped;
+            Post(() => _zx?.SetCPUSpeed(clamped));
         }
 
         public void SetVolume(int percent)
