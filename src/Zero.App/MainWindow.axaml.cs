@@ -625,17 +625,18 @@ namespace Zero.App
             DateTime now = DateTime.UtcNow;
             double seconds = (now - _lastFpsSample).TotalSeconds;
 
-            // Frames the machine ran, not frames the display showed. A frame whose predecessor is
-            // still waiting to be drawn is dropped rather than queued -- the right thing for a UI,
-            // since the triple buffer already holds the newest -- so counting what reached the screen
-            // reads as the emulator running slow whenever the drawing is merely running behind.
+            // Frames the machine ran, not frames the display showed. Two things pull those apart. A
+            // frame whose predecessor is still waiting to be drawn is dropped rather than queued --
+            // the right thing for a UI, since the triple buffer already holds the newest. And above
+            // 1x the machine runs several frames for every one it hands over, painting only the last,
+            // so at 4x a count of what was handed over reads a quarter of the truth.
             //
             // Over a second rather than half of one. At fifty frames a second, half a second is
             // twenty-five of them, and a single frame either way is already two frames a second of
             // wobble before anything has actually gone wrong.
             if (seconds >= 1.0)
             {
-                long frames = _session.FrameCount;
+                long frames = _session.EmulatedFrameCount;
                 double fps = (frames - _lastFrameCount) / seconds;
                 _lastFrameCount = frames;
                 _lastFpsSample = now;

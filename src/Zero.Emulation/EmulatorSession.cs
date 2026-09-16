@@ -73,7 +73,17 @@ namespace Zero.Emulation
         public EmulatorState State => _state;
         public bool IsPaused => _paused;
         public bool IsRunning => _thread != null && _thread.IsAlive;
+        /// <summary>Frames handed to the display: one per turn of the loop.</summary>
         public long FrameCount => Frames.FramesProduced;
+
+        /// <summary>
+        /// Frames the machine actually ran. Above 1x the machine runs that many frames for every one
+        /// it hands over -- only the last of them is painted -- so the two part company exactly by
+        /// the speed, and it is this one that says how fast the Spectrum is going.
+        /// </summary>
+        public long EmulatedFrameCount => Interlocked.Read(ref _emulatedFrames);
+
+        private long _emulatedFrames;
 
         /// <summary>A new frame is in <see cref="Frames"/>. Emulation thread.</summary>
         public event Action FrameReady;
@@ -242,7 +252,10 @@ namespace Zero.Emulation
             ApplyInput(zx);
 
             if (zx.doRun)
+            {
                 zx.Run();
+                Interlocked.Add(ref _emulatedFrames, Math.Max(1, zx.emulationSpeed));
+            }
 
             if (zx.isResetOver && _autoLoadPending)
                 AutoLoadStep(zx);
