@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using Xunit;
+using Zero.Emulation;
 using Zero.Emulation.Settings;
 using Zero.TestSupport;
 
@@ -66,6 +67,31 @@ namespace Zero.App.Tests
             Thread.Sleep(80);
             Assert.False(w.FullSpeedItem.IsChecked);
             Assert.Equal(1, w.Session.Settings.Emulation.EmulationSpeed);
+            w.Close();
+        }
+
+        [AvaloniaFact]
+        public void The_overclock_is_capped_where_it_stops_doing_anything()
+        {
+            // An instruction can never charge less than one T state, so once the multiplier is high
+            // enough that they all charge exactly one, a frame holds its own T state count of them
+            // and no more. Measured on the 128Ke, 8x, 10x and 14x all came out at 3.95x -- the same
+            // as each other and barely above 4x. A setting saved before the cap has to come back
+            // inside it rather than pretend to be doing something.
+            MainWindow.SettingsLoader = () =>
+            {
+                var s = new EmulatorSettings();
+                s.Paths.Roms = TestPaths.RomDir;
+                s.Emulation.PauseOnFocusLost = false;
+                s.Audio.Mute = true;
+                s.Emulation.CpuMultiplier = 10;      // as an older config would hold it
+                return s;
+            };
+            var w = new MainWindow();
+            w.Show();
+            while (w.Session.FrameCount < 10) { Thread.Sleep(10); Dispatcher.UIThread.RunJobs(); }
+
+            Assert.Equal(EmulatorSession.MaxCpuMultiplier, w.Session.Machine.cpuMultiplier);
             w.Close();
         }
     }

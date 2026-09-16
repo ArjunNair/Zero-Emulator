@@ -18,7 +18,7 @@ namespace Zero.App
         internal NativeMenuItem OpenItem, RecentMenu, SaveSnapshotItem, SaveScreenItem, OptionsItem;
         internal NativeMenuItem Machine48k, Machine128k, Machine128ke, MachinePlus3, MachinePentagon;
         internal NativeMenuItem ResetItem, HardResetItem, PauseItem, FullSpeedItem,
-                                Cpu1, Cpu2, Cpu4, Cpu10, LateTimingsItem, Issue2Item;
+                                Cpu1, Cpu2, Cpu4, LateTimingsItem, Issue2Item;
         internal NativeMenuItem TapeDeckItem, TapePlayItem, TapeStopItem, TapeRewindItem;
         internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFastLoadItem, TapeRomTrapsItem;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
@@ -76,11 +76,20 @@ namespace Zero.App
                 HardResetItem = Item("Hard Reset", () => _session.Reset(true), G(Key.F9, KeyModifiers.Shift)),
                 Sep(),
                 PauseItem = Item("Pause", TogglePause, G(Key.F7), checkable: true),
+                // Nothing above 4x: the overclock charges each instruction fewer T states with a
+                // floor of one, so once every instruction costs one a frame holds its own T state
+                // count of them and no more. Measured on the 128Ke, 8x, 10x and 14x all came out at
+                // 3.95x, the same as each other and barely above 4x.
+                //
+                // No clock rates on the labels either. 2x is not a 7 MHz Spectrum: the ULA derives
+                // the Z80's clock and stalls it for contention, so a faster CPU against an unchanged
+                // display is not something the hardware can do, and the timing it produces is not
+                // the hardware's. The core already concedes this by ignoring the multiplier while a
+                // tape is loading.
                 Submenu("CPU Speed",
-                    Cpu1 = Item("1x (3.5 MHz)", () => SelectCpuSpeed(1), checkable: true),
-                    Cpu2 = Item("2x (7 MHz)", () => SelectCpuSpeed(2), checkable: true),
-                    Cpu4 = Item("4x (14 MHz)", () => SelectCpuSpeed(4), checkable: true),
-                    Cpu10 = Item("10x (35 MHz)", () => SelectCpuSpeed(10), checkable: true)),
+                    Cpu1 = Item("1x (normal)", () => SelectCpuSpeed(1), checkable: true),
+                    Cpu2 = Item("2x", () => SelectCpuSpeed(2), checkable: true),
+                    Cpu4 = Item("4x", () => SelectCpuSpeed(4), checkable: true)),
                 FullSpeedItem = Item("Full Speed", ToggleFullSpeed, checkable: true),
                 LateTimingsItem = Item("Late Timings", ToggleLateTimings, checkable: true),
                 Issue2Item = Item("Issue 2 Keyboard", ToggleIssue2, checkable: true));
@@ -322,7 +331,7 @@ namespace Zero.App
             PauseItem.IsChecked = _session.IsPaused;
             FullSpeedItem.IsChecked = _settings.Emulation.EmulationSpeed > 1;
             int cpu = _settings.Emulation.CpuMultiplier;
-            Cpu1.IsChecked = cpu == 1; Cpu2.IsChecked = cpu == 2; Cpu4.IsChecked = cpu == 4; Cpu10.IsChecked = cpu == 10;
+            Cpu1.IsChecked = cpu == 1; Cpu2.IsChecked = cpu == 2; Cpu4.IsChecked = cpu == 4;
             LateTimingsItem.IsChecked = _settings.Emulation.LateTimings;
             Issue2Item.IsChecked = _settings.Emulation.UseIssue2Keyboard;
 

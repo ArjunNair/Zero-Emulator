@@ -501,10 +501,10 @@ namespace Zero.App.Tests
 
             Click(w.Cpu2);
             Assert.True(w.Cpu2.IsChecked); Assert.False(w.Cpu1.IsChecked); Assert.False(w.Cpu4.IsChecked);
-            Click(w.Cpu10);
-            Assert.True(w.Cpu10.IsChecked); Assert.False(w.Cpu2.IsChecked);
+            Click(w.Cpu4);
+            Assert.True(w.Cpu4.IsChecked); Assert.False(w.Cpu2.IsChecked);
             Click(w.Cpu1);
-            Assert.True(w.Cpu1.IsChecked); Assert.False(w.Cpu10.IsChecked);
+            Assert.True(w.Cpu1.IsChecked); Assert.False(w.Cpu4.IsChecked);
 
             Click(w.PaletteGray);
             Assert.True(w.PaletteGray.IsChecked); Assert.False(w.PaletteNormal.IsChecked);

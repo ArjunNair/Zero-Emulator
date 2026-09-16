@@ -397,7 +397,7 @@ namespace Zero.Emulation
             EmulatorSettings s = Settings;
             zx.SetSoundVolume(Math.Clamp(s.Audio.Volume, 0, 100) / 100.0f);
             zx.SetEmulationSpeed(Math.Clamp(s.Emulation.EmulationSpeed, 1, 10));
-            zx.SetCPUSpeed(Math.Clamp(s.Emulation.CpuMultiplier, 1, 14));
+            zx.SetCPUSpeed(Math.Clamp(s.Emulation.CpuMultiplier, 1, MaxCpuMultiplier));
             zx.SetStereoSound(s.Audio.StereoSoundMode);
             zx.EnableAY(s.Audio.EnableAYFor48K);
             zx.MuteSound(s.Audio.Mute);
@@ -477,6 +477,9 @@ namespace Zero.Emulation
         /// forward. It is not a multiple of anything -- above 1 the machine simply runs as fast as
         /// the host allows, and the number only decides how often the picture is refreshed.
         /// </summary>
+        /// <summary>Beyond this the overclock has nothing left to give; see SetCpuMultiplier.</summary>
+        public const int MaxCpuMultiplier = 4;
+
         public void SetSpeed(int speed)
         {
             int clamped = Math.Clamp(speed, 1, 10);
@@ -485,13 +488,22 @@ namespace Zero.Emulation
         }
 
         /// <summary>
-        /// How much faster than 3.5 MHz the Z80 runs. The frame is still 69888 T states long and the
-        /// display still refreshes fifty times a second; more instructions simply fit inside a frame.
-        /// This is the one that means 2x = 7 MHz.
+        /// How hard the Z80 is overclocked. The frame keeps its own length and the display still
+        /// refreshes fifty times a second; instructions simply charge fewer T states, so more of them
+        /// fit inside a frame.
+        ///
+        /// Capped at 4. Each instruction charges at least one T state, so once the multiplier is high
+        /// enough that they all charge exactly one, a frame holds its own T state count of them and
+        /// no more: measured on the 128Ke, 8x, 10x and 14x all came out at 3.95x. The ceiling is the
+        /// average T states an instruction takes in whatever is running, so it moves with the code.
+        ///
+        /// It is not a faithful 7 or 14 MHz Spectrum. The ULA derives the Z80's clock and stalls it
+        /// for contention, so a faster CPU against an unchanged display is not a thing the hardware
+        /// can do; anything counting T states to hit a scanline will land in the wrong place.
         /// </summary>
         public void SetCpuMultiplier(int multiple)
         {
-            int clamped = Math.Clamp(multiple, 1, 14);
+            int clamped = Math.Clamp(multiple, 1, MaxCpuMultiplier);
             Settings.Emulation.CpuMultiplier = clamped;
             Post(() => _zx?.SetCPUSpeed(clamped));
         }

@@ -49,8 +49,8 @@ namespace Zero.App.Windows
             RomPlus3.Text = settings.Roms.RomPlus3;
             RomPentagon.Text = settings.Roms.RomPentagon;
 
-            CpuMultiplier.ItemsSource = Enumerable.Range(1, 14).Select(i => i.ToString()).ToArray();
-            CpuMultiplier.SelectedIndex = Math.Clamp(settings.Emulation.CpuMultiplier, 1, 14) - 1;
+            CpuMultiplier.ItemsSource = Enumerable.Range(1, EmulatorSession.MaxCpuMultiplier).Select(i => i.ToString()).ToArray();
+            CpuMultiplier.SelectedIndex = Math.Clamp(settings.Emulation.CpuMultiplier, 1, EmulatorSession.MaxCpuMultiplier) - 1;
             Use128ke.IsChecked = settings.Emulation.Use128keForSnapshots;
             PauseOnFocusLost.IsChecked = settings.Emulation.PauseOnFocusLost;
             ConfirmOnExit.IsChecked = settings.Emulation.ConfirmOnExit;

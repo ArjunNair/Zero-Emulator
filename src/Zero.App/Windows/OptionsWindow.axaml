@@ -65,6 +65,8 @@
               <ComboBox x:Name="CpuMultiplier" Width="90" />
               <TextBlock Text="(1 = original 3.5 MHz)" Foreground="#BBBBBB" VerticalAlignment="Center" />
             </StackPanel>
+            <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
+                       Text="Not hardware accurate above 1x. The ULA derives the Z80's clock and stalls it for contention, so a faster processor against an unchanged display is not something a Spectrum can do: software that counts T states to hit a scanline will misbehave, and tape loading ignores the setting altogether. It also stops giving much above 4x, because an instruction can never charge less than one T state." />
             <CheckBox x:Name="Use128ke" Content="Load 128K snapshots into the 128Ke (higher compatibility)" />
             <CheckBox x:Name="PauseOnFocusLost" Content="Pause emulation when the window loses focus" />
             <CheckBox x:Name="ConfirmOnExit" Content="Ask for confirmation before exiting" />
