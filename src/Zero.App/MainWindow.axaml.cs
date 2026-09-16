@@ -33,7 +33,7 @@ namespace Zero.App
         private readonly DispatcherTimer _statusTimer;
         private readonly string _initialFile;
         private int _framePending;
-        private long _lastPresented;
+        private long _lastFrameCount;
         private DateTime _lastFpsSample = DateTime.UtcNow;
         private bool _pausedByFocusLoss;
         private bool _audioFallback;
@@ -620,15 +620,24 @@ namespace Zero.App
             _ = MessageDialog.ShowAsync(this, "Zero", message);
         }
 
-        private void UpdateStatusBar()
+        internal void UpdateStatusBar()
         {
             DateTime now = DateTime.UtcNow;
             double seconds = (now - _lastFpsSample).TotalSeconds;
-            if (seconds >= 0.5)
+
+            // Frames the machine ran, not frames the display showed. A frame whose predecessor is
+            // still waiting to be drawn is dropped rather than queued -- the right thing for a UI,
+            // since the triple buffer already holds the newest -- so counting what reached the screen
+            // reads as the emulator running slow whenever the drawing is merely running behind.
+            //
+            // Over a second rather than half of one. At fifty frames a second, half a second is
+            // twenty-five of them, and a single frame either way is already two frames a second of
+            // wobble before anything has actually gone wrong.
+            if (seconds >= 1.0)
             {
-                long presented = Display.FramesPresented;
-                double fps = (presented - _lastPresented) / seconds;
-                _lastPresented = presented;
+                long frames = _session.FrameCount;
+                double fps = (frames - _lastFrameCount) / seconds;
+                _lastFrameCount = frames;
                 _lastFpsSample = now;
                 StatusFps.Text = _session.IsPaused ? "paused" : $"{fps:F0} fps";
             }
