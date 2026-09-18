@@ -88,5 +88,6 @@ else's.
   signing needs a code signing certificate.
 - **Linux:** nothing to sign.
 
-The old Inno Setup script in `InnoScript/` predates the port and would need updating for the current
-file layout before it could build an installer again.
+There is no Windows installer. The published folder is the whole application, so unzipping it
+somewhere is the install. If one is wanted later it would be written against the current layout --
+one executable beside `roms/` and `programs/` -- rather than revived from anything older.
