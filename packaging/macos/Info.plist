@@ -2,8 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleName</key><string>Zero</string>
-  <key>CFBundleDisplayName</key><string>Zero</string>
+  <key>CFBundleName</key><string>Zero X</string>
+  <key>CFBundleDisplayName</key><string>Zero X</string>
   <key>CFBundleIdentifier</key><string>com.arjunnair.zero</string>
   <key>CFBundleVersion</key><string>0.9.0</string>
   <key>CFBundleShortVersionString</key><string>0.9.0</string>
