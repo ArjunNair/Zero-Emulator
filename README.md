@@ -1,8 +1,10 @@
 
-# Zero - A ZX Spectrum Emulator
-Zero is a spectrum emulator written entirely on the .NET platform, using C#, and requires .NET framework 4.7 or above.
+# Zero X - A cross platform ZX Spectrum emulator
+Zero X is a cross platform port of the previous Windows only emulator. This version is based on Avalonia and SDL 3 and was ported using Claude AI. 
 
-The philosophy behind Zero is to provide a highly accurate emulation of the various Spectrum models while also providing a nice, user friendly experience. 
+Note that much of the code is still my hand rolled one, over 10+ years, so any errors in emulation accuracy or feature implementation in this version are my own. 
+
+The philosophy behind Zero X is to provide a highly accurate emulation of the various Spectrum models while also providing a modern, user friendly experience. 
 
 ![Zero running Exolon](zero_hero.png)
 
@@ -153,12 +155,6 @@ If you installed the emulator using the Setup, simply run the uninstaller to uni
 
 If you used the .zip version, simply delete the folder in which Zero resides.
 
-## Building the project using source
-The project currently uses Visual Studio 2019 Community edition (free). It may not be compatible with older Visual Studio editions. I recommend downloading VS 2019 Community as it's almost like the professional version (supports plugins for example) and is free to download from here: http://www.visualstudio.com/en-us/news/vs2013-community-vs.aspx
-
-
-## Important
-If you're unable to launch the emulator or the emulator crashes immediately on launching, you may need to install an additional DirectX component, which can be found here: http://www.microsoft.com/en-us/download/details.aspx?id=810
 
 ## Acknowledgements
 Many thanks to Mark Woodmass (Woody) for his patient and detailed technical advice on various aspects of emulation, and to Rich Chandler, Paul Dunn (Dunny) and others on the ZX Spectrum discord group for their help and feedback. This emulator wouldn't have been possible otherwise without their considerable encouragement and support.
@@ -174,5 +170,5 @@ I must also thank my wife Poornima for putting up with my obsession with the spe
 Additional contributors whose feedback have helped in shaping the emulator are credited in the What's New file.
 
 ## License & Copyrights
-Copyright (c) 2009-2024 Arjun Nair. See the LICENSE file for license rights and limitations (MIT).  
+Copyright (c) 2009-2026 Arjun Nair. See the LICENSE file for license rights and limitations (MIT).  
 Zero uses various public domain icons. Copyright rests with their respective authors. 

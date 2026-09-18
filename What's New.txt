@@ -1,6 +1,13 @@
 
 What's New
 --------------
+v 1.0
+
+This is a port of the Zero Emulator for Windows to a cross platform Avalonia based one, with some extra
+bells and whistles, described here. These (and the port) were made possible by using claude AI.
+- Added select themes made by Avalonia community.
+- Added CRT FX like scanlines, fascia lighting, glow etc
+
 
 V 0.8.1
 ---------------
