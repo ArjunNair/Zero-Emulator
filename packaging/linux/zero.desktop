@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Zero
+Name=Zero X
 Comment=ZX Spectrum emulator
 Exec=Zero %f
 Icon=zero

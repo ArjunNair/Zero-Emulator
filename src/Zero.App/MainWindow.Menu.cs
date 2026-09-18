@@ -170,7 +170,7 @@ namespace Zero.App
             var help = Submenu("Help",
                 KeyboardItem = Item("Spectrum Keyboard…", ShowKeyboardWindow, G(Key.F1)),
                 Item("Keyboard Shortcuts", ShowShortcutsHelp),
-                Item("About Zero", ShowAbout));
+                Item("About Zero X", ShowAbout));
 
             var root = new NativeMenu();
             foreach (NativeMenuItem m in new[] { file, machine, tape, sound, view, input, help }) root.Items.Add(m);
@@ -181,7 +181,7 @@ namespace Zero.App
         private NativeMenu BuildAppMenu()
         {
             var menu = new NativeMenu();
-            menu.Items.Add(Item("About Zero", ShowAbout));
+            menu.Items.Add(Item("About Zero X", ShowAbout));
             menu.Items.Add(Sep());
             menu.Items.Add(Item("Options…", () => _ = ShowOptionsAsync(), G(Key.OemComma, KeyModifiers.Meta)));
             return menu;

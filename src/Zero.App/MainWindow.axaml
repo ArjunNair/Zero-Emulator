@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="using:Zero.App.Controls"
         x:Class="Zero.App.MainWindow"
-        Title="Zero"
+        Title="Zero X"
         Icon="/Assets/zero.ico"
         Width="760" Height="672"
         MinWidth="400" MinHeight="360"

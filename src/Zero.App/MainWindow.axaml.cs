@@ -127,7 +127,7 @@ namespace Zero.App
                 e.Cancel = true;
                 bool wasPaused = _session.IsPaused;
                 _session.Pause();
-                bool yes = await MessageDialog.ConfirmAsync(this, "Exit Zero", "Quit the emulator?", "Quit", "Cancel");
+                bool yes = await MessageDialog.ConfirmAsync(this, "Exit Zero X", "Quit the emulator?", "Quit", "Cancel");
                 if (!yes) { if (!wasPaused) _session.Resume(); return; }
                 _closeConfirmed = true;
                 Close();
@@ -527,8 +527,8 @@ namespace Zero.App
             "F9 Reset   Shift+F9 Hard reset   F11 Full screen\n" +
             (IsMac ? "Cmd+O / Cmd+S / Cmd+R / Cmd+P / Cmd+M / Cmd+F do the same." : ""));
 
-        private void ShowAbout() => _ = MessageDialog.ShowAsync(this, "About Zero",
-            "Zero — a ZX Spectrum emulator\nCopyright © 2009-2026 Arjun Nair\n\n" +
+        private void ShowAbout() => _ = MessageDialog.ShowAsync(this, "About Zero X",
+            "Zero X — a ZX Spectrum emulator\nCopyright © 2009-2026 Arjun Nair\n\n" +
             "Cross-platform build: .NET " + Environment.Version + ", Avalonia UI, SDL3 audio & gamepads.\n" +
             "Emulates the 48K, 128K, 128Ke, +3 (no disk) and Pentagon 128K.");
 
@@ -617,7 +617,7 @@ namespace Zero.App
         private void ShowError(string message)
         {
             SetStatus(message);
-            _ = MessageDialog.ShowAsync(this, "Zero", message);
+            _ = MessageDialog.ShowAsync(this, "Zero X", message);
         }
 
         internal void UpdateStatusBar()
