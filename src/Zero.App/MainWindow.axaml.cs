@@ -193,7 +193,8 @@ namespace Zero.App
         private void OnWindowKeyDown(object sender, KeyEventArgs e)
         {
             if (HandleShortcut(e)) { e.Handled = true; return; }
-            if ((e.KeyModifiers & CommandModifier) != 0 && !IsMac) return; // leave Ctrl+? shortcuts alone on Win/Linux only when unmapped... (Ctrl is symbol shift)
+            // Nothing is swallowed here. On Windows and Linux Control is Symbol Shift and nothing
+            // else, so Ctrl+P has to reach the Spectrum as a quote rather than being eaten.
             ForwardKey(e, true);
         }
 
@@ -232,10 +233,18 @@ namespace Zero.App
             e.Handled = true;
         }
 
-        private bool HandleShortcut(KeyEventArgs e)
+        private bool HandleShortcut(KeyEventArgs e) => HandleShortcut(e, IsMac);
+
+        /// <summary>
+        /// True when the press was a shortcut and the Spectrum should not see it. The command-key
+        /// half is macOS only: elsewhere the command modifier is Control, which the Spectrum needs
+        /// as Symbol Shift, and Ctrl+P, Ctrl+O, Ctrl+M and friends all type useful characters. The
+        /// function keys cover the same ground on every platform.
+        /// </summary>
+        internal bool HandleShortcut(KeyEventArgs e, bool isMac)
         {
             if (e.Key == Key.Escape && _mouseCaptured) { ReleaseMouse(); return true; }
-            bool cmd = (e.KeyModifiers & CommandModifier) != 0;
+            bool cmd = isMac && (e.KeyModifiers & KeyModifiers.Meta) != 0;
             bool shift = (e.KeyModifiers & KeyModifiers.Shift) != 0;
             switch (e.Key)
             {
@@ -248,9 +257,10 @@ namespace Zero.App
                 case Key.F7: TogglePause(); return true;
                 case Key.F8: SetMute(!_settings.Audio.Mute); return true;
                 case Key.F9: _session.Reset(shift); return true;
+                case Key.F10: if (shift) RollbackRzx(); else InsertRzxBookmark(); return true;
                 case Key.F11: ToggleFullScreen(); return true;
                 case Key.F12: _ = SaveScreenAsync(); return true;
-                case Key.Pause: _session.TogglePause(); return true;
+                case Key.Pause: TogglePause(); return true;
             }
             if (cmd)
             {
@@ -263,7 +273,7 @@ namespace Zero.App
                     case Key.P: TogglePause(); return true;
                     case Key.M: SetMute(!_settings.Audio.Mute); return true;
                     case Key.F: ToggleFullScreen(); return true;
-                    case Key.Q: if (IsMac) { Close(); return true; } break;
+                    case Key.Q: Close(); return true;
                 }
             }
             return false;
@@ -407,6 +417,75 @@ namespace Zero.App
             Display.Focus();
         }
 
+        // ------------------------------------------------------------------ RZX recording
+
+        private async Task StartRzxRecordingAsync()
+        {
+            bool wasPaused = _session.IsPaused;
+            _session.Pause();
+            string path = await PickSaveFileAsync("Record RZX", "recording.rzx", "rzx", "Action Replay recording");
+            if (!wasPaused) _session.Resume();
+            if (path != null && await _session.StartRzxRecordingAsync(path))
+                SetStatus("Recording to " + Path.GetFileName(path) + " — F10 bookmarks, Shift+F10 rolls back");
+            RefreshMenuState();
+            Display.Focus();
+        }
+
+        private async Task StopRzxRecordingAsync()
+        {
+            if (!_session.IsRecordingRzx) return;
+            bool yes = await MessageDialog.ConfirmAsync(this, "Stop Recording", "Stop recording the RZX?", "Stop", "Cancel");
+            if (!yes) return;
+            _session.StopRzxRecording();
+        }
+
+        private async Task ContinueRzxRecordingAsync()
+        {
+            bool wasPaused = _session.IsPaused;
+            _session.Pause();
+            string path = await PickOpenFileAsync("Continue RZX Recording", new[]
+            {
+                new FilePickerFileType("Action Replay recordings") { Patterns = new[] { "*.rzx" } },
+                FilePickerFileTypes.All
+            });
+            if (!wasPaused) _session.Resume();
+            if (path != null && await _session.ContinueRzxRecordingAsync(path))
+                SetStatus("Continuing recording to " + Path.GetFileName(path) + " — F10 bookmarks, Shift+F10 rolls back");
+            RefreshMenuState();
+            Display.Focus();
+        }
+
+        private async Task FinishRzxRecordingAsync()
+        {
+            if (!_session.IsRecordingRzx) return;
+            string path = await _session.FinishRzxRecordingAsync();
+            if (path != null) SetStatus("Saved " + Path.GetFileName(path));
+            RefreshMenuState();
+            Display.Focus();
+        }
+
+        private void DiscardRzxRecording()
+        {
+            if (!_session.IsRecordingRzx) return;
+            _session.DiscardRzxRecording();
+            SetStatus("Recording discarded");
+            RefreshMenuState();
+        }
+
+        private void InsertRzxBookmark()
+        {
+            if (!_session.IsRecordingRzx) return;
+            _session.InsertRzxBookmark();
+            SetStatus("Bookmark inserted");
+        }
+
+        private void RollbackRzx()
+        {
+            if (!_session.IsRecordingRzx) return;
+            _session.RollbackRzx();
+            SetStatus("Rolled back to the last bookmark");
+        }
+
         private async Task SaveScreenAsync()
         {
             bool wasPaused = _session.IsPaused;
@@ -525,7 +604,9 @@ namespace Zero.App
             "F1 Spectrum keyboard   F3 Open   F2 Save snapshot   F12 Save screen\n" +
             "F4 Tape deck   F5 Tape play/stop   F6 Rewind   F7 Pause   F8 Mute\n" +
             "F9 Reset   Shift+F9 Hard reset   F11 Full screen\n" +
-            (IsMac ? "Cmd+O / Cmd+S / Cmd+R / Cmd+P / Cmd+M / Cmd+F do the same." : ""));
+            "F10 RZX bookmark   Shift+F10 roll back (while recording)\n" +
+            (IsMac ? "Cmd+O / Cmd+S / Cmd+R / Cmd+P / Cmd+M / Cmd+F do the same." :
+             "Control is Symbol Shift here, so the function keys above are the only shortcuts."));
 
         private void ShowAbout() => _ = MessageDialog.ShowAsync(this, "About Zero X",
             "Zero X — a ZX Spectrum emulator\nCopyright © 2009-2026 Arjun Nair\n\n" +

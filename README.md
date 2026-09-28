@@ -6,6 +6,8 @@ Note that much of the code is still my hand rolled one, over 10+ years, so any e
 
 The philosophy behind Zero X is to provide a highly accurate emulation of the various Spectrum models while also providing a modern, user friendly experience. 
 
+Note: The terms Zero and Zero X are used interchangeably, but Zero X strictly refers to the cross platform emulator only.
+
 ![Zero running Exolon](zero_hero.png)
 
 ## Cross-platform build (branch `crossplatform`)
@@ -31,7 +33,7 @@ See [docs/porting-status.md](docs/porting-status.md) for what is in this build, 
 
 * Supports the following disk formats: DSK, TRD and SCL.
 
-* Supports the playback and recording (with rollback) of RZX files.
+* Supports the playback and recording of RZX files, with bookmarks and rollback. Stopping and resuming of recordings is also supported.
 
 * Supports the AY-3-8192 sound chip and ULA Plus.
   
@@ -45,6 +47,23 @@ See [docs/porting-status.md](docs/porting-status.md) for what is in this build, 
 ## Using the Emulator
 The entire emulator is controlled and configured via the menu bar at the top. Additional options are under the Tools section in the menu.
 
+### RZX recordings
+Zero supports RXZ recordings. To playback one, simply open a `.rzx` file - the emulator will automatically start playing it back with the status bar showing`▶ RZX` while it runs. 
+
+To make your own recording, use File > RZX Recording > Start Recording... The recording opens with a snapshot of the machine as it stands, so it replays on its own without the original snapshot or tape, and the status bar shows `● REC`.
+
+Rollbacks while recording is also supported. F10 inserts a rollback bookmark and Shift+F10 rewinds the machine and the recording to the last one.
+
+There are three ways to end a recording:
+
+Menu item          | What it does
+-------------------|-------------
+Stop Recording     | Ends the session and leaves but allows continuing the recording later.
+Finish Recording   | Finalizes the recording. No more changes can be done to the RZX file.
+Discard Recording  | Throws away the recording and deletes the file.
+
+Continue Recording... reopens a file left by Stop Recording and appends to it, so a long recording can be built over several sittings. 
+
 ## Using the Keyboard
 Zero emulates the speccy keyboard faithfully and provides some additional functionality via the PC keyboard.
 
@@ -57,49 +76,43 @@ In addition, you can type in symbols like + , - ? etc directly from the PC keybo
 
 If you're in the habit of forgetting what key does what on the speccy (like me!), I recommend you use the SEBasic ROM or the Gosh Wonderful for the 48k, which support full typing (i.e to do LOAD "" you would actually have to type it in one letter at a time like on the PC). 
 
-The following key combinations are used by Zero:
+The following key combinations are used by Zero X. The `Cmd` rows are the Command key on macOS only:
+on Windows and Linux the Control key is Symbol Shift for the Spectrum and nothing else, so there are no
+Ctrl shortcuts there. The function keys do the same jobs on every platform.
 
-**Emulator Window**
-
-Shortcut Key    | Function  
+Shortcut Key    | Function
 ----------------|-----------
-F2              | Tape Browser
-F3 		          | Debugger
-F4		          | Search Infoseek
-F5     		      | Pause Emulation
-F6		          | Acquire/Release Mouse (May first need to enable mouse emulation in Options)
-F7		          | New RZX Recording
-F8	            | Finalise RZX Recording
-F9		          | Stop RZX Recording
-Ins / Tab		          | Insert RZX Bookmark
-Del		          | Rollback RZX to previous bookmark
-Alt+F8 		      | Discard RZX Recording
-Alt+F4  	      | Exit emulator
-Ctrl+F5		      | Reset Emulator
-Alt+F6		      | Unacquire mouse
-Ctrl+O   	      | Open File
-Ctrl+S   	      | Save snapshot
-Ctrl+Shift+S     | Save screenshot
-Ctrl+K		        | Show 48k Keyboard helper
-Alt+0           | 100% window size
-Alt+ +   	      | Increase window size by 50% of original speccy size
-Alt+ -   	      | Decrease window size by 50% of original speccy size
-Alt+Enter 	    | Full screen toggle
+F1              | Show the Spectrum keyboard helper
+F2              | Save snapshot
+F3              | Open file
+F4              | Tape Deck
+F5              | Tape play / stop
+F6              | Tape rewind
+F7              | Pause / resume emulation
+F8              | Mute / unmute
+F9              | Reset emulator
+Shift+F9        | Hard reset
+F10             | Insert an RZX rollback bookmark (while recording)
+Shift+F10       | Roll back to the last bookmark (while recording)
+F11             | Full screen toggle
+F12             | Save screen as .scr
+Pause           | Pause / resume emulation
+Esc             | Release the captured Kempston mouse
+Cmd+O           | Open file
+Cmd+S           | Save snapshot
+Cmd+R           | Reset emulator (add Shift for a hard reset)
+Cmd+P           | Pause / resume emulation
+Cmd+M           | Mute / unmute
+Cmd+F           | Full screen toggle
+Cmd+,           | Options
+Cmd+Q           | Exit emulator
 
-**Debugger**
+The Kempston mouse is captured by clicking on the screen, after enabling it under Input, and released with Esc.
 
-Shortcut Key    | Function  
-----------------|-----------
-F5		          | Resume Emulation
-F10		          | Step Over
-F11		          | Step In
-F12 		        | Step Out
-Alt+B		        | Show Breakpoints Editor
-Alt+S		        | Show Machine State
-Alt+V		        | Show Memory Viewer
-Alt+R		        | Show Registers
-Alt+L		        | Show Execution Log
-Alt+P		        | Poke Memory
+Window size is chosen from View > Window Size; there is no shortcut for it. Options has no shortcut
+outside macOS either, for the same reason as the rest of the Cmd set.
+
+The debugger was cut for v1, so the shortcuts it used to own are gone.
 
 
 ## Command line options
@@ -151,9 +164,8 @@ zero.exe -q "exolon.pzx" /waitframes 2 /startrace "exolon_trace.log" /waitframes
 ```
 
 ## Uninstalling Zero
-If you installed the emulator using the Setup, simply run the uninstaller to uninstall the emulator.It's generally a good idea to uninstall a previous version of the emulator before installing a new one.
 
-If you used the .zip version, simply delete the folder in which Zero resides.
+Simply delete the folder in which Zero resides.
 
 
 ## Acknowledgements

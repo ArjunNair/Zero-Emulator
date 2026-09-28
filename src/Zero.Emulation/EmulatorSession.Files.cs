@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using Peripherals;
 using Speccy;
 using SpeccyCommon;
@@ -179,6 +180,7 @@ namespace Zero.Emulation
             bool force128ke = Settings.Emulation.Use128keForSnapshots;
             switch ((SZXFile.ZXTYPE)szx.header.MachineId)
             {
+                case SZXFile.ZXTYPE.ZXSTMID_NTSC48K:
                 case SZXFile.ZXTYPE.ZXSTMID_48K:
                     if (force128ke)
                     {
@@ -188,6 +190,9 @@ namespace Zero.Emulation
                         _zx.pagingDisabled = true;
                     }
                     else EnsureMachine(MachineModel._48k);
+                    break;
+                case SZXFile.ZXTYPE.ZXSTMID_128KE:
+                    EnsureMachine(MachineModel._128ke);
                     break;
                 case SZXFile.ZXTYPE.ZXSTMID_128K:
                     EnsureMachine(force128ke ? MachineModel._128ke : MachineModel._128k);
@@ -277,9 +282,178 @@ namespace Zero.Emulation
         {
             if (_zx == null) return;
             if (_zx.isPlayingRZX) _zx.StopPlaybackRZX();
-            else if (_zx.isRecordingRZX) _zx.DiscardRZX();
+            else if (_zx.isRecordingRZX) FinishRzxRecordingCore();
             if (_state == EmulatorState.PlayingRzx || _state == EmulatorState.RecordingRzx)
-                SetState(_paused ? EmulatorState.Paused : EmulatorState.Running);
+                SetState(RunningState());
+        }
+
+        // ------------------------------------------------------------------ RZX recording
+
+        /// <summary>The file the current recording is being written to, or null when not recording.</summary>
+        private string _rzxRecordingPath;
+
+        public bool IsRecordingRzx => _zx != null && _zx.isRecordingRZX;
+
+        /// <summary>
+        /// Start recording to <paramref name="path"/>. The machine keeps running from where it is: the
+        /// recording opens with a snapshot of the current state, so the result plays back standalone.
+        /// </summary>
+        public Task<bool> StartRzxRecordingAsync(string path) => InvokeAsync(() => StartRzxRecordingCore(path));
+
+        private bool StartRzxRecordingCore(string path)
+        {
+            if (_zx == null) { Error?.Invoke("No machine is running."); return false; }
+            StopRzxCore();
+            try
+            {
+                using (File.Create(path)) { }
+            }
+            catch (Exception ex)
+            {
+                Error?.Invoke("Cannot record to " + Path.GetFileName(path) + ": " + ex.Message);
+                return false;
+            }
+            try
+            {
+                _zx.StartRecordingRZX(path, OnRzxEvent);
+            }
+            catch (Exception ex)
+            {
+                Error?.Invoke("Unable to start the recording: " + ex.Message);
+                try { _zx.rzx?.Close(); } catch { }
+                _zx.rzx = null;
+                _zx.isRecordingRZX = false;
+                return false;
+            }
+            _rzxRecordingPath = path;
+            SetState(_paused ? EmulatorState.Paused : EmulatorState.RecordingRzx);
+            return true;
+        }
+
+        /// <summary>Close the recording and write it out. Returns the file written, or null on failure.</summary>
+        public Task<string> FinishRzxRecordingAsync() => InvokeAsync(FinishRzxRecordingCore);
+
+        private string FinishRzxRecordingCore()
+        {
+            if (_zx == null || !_zx.isRecordingRZX) return null;
+            string path = _rzxRecordingPath;
+            try
+            {
+                _zx.SaveRZX(true); 
+            }
+            catch (Exception ex)
+            {
+                Error?.Invoke("Unable to save the recording: " + ex.Message);
+                path = null;
+            }
+            _zx.rzx = null;
+            _rzxRecordingPath = null;
+            SetState(RunningState());
+            return path;
+        }
+
+        /// <summary>Abandon the recording and delete the part-written file.</summary>
+        public void DiscardRzxRecording() => Post(() =>
+        {
+            DiscardRzxRecordingCore();
+            SetState(RunningState());
+        });
+
+        /// <summary>
+        /// End the recording but allow it be resumed later.
+        /// </summary>
+        public void StopRzxRecording() => Post(StopRzxRecordingCore);
+
+        private void StopRzxRecordingCore()
+        {
+            if (_zx == null || !_zx.isRecordingRZX) return;
+            try
+            {
+                _zx.SaveRZX(false);
+            }
+            catch (Exception ex)
+            {
+                Error?.Invoke("Unable to stop the recording: " + ex.Message);
+            }
+            _zx.rzx = null;
+            _rzxRecordingPath = null;
+            SetState(RunningState());
+        }
+
+        /// <summary>Resume a recording that was stopped with <see cref="StopRzxRecording"/>.</summary>
+        public Task<bool> ContinueRzxRecordingAsync(string path) => InvokeAsync(() => ContinueRzxRecordingCore(path));
+
+        private bool ContinueRzxRecordingCore(string path)
+        {
+            if (_zx == null || _zx.isRecordingRZX) return false;
+
+            zx_spectrum before = _zx;
+            try
+            {
+                if (!before.ContinueRZXSession(path, OnRzxEvent))
+                {
+                    Error?.Invoke("Unable to continue " + Path.GetFileName(path) +
+                                  ": it must be an unfinalised recording made by Zero X.");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Error?.Invoke("Unable to continue the recording: " + ex.Message);
+                try { before.rzx?.Close(); } catch { }
+                before.rzx = null;
+                before.isRecordingRZX = false;
+                return false;
+            }
+
+            if (!ReferenceEquals(_zx, before))
+            {
+                _zx.rzx = before.rzx;
+                _zx.isRecordingRZX = true;
+                before.isRecordingRZX = false;
+            }
+
+            _rzxRecordingPath = path;
+            SetState(_paused ? EmulatorState.Paused : EmulatorState.RecordingRzx);
+            return true;
+        }
+
+        private void DiscardRzxRecordingCore()
+        {
+            if (_zx == null || !_zx.isRecordingRZX) return;
+            string path = _rzxRecordingPath;
+            RZXFile rzx = _zx.rzx;
+            _zx.DiscardRZX();
+            try { rzx?.Close(); } catch { }
+            _zx.rzx = null;
+            _rzxRecordingPath = null;
+            if (path != null) { try { File.Delete(path); } catch { } }
+        }
+
+        /// <summary>Drop a rollback point at the current frame. Ignored unless recording.</summary>
+        public void InsertRzxBookmark() => Post(() =>
+        {
+            if (_zx != null && _zx.isRecordingRZX) _zx.InsertBookmark();
+        });
+
+        /// <summary>
+        /// Rewind machine and recording to the last bookmark. The core raises a snapshot event that
+        /// <see cref="OnRzxEvent"/> loads, which can rebuild the machine, so the recording is rebound
+        /// to whatever machine comes back.
+        /// </summary>
+        public void RollbackRzx() => Post(RollbackRzxCore);
+
+        private void RollbackRzxCore()
+        {
+            if (_zx == null || !_zx.isRecordingRZX) return;
+            zx_spectrum before = _zx;
+            RZXFile rzx = _zx.rzx;
+            _zx.RollbackRZX();
+            if (!ReferenceEquals(_zx, before) || _zx.rzx == null)
+            {
+                _zx.rzx = rzx;
+                _zx.isRecordingRZX = true;
+            }
         }
 
         private void OnRzxEvent(RZXFileEventArgs args)

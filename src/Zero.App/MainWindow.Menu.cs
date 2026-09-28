@@ -19,6 +19,7 @@ namespace Zero.App
         internal NativeMenuItem Machine48k, Machine128k, Machine128ke, MachinePlus3, MachinePentagon;
         internal NativeMenuItem ResetItem, HardResetItem, PauseItem, FullSpeedItem,
                                 Cpu1, Cpu2, Cpu4, LateTimingsItem, Issue2Item;
+        internal NativeMenuItem RzxRecordItem, RZXRecordStopItem, RZXRecordContinueItem, RzxBookmarkItem, RzxRollbackItem, RzxFinishItem, RzxDiscardItem;
         internal NativeMenuItem TapeDeckItem, TapePlayItem, TapeStopItem, TapeRewindItem;
         internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFastLoadItem, TapeRomTrapsItem;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
@@ -51,17 +52,32 @@ namespace Zero.App
         {
             KeyModifiers cmd = CommandModifier;
 
+            // Command-key accelerators are macOS only. Off the Mac the command modifier is Control,
+            // which belongs to the Spectrum as Symbol Shift, so those items advertise their
+            // function key instead and Options makes do with the menu.
             var file = Submenu("File",
-                OpenItem = Item("Open…", () => _ = OpenFileAsync(), G(Key.O, cmd)),
+                OpenItem = Item("Open…", () => _ = OpenFileAsync(), IsMac ? G(Key.O, cmd) : G(Key.F3)),
                 RecentMenu = Submenu("Open Recent"),
                 Sep(),
-                SaveSnapshotItem = Item("Save Snapshot…", () => _ = SaveSnapshotAsync(), G(Key.S, cmd)),
+                SaveSnapshotItem = Item("Save Snapshot…", () => _ = SaveSnapshotAsync(), IsMac ? G(Key.S, cmd) : G(Key.F2)),
                 SaveScreenItem = Item("Save Screen (.scr)…", () => _ = SaveScreenAsync(), G(Key.F12)),
+                Sep(),
+                // Playback needs no menu of its own: opening a .rzx starts it.
+                Submenu("RZX Recording",
+                    RzxRecordItem = Item("Start Recording…", () => _ = StartRzxRecordingAsync()),
+                    RZXRecordStopItem = Item("Stop Recording", () => _ = StopRzxRecordingAsync()),
+                    RZXRecordContinueItem = Item("Continue Recording…", () => _ = ContinueRzxRecordingAsync()),
+                    Sep(),
+                    RzxBookmarkItem = Item("Insert Bookmark", InsertRzxBookmark, G(Key.F10)),
+                    RzxRollbackItem = Item("Roll Back to Bookmark", RollbackRzx, G(Key.F10, KeyModifiers.Shift)),
+                    Sep(),
+                    RzxFinishItem = Item("Finish Recording", () => _ = FinishRzxRecordingAsync()),
+                    RzxDiscardItem = Item("Discard Recording", DiscardRzxRecording)),
                 Sep(),
                 Item("Load Binary…", () => _ = RunBinaryDialog(false)),
                 Item("Save Binary…", () => _ = RunBinaryDialog(true)),
                 Sep(),
-                OptionsItem = Item("Options…", () => _ = ShowOptionsAsync(), G(Key.OemComma, cmd)),
+                OptionsItem = Item("Options…", () => _ = ShowOptionsAsync(), IsMac ? G(Key.OemComma, cmd) : null),
                 Sep(),
                 Item("Exit", Close, IsMac ? G(Key.Q, cmd) : null));
 
@@ -326,7 +342,22 @@ namespace Zero.App
             Machine128ke.IsChecked = model == MachineModel._128ke;
             MachinePlus3.IsChecked = model == MachineModel._plus3;
             MachinePentagon.IsChecked = model == MachineModel._pentagon;
-            StatusMachine.Text = MachineFactory.DisplayName(model) + (_session.State == EmulatorState.PlayingRzx ? "  ▶ RZX" : "");
+            StatusMachine.Text = MachineFactory.DisplayName(model) + _session.State switch
+            {
+                EmulatorState.PlayingRzx => "  ▶ RZX",
+                EmulatorState.RecordingRzx => "  ● REC",
+                _ => ""
+            };
+
+            bool recording = _session.IsRecordingRzx;
+            bool rzxBusy = recording || _session.State == EmulatorState.PlayingRzx;
+            RzxRecordItem.IsEnabled = !rzxBusy;
+            RZXRecordStopItem.IsEnabled = recording;
+            RZXRecordContinueItem.IsEnabled = !rzxBusy;
+            RzxBookmarkItem.IsEnabled = recording;
+            RzxRollbackItem.IsEnabled = recording;
+            RzxFinishItem.IsEnabled = recording;
+            RzxDiscardItem.IsEnabled = recording;
 
             PauseItem.IsChecked = _session.IsPaused;
             FullSpeedItem.IsChecked = _settings.Emulation.EmulationSpeed > 1;

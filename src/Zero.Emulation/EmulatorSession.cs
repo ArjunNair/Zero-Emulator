@@ -157,7 +157,15 @@ namespace Zero.Emulation
             Post(() => { _audio?.Play(); });
             _paused = false;
             _resumeGate.Set();
-            SetState(_zx != null && _zx.isPlayingRZX ? EmulatorState.PlayingRzx : EmulatorState.Running);
+            SetState(RunningState());
+        }
+
+        private EmulatorState RunningState()
+        {
+            if (_zx == null) return EmulatorState.Running;
+            if (_zx.isPlayingRZX) return EmulatorState.PlayingRzx;
+            if (_zx.isRecordingRZX) return EmulatorState.RecordingRzx;
+            return EmulatorState.Running;
         }
 
         public void TogglePause() { if (_paused) Resume(); else Pause(); }

@@ -51,6 +51,7 @@ namespace Peripherals
             ZXSTMID_TS2068,
             ZXSTMID_PENTAGON512,
             ZXSTMID_PENTAGON1024,
+            ZXSTMID_NTSC48K,
             ZXSTMID_128KE
         }
 

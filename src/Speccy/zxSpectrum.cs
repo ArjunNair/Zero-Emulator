@@ -6087,10 +6087,19 @@ namespace Speccy
             rzxInputs = new System.Collections.Generic.List<byte>();
         }
 #endif    
-        public bool ContinueRZXSession(string filename) {
-            isRecordingRZX = true;
+        public bool ContinueRZXSession(string filename, System.Action<RZXFileEventArgs> callback) {
+            rzx = new RZXFile();
+            rzx.OnError += RaiseError;
+            rzx.RZXFileEventHandler += callback;
+
+            if (!rzx.ContinueRecording(filename)) {
+                rzx = null;
+                return false;
+            }
+
             isPlayingRZX = false;
-            return rzx.ContinueRecording(filename);
+            isRecordingRZX = true;
+            return true;
         }
 
         public void InsertBookmark() {
@@ -6122,38 +6131,22 @@ namespace Speccy
                 isPlayingRZX = false;
                 isRecordingRZX = false;
                 rzx.UpdateRecording(cpu.t_states);
-#if NEW_RZX_METHODS
                 rzx.SaveSession(CreateSZX().GetSZXData(), doFinalise);
-
                 rzx.Close();
-#else
-                //rzx.Save(filename, (doFinalise ? null : CreateSZX().GetSZXData()));
-#endif
             }
         }
 
         public void StartRecordingRZX(string filename, System.Action<RZXFileEventArgs> callback) {
             rzx = new RZXFile();
-#if NEW_RZX_METHODS
+            rzx.OnError += RaiseError;
             rzx.RZXFileEventHandler += callback;
             rzx.Record(filename);
             rzx.AddSnapshot(CreateSZX().GetSZXData());
-#else
-            //rzx.StartRecording(CreateSZX().GetSZXData(), cpu.t_states);
-#endif
             isPlayingRZX = false;
             isRecordingRZX = true;
-
-            //rzx.record.tstatesAtStart = (uint)cpu.t_states;
-            //rzx.record.flags |= 0x2; //Frames are compressed.
-            //rzx.snapshotData[0] = CreateSZX().GetSZXData();
-
         }
 
         public bool IsValidSessionRZX() {
-            //if (!rzx.IsValidSession())
-            //    return false;
-
             isPlayingRZX = false;
             isRecordingRZX = true;
             return true;
