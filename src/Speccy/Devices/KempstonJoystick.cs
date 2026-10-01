@@ -18,10 +18,10 @@ namespace Speccy {
         public byte In(ushort port) {
             Responded = true;
             if(UsePort1F) {
-                if((port & 0x1f) == 0x1f)
+                if((port & 0x0e) == 0)
                     return JoystickState;
             }
-            else if((port & 0xdf) == 0xdf)
+            else if((port & 0x20) == 0)
                 return JoystickState;
 
             Responded = false;
