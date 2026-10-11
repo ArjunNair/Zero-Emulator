@@ -1,4 +1,5 @@
 using System;
+using Avalonia;
 using System.Threading;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
@@ -48,8 +49,10 @@ namespace Zero.App.Tests
             AvaloniaHeadlessPlatform.ForceRenderTimerTick();
             using WriteableBitmap frame = w.CaptureRenderedFrame();
             if (save != null) frame.Save(System.IO.Path.Combine(MainWindowTests.ScreenshotDir, save + ".png"));
-            // Sample the emulated screen, below the menu bar and above the status bar.
-            return Fingerprint(frame, 60, frame.PixelSize.Height - 40);
+            // Sample the emulated screen only: not the menu bar, and not the deck or status bar under
+            // it, whose lights blink and follow the CRT setting.
+            Point top = w.Display.TranslatePoint(default, w) ?? default;
+            return Fingerprint(frame, (int)top.Y + 4, (int)(top.Y + w.Display.Bounds.Height) - 4);
         }
 
         [AvaloniaFact]

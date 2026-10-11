@@ -14,4 +14,9 @@
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
+  <!-- Tooltip text wraps under every theme. Pipboy caps a tooltip at 400 px but leaves its text on
+       one line, so anything longer was cut off mid-sentence. -->
+  <Style Selector="ToolTip /template/ ContentPresenter">
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
 </Styles>

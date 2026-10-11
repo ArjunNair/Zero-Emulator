@@ -266,7 +266,7 @@ namespace Speccy
                     result = d.In(port);
                     if (d.Responded) {
                         device_responded = true;
-                        base.In(port, result);
+                        break;      //first device to answer supplies the byte, as on the 128K and Pentagon
                     }
                 }
             }

@@ -60,6 +60,7 @@ namespace Speccy
         protected int timeToOutSound = 0;
         private byte lastOut = 0xff;
 
+        public int Priority => 40;
         public SPECCY_DEVICE DeviceID { get { return SPECCY_DEVICE.AY_3_8912; } }
         public bool Responded { get; set; }
         public bool StereoSound
@@ -119,9 +120,7 @@ namespace Speccy
         }
 
         public void RegisterDevice(zx_spectrum speccyModel) {
-            UnregisterDevice(speccyModel);
             speccyModel.audio_devices.Add(this);
-            speccyModel.io_devices.Add(this);
         }
 
         public void UnregisterDevice(zx_spectrum speccyModel) {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using SpeccyCommon;
 
@@ -48,7 +49,7 @@ namespace Zero.Emulation.Settings
 
     public sealed class RenderSettings
     {
-        public bool FullScreen { get; set; }
+        public bool FullScreen { get; set; } = false;
         public bool MaintainAspectRatio { get; set; } = true;
         public bool PixelSmoothing { get; set; } = true;
         /// <summary>
@@ -62,7 +63,6 @@ namespace Zero.Emulation.Settings
         [JsonIgnore]
         public int PixelFilter => !PixelSmoothing ? 0 : SharpPixelEdges ? 2 : 1;
         public bool Scanlines { get; set; }
-        public bool Vsync { get; set; } = true;
         /// <summary>"Normal", "Grayscale" or "ULA Plus".</summary>
         public string Palette { get; set; } = "Normal";
         /// <summary>Border pixels to crop from each edge (0 = full border).</summary>
@@ -71,6 +71,10 @@ namespace Zero.Emulation.Settings
         public int WindowScale { get; set; } = 2;
         /// <summary>UI theme for the windows and dialogs. Applied at start-up; unknown names fall back to the default.</summary>
         public string UiTheme { get; set; } = "Semi";
+        /// <summary>Show the hi-fi cassette deck (power, display, tape keys) under the screen.</summary>
+        public bool ShowDeck { get; set; } = true;
+        /// <summary>Show the hi-fi receiver (machine, picture and sound knobs) under the cassette deck.</summary>
+        public bool ShowReceiver { get; set; } = true;
         public CrtSettings Crt { get; set; } = new CrtSettings();
     }
 
@@ -80,11 +84,11 @@ namespace Zero.Emulation.Settings
     /// </summary>
     public sealed class CrtSettings
     {
-        public bool Enabled { get; set; }
+        public bool Enabled { get; set; } = true;
         public bool Scanlines { get; set; } = true;
         public bool Vignette { get; set; } = true;
-        public bool Flicker { get; set; }
-        public bool Noise { get; set; }
+        public bool Flicker { get; set; } = false;
+        public bool Noise { get; set; } = false;
         public double Curvature { get; set; } = 0.2;
         public double Glow { get; set; } = 0.35;
         public double GlassReflect { get; set; } = 0.2;
@@ -182,6 +186,13 @@ namespace Zero.Emulation.Settings
             AppPaths.EnsureDirectory(Path.GetDirectoryName(file));
             File.WriteAllText(file, JsonSerializer.Serialize(this, SettingsJsonContext.Default.EmulatorSettings));
         }
+
+        /// <summary>The settings as a JSON tree, through the same source-generated context as Save.</summary>
+        public JsonObject ToJson() =>
+            JsonSerializer.SerializeToNode(this, SettingsJsonContext.Default.EmulatorSettings).AsObject();
+
+        public static EmulatorSettings FromJson(JsonNode json) =>
+            json.Deserialize(SettingsJsonContext.Default.EmulatorSettings) ?? new EmulatorSettings();
 
         public void AddRecentFile(string path)
         {

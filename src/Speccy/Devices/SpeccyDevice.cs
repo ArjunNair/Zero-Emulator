@@ -1,5 +1,5 @@
 ﻿using SpeccyCommon;
-
+/*
 namespace Speccy
 {
     public interface SpeccyDevice
@@ -9,4 +9,4 @@ namespace Speccy
         void Reset();
         SPECCY_DEVICE DeviceID { get; }
     }
-}
+}*/

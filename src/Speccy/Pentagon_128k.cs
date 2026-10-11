@@ -441,12 +441,12 @@ namespace Speccy
                 foreach (var d in io_devices) {
                     result = d.In(port);
                     if (d.Responded) {
-                        base.In(port, result);
                         break;
                     }
                 }
             }
 
+            base.In(port, result);
             cpu.t_states += 3;
             return (result);
         }

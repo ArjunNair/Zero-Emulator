@@ -6,6 +6,7 @@ using Peripherals;
 using Cpu;
 using SpeccyCommon;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Speccy
 {
@@ -99,7 +100,6 @@ namespace Speccy
         }
         public List<IODevice> io_devices = new List<IODevice>();
         public List<AudioDevice> audio_devices = new List<AudioDevice>();
-        public Dictionary<int, SpeccyDevice> attached_devices = new Dictionary<int, SpeccyDevice>();
         protected Random rnd_generator = new Random();
 
         protected int[] keyLine = { 255, 255, 255, 255, 255, 255, 255, 255 };
@@ -438,6 +438,24 @@ namespace Speccy
             if (emulationThread.ThreadState != System.Threading.ThreadState.WaitSleepJoin)
                 emulationThread.Start();
         }
+
+        public void AttachIODevice(IODevice device)
+        {
+            if (io_devices.Contains(device)) {
+                device.UnregisterDevice(this);
+                io_devices.Remove(device);
+            }
+            int at = io_devices.FindIndex(d => d.Priority < device.Priority);
+            if (at < 0) io_devices.Add(device); else io_devices.Insert(at, device);   // stable among equals
+            device.RegisterDevice(this);
+        }
+        
+        public void RemoveIODevice(IODevice device)
+        {
+            device.UnregisterDevice(this);
+            io_devices.Remove(device);
+        }
+
 
         public string Disassemble(ushort address) {
             string dis = "";
@@ -6265,17 +6283,14 @@ namespace Speccy
         //    return RAMpage[page * 2];
         //}
 
-        public void AddDevice(SpeccyDevice newDevice) {
+        public void AddDevice(IODevice newDevice) {
             RemoveDevice(newDevice.DeviceID);
-            attached_devices[(int)newDevice.DeviceID] = newDevice;
-            newDevice.RegisterDevice(this);
+            AttachIODevice(newDevice);
         }
 
         public void RemoveDevice(SPECCY_DEVICE deviceId) {
-            SpeccyDevice dev;
-            if (attached_devices.TryGetValue((int)deviceId, out dev)) {
-                dev.UnregisterDevice(this);
-            }
+            foreach (var d in io_devices.Where(d => d.DeviceID == deviceId).ToList())
+                RemoveIODevice(d);      // unregisters first, then removes
         }
 
         //Resets the speccy

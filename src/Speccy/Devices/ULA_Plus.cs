@@ -24,6 +24,7 @@ namespace Speccy
         public bool PaletteEnabled = false;
         
         public SPECCY_DEVICE DeviceID { get { return SPECCY_DEVICE.ULA_PLUS; } }
+        public int Priority => 99;
         protected byte lastULAPlusOut = 0;
 
         public byte In(ushort port) {
@@ -86,8 +87,6 @@ namespace Speccy
         }
 
         public void RegisterDevice(zx_spectrum speccyModel) {
-            speccyModel.io_devices.Remove(this);
-            speccyModel.io_devices.Add(this);
             ULAOutEvent += speccyModel.UpdateScreenBuffer;
             Enabled = true;
         }

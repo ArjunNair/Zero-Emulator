@@ -56,7 +56,108 @@ namespace Zero.Emulation.Tape
         public IReadOnlyList<TapeBlockInfo> Blocks => _blocks;
         private readonly List<TapeBlockInfo> _blocks = new List<TapeBlockInfo>();
 
+        // ------------------------------------------------------------------ tape counter
+
+        /// <summary>
+        /// Seconds of tape that have run past the head. Moves only while the tape plays, as a real
+        /// deck's does; rewinding and block skips set it to the start of the block that will play.
+        /// </summary>
+        public double PositionSeconds
+        {
+            get
+            {
+                int b = _counterBlock;
+                if (b < 0 || b >= _blockStart.Count) return 0;
+                return _blockStart[b] + Math.Min(_counterElapsed, _blockLength[b]);
+            }
+        }
+
+        /// <summary>The three-digit reel counter at the current position: see <see cref="CounterAt"/>.</summary>
+        public int Counter => CounterAt(PositionSeconds);
+
+        /// <summary>
+        /// What a cassette recorder's mechanical counter reads after this many seconds of play. A belt
+        /// from the take-up spool drives it, so it counts turns of the reel, and as the reel fills each
+        /// turn takes up more tape: it counts about once every 1.5 seconds at the start and slows from
+        /// there. Modelled on a C90 (12 µm tape on an 11 mm hub at 4.76 cm/s) with one count a turn,
+        /// which ends a five-minute game near 187 and a C60 side near 850; a C90 side rolls over.
+        /// </summary>
+        public static int CounterAt(double seconds)
+        {
+            const double hub = 0.011, thickness = 12e-6, speed = 0.0476;
+            if (seconds <= 0) return 0;
+            double radius = Math.Sqrt(hub * hub + speed * thickness * seconds / Math.PI);
+            return (int)((radius - hub) / thickness) % 1000;
+        }
+
+        // Start and length of each PZX block in seconds, indexed like PZXFile.blocks, which is what
+        // the machine's blockCounter indexes too.
+        private readonly List<double> _blockStart = new List<double>();
+        private readonly List<double> _blockLength = new List<double>();
+        private int _counterBlock;
+        private double _counterElapsed;
+
+        private const double PzxClock = 3500000.0; // PZX durations are in 48K T-states
+
+        private void MeasureBlocks()
+        {
+            _blockStart.Clear();
+            _blockLength.Clear();
+            double at = 0;
+            foreach (PZXFile.Block b in PZXFile.blocks)
+            {
+                double tstates = 0;
+                switch (b)
+                {
+                    case PZXFile.PULS_Block puls:
+                        foreach (PZXFile.Pulse p in puls.pulse) tstates += (double)p.count * p.duration;
+                        break;
+                    case PZXFile.DATA_Block data:
+                        double zero = 0, one = 0;
+                        foreach (ushort d in data.s0) zero += d;
+                        foreach (ushort d in data.s1) one += d;
+                        for (int bit = 0; bit < data.count; bit++)
+                        {
+                            int index = bit / 8;
+                            bool set = index < data.data.Count && (data.data[index] & (0x80 >> (bit % 8))) != 0;
+                            tstates += set ? one : zero;
+                        }
+                        tstates += data.tail;
+                        break;
+                    case PZXFile.PAUS_Block pause:
+                        tstates = pause.duration;
+                        break;
+                }
+                _blockStart.Add(at);
+                _blockLength.Add(tstates / PzxClock);
+                at += tstates / PzxClock;
+            }
+            CueCounter(0);
+        }
+
+        /// <summary>Park the counter at the start of a block.</summary>
+        private void CueCounter(int block)
+        {
+            _counterBlock = Math.Clamp(block, 0, Math.Max(0, _blockStart.Count - 1));
+            _counterElapsed = 0;
+        }
+
+        /// <summary>
+        /// Emulated time has passed: run the counter on if the tape is playing. Called by the session
+        /// after each batch of frames, on the emulation thread.
+        /// </summary>
+        internal void AdvanceCounter(double seconds)
+        {
+            if (!IsPlaying) return;
+            int block = _zx.blockCounter;
+            if (block != _counterBlock) CueCounter(block); // the machine moved on to the next block
+            _counterElapsed += seconds;
+        }
+
         public TapeDeckStatus Status => !IsInserted ? TapeDeckStatus.Empty : IsPlaying ? TapeDeckStatus.Playing : TapeDeckStatus.Stopped;
+
+        /// <summary>When the machine last SAVEd a block to <see cref="TapSavePath"/> (UTC), or MinValue.</summary>
+        public DateTime LastSaveUtc { get; private set; } = DateTime.MinValue;
 
         /// <summary>Where SAVE "" output goes. Appended to if it exists (matches the original deck).</summary>
         public string TapSavePath
@@ -151,6 +252,7 @@ namespace Zero.Emulation.Tape
             IsInserted = true;
             _tapFileOpen = false;
             ReadTapeInfo(name);
+            MeasureBlocks();
 
             if (_zx != null)
             {
@@ -194,6 +296,9 @@ namespace Zero.Emulation.Tape
             PZXFile.blocks.Clear();
             PZXFile.tapeBlockInfo.Clear();
             _blocks.Clear();
+            _blockStart.Clear();
+            _blockLength.Clear();
+            CueCounter(0);
             if (_zx != null)
             {
                 _zx.StopTape(true);
@@ -220,6 +325,7 @@ namespace Zero.Emulation.Tape
             _zx.blockCounter--;
             if (_zx.blockCounter < 0) _zx.blockCounter = 0;
             _zx.NextPZXBlock();
+            CueCounter(_zx.blockCounter); // a stopped tape restarts its block from the top
             Changed?.Invoke();
         }
 
@@ -235,6 +341,7 @@ namespace Zero.Emulation.Tape
             if (!IsInserted || _zx == null) return;
             _zx.StopTape(true);
             _zx.blockCounter = 0;
+            CueCounter(0);
             Changed?.Invoke();
         }
 
@@ -242,6 +349,7 @@ namespace Zero.Emulation.Tape
         {
             if (!IsInserted || _zx == null) return;
             if (_zx.blockCounter > 0) _zx.blockCounter--;
+            if (!IsPlaying) CueCounter(_zx.blockCounter);
             Changed?.Invoke();
         }
 
@@ -249,6 +357,7 @@ namespace Zero.Emulation.Tape
         {
             if (!IsInserted || _zx == null) return;
             if (_zx.blockCounter < PZXFile.tapeBlockInfo.Count - 1) _zx.blockCounter++;
+            if (!IsPlaying) CueCounter(_zx.blockCounter);
             Changed?.Invoke();
         }
 
@@ -313,6 +422,7 @@ namespace Zero.Emulation.Tape
                     }
                     w.Write((byte)checksum);
                 }
+                LastSaveUtc = DateTime.UtcNow;
                 BlockSaved?.Invoke(_tapSavePath);
             }
             catch (Exception ex)

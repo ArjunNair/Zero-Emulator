@@ -1,6 +1,17 @@
 
 What's New
 --------------
+v 1.1
+--------------
+* Fixed RZX recording issues related to stop/continue and rollback while recording.
+* Refactored command line arguments for cross platform usage.
+* Fixed Kempston Joystick emulation
+* Fixed tapes always playing at full speed, even with Edge and Fast loading switched off.
+* Added a hi-fi stack under the screen at 2x and up, each part switchable from View > Hi-Fi Decks:
+  - a cassette deck, in place of the status bar: power key, machine selector, a VFD with a three-digit tape
+    counter, tape transport keys with REC for choosing the SAVE tape, and volume;
+  - a receiver: knobs, faders and keys for the CRT picture, stereo, CPU speed, mute and turbo.
+
 v 1.0
 
 This is a port of the Zero Emulator for Windows to a cross platform Avalonia based one, with some extra

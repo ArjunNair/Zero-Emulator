@@ -29,8 +29,7 @@ namespace Zero.App
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                string fileToOpen = desktop.Args?.FirstOrDefault(a => !a.StartsWith("-", StringComparison.Ordinal));
-                desktop.MainWindow = new MainWindow(fileToOpen);
+                desktop.MainWindow = new MainWindow(desktop.Args);
             }
             base.OnFrameworkInitializationCompleted();
         }

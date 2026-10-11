@@ -262,7 +262,10 @@ namespace Zero.Emulation
             if (zx.doRun)
             {
                 zx.Run();
-                Interlocked.Add(ref _emulatedFrames, Math.Max(1, zx.emulationSpeed));
+                int frames = Math.Max(1, zx.emulationSpeed);
+                Interlocked.Add(ref _emulatedFrames, frames);
+                Tape.AdvanceCounter(frames / 50.0); // near enough 1/50 s on every model
+                PaceTapePlayback(zx);
             }
 
             if (zx.isResetOver && _autoLoadPending)
@@ -270,6 +273,20 @@ namespace Zero.Emulation
 
             PublishFrame(zx);
             zx.needsPaint = false;
+        }
+
+        /// <summary>
+        /// At 1x the machine paces itself on its sound output, except while the tape plays: the
+        /// original Windows host paced on the display as well, so the core leaves the wait out then.
+        /// Here nothing else paces it, and a tape played flat out whatever the loading options said.
+        /// Wait on the same audio clock the core uses. Full Speed still runs unpaced, and so does an
+        /// audio sink that never blocks (the tests' NullAudioOutput).
+        /// </summary>
+        private void PaceTapePlayback(zx_spectrum zx)
+        {
+            if (!zx.tapeIsPlaying || zx.emulationSpeed > 1 || _audio == null) return;
+            while (!_audio.FinishedPlaying() && !_stopRequested)
+                Thread.Sleep(1);
         }
 
         private void PublishFrame(zx_spectrum zx)

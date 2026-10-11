@@ -32,6 +32,7 @@ namespace Zero.App.Tests
                 s.Paths.Roms = TestPaths.RomDir;
                 s.Emulation.PauseOnFocusLost = false;
                 s.Audio.Mute = true;
+                s.Render.ShowDeck = false; // the status bar only shows in place of the hi-fi deck
                 return s;
             };
         }

@@ -28,6 +28,34 @@ namespace Zero.Core.Tests
         }
 
         [Fact]
+        public void Counter_runs_like_a_reel_counter_quick_then_slowing()
+        {
+            Assert.Equal(0, TapeDeck.CounterAt(0));
+            Assert.Equal(0, TapeDeck.CounterAt(1.4));               // about one count every 1.5 seconds at first
+            Assert.Equal(1, TapeDeck.CounterAt(1.6));
+            Assert.InRange(TapeDeck.CounterAt(5 * 60), 180, 195);   // a typical 48K game
+            Assert.InRange(TapeDeck.CounterAt(30 * 60), 830, 870);  // one side of a C60
+            int previous = 0;
+            for (int s = 0; s <= 30 * 60; s += 10)
+            {
+                int now = TapeDeck.CounterAt(s);
+                Assert.True(now >= previous, $"counter went backwards at {s}s");
+                previous = now;
+            }
+            // The take-up reel fills, so the first minute counts more than the last.
+            Assert.True(TapeDeck.CounterAt(60) > TapeDeck.CounterAt(30 * 60) - TapeDeck.CounterAt(29 * 60));
+        }
+
+        [Fact]
+        public void A_freshly_inserted_tape_reads_zero_and_measures_its_blocks()
+        {
+            var deck = new TapeDeck();
+            Assert.True(deck.Insert("test.pzx", BuildPzx("Title")));
+            Assert.Equal(0, deck.PositionSeconds);
+            Assert.Equal(0, deck.Counter);
+        }
+
+        [Fact]
         public void Insert_reads_pzx_header_metadata()
         {
             var deck = new TapeDeck();

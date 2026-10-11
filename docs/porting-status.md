@@ -86,6 +86,11 @@ TZX/CSW tapes (converter needed), +3 and TR-DOS disks (managed FDCs needed), deb
 BASIC importer (the old one shelled out to a Windows-only `zmakebas.exe`, now removed; a C# port of
 zmakebas next to `TapFile` is the natural v1.1 replacement), file associations.
 
+RZX recording, bookmarks, rollback, stop/resume and finalise are all wired up (File > RZX Recording),
+and `tests/Zero.Core.Tests/RzxContinueTests.cs` round-trips a recording across three separate sessions.
+Not covered: multiload playback, where `SeekIRB` applies only the first snapshot block in a file, so a
+Snap/IRB/Snap/IRB recording from another emulator desyncs at the second load.
+
 ## Verifying
 
 ```bash

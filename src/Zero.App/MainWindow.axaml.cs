@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -45,6 +46,8 @@ namespace Zero.App
 
         /// <summary>Test hook: where settings come from (defaults to the user config file).</summary>
         internal static Func<EmulatorSettings> SettingsLoader = () => EmulatorSettings.Load();
+        /// <summary>Where SaveSettings writes. Tests point this away from the real config file.</summary>
+        internal static Action<EmulatorSettings> SettingsSaver = s => s.Save();
         internal EmulatorSession Session => _session;
         internal bool AudioFallback => _audioFallback;
 
@@ -52,11 +55,20 @@ namespace Zero.App
         private static KeyModifiers CommandModifier => IsMac ? KeyModifiers.Meta : KeyModifiers.Control;
 
         public MainWindow() : this(null) { }
+        
+        private bool HasCommandLineFlag(string flag, ref string[] args) => args?.Any(a => a.Equals(flag, StringComparison.OrdinalIgnoreCase)) ?? false;
 
-        public MainWindow(string initialFile)
+        // The settings as loaded, and again once command-line flags are applied. SaveSettings puts the
+        // first back wherever a flag changed something and nothing has changed it since: flags last one session.
+        private JsonObject _beforeFlags, _afterFlags;
+
+        public MainWindow(string[] args)
         {
             InitializeComponent();
-            _initialFile = initialFile;
+            // The menu bar needs 400 px when it is drawn in the window. On macOS it lives in the system
+            // bar, so let a 1x window shrink to the screen itself rather than letterbox it.
+            if (IsMac) MinWidth = 256;
+            _initialFile = args?.FirstOrDefault(a => !a.StartsWith("-", StringComparison.Ordinal));
 
             _settings = SettingsLoader();
             _session = new EmulatorSession(_settings)
@@ -65,16 +77,21 @@ namespace Zero.App
                 Gamepads = new SdlGamepadSource(),
                 ChooseArchiveEntry = ChooseArchiveEntryBlocking
             };
+            _beforeFlags = _settings.ToJson();
+            ApplyCommandLine(args);
+            _afterFlags = _settings.ToJson();
+
             _session.FrameReady += OnFrameReady;
             _session.Error += msg => Dispatcher.UIThread.Post(() => ShowError(msg));
             _session.MachineChanged += _ => Dispatcher.UIThread.Post(RefreshMenuState);
             _session.StateChanged += _ => Dispatcher.UIThread.Post(RefreshMenuState);
             _session.FileLoaded += path => Dispatcher.UIThread.Post(() => { RebuildRecentMenu(); SetStatus("Loaded " + Path.GetFileName(path)); });
             _session.Tape.Changed += () => Dispatcher.UIThread.Post(RefreshTapeStatus);
-            _session.Tape.BlockSaved += path => Dispatcher.UIThread.Post(() => SetStatus("Saved block to " + Path.GetFileName(path)));
+            _session.Tape.BlockSaved += path => Dispatcher.UIThread.Post(() => { SetStatus("Saved block to " + Path.GetFileName(path)); RefreshDeck(); });
 
             NativeMenu.SetMenu(this, BuildMenu());
             if (IsMac && Application.Current != null) NativeMenu.SetMenu(Application.Current, BuildAppMenu());
+            WireDeck();
             ApplyCrtSettings();
             ApplyViewSettings();
             RefreshMenuState();
@@ -105,6 +122,90 @@ namespace Zero.App
         }
 
         // ------------------------------------------------------------------ lifecycle
+
+        /// <summary>Apply command-line flags for this session. Each one simply sets the setting it
+        /// controls; SaveSettings works out afterwards which ones to keep out of the saved file.</summary>
+        private void ApplyCommandLine(string[] args)
+        {
+            if (HasCommandLineFlag("-fs", ref args))
+                _settings.Render.FullScreen = true;
+
+            if (HasCommandLineFlag("-cs", ref args))
+            {
+                _settings.Render.Crt.Scanlines = true;
+                _settings.Render.Crt.Enabled = true;
+            }             
+            
+            if (HasCommandLineFlag("-cv", ref args))
+            {
+                _settings.Render.Crt.Vignette = true;
+                _settings.Render.Crt.Enabled = true;
+            }
+
+            var pixelFilter = args?.FirstOrDefault(a => a.StartsWith("-pf:", StringComparison.OrdinalIgnoreCase));
+            if (pixelFilter != null)
+            {
+                var mode = pixelFilter.Split(':')[1];
+                _settings.Render.PixelSmoothing = true;
+                _settings.Render.SharpPixelEdges = mode.Equals("sharp", StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (HasCommandLineFlag("-lt", ref args))
+            {
+                _settings.Emulation.LateTimings = true;
+            }
+
+            var palette = args?.FirstOrDefault(a => a.StartsWith("-pl:", StringComparison.OrdinalIgnoreCase));
+            if (palette != null)
+            {
+                var mode = palette.Split(':')[1];
+                _settings.Render.Palette = mode switch {
+                    "ula+" => "Ula Plus",
+                    "ulaplus" => "Ula Plus",
+                    "grayscale" => "Grayscale",
+                    "greyscale" => "Grayscale",
+                    _ => "Normal"
+                };
+            }
+
+            var windowScale = args?.FirstOrDefault(a => a.StartsWith("-ws:", StringComparison.OrdinalIgnoreCase));
+            if (windowScale != null)
+            {
+                try {
+                    var scale = windowScale.Split(':')[1];
+                    _settings.Render.WindowScale = Int32.Parse(scale);
+                }
+                catch (Exception) {
+                    Console.WriteLine("Invalid parameter in option: " + windowScale);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Put back the pre-launch value wherever a flag changed a setting and nothing has changed it
+        /// since. A three-way compare per leaf: before the flags, after them, and now. A setting you
+        /// change by hand during the session no longer matches the flag value, so it is kept.
+        /// </summary>
+        internal static void StripFlags(JsonObject before, JsonObject after, JsonObject current)
+        {
+            foreach (var (key, flagValue) in after)
+            {
+                JsonNode original = before[key], now = current[key];
+                if (flagValue is JsonObject f && original is JsonObject o && now is JsonObject n)
+                    StripFlags(o, f, n);                     // recurse into Render, Crt, ...
+                else if (!JsonNode.DeepEquals(original, flagValue) && JsonNode.DeepEquals(now, flagValue))
+                    current[key] = original?.DeepClone();
+            }
+        }
+
+        /// <summary>Save the session's settings minus any untouched command-line flags. The live
+        /// settings are left alone, so flags stay in force for the rest of the session.</summary>
+        internal void SaveSettings()
+        {
+            JsonObject current = _settings.ToJson();
+            StripFlags(_beforeFlags, _afterFlags, current);
+            try { SettingsSaver(EmulatorSettings.FromJson(current)); } catch { /* not fatal */ }
+        }
 
         private void OnOpened(object sender, EventArgs e)
         {
@@ -149,7 +250,7 @@ namespace Zero.App
             Zero.Emulation.Trace.Log("MainWindow.OnClosing: session disposed");
             // SDL is left initialised on purpose: SDL_Quit is not needed at process exit and can block
             // when the audio device is torn down from a thread other than the one that opened it.
-            try { _settings.Save(); } catch { /* not fatal */ }
+            SaveSettings();
             Zero.Emulation.Trace.Log("MainWindow.OnClosing: done");
         }
 
@@ -565,11 +666,13 @@ namespace Zero.App
             if (dialog.Accepted)
             {
                 _session.RomDirectory = AppPaths.Resolve(_settings.Paths.Roms, "roms");
-                _session.Post(() => _session.Tape.TapSavePath = Path.Combine(AppPaths.Resolve(_settings.Paths.Saves, "saves"), "zero_saved.tap"));
+                string tapSave = DefaultTapSavePath;
+                _session.Post(() => _session.Tape.TapSavePath = tapSave);
+                _recordArmed = false;
                 if (dialog.RomsChanged) _session.SwitchMachine(_session.Model);
                 else _session.ApplySettings();
                 RefreshMenuState();
-                try { _settings.Save(); } catch { }
+                SaveSettings();
                 ApplyCrtSettings();
                 if (dialog.ThemeChanged)
                     await MessageDialog.ShowAsync(this, "Theme",
@@ -585,7 +688,9 @@ namespace Zero.App
             if (path != null)
             {
                 _session.Post(() => _session.Tape.TapSavePath = path);
+                _recordArmed = true;
                 SetStatus("SAVE output goes to " + Path.GetFileName(path));
+                RefreshDeck();
             }
         }
 
@@ -593,7 +698,7 @@ namespace Zero.App
         {
             var dialog = new GamepadWindow(_settings, _session, 0);
             await dialog.ShowDialog(this);
-            if (dialog.Accepted) { try { _settings.Save(); } catch { } }
+            if (dialog.Accepted) SaveSettings();
             Display.Focus();
         }
 
@@ -632,11 +737,15 @@ namespace Zero.App
             Rect source = Display.SourceRect;
             double w = source.Width * scale;
             double h = source.Height * scale;
-            double chrome = ClientSize.Height - Display.Bounds.Height;
+            // The deck is left out of the measured chrome and added back for the new width, since
+            // its height follows the window's width (see DeckHeightFor).
+            double deck = DeckShelf.IsVisible ? DeckShelf.Bounds.Height : 0;
+            double chrome = ClientSize.Height - Display.Bounds.Height - deck;
             if (chrome < 0 || double.IsNaN(chrome) || Display.Bounds.Height <= 0) chrome = 56;
             double sideChrome = Math.Max(0, ClientSize.Width - Display.Bounds.Width);
             Width = w + sideChrome;
-            Height = h + chrome;
+            LimitDeckScaleToScreen(h + chrome);
+            Height = h + chrome + DeckHeightFor(Math.Max(Width, MinWidth)); // MinWidth may widen it, and the deck with it
         }
 
         private void ToggleFullScreen()
@@ -644,13 +753,11 @@ namespace Zero.App
             if (WindowState == WindowState.FullScreen)
             {
                 WindowState = _stateBeforeFullScreen;
-                _settings.Render.FullScreen = false;
             }
             else
             {
                 _stateBeforeFullScreen = WindowState;
                 WindowState = WindowState.FullScreen;
-                _settings.Render.FullScreen = true;
             }
             RefreshMenuState();
         }
@@ -683,21 +790,30 @@ namespace Zero.App
             Display.SharpPixels = _settings.Render.SharpPixelEdges;
             Display.BorderCrop = _settings.Render.BorderCrop;
             Display.KeepAspectRatio = _settings.Render.MaintainAspectRatio;
+            ApplyDeckVisibility(refit: false);
             int scale = Math.Clamp(_settings.Render.WindowScale, 1, 6);
             Rect source = Display.SourceRect;
             Width = source.Width * scale;
-            Height = source.Height * scale + 56; // refined from the real layout once the window has opened
+            LimitDeckScaleToScreen(source.Height * scale + 56);
+            Height = source.Height * scale + 56 + DeckHeightFor(Math.Max(Width, MinWidth)); // refined from the real layout once the window has opened
             if (_settings.Render.FullScreen) WindowState = WindowState.FullScreen;
         }
 
 
         // ------------------------------------------------------------------ status
 
-        private void SetStatus(string text) => StatusMessage.Text = text;
+        private void SetStatus(string text)
+        {
+            StatusMessage.Text = text;
+            Deck.ShowMessage(text);
+            RefreshDeck();
+        }
 
         private void ShowError(string message)
         {
-            SetStatus(message);
+            // The dialog reports errors. The status bar keeps a copy, but the deck's display is for
+            // short notices and is left alone: an error there just ran off the end of the line.
+            StatusMessage.Text = message;
             _ = MessageDialog.ShowAsync(this, "Zero X", message);
         }
 
@@ -722,6 +838,7 @@ namespace Zero.App
                 _lastFrameCount = frames;
                 _lastFpsSample = now;
                 StatusFps.Text = _session.IsPaused ? "paused" : $"{fps:F0} fps";
+                Deck.ShowFps(_session.IsPaused ? "PAUSE" : $"{fps:F0} FPS");
             }
             RefreshTapeStatus();
         }
@@ -731,7 +848,28 @@ namespace Zero.App
             TapeDeck tape = _session.Tape;
             if (!tape.IsInserted) StatusTape.Text = "No tape";
             else StatusTape.Text = $"{tape.Title}: {(tape.IsPlaying ? "playing" : "stopped")} block {Math.Min(tape.CurrentBlock + 1, Math.Max(1, tape.Blocks.Count))}/{tape.Blocks.Count}";
+            RefreshDeck();
         }
 
-    }
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+        {
+            base.OnPropertyChanged(change);
+            if (change.Property != WindowStateProperty || _settings == null) return;
+
+            WindowState old = change.GetOldValue<WindowState>();
+            WindowState now = change.GetNewValue<WindowState>();
+
+            // Where F11 should return to. Never Minimized: restoring a minimised full-screen window
+            // reports Minimized -> FullScreen, and recording that would make the next F11 minimise it.
+            if (now == WindowState.FullScreen && old is WindowState.Normal or WindowState.Maximized)
+                _stateBeforeFullScreen = old;
+
+            // Minimised is a pause, not a choice: quitting from the taskbar shouldn't forget full screen.
+            // A -fs launch needs no special case here: SaveSettings strips it unless you changed it.
+            if (now != WindowState.Minimized)
+                _settings.Render.FullScreen = now == WindowState.FullScreen;
+
+            RefreshMenuState();
+        }
+    }    
 }

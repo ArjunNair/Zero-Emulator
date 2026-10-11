@@ -229,7 +229,7 @@ namespace Speccy
                     result = d.In(port);
                     if (d.Responded) {
                         device_responded = true;
-                        base.In(port, result);
+                        break;      //first device to answer supplies the byte, as on the 128K and Pentagon
                     }
                 }
             }
@@ -280,18 +280,21 @@ namespace Speccy
                     else
                         result |= TAPE_BIT;
                 }
-            }
-            else {
-                int _tstates = cpu.t_states;
-
-                //if we're on the top or bottom border return 0xff
-                if ((_tstates < contentionStartPeriod) || (_tstates > contentionEndPeriod))
-                    result = 0xff;
                 else {
-                    if (floatingBusTable[_tstates] < 0)
+                    //Odd port that no device answered: return the floating bus, as the 48K and 128K do.
+                    //This else used to pair with !device_responded, so it ran when a device HAD
+                    //answered and overwrote its byte - no peripheral ever worked on this machine.
+                    int _tstates = cpu.t_states;
+
+                    //if we're on the top or bottom border return 0xff
+                    if ((_tstates < contentionStartPeriod) || (_tstates > contentionEndPeriod))
                         result = 0xff;
-                    else
-                        result = PeekByteNoContend((ushort)floatingBusTable[_tstates]);
+                    else {
+                        if (floatingBusTable[_tstates] < 0)
+                            result = 0xff;
+                        else
+                            result = PeekByteNoContend((ushort)floatingBusTable[_tstates]);
+                    }
                 }
             }
 
@@ -630,7 +633,7 @@ namespace Speccy
 
                 if (!device_responded) {
                     //Memory paging activate
-                    if ((port & 0x8002) == 0) //Are bits 1 and 15 reset?
+                    if ((port & 0xC002) == 0x4000) //Are bits 1 and 15 reset?
                     {
                         Out_7ffd(val);
                     }

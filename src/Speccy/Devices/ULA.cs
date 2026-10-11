@@ -21,6 +21,7 @@ namespace Speccy
         public bool TapeBitWasFlipped = false;
         
         public SPECCY_DEVICE DeviceID { get { return SPECCY_DEVICE.ULA_48K; } }
+        public int Priority => 0;
 
         public bool Responded { get; set; }
         public bool Issue2Keyboard { get; set; }
@@ -124,11 +125,6 @@ namespace Speccy
                     }
                 }
             }
-        }
-
-        public void RegisterDevice(zx_spectrum speccyModel) {
-            speccyModel.io_devices.Remove(this);
-            speccyModel.io_devices.Add(this);
         }
 
         public void UnregisterDevice(zx_spectrum speccyModel) {

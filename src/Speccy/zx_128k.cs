@@ -287,7 +287,6 @@ namespace Speccy
                     result = d.In(port);
                     if (d.Responded) {
                         device_responded = true;
-                        base.In(port, result);
                         break;
                     }
                 }

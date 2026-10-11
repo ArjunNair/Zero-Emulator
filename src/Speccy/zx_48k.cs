@@ -243,7 +243,7 @@ namespace Speccy
                 rzx.inputCount++;
                 return rzxIN;
             }
-            
+
             byte result = 0xff;
             bool lowBitReset = (port & 0x01) == 0;
 
@@ -251,87 +251,88 @@ namespace Speccy
             ContendPortLate(port);
 
             bool device_responded = false;
+            if (lowBitReset) {                 //Even address, so get input
+                if (!externalSingleStep) {
+                    if ((port & 0x8000) == 0)
+                        result &= (byte)keyLine[7];
 
-            if (!lowBitReset) {        
-                foreach (var d in io_devices) {
-                    result = d.In(port);
-                    if (d.Responded) {
-                        device_responded = true;
-                        base.In(port, result);
-                    }
+                    if ((port & 0x4000) == 0)
+                        result &= (byte)keyLine[6];
+
+                    if ((port & 0x2000) == 0)
+                        result &= (byte)keyLine[5];
+
+                    if ((port & 0x1000) == 0)
+                        result &= (byte)keyLine[4];
+
+                    if ((port & 0x800) == 0)
+                        result &= (byte)keyLine[3];
+
+                    if ((port & 0x400) == 0)
+                        result &= (byte)keyLine[2];
+
+                    if ((port & 0x200) == 0)
+                        result &= (byte)keyLine[1];
+
+                    if ((port & 0x100) == 0)
+                        result &= (byte)keyLine[0];
                 }
-            }
-            if (!device_responded) {
-                if (lowBitReset) {                 //Even address, so get input
-                    if (!externalSingleStep) {
-                        if ((port & 0x8000) == 0)
-                            result &= (byte)keyLine[7];
 
-                        if ((port & 0x4000) == 0)
-                            result &= (byte)keyLine[6];
+                result = (byte)(result & 0x1f); //mask out lower 4 bits
+                result = (byte)(result | 0xa0); //set bit 5 & 7 to 1
 
-                        if ((port & 0x2000) == 0)
-                            result &= (byte)keyLine[5];
-
-                        if ((port & 0x1000) == 0)
-                            result &= (byte)keyLine[4];
-
-                        if ((port & 0x800) == 0)
-                            result &= (byte)keyLine[3];
-
-                        if ((port & 0x400) == 0)
-                            result &= (byte)keyLine[2];
-
-                        if ((port & 0x200) == 0)
-                            result &= (byte)keyLine[1];
-
-                        if ((port & 0x100) == 0)
-                            result &= (byte)keyLine[0];
-                    }
-
-                    result = (byte)(result & 0x1f); //mask out lower 4 bits
-                    result = (byte)(result | 0xa0); //set bit 5 & 7 to 1
-
-                    if (tapeIsPlaying) {
-                        if (pulseLevel == 0) {
-                            result &= (~(TAPE_BIT) & 0xff);    //reset is EAR off
-                        }
-                        else {
-                            result |= (TAPE_BIT); //set is EAR on
-                        }
+                if (tapeIsPlaying) {
+                    if (pulseLevel == 0) {
+                        result &= (~(TAPE_BIT) & 0xff);    //reset is EAR off
                     }
                     else {
-                        if (Issue2Keyboard) {
-                            if ((lastFEOut & (EAR_BIT + MIC_BIT)) == 0) {
-                                result &= (~(TAPE_BIT) & 0xff);
-                            }
-                            else
-                                result |= TAPE_BIT;
-                        }
-                        else {
-                            if ((lastFEOut & EAR_BIT) == 0) {
-                                result &= (~(TAPE_BIT) & 0xff);
-                            }
-                            else
-                                result |= TAPE_BIT;
-                        }
+                        result |= (TAPE_BIT); //set is EAR on
                     }
                 }
                 else {
-                    //Unused port, return floating bus
-                    int _tstates = cpu.t_states; //the floating bus is read on the last t-state
-
-                    //if we're on the top or bottom border return 0xff
-                    if ((_tstates < contentionStartPeriod) || (_tstates > contentionEndPeriod))
-                        result = 0xff;
-                    else {
-                        if (floatingBusTable[_tstates] < 0)
-                            result = 0xff;
+                    if (Issue2Keyboard) {
+                        if ((lastFEOut & (EAR_BIT + MIC_BIT)) == 0) {
+                            result &= (~(TAPE_BIT) & 0xff);
+                        }
                         else
-                            result = PeekByteNoContend((ushort)(floatingBusTable[_tstates]));
+                            result |= TAPE_BIT;
+                    }
+                    else {
+                        if ((lastFEOut & EAR_BIT) == 0) {
+                            result &= (~(TAPE_BIT) & 0xff);
+                        }
+                        else
+                            result |= TAPE_BIT;
                     }
                 }
+               device_responded = true; 
             }
+
+            
+            foreach (var d in io_devices) {
+                byte data = d.In(port);
+                if (d.Responded) {
+                    device_responded = true;
+                    result = data;
+                    break;      //first device to answer supplies the byte, as on the 128K and Pentagon
+                }
+            }
+
+            if (!device_responded) {
+                //Unused port, return floating bus
+                int _tstates = cpu.t_states; //the floating bus is read on the last t-state
+
+                //if we're on the top or bottom border return 0xff
+                if ((_tstates < contentionStartPeriod) || (_tstates > contentionEndPeriod))
+                    result = 0xff;
+                else {
+                    if (floatingBusTable[_tstates] < 0)
+                        result = 0xff;
+                    else
+                        result = PeekByteNoContend((ushort)(floatingBusTable[_tstates]));
+                }
+            }
+
             cpu.t_states++;
             base.In(port, result);
             return (result);
@@ -347,10 +348,20 @@ namespace Speccy
         public override void Out(ushort port, byte val) {
             base.Out(port, val);
 
-            bool lowBitReset = ((port & 0x01) == 0);
+            bool lowBitReset = (port & 0x01) == 0;
 
             //T1
             ContendPortEarly(port);
+
+            foreach (var d in io_devices) {
+                d.Out(port, val);
+                if (d.Responded) {
+                    if (d is KempstonJoystick k) {
+                        val = k.JoystickState;
+                    }
+                    break;
+                }
+            }
 
             if (lowBitReset)    //Even address, so update ULA
             {
@@ -367,7 +378,7 @@ namespace Speccy
 
                     if (beepVal != lastSoundOut) {
 
-                        if ((beepVal) == 0) {
+                        if (beepVal == 0) {
                             soundOut = MIN_SOUND_VOL;
                         }
 
@@ -382,14 +393,7 @@ namespace Speccy
                     }
                 }
             }
-            else {
-                foreach (var d in io_devices) {
-                    d.Out(port, val);
-                    if (d.Responded) {
-                        break;
-                    }
-                }
-            }
+
             ContendPortLate(port);
             cpu.t_states++;
         }

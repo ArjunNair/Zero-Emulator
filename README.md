@@ -118,24 +118,23 @@ The debugger was cut for v1, so the shortcuts it used to own are gone.
 ## Command line options
 Zero can be fully configured via the command line by passing parameters in the following format:
 ```
-zero [file][-option [value]]
+zero [file][-option[:value]]
 ```
 The following options are available:
 
 Option            | Parameters    | Function  
 ------------------|---------------|------------------------------------------------
--f                |               | Launches the emulator in full screen mode
--s                |               | Enables pixel smoothing
--v                |               | Enables vertical syncing
--g                |               | Use GDI instead of DirectX for rendering
--i                |               | Enables display interlacing (scanlines)
--l                |               | Enables late timings
--p                | ula+/ulaplus/grayscale/normal |  Selects a colour palette
+-fs               |               | Launches the emulator in full screen mode
+-cs               |               | Enable CRT scanlines
+-cv               |               | Enable CRT vignette
+-pf               | sharp/smooth  | Set pixel filter mode to smooth
+-lt               |               | Enables late timings (defaults to early)
+-pl               | ula+/ulaplus/grayscale |  Selects a colour palette
 -m                | 48k/128k/128ke/plus3/pentagon128k | Selects a spectrum machine model
 -e                | 1 to 10       | Sets the emulation speed (1 = Normal)
 -c                | 1/2/4/8/14    | CPU Multiplier (3.5 MHz * multiplier)
--w                | multiples of 50 | Selects a window size as a percentage increment of speccy size (0 = no increment, 50 = 50% increment, etc)
--b                | mini/medium/full | Sets the emulated border size
+-ws               | 1x, 2x .. 5x  | Selects a window size as integral multiple of original speccy screen
+-b                | none/medium/full | Sets the emulated border size
 -q                | see below       |  Plays back commands in a queue
 
 Available playback commands:

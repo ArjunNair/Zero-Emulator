@@ -24,7 +24,7 @@ namespace Zero.App
         internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFastLoadItem, TapeRomTrapsItem;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
         internal NativeMenuItem CrtItem;
-        internal NativeMenuItem FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
+        internal NativeMenuItem DeckItem, ReceiverItem, FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
         internal NativeMenuItem KeyJoyItem, KeyJoyKempston, KeyJoySinclair1, KeyJoySinclair2, KeyJoyCursor;
         internal NativeMenuItem Pad1None, Pad1Kempston, Pad1Sinclair1, Pad1Sinclair2, Pad1Cursor, KempstonPortItem, MouseItem, PauseOnFocusItem;
         internal NativeMenuItem KeyboardItem;
@@ -148,6 +148,9 @@ namespace Zero.App
                     Item("1x", () => SelectScale(1)), Item("2x", () => SelectScale(2)),
                     Item("3x", () => SelectScale(3)), Item("4x", () => SelectScale(4))),
                 FullScreenItem = Item("Full Screen", ToggleFullScreen, G(Key.F11), checkable: true),
+                Submenu("Hi-Fi Decks",
+                    DeckItem = Item("Cassette Deck", () => ToggleDeck(cassette: true), checkable: true),
+                    ReceiverItem = Item("Receiver", () => ToggleDeck(cassette: false), checkable: true)),
                 Submenu("Pixel Filter",
                     FilterNone = Item("None", () => SelectFilter(false, false), checkable: true),
                     FilterSmooth = Item("Smooth", () => SelectFilter(true, false), checkable: true),
@@ -276,7 +279,9 @@ namespace Zero.App
         private void SelectScale(int scale)
         {
             _settings.Render.WindowScale = scale;
-            if (WindowState != WindowState.FullScreen) ApplyWindowScale();
+            ApplyDeckVisibility(refit: false); // no deck at 1x
+            if (WindowState != WindowState.FullScreen) { UpdateLayout(); ApplyWindowScale(); }
+            RefreshMenuState();
         }
 
         private void SelectFilter(bool smooth, bool sharp)
@@ -379,10 +384,14 @@ namespace Zero.App
             StereoAbc.IsChecked = _settings.Audio.StereoSoundMode == 2;
 
             FullScreenItem.IsChecked = WindowState == WindowState.FullScreen;
+            DeckItem.IsChecked = _settings.Render.ShowDeck;
+            ReceiverItem.IsChecked = _settings.Render.ShowReceiver;
+            DeckItem.IsEnabled = ReceiverItem.IsEnabled = _settings.Render.WindowScale > 1;
             FilterNone.IsChecked = _settings.Render.PixelFilter == 0;
             FilterSmooth.IsChecked = _settings.Render.PixelFilter == 1;
             FilterSharp.IsChecked = _settings.Render.PixelFilter == 2;
             CrtItem.IsChecked = _settings.Render.Crt.Enabled;
+
             IntegerScalingItem.IsChecked = Display.IntegerScaling;
             BorderFull.IsChecked = _settings.Render.BorderCrop == 0;
             BorderMedium.IsChecked = _settings.Render.BorderCrop == 24;
@@ -399,6 +408,8 @@ namespace Zero.App
             KempstonPortItem.IsChecked = _settings.Input.KempstonUsesPort1F;
             MouseItem.IsChecked = _settings.Input.EnableKempstonMouse;
             PauseOnFocusItem.IsChecked = _settings.Emulation.PauseOnFocusLost;
+
+            RefreshDeck();
         }
     }
 }
