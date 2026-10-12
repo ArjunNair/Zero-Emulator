@@ -109,9 +109,9 @@
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
                        Text="Applies when Zero next starts. Themes change the windows and dialogs, never the emulated screen." />
             <Separator />
+            <CheckBox x:Name="CrtScanlines" Content="Scanlines" />
             <CheckBox x:Name="CrtEnabled" Content="CRT effects over the emulated screen" />
             <StackPanel Margin="24,0,0,0" Spacing="6">
-              <CheckBox x:Name="CrtScanlines" Content="Scanlines" />
               <CheckBox x:Name="CrtVignette" Content="Vignette (darkened corners)" />
               <CheckBox x:Name="CrtFlicker" Content="Flicker" />
               <CheckBox x:Name="CrtNoise" Content="Noise" />

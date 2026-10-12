@@ -175,6 +175,37 @@ namespace Zero.Core.Tests
         }
 
         [Fact]
+        public async Task A_disk_from_a_zip_keeps_its_own_name()
+        {
+            string zip = Path.Combine(_dir, "games.zip");
+            using (var archive = System.IO.Compression.ZipFile.Open(zip, System.IO.Compression.ZipArchiveMode.Create))
+            using (Stream entry = archive.CreateEntry("Infocom/Bored Of The Rings.dsk").Open())
+                entry.Write(DskImage.CreateBlankPlus3());
+
+            _session.Start();
+            await RunFrames(50);
+            Assert.True(await _session.LoadFileAsync(zip));
+            Assert.Equal("Bored Of The Rings.dsk", Path.GetFileName(_session.DiskInDrive(0)));
+        }
+
+        [Fact]
+        public async Task A_drive_takes_a_disk_straight_from_a_zip()
+        {
+            string zip = Path.Combine(_dir, "adventure.zip");
+            using (var archive = System.IO.Compression.ZipFile.Open(zip, System.IO.Compression.ZipArchiveMode.Create))
+            {
+                using (var readme = new StreamWriter(archive.CreateEntry("readme.txt").Open())) readme.Write("not a disk");
+                using (Stream entry = archive.CreateEntry("Bored Of The Rings.dsk").Open()) entry.Write(DskImage.CreateBlankPlus3());
+            }
+
+            _session.Start();
+            await RunFrames(50);
+            Assert.True(await _session.InsertDiskAsync(1, zip));
+            Assert.Equal("Bored Of The Rings.dsk", Path.GetFileName(_session.DiskInDrive(1)));
+            Assert.Null(_session.DiskInDrive(0));
+        }
+
+        [Fact]
         public async Task Opening_a_dsk_switches_to_the_plus3_and_puts_it_in_drive_a()
         {
             var settings = _session.Settings;

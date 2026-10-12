@@ -25,7 +25,7 @@ namespace Zero.App
         internal NativeMenuItem DiskEjectA, DiskEjectB;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
         internal NativeMenuItem CrtItem;
-        internal NativeMenuItem DeckItem, ReceiverItem, FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
+        internal NativeMenuItem DeckItem, DeckAItem, DeckBItem, FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
         internal NativeMenuItem KeyJoyItem, KeyJoyKempston, KeyJoySinclair1, KeyJoySinclair2, KeyJoyCursor;
         internal NativeMenuItem Pad1None, Pad1Kempston, Pad1Sinclair1, Pad1Sinclair2, Pad1Cursor, KempstonPortItem, MouseItem, PauseOnFocusItem;
         internal NativeMenuItem KeyboardItem;
@@ -160,8 +160,10 @@ namespace Zero.App
                     Item("3x", () => SelectScale(3)), Item("4x", () => SelectScale(4))),
                 FullScreenItem = Item("Full Screen", ToggleFullScreen, G(Key.F11), checkable: true),
                 Submenu("Hi-Fi Decks",
-                    DeckItem = Item("Cassette Deck", () => ToggleDeck(cassette: true), checkable: true),
-                    ReceiverItem = Item("Receiver", () => ToggleDeck(cassette: false), checkable: true)),
+                    DeckItem = Item("Show Decks", ToggleDeck, checkable: true),
+                    Sep(),
+                    DeckAItem = Item("Deck A: Cassette", () => SelectDeck(0), checkable: true),
+                    DeckBItem = Item("Deck B: Receiver", () => SelectDeck(1), checkable: true)),
                 Submenu("Pixel Filter",
                     FilterNone = Item("None", () => SelectFilter(false, false), checkable: true),
                     FilterSmooth = Item("Smooth", () => SelectFilter(true, false), checkable: true),
@@ -399,8 +401,9 @@ namespace Zero.App
 
             FullScreenItem.IsChecked = WindowState == WindowState.FullScreen;
             DeckItem.IsChecked = _settings.Render.ShowDeck;
-            ReceiverItem.IsChecked = _settings.Render.ShowReceiver;
-            DeckItem.IsEnabled = ReceiverItem.IsEnabled = _settings.Render.WindowScale > 1;
+            DeckAItem.IsChecked = _settings.Render.ActiveDeck != 1;
+            DeckBItem.IsChecked = _settings.Render.ActiveDeck == 1;
+            DeckItem.IsEnabled = DeckAItem.IsEnabled = DeckBItem.IsEnabled = _settings.Render.WindowScale > 1;
             FilterNone.IsChecked = _settings.Render.PixelFilter == 0;
             FilterSmooth.IsChecked = _settings.Render.PixelFilter == 1;
             FilterSharp.IsChecked = _settings.Render.PixelFilter == 2;

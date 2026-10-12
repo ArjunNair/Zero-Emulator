@@ -71,10 +71,10 @@ namespace Zero.Emulation.Settings
         public int WindowScale { get; set; } = 2;
         /// <summary>UI theme for the windows and dialogs. Applied at start-up; unknown names fall back to the default.</summary>
         public string UiTheme { get; set; } = "Semi";
-        /// <summary>Show the hi-fi cassette deck (power, display, tape keys) under the screen.</summary>
+        /// <summary>Show the hi-fi decks under the screen.</summary>
         public bool ShowDeck { get; set; } = true;
-        /// <summary>Show the hi-fi receiver (machine, picture and sound knobs) under the cassette deck.</summary>
-        public bool ShowReceiver { get; set; } = true;
+        /// <summary>Which deck is showing: 0 the cassette deck (A), 1 the receiver (B).</summary>
+        public int ActiveDeck { get; set; }
         public CrtSettings Crt { get; set; } = new CrtSettings();
     }
 

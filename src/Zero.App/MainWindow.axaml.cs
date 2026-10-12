@@ -641,7 +641,7 @@ namespace Zero.App
 
         private static readonly FilePickerFileType[] DiskFilters =
         {
-            new FilePickerFileType("+3 disks") { Patterns = new[] { "*.dsk" } },
+            new FilePickerFileType("+3 disks") { Patterns = new[] { "*.dsk", "*.zip" } },
             FilePickerFileTypes.All
         };
 
@@ -801,7 +801,10 @@ namespace Zero.App
             RefreshMenuState();
         }
 
-        /// <summary>Push the CRT settings into the display's shader. Safe to call at any time.</summary>
+        /// <summary>
+        /// Push the CRT settings into the display's shader. Safe to call at any time. Scanlines stand
+        /// on their own; the CRT switch governs the rest (curvature, glow, the housing and so on).
+        /// </summary>
         internal void ApplyCrtSettings()
         {
             CrtSettings crt = _settings.Render.Crt;
@@ -809,14 +812,14 @@ namespace Zero.App
             float Strength(double value) => on ? (float)Math.Clamp(value, 0, 1) : 0f;
             Display.CrtOptions = new Controls.CrtShaderOptions
             {
-                Enabled = on,
+                Enabled = on || crt.Scanlines,
                 Curvature = Strength(crt.Curvature),
                 Glow = Strength(crt.Glow),
                 Reflection = Strength(crt.GlassReflect),
                 EdgeLight = Strength(crt.EdgeLight),
                 Bezel = on ? (float)Math.Clamp(crt.Bezel, 0, 0.05) : 0f,
                 Diffuse = Strength(crt.Diffuse),
-                Scanlines = on && crt.Scanlines ? 0.35f : 0f,
+                Scanlines = crt.Scanlines ? 0.35f : 0f,
                 Vignette = on && crt.Vignette ? 0.6f : 0f,
                 Flicker = on && crt.Flicker ? 1f : 0f,
                 Noise = on && crt.Noise ? 1f : 0f

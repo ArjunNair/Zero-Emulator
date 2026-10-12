@@ -438,6 +438,19 @@ namespace Peripherals
         /// <summary>Write a drive's image back to its file if the Spectrum has changed it.</summary>
         public void Flush(byte unit) => WriteCurrentDisk((byte)(unit & 1));
 
+        /// <summary>
+        /// The drive the controller last addressed: by a read or write, or failing that a seek or
+        /// recalibrate. The +3's one motor line runs both drives, so this is what tells them apart.
+        /// </summary>
+        public int ActiveUnit
+        {
+            get
+            {
+                DiskUnit* unit = C->UnitPtr != null ? C->UnitPtr : C->SeekUnitPtr;
+                return unit == &C->FDDUnit1 ? 1 : 0;
+            }
+        }
+
         /// <summary>Current track of a drive, for display.</summary>
         public byte CurrentTrack(byte unit) => Unit((byte)(unit & 1))->CTK;
 

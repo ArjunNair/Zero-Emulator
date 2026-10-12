@@ -21,6 +21,11 @@ namespace Zero.App
         {
             DeckPanel d = Deck;
 
+            d.DeckRequested += SelectDeck;
+            d.DriveAEject.Click += (_, __) => EjectOrInsertDisk(0);
+            d.DriveBEject.Click += (_, __) => EjectOrInsertDisk(1);
+
+            d.PauseKey.Click += (_, __) => TogglePause();
             d.PowerKey.Click += (_, __) => Close(); // asks first when Confirm on Exit is set
             WireResetKey(d.ResetKey);
 
@@ -36,7 +41,6 @@ namespace Zero.App
             d.PlayKey.Click += (_, __) => _session.Post(_session.Tape.Play);
             d.NextKey.Click += (_, __) => _session.Post(_session.Tape.NextBlock);
             d.StopKey.Click += (_, __) => _session.Post(_session.Tape.Stop);
-            d.PauseKey.Click += (_, __) => TogglePause();
 
             d.CrtKey.Click += (_, __) => ToggleCrt();
             d.ScanKey.Click += (_, __) =>
@@ -114,32 +118,43 @@ namespace Zero.App
 
         // The decks are left off at 1x, where they would be shrunk past the point of being usable.
         private bool DecksFit => _settings.Render.WindowScale > 1;
-        private bool CassetteWanted => DecksFit && _settings.Render.ShowDeck;
-        private bool ReceiverWanted => DecksFit && _settings.Render.ShowReceiver;
-        private bool DeckWanted => CassetteWanted || ReceiverWanted;
+        private bool DeckWanted => DecksFit && _settings.Render.ShowDeck;
 
         /// <summary>
-        /// Show the decks that are switched on. The status bar stands in whenever the cassette deck
-        /// is off, since its display is where the status otherwise goes.
+        /// Show the decks, or the status bar in their place. Which deck shows makes no difference to
+        /// the size: the deck area is always the taller of the two.
         /// </summary>
         private void ApplyDeckVisibility(bool refit)
         {
-            Deck.CassetteDeck.IsVisible = CassetteWanted;
-            Deck.ReceiverDeck.IsVisible = ReceiverWanted;
+            Deck.SelectDeck(_settings.Render.ActiveDeck);
             DeckShelf.IsVisible = DeckWanted;
-            StatusBar.IsVisible = !CassetteWanted;
+            StatusBar.IsVisible = !DeckWanted;
             // Grow or shrink the window by the change, so the screen keeps its size. ApplyWindowScale
             // measures the chrome from the current layout, so let the change land first.
             if (refit && WindowState == WindowState.Normal) { UpdateLayout(); ApplyWindowScale(); }
             RefreshDeck();
         }
 
-        private void ToggleDeck(bool cassette)
+        private void ToggleDeck()
         {
-            if (cassette) _settings.Render.ShowDeck = !_settings.Render.ShowDeck;
-            else _settings.Render.ShowReceiver = !_settings.Render.ShowReceiver;
+            _settings.Render.ShowDeck = !_settings.Render.ShowDeck;
             ApplyDeckVisibility(refit: true);
             RefreshMenuState();
+        }
+
+        /// <summary>Show deck A (the cassette deck) or B (the receiver), from the DECK keys or the menu.</summary>
+        private void SelectDeck(int deck)
+        {
+            _settings.Render.ActiveDeck = deck == 1 ? 1 : 0;
+            Deck.SelectDeck(_settings.Render.ActiveDeck);
+            RefreshMenuState();
+        }
+
+        /// <summary>A drive's eject button: out with the disk, or, with none in, choose one to put in.</summary>
+        private void EjectOrInsertDisk(int unit)
+        {
+            if (_session.DiskInDrive(unit) != null) _session.EjectDisk(unit);
+            else _ = InsertDiskAsync(unit);
         }
 
         /// <summary>

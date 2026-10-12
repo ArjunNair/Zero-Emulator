@@ -62,6 +62,29 @@ namespace Zero.App.Tests
             w.Close();
         }
 
+        [AvaloniaFact]
+        public void Scanlines_do_not_follow_the_crt_switch()
+        {
+            // Two separate effects: scanlines on their own, with the rest of the CRT look off.
+            var w = Open(new CrtSettings { Enabled = false, Scanlines = true, Curvature = 0.3, Glow = 0.4, Bezel = 0.04 });
+            Controls.CrtShaderOptions o = w.Display.CrtOptions;
+            Assert.True(o.Enabled);
+            Assert.True(o.Scanlines > 0);
+            Assert.Equal(0f, o.Curvature);
+            Assert.Equal(0f, o.Glow);
+            Assert.Equal(0f, o.Bezel);
+            Assert.True(o.Any);
+
+            // And the CRT look without scanlines.
+            w.Session.Settings.Render.Crt.Enabled = true;
+            w.Session.Settings.Render.Crt.Scanlines = false;
+            w.ApplyCrtSettings();
+            o = w.Display.CrtOptions;
+            Assert.Equal(0f, o.Scanlines);
+            Assert.True(o.Curvature > 0);
+            w.Close();
+        }
+
         [AvaloniaTheory]
         [InlineData(false, false, false)]   // none
         [InlineData(true, false, false)]    // smooth
@@ -76,7 +99,7 @@ namespace Zero.App.Tests
                 s.Paths.Roms = TestPaths.RomDir;
                 s.Emulation.PauseOnFocusLost = false;
                 s.Audio.Mute = true;
-                s.Render.Crt = new CrtSettings { Enabled = false };
+                s.Render.Crt = new CrtSettings { Enabled = false, Scanlines = false };
                 s.Render.PixelSmoothing = smoothing;
                 s.Render.SharpPixelEdges = sharpEdges;
                 return s;

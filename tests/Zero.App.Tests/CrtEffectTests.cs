@@ -26,7 +26,7 @@ namespace Zero.App.Tests
                 s.Paths.Roms = TestPaths.RomDir;
                 s.Emulation.PauseOnFocusLost = false;
                 s.Audio.Mute = true;
-                s.Render.Crt = new CrtSettings { Enabled = false, Scanlines = true, Vignette = true };
+                s.Render.Crt = new CrtSettings { Enabled = false, Scanlines = false, Vignette = true };
                 return s;
             };
         }
@@ -83,7 +83,8 @@ namespace Zero.App.Tests
             w.ApplyCrtSettings();
             long everything = Capture(w, "crt-all");
 
-            crt.Enabled = false;
+            // Scanlines no longer follow the CRT switch, so they go off separately.
+            crt.Enabled = crt.Scanlines = false;
             crt.Flicker = crt.Noise = false;
             w.ApplyCrtSettings();
             long plainOnceMore = Capture(w);

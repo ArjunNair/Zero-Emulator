@@ -130,11 +130,14 @@ namespace Zero.App.Tests
             Press(d.RewindKey);
             PumpUntil(() => d.VfdCounter.Text == "000");
 
+            // Pausing blinks the power light.
             Press(d.PauseKey);
             Assert.True(w.Session.IsPaused);
             Assert.True(d.PowerLed.Blink);
+            Assert.True(w.PauseItem.IsChecked);
             Press(d.PauseKey);
             Assert.False(w.Session.IsPaused);
+            Assert.False(d.PowerLed.Blink);
 
             Press(d.EjectKey);
             PumpUntil(() => d.VfdTitle.Text == "NO TAPE", 10000);
@@ -170,7 +173,7 @@ namespace Zero.App.Tests
         {
             MainWindow w = Boot();
             var d = w.Deck;
-            Assert.True(d.VfdDisk.Classes.Contains("off"));         // a 48K has no drives
+            Assert.True(d.VfdDiskA.Classes.Contains("off"));        // a 48K has no drives
             Assert.False(w.DiskEjectA.IsEnabled);
 
             string dir = Path.Combine(Path.GetTempPath(), "zero-deck-disk-" + Guid.NewGuid().ToString("N"));
@@ -180,14 +183,32 @@ namespace Zero.App.Tests
                 string disk = Path.Combine(dir, "games.dsk");
                 Peripherals.DskImage.WriteBlankPlus3(disk);
                 Assert.True(w.Session.InsertDiskAsync(0, disk).Result); // switches to the +3
-                PumpUntil(() => d.VfdDisk.Text == "A:GAMES B:--");
-                Assert.False(d.VfdDisk.Classes.Contains("off"));
+                PumpUntil(() => d.VfdDiskA.Text == "A: GAMES");
+                Assert.Equal("B: --", d.VfdDiskB.Text);
+                Assert.False(d.VfdDiskA.Classes.Contains("off"));
+                Assert.True(d.VfdDiskB.Classes.Contains("off"));      // empty: unlit
+                Assert.False(d.VfdLedA.Classes.Contains("lit"));    // idle: the motor is off
+
+                // The receiver's drive fronts: A occupied and named, B empty.
+                Assert.True(d.DriveADisk.IsVisible);
+                Assert.Equal("GAMES", d.DriveAName.Text);
+                Assert.False(d.DriveBDisk.IsVisible);
+                Assert.Equal("NO DISK", d.DriveBName.Text);
+                Assert.True(d.DriveBName.Classes.Contains("empty"));
+                Assert.False(d.DriveAName.Classes.Contains("empty"));
+                w.DeckBItem.Command.Execute(null);
+                Dispatcher.UIThread.RunJobs();
+                Capture(w, "deck-drives");
+                w.DeckAItem.Command.Execute(null);
                 Assert.True(w.DiskEjectA.IsEnabled);
                 Assert.False(w.DiskEjectB.IsEnabled);
                 Capture(w, "deck-disk");
 
-                w.DiskEjectA.Command.Execute(null);
-                PumpUntil(() => d.VfdDisk.Text == "A:-- B:--");
+                // The drive's own eject button takes it out.
+                Press(d.DriveAEject);
+                PumpUntil(() => d.VfdDiskA.Text == "A: --");
+                Assert.True(d.VfdDiskA.Classes.Contains("off"));
+                Assert.False(d.DriveADisk.IsVisible);
                 Assert.False(w.DiskEjectA.IsEnabled);
             }
             finally
@@ -230,6 +251,16 @@ namespace Zero.App.Tests
             var d = w.Deck;
             EmulatorSettings s = w.Session.Settings;
 
+            // The wheel turns the volume pot, on deck A.
+            int volume = s.Audio.Volume;
+            w.MouseWheel(CentreOf(d.VolumeKnob, w), new Vector(0, 1));
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(volume + 5, s.Audio.Volume);
+
+            // The rest are on deck B, the receiver.
+            Press(d.DeckBKey);
+            Dispatcher.UIThread.RunJobs();
+
             // A click on a selector knob steps it on: ACB -> ABC.
             Assert.Equal(1, s.Audio.StereoSoundMode);
             Point stereo = CentreOf(d.StereoKnob, w);
@@ -239,12 +270,6 @@ namespace Zero.App.Tests
             Assert.Equal(2, s.Audio.StereoSoundMode);
             Assert.True(w.StereoAbc.IsChecked);
             Assert.Equal("ABC", d.VfdStereo.Text);
-
-            // The wheel turns the volume pot.
-            int volume = s.Audio.Volume;
-            w.MouseWheel(CentreOf(d.VolumeKnob, w), new Vector(0, 1));
-            Dispatcher.UIThread.RunJobs();
-            Assert.Equal(volume + 5, s.Audio.Volume);
 
             // Dragging the CPU knob up two stops picks 4x.
             Point cpu = CentreOf(d.CpuKnob, w);
@@ -301,57 +326,68 @@ namespace Zero.App.Tests
         }
 
         [AvaloniaFact]
-        public void Each_deck_shows_and_hides_from_the_menu_and_the_screen_keeps_its_size()
+        public void One_deck_shows_at_a_time_and_the_screen_keeps_its_size()
         {
             MainWindow w = Boot();
             var d = w.Deck;
-            Rect before = w.Display.Bounds;
-            double ratio = before.Width / before.Height;
-            Assert.InRange(ratio, 352.0 / 296 - 0.02, 352.0 / 296 + 0.02); // fitted with both decks showing
-            Assert.True(d.CassetteDeck.IsVisible && d.ReceiverDeck.IsVisible);
-            Assert.Equal(d.CassetteDeck.Bounds.Width, d.ReceiverDeck.Bounds.Width); // stacked flush, like real hi-fi
+            Rect screen = w.Display.Bounds;
+            double ratio = screen.Width / screen.Height;
+            Assert.InRange(ratio, 352.0 / 296 - 0.02, 352.0 / 296 + 0.02); // fitted with the decks showing
             Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.PlayKey));
-            Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.VolumeKnob)); // in constant use, so up top
+            Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.VolumeKnob));
             Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.MachineKnob));
             Assert.True(d.ReceiverDeck.IsVisualAncestorOf(d.StereoKnob));
-            Capture(w, "decks-both");
+            Assert.True(d.ReceiverDeck.IsVisualAncestorOf(d.DriveAEject));
+
+            // Deck A to start with: the cassette deck shows, the receiver does not.
+            Assert.Equal(0, d.SelectedDeck);
+            Assert.True(d.DeckAKey.IsChecked == true && d.DeckBKey.IsChecked == false);
+            Assert.Equal(1, d.CassetteDeck.Opacity);
+            Assert.Equal(0, d.ReceiverDeck.Opacity);
+            Assert.False(d.ReceiverDeck.IsHitTestVisible);
+            Capture(w, "decks-a");
+            double shelf = w.DeckShelf.Bounds.Height;
 
             void AssertScreenUnchanged()
             {
-                Assert.InRange(w.Display.Bounds.Height, before.Height - 1.5, before.Height + 1.5);
-                Assert.InRange(w.Display.Bounds.Width, before.Width - 1.5, before.Width + 1.5);
+                Assert.InRange(w.Display.Bounds.Height, screen.Height - 1.5, screen.Height + 1.5);
+                Assert.InRange(w.Display.Bounds.Width, screen.Width - 1.5, screen.Width + 1.5);
             }
 
-            // Cassette deck off: the receiver stays, and the status bar takes over the deck's display.
+            // Deck B: the receiver instead, in the same space.
+            Press(d.DeckBKey);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(1, d.SelectedDeck);
+            Assert.True(d.DeckAKey.IsChecked == false && d.DeckBKey.IsChecked == true);
+            Assert.Equal(0, d.CassetteDeck.Opacity);
+            Assert.Equal(1, d.ReceiverDeck.Opacity);
+            Assert.False(d.CassetteDeck.IsHitTestVisible);
+            Assert.Equal(1, w.Session.Settings.Render.ActiveDeck);
+            Assert.True(w.DeckBItem.IsChecked);
+            Assert.Equal(shelf, w.DeckShelf.Bounds.Height);
+            AssertScreenUnchanged();
+            Capture(w, "decks-b");
+
+            // Pressing the lit key leaves it lit; the menu picks too.
+            Press(d.DeckBKey);
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(d.DeckBKey.IsChecked == true);
+            w.DeckAItem.Command.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(0, d.SelectedDeck);
+
+            // Hiding the decks gives way to the status bar, and the screen stays the size it was.
             w.DeckItem.Command.Execute(null);
             Dispatcher.UIThread.RunJobs();
-            Assert.False(d.CassetteDeck.IsVisible);
-            Assert.True(d.ReceiverDeck.IsVisible);
+            Assert.False(w.DeckShelf.IsVisible);
             Assert.True(w.StatusBar.IsVisible);
-            Assert.False(w.DeckItem.IsChecked);
             Assert.False(w.Session.Settings.Render.ShowDeck);
             AssertScreenUnchanged();
 
-            // Receiver off too: the shelf goes.
-            w.ReceiverItem.Command.Execute(null);
-            Dispatcher.UIThread.RunJobs();
-            Assert.False(w.DeckShelf.IsVisible);
-            Assert.False(w.ReceiverItem.IsChecked);
-            Assert.False(w.Session.Settings.Render.ShowReceiver);
-            AssertScreenUnchanged();
-
-            // Cassette deck alone.
             w.DeckItem.Command.Execute(null);
             Dispatcher.UIThread.RunJobs();
-            Assert.True(d.CassetteDeck.IsVisible);
-            Assert.False(d.ReceiverDeck.IsVisible);
+            Assert.True(w.DeckShelf.IsVisible);
             Assert.False(w.StatusBar.IsVisible);
-            AssertScreenUnchanged();
-            Capture(w, "decks-cassette-only");
-
-            w.ReceiverItem.Command.Execute(null);
-            Dispatcher.UIThread.RunJobs();
-            Assert.True(d.ReceiverDeck.IsVisible);
             AssertScreenUnchanged();
             w.Close();
         }

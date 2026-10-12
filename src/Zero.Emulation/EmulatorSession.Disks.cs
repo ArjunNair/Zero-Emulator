@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Peripherals;
 using Speccy;
@@ -26,12 +27,20 @@ namespace Zero.Emulation
         /// <summary>The +3's drive motor is running: the disk is being read or written.</summary>
         public bool DiskMotorOn => _diskMotorOn;
 
+        /// <summary>
+        /// The drive in use: the one the controller last addressed, while the motor runs; -1 when
+        /// neither is busy. Read from the UI thread, so it may be a moment behind the machine.
+        /// </summary>
+        public int BusyDiskUnit =>
+            _diskMotorOn && _zx is zx_plus3 plus3 && plus3.FloppyController.Controller is Fdc765 fdc ? fdc.ActiveUnit : -1;
+
         /// <summary>The current machine has disk drives Zero can emulate (the +3).</summary>
         public bool HasDiskDrives => Model == MachineModel._plus3;
 
         /// <summary>
         /// Put a DSK image in a drive, switching to the +3 first if need be. An image that cannot be
-        /// written (read-only file, or extended DSK) goes in write protected.
+        /// written (read-only file, or extended DSK) goes in write protected. A ZIP is opened for the
+        /// disk image inside it.
         /// </summary>
         public void InsertDisk(int unit, string path) => Post(() => InsertDiskCore(unit, path));
 
@@ -45,6 +54,11 @@ namespace Zero.Emulation
         private bool InsertDiskCore(int unit, string path)
         {
             unit &= 1;
+            if (File.Exists(path) && Path.GetExtension(path).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                path = ExtractDiskFromZip(path);
+                if (path == null) return false;
+            }
             if (!File.Exists(path) || !DskImage.IsDsk(path))
             {
                 Error?.Invoke("This doesn't seem to be a +3 disk image (DSK): " + Path.GetFileName(path));
@@ -57,6 +71,30 @@ namespace Zero.Emulation
                 _zx.DiskInsert(_diskPaths[unit], (byte)unit);
             DisksChanged?.Invoke();
             return true;
+        }
+
+        /// <summary>
+        /// The disk image inside a ZIP, written out under its own name for the drive to use (it
+        /// writes changes back to a file). Asks which one when there are several; null if none.
+        /// </summary>
+        private string ExtractDiskFromZip(string zipPath)
+        {
+            using var archive = System.IO.Compression.ZipFile.OpenRead(zipPath);
+            var disks = archive.Entries
+                .Where(e => Path.GetExtension(e.Name).Equals(".dsk", StringComparison.OrdinalIgnoreCase))
+                .Select(e => e.FullName)
+                .ToList();
+            if (disks.Count == 0)
+            {
+                Error?.Invoke("There's no +3 disk image (DSK) in " + Path.GetFileName(zipPath) + ".");
+                return null;
+            }
+            string chosen = disks.Count == 1 ? disks[0] : (ChooseArchiveEntry?.Invoke(disks) ?? disks[0]);
+            if (chosen == null) return null;
+            System.IO.Compression.ZipArchiveEntry entry = archive.GetEntry(chosen);
+            using var data = new MemoryStream();
+            using (Stream s = entry.Open()) s.CopyTo(data);
+            return WriteTemp(entry.Name, data.ToArray());
         }
 
         private void EjectDiskCore(int unit)

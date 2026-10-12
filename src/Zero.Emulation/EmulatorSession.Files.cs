@@ -111,10 +111,17 @@ namespace Zero.Emulation
             }
         }
 
+        /// <summary>
+        /// Give a file from an archive a file of its own, under its own name: the name is what the
+        /// deck's display and the menus show. A folder of its own keeps it from colliding with
+        /// another file of the same name.
+        /// </summary>
         private static string WriteTemp(string name, byte[] bytes)
         {
-            string dir = AppPaths.EnsureDirectory(AppPaths.TempDirectory);
-            string path = Path.Combine(dir, "temp_" + Guid.NewGuid().ToString("N") + Path.GetExtension(name));
+            string dir = AppPaths.EnsureDirectory(Path.Combine(AppPaths.TempDirectory, "temp_" + Guid.NewGuid().ToString("N")));
+            string fileName = Path.GetFileName(name);
+            if (string.IsNullOrWhiteSpace(Path.GetFileNameWithoutExtension(fileName))) fileName = "file" + Path.GetExtension(name);
+            string path = Path.Combine(dir, fileName);
             File.WriteAllBytes(path, bytes);
             return path;
         }

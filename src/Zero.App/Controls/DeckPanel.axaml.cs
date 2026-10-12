@@ -20,6 +20,10 @@ namespace Zero.App.Controls
         {
             InitializeComponent();
             VersionText.Text = VersionLabel;
+            // The selector keys are radio buttons: pressing the lit one leaves it lit.
+            DeckAKey.Click += (_, __) => { SelectDeck(SelectedDeck); DeckRequested?.Invoke(0); };
+            DeckBKey.Click += (_, __) => { SelectDeck(SelectedDeck); DeckRequested?.Invoke(1); };
+            SelectDeck(0);
         }
 
         /// <summary>The build's version as printed under the badge, e.g. "v0.9.0".</summary>
@@ -61,11 +65,12 @@ namespace Zero.App.Controls
             VfdStereo.Text = settings.Audio.StereoSoundMode switch { 0 => "MONO", 2 => "ABC", _ => "ACB" };
             SetLit(VfdTurbo, settings.Emulation.EmulationSpeed > 1);
             SetLit(VfdMute, settings.Audio.Mute);
-            // The +3's drives. (The Pentagon's TR-DOS drives are not emulated, so it reads as having none.)
+            // The +3's drives, on the display and on the receiver's drive fronts. (The Pentagon's
+            // TR-DOS drives are not emulated, so it reads as having none.)
             bool drives = session.HasDiskDrives;
-            VfdDisk.Text = $"A:{DiskLabel(session.DiskInDrive(0))} B:{DiskLabel(session.DiskInDrive(1))}";
-            SetLit(VfdDisk, drives);
-            SetLit(VfdDiskActive, drives && session.DiskMotorOn);
+            int busy = drives ? session.BusyDiskUnit : -1;
+            ShowDrive(0, session.DiskInDrive(0), drives, busy == 0, VfdLedA, VfdDiskA, DriveADisk, DriveALed, DriveAName);
+            ShowDrive(1, session.DiskInDrive(1), drives, busy == 1, VfdLedB, VfdDiskB, DriveBDisk, DriveBLed, DriveBName);
 
             if (!tape.IsInserted)
             {
@@ -94,7 +99,7 @@ namespace Zero.App.Controls
             CrtSettings crt = settings.Render.Crt;
             CrtKey.IsChecked = crt.Enabled;
             ScanKey.IsChecked = crt.Scanlines;
-            ScanKey.IsEnabled = CurveFader.IsEnabled = GlowFader.IsEnabled = crt.Enabled;
+            CurveFader.IsEnabled = GlowFader.IsEnabled = crt.Enabled;   // scanlines work with CRT off too
             CurveFader.Opacity = GlowFader.Opacity = crt.Enabled ? 1 : 0.45;
             CurveFader.Value = crt.Curvature;
             GlowFader.Value = crt.Glow;
@@ -105,6 +110,41 @@ namespace Zero.App.Controls
             VolumeKnob.Value = settings.Audio.Volume;
             MuteKey.IsChecked = settings.Audio.Mute;
             TurboKey.IsChecked = settings.Emulation.EmulationSpeed > 1;
+        }
+
+        private static void ShowDrive(int unit, string disk, bool drives, bool busy,
+            Border vfdLed, TextBlock vfdLine, Border slotDisk, DeckLed driveLed, TextBlock driveName)
+        {
+            char letter = (char)('A' + unit);
+            vfdLine.Text = $"{letter}: {DiskLabel(disk)}";
+            SetLit(vfdLine, drives && disk != null);  // an empty drive's line stays unlit
+            vfdLed.Classes.Set("lit", busy);
+            slotDisk.IsVisible = disk != null;          // the slot looks occupied
+            driveLed.IsLit = busy;
+            driveName.Text = disk == null ? "NO DISK" : DiskLabel(disk);
+            driveName.Classes.Set("empty", disk == null);
+        }
+
+        /// <summary>The deck showing: 0 the cassette deck (A), 1 the receiver (B).</summary>
+        public int SelectedDeck { get; private set; }
+
+        /// <summary>Raised when a DECK selector key is pressed, with the deck asked for.</summary>
+        public event Action<int> DeckRequested;
+
+        /// <summary>
+        /// Show one deck. Both stay laid out, one over the other, so the deck area keeps its size;
+        /// the other is made transparent and stops taking the pointer.
+        /// </summary>
+        public void SelectDeck(int deck)
+        {
+            SelectedDeck = deck == 1 ? 1 : 0;
+            bool cassette = SelectedDeck == 0;
+            CassetteDeck.Opacity = cassette ? 1 : 0;
+            CassetteDeck.IsHitTestVisible = cassette;
+            ReceiverDeck.Opacity = cassette ? 0 : 1;
+            ReceiverDeck.IsHitTestVisible = !cassette;
+            DeckAKey.IsChecked = cassette;
+            DeckBKey.IsChecked = !cassette;
         }
 
         /// <summary>Frames per second, or "PAUSE", in the corner of the display.</summary>
@@ -134,13 +174,12 @@ namespace Zero.App.Controls
         /// <summary>The CPU multiplier for each stop on the CPU knob.</summary>
         public static int CpuMultiplierAt(double stop) => stop >= 2 ? 4 : stop >= 1 ? 2 : 1;
 
-        /// <summary>A disk's name as the display shows it: the file name, short and upper case.</summary>
-        internal static string DiskLabel(string path)
-        {
-            if (string.IsNullOrEmpty(path)) return "--";
-            string name = System.IO.Path.GetFileNameWithoutExtension(path).ToUpperInvariant();
-            return name.Length > 8 ? name.Substring(0, 8) : name;
-        }
+        /// <summary>
+        /// A disk's name as the deck shows it: its image's file name, upper case, without the
+        /// extension. +3 disks carry no volume name of their own. Long names are trimmed to fit.
+        /// </summary>
+        internal static string DiskLabel(string path) =>
+            string.IsNullOrEmpty(path) ? "--" : System.IO.Path.GetFileNameWithoutExtension(path).ToUpperInvariant();
 
         private static string RecordTarget(TapeDeck tape) =>
             System.IO.Path.GetFileNameWithoutExtension(tape.TapSavePath ?? "").ToUpperInvariant();

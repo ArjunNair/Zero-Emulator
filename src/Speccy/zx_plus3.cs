@@ -11,6 +11,9 @@ namespace Speccy
         protected bool[] diskInserted = { false, false };
         private UDP765 udpDrive = new UDP765();
 
+        /// <summary>The floppy controller, for reading the drives' state (which is busy).</summary>
+        public UDP765 FloppyController => udpDrive;
+
         public zx_plus3(IAudioOutput audioOutput, bool lateTimingModel)
             : base(audioOutput, lateTimingModel) {
             FrameLength = 70908;

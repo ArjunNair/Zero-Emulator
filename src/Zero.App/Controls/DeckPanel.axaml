@@ -111,6 +111,17 @@
       <Setter Property="LetterSpacing" Value="0.2" />
       <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
+    <!-- The disk's name inside a drive bay: muted, and fainter still for an empty drive. -->
+    <Style Selector="TextBlock.bayname">
+      <Setter Property="Foreground" Value="#7C7F85" />
+      <Setter Property="FontSize" Value="7.5" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="LetterSpacing" Value="0.3" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style Selector="TextBlock.bayname.empty">
+      <Setter Property="Foreground" Value="#4E5157" />
+    </Style>
     <Style Selector="TextBlock.section">
       <Setter Property="Foreground" Value="#6F7278" />
       <Setter Property="FontSize" Value="7.5" />
@@ -144,191 +155,288 @@
         <DropShadowEffect Color="#5EF2DC" BlurRadius="5" OffsetX="0" OffsetY="0" Opacity="0.75" />
       </Setter>
     </Style>
+    <!-- A square display segment: a drive's busy light. -->
+    <Style Selector="Border.vfdled">
+      <Setter Property="Width" Value="6" />
+      <Setter Property="Height" Value="6" />
+      <Setter Property="Margin" Value="0,0,5,0" />
+      <Setter Property="CornerRadius" Value="1" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Background" Value="#163A36" />
+    </Style>
+    <Style Selector="Border.vfdled.lit">
+      <Setter Property="Background" Value="#5EF2DC" />
+      <Setter Property="BoxShadow" Value="0 0 4 1 #905EF2DC" />
+    </Style>
     <Style Selector="TextBlock.vfd.off">
       <Setter Property="Foreground" Value="#163A36" />
       <Setter Property="Effect" Value="{x:Null}" />
     </Style>
   </UserControl.Styles>
 
-  <!-- A stack of two components, kept the same width like a real hi-fi stack. Either can be
-       hidden from View > Hi-Fi Decks; MainWindow.Deck.cs shows and hides them. -->
-  <StackPanel Spacing="5">
+  <!-- One deck shows at a time, picked with the DECK selector beside it. Both are always laid out,
+       one over the other, so the shelf keeps the taller one's height and choosing the other deck
+       does not resize the window; the deck not showing is made transparent and untouchable. -->
+  <Grid ColumnDefinitions="Auto,*">
 
-    <!-- The cassette deck: everything in constant use. Badge and power, the machine selector, the
-         display and tape transport, and volume. -->
-    <Border x:Name="CassetteDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
-      <c:DeckFaceplate Padding="16,10,16,9">
-        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto">
-          <Grid RowDefinitions="*,Auto" MinWidth="76">
-            <StackPanel VerticalAlignment="Top" Margin="0,2,0,0">
-              <TextBlock Text="ZERO X" FontSize="15" FontWeight="Black" FontStyle="Italic"
-                         LetterSpacing="1.5" Foreground="#E4E6EA" />
-              <!-- The rainbow flash from the Spectrum's case. -->
-              <Canvas Width="63" Height="4" HorizontalAlignment="Left" Margin="1,3,0,0">
-                <Path Fill="#E8302A" Data="M3,0 H18 L15,4 H0 Z" />
-                <Path Fill="#F7B500" Data="M18,0 H33 L30,4 H15 Z" />
-                <Path Fill="#3BAA45" Data="M33,0 H48 L45,4 H30 Z" />
-                <Path Fill="#1D9AD6" Data="M48,0 H63 L60,4 H45 Z" />
-              </Canvas>
-              <TextBlock x:Name="VersionText" FontSize="8" FontWeight="SemiBold"
-                         LetterSpacing="0.8" Foreground="#8A8D93" Margin="1,3,0,0" />
-            </StackPanel>
-            <!-- A slim power bar, with pause and reset under it. -->
-            <Grid Grid.Row="1" ColumnDefinitions="Auto,8,Auto" RowDefinitions="Auto,Auto,Auto" HorizontalAlignment="Left">
-              <Button x:Name="PowerKey" Grid.ColumnSpan="3" Theme="{StaticResource DeckKey}" Width="68" Height="18"
-                      Margin="0,8,0,6" ToolTip.Tip="Power: quit Zero X">
-                <Panel Width="64" Height="14">
-                  <c:DeckLed x:Name="PowerLed" Width="7" Height="7" Color="#FF3B30"
-                             HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3,0,0,0" />
-                  <TextBlock Classes="legend" Text="POWER" Foreground="#C8CACE" VerticalAlignment="Center" Margin="6,0,0,0" />
-                </Panel>
-              </Button>
-              <Button x:Name="PauseKey" Grid.Row="1" Theme="{StaticResource DeckKey}" Width="30" ToolTip.Tip="Pause the emulator (F7)">
-                <Path Classes="glyph" Data="M0,0 H2.5 V8 H0 Z M4.5,0 H7 V8 H4.5 Z" />
-              </Button>
-              <Button x:Name="ResetKey" Grid.Row="1" Grid.Column="2" Theme="{StaticResource DeckKey}" Width="30" ToolTip.Tip="Reset the Spectrum (F9). Hold it down for a hard reset (Shift+F9).">
-                <!-- A clockwise arrow round a circle: start again. -->
-                <Panel Width="9" Height="10">
-                  <Path Classes="glyphline" Data="M1,4.5 A3.5,3.5 0 1 1 4.5,8" />
-                  <Path Classes="glyph" Data="M2.4,8 L5,6.5 L5,9.5 Z" />
-                </Panel>
-              </Button>
-              <TextBlock Grid.Row="2" Classes="legend" Text="PAUSE" Margin="0,3,0,0" />
-              <TextBlock Grid.Row="2" Grid.Column="2" Classes="legend" Text="RESET" Margin="0,3,0,0" />
-            </Grid>
-          </Grid>
-
-          <Border Grid.Column="1" Classes="divider" />
-
-          <!-- Like a receiver's input selector. Changing machine resets it, so the knob acts only
-               when let go, and ignores the wheel. -->
-          <StackPanel Grid.Column="2" VerticalAlignment="Center">
-            <c:DeckKnob x:Name="MachineKnob" Width="78" Height="62" CommitOnRelease="True"
-                        Positions="48K,128K,128KE,+3,PENT" ToolTip.Tip="Machine: click or drag to choose. Switching resets the Spectrum." />
-            <TextBlock Classes="legend" Text="MACHINE" Margin="0,1,0,0" />
-          </StackPanel>
-
-          <Border Grid.Column="3" Classes="divider" />
-
-          <!-- A fixed width: the decks are measured at their natural size, so without one a long
-               message on the display would widen the deck instead of being trimmed. -->
-          <StackPanel Grid.Column="4" Width="240" Spacing="6">
-            <Border Height="52" CornerRadius="3" Background="#050B0B" BorderBrush="#000000" BorderThickness="1"
-                    BoxShadow="inset 0 1 3 0 #C0000000">
-              <Grid Margin="7,3,7,3" RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,Auto">
-                <TextBlock x:Name="VfdMachine" Classes="vfd" FontSize="8" Text="ZX SPECTRUM 48K" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
-                  <TextBlock x:Name="VfdStereo" Classes="vfd" FontSize="8" Text="ACB" />
-                  <TextBlock x:Name="VfdTurbo" Classes="vfd off" FontSize="8" Text="TURBO" />
-                  <TextBlock x:Name="VfdMute" Classes="vfd off" FontSize="8" Text="MUTE" />
-                </StackPanel>
-                <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="1">
-                  <StackPanel Orientation="Horizontal" Spacing="6">
-                    <TextBlock x:Name="VfdMode" Classes="vfd" FontSize="8" Width="30" Text="STOP" />
-                    <TextBlock x:Name="VfdBlock" Classes="vfd" FontSize="8" Text="BLK --/--" />
-                  </StackPanel>
-                  <TextBlock x:Name="VfdTitle" Classes="vfd" FontSize="8"
-                             TextTrimming="CharacterEllipsis" Text="NO TAPE" />
-                </StackPanel>
-                <!-- The tape counter, with its unlit segments showing through like a real VFD. -->
-                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                  <TextBlock Classes="vfd" FontSize="7" VerticalAlignment="Bottom" Margin="0,0,0,3" Text="COUNTER" />
-                  <Panel>
-                    <TextBlock Classes="vfd off" FontSize="18" FontWeight="Bold" Text="888" />
-                    <TextBlock x:Name="VfdCounter" Classes="vfd" FontSize="18" FontWeight="Bold" Text="000" />
-                  </Panel>
-                </StackPanel>
-                <!-- Disk drives: the disk in each drive, lit on the +3 and unlit segments elsewhere.
-                     DISK lights while the drive motor runs. -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="5">
-                  <TextBlock x:Name="VfdDiskActive" Classes="vfd off" FontSize="8" Text="DISK" />
-                  <TextBlock x:Name="VfdDisk" Classes="vfd off" FontSize="8" Text="A:-- B:--" />
-                </StackPanel>
-                <TextBlock x:Name="VfdFps" Grid.Row="2" Grid.Column="1" Classes="vfd" FontSize="8" HorizontalAlignment="Right" Text="" />
-              </Grid>
-            </Border>
-
-            <Grid ColumnDefinitions="*,*,*,*,*,*,*" RowDefinitions="Auto,Auto">
-              <Button x:Name="EjectKey" Grid.Column="0" Theme="{StaticResource DeckKey}" ToolTip.Tip="Eject the tape, or insert one when the deck is empty">
-                <Path Classes="glyph" Data="M0,5 L4.5,0 L9,5 Z M0,6.5 H9 V8 H0 Z" />
-              </Button>
-              <Button x:Name="RecKey" Grid.Column="1" Theme="{StaticResource DeckKey}" ToolTip.Tip="Record: choose the tape file SAVE writes to. Press again to go back to the default.">
-                <c:DeckLed x:Name="RecLamp" Width="9" Height="9" Color="#FF3B30" />
-              </Button>
-              <Button x:Name="RewindKey" Grid.Column="2" Theme="{StaticResource DeckKey}" ToolTip.Tip="Rewind to the start of the tape">
-                <Path Classes="glyph" Data="M0,3.5 L4.5,0 V7 Z M4.5,3.5 L9,0 V7 Z" />
-              </Button>
-              <Button x:Name="PrevKey" Grid.Column="3" Theme="{StaticResource DeckKey}" ToolTip.Tip="Previous block">
-                <Path Classes="glyph" Data="M0,0 H1.5 V7 H0 Z M1.5,3.5 L6.5,0 V7 Z" />
-              </Button>
-              <Button x:Name="PlayKey" Grid.Column="4" Theme="{StaticResource DeckKey}" ToolTip.Tip="Play">
-                <Path Classes="glyph" Data="M0,0 L7,4 L0,8 Z" />
-              </Button>
-              <Button x:Name="NextKey" Grid.Column="5" Theme="{StaticResource DeckKey}" ToolTip.Tip="Next block">
-                <Path Classes="glyph" Data="M0,0 L5,3.5 L0,7 Z M5,0 H6.5 V7 H5 Z" />
-              </Button>
-              <Button x:Name="StopKey" Grid.Column="6" Theme="{StaticResource DeckKey}" ToolTip.Tip="Stop">
-                <Path Classes="glyph" Data="M0,0 H7 V7 H0 Z" />
-              </Button>
-              <TextBlock Grid.Row="1" Grid.Column="0" Classes="legend" Text="EJECT" Margin="0,4,0,0" />
-              <TextBlock Grid.Row="1" Grid.Column="1" Classes="legend" Text="REC" Margin="0,4,0,0" />
-              <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" Text="REW" Margin="0,4,0,0" />
-              <TextBlock Grid.Row="1" Grid.Column="3" Classes="legend" Text="PREV" Margin="0,4,0,0" />
-              <TextBlock Grid.Row="1" Grid.Column="4" Classes="legend" Text="PLAY" Margin="0,4,0,0" />
-              <TextBlock Grid.Row="1" Grid.Column="5" Classes="legend" Text="NEXT" Margin="0,4,0,0" />
-              <TextBlock Grid.Row="1" Grid.Column="6" Classes="legend" Text="STOP" Margin="0,4,0,0" />
-            </Grid>
-          </StackPanel>
-
-
-          <Border Grid.Column="5" Classes="divider" />
-
-          <StackPanel Grid.Column="6" VerticalAlignment="Center">
-            <c:DeckKnob x:Name="VolumeKnob" Width="66" Height="66" Minimum="0" Maximum="100" SmallChange="5"
-                        ToolTip.Tip="Volume" />
-            <TextBlock Classes="legend" Text="VOLUME" Margin="0,1,0,0" />
-          </StackPanel>
+    <Border CornerRadius="5" BoxShadow="0 3 8 0 #B0000000" Margin="0,0,5,0">
+      <c:DeckFaceplate Padding="8,10,8,9">
+        <!-- Slim selector keys, each lamp lit for the deck showing, with the deck's letter beside it. -->
+        <Grid ColumnDefinitions="Auto,5,Auto" RowDefinitions="Auto,Auto,8,Auto" VerticalAlignment="Center">
+          <TextBlock Grid.ColumnSpan="3" Classes="legend" HorizontalAlignment="Left" Margin="0,0,0,7" Text="DECK" />
+          <ToggleButton x:Name="DeckAKey" Grid.Row="1" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
+                        ToolTip.Tip="Deck A: the cassette deck" />
+          <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" VerticalAlignment="Center" Text="A" />
+          <ToggleButton x:Name="DeckBKey" Grid.Row="3" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
+                        ToolTip.Tip="Deck B: the receiver" />
+          <TextBlock Grid.Row="3" Grid.Column="2" Classes="legend" VerticalAlignment="Center" Text="B" />
         </Grid>
       </c:DeckFaceplate>
     </Border>
 
-    <!-- The receiver: the picture, sound and speed settings. -->
-    <Border x:Name="ReceiverDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
-      <c:DeckFaceplate Padding="16,10,16,9">
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+    <Panel Grid.Column="1">
 
-          <!-- Picture controls. -->
-          <StackPanel Width="112">
-            <TextBlock Classes="section" Text="PICTURE" />
-            <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,6">
-              <ToggleButton x:Name="CrtKey" Theme="{StaticResource DeckToggle}" Content="CRT" ToolTip.Tip="CRT effects" />
-              <ToggleButton x:Name="ScanKey" Theme="{StaticResource DeckToggle}" Content="SCAN" ToolTip.Tip="Scanlines" />
-            </StackPanel>
-            <Grid ColumnDefinitions="34,*" RowDefinitions="16,16">
-              <TextBlock Classes="legend" Text="CURVE" HorizontalAlignment="Left" VerticalAlignment="Center" />
-              <c:DeckFader x:Name="CurveFader" Grid.Column="1" ToolTip.Tip="Screen curvature" />
-              <TextBlock Grid.Row="1" Classes="legend" Text="GLOW" HorizontalAlignment="Left" VerticalAlignment="Center" />
-              <c:DeckFader x:Name="GlowFader" Grid.Row="1" Grid.Column="1" ToolTip.Tip="Phosphor glow" />
+      <!-- The cassette deck: everything in constant use. Badge and power, the machine selector, the
+           display and tape transport, and volume. -->
+      <Border x:Name="CassetteDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
+        <c:DeckFaceplate Padding="16,10,16,9">
+          <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto">
+            <Grid RowDefinitions="*,Auto" MinWidth="76">
+              <StackPanel VerticalAlignment="Top" Margin="0,2,0,0">
+                <TextBlock Text="ZERO X" FontSize="15" FontWeight="Black" FontStyle="Italic"
+                           LetterSpacing="1.5" Foreground="#E4E6EA" />
+                <!-- The rainbow flash from the Spectrum's case. -->
+                <Canvas Width="63" Height="4" HorizontalAlignment="Left" Margin="1,3,0,0">
+                  <Path Fill="#E8302A" Data="M3,0 H18 L15,4 H0 Z" />
+                  <Path Fill="#F7B500" Data="M18,0 H33 L30,4 H15 Z" />
+                  <Path Fill="#3BAA45" Data="M33,0 H48 L45,4 H30 Z" />
+                  <Path Fill="#1D9AD6" Data="M48,0 H63 L60,4 H45 Z" />
+                </Canvas>
+                <TextBlock x:Name="VersionText" FontSize="8" FontWeight="SemiBold"
+                           LetterSpacing="0.8" Foreground="#8A8D93" Margin="1,3,0,0" />
+              </StackPanel>
+              <!-- Power, with slim pause and reset keys stacked beside it; each name printed under its key. -->
+              <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left" Margin="0,8,0,0">
+                <StackPanel>
+                  <Button x:Name="PowerKey" Theme="{StaticResource DeckKey}" Width="44" Height="28" ToolTip.Tip="Power: quit Zero X">
+                    <Panel Width="40" Height="24">
+                      <c:DeckLed x:Name="PowerLed" Width="7" Height="7" Color="#FF3B30"
+                                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0" />
+                    </Panel>
+                  </Button>
+                  <TextBlock Classes="legend" Text="POWER" Margin="0,4,0,0" />
+                </StackPanel>
+                <StackPanel VerticalAlignment="Bottom">
+                  <Button x:Name="PauseKey" Theme="{StaticResource DeckKey}" Width="30" Height="10" ToolTip.Tip="Pause the emulator (F7)" />
+                  <TextBlock Classes="legend" Text="PAUSE" Margin="0,2,0,4" />
+                  <Button x:Name="ResetKey" Theme="{StaticResource DeckKey}" Width="30" Height="10"
+                          ToolTip.Tip="Reset the Spectrum (F9). Hold it down for a hard reset (Shift+F9)." />
+                  <TextBlock Classes="legend" Text="RESET" Margin="0,2,0,0" />
+                </StackPanel>
+              </StackPanel>
             </Grid>
-          </StackPanel>
 
-          <Border Classes="divider" />
+            <Border Grid.Column="1" Classes="divider" />
 
-          <!-- Sound and speed: selector knobs and function keys. -->
-          <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto">
-            <c:DeckKnob x:Name="StereoKnob" Width="64" Height="50" Positions="MONO,ACB,ABC" ToolTip.Tip="Stereo mode" />
-            <c:DeckKnob x:Name="CpuKnob" Grid.Column="1" Width="56" Height="50" Positions="1X,2X,4X" ToolTip.Tip="CPU speed" />
-            <TextBlock Grid.Row="1" Classes="legend" Text="STEREO" Margin="0,1,0,0" />
-            <TextBlock Grid.Row="1" Grid.Column="1" Classes="legend" Text="CPU" Margin="0,1,0,0" />
-            <ToggleButton x:Name="MuteKey" Grid.Row="2" Theme="{StaticResource DeckToggle}" Content="MUTE"
-                          Margin="0,6,0,0" ToolTip.Tip="Mute" />
-            <ToggleButton x:Name="TurboKey" Grid.Row="2" Grid.Column="1" Theme="{StaticResource DeckToggle}" Content="TURBO"
-                          Margin="0,6,0,0" ToolTip.Tip="Full speed" />
+            <!-- Like a receiver's input selector. Changing machine resets it, so the knob acts only
+                 when let go, and ignores the wheel. -->
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+              <c:DeckKnob x:Name="MachineKnob" Width="78" Height="62" CommitOnRelease="True"
+                          Positions="48K,128K,128KE,+3,PENT" ToolTip.Tip="Machine: click or drag to choose. Switching resets the Spectrum." />
+              <TextBlock Classes="legend" Text="MACHINE" Margin="0,1,0,0" />
+            </StackPanel>
+
+            <Border Grid.Column="3" Classes="divider" />
+
+            <!-- A fixed width: the decks are measured at their natural size, so without one a long
+                 message on the display would widen the deck instead of being trimmed. -->
+            <StackPanel Grid.Column="4" Width="240" Spacing="6">
+              <Border Height="63" CornerRadius="3" Background="#050B0B" BorderBrush="#000000" BorderThickness="1"
+                      BoxShadow="inset 0 1 3 0 #C0000000">
+                <Grid Margin="7,3,7,3" RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,Auto">
+                  <TextBlock x:Name="VfdMachine" Classes="vfd" FontSize="8" Text="ZX SPECTRUM 48K" />
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
+                    <TextBlock x:Name="VfdStereo" Classes="vfd" FontSize="8" Text="ACB" />
+                    <TextBlock x:Name="VfdTurbo" Classes="vfd off" FontSize="8" Text="TURBO" />
+                    <TextBlock x:Name="VfdMute" Classes="vfd off" FontSize="8" Text="MUTE" />
+                  </StackPanel>
+                  <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="1">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <TextBlock x:Name="VfdMode" Classes="vfd" FontSize="8" Width="30" Text="STOP" />
+                      <TextBlock x:Name="VfdBlock" Classes="vfd" FontSize="8" Text="BLK --/--" />
+                    </StackPanel>
+                    <TextBlock x:Name="VfdTitle" Classes="vfd" FontSize="8"
+                               TextTrimming="CharacterEllipsis" Text="NO TAPE" />
+                  </StackPanel>
+                  <!-- The tape counter, with its unlit segments showing through like a real VFD. -->
+                  <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                    <TextBlock Classes="vfd" FontSize="7" VerticalAlignment="Bottom" Margin="0,0,0,3" Text="COUNTER" />
+                    <Panel>
+                      <TextBlock Classes="vfd off" FontSize="18" FontWeight="Bold" Text="888" />
+                      <TextBlock x:Name="VfdCounter" Classes="vfd" FontSize="18" FontWeight="Bold" Text="000" />
+                    </Panel>
+                  </StackPanel>
+                  <!-- Disk drives, a line each: a segment that lights while that drive is busy, then the
+                       disk in it (its file name). Lit when the drive holds a disk; unlit when it is
+                       empty or the machine has no drives. -->
+                  <Grid Grid.Row="2" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                    <Border x:Name="VfdLedA" Classes="vfdled" />
+                    <TextBlock x:Name="VfdDiskA" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="A: --" />
+                    <Border x:Name="VfdLedB" Grid.Row="1" Classes="vfdled" />
+                    <TextBlock x:Name="VfdDiskB" Grid.Row="1" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="B: --" />
+                  </Grid>
+                  <TextBlock x:Name="VfdFps" Grid.Row="2" Grid.Column="1" Classes="vfd" FontSize="8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="" />
+                </Grid>
+              </Border>
+
+              <Grid ColumnDefinitions="*,*,*,*,*,*,*" RowDefinitions="Auto,Auto">
+                <Button x:Name="EjectKey" Grid.Column="0" Theme="{StaticResource DeckKey}" ToolTip.Tip="Eject the tape, or insert one when the deck is empty">
+                  <Path Classes="glyph" Data="M0,5 L4.5,0 L9,5 Z M0,6.5 H9 V8 H0 Z" />
+                </Button>
+                <Button x:Name="RecKey" Grid.Column="1" Theme="{StaticResource DeckKey}" ToolTip.Tip="Record: choose the tape file SAVE writes to. Press again to go back to the default.">
+                  <c:DeckLed x:Name="RecLamp" Width="9" Height="9" Color="#FF3B30" />
+                </Button>
+                <Button x:Name="RewindKey" Grid.Column="2" Theme="{StaticResource DeckKey}" ToolTip.Tip="Rewind to the start of the tape">
+                  <Path Classes="glyph" Data="M0,3.5 L4.5,0 V7 Z M4.5,3.5 L9,0 V7 Z" />
+                </Button>
+                <Button x:Name="PrevKey" Grid.Column="3" Theme="{StaticResource DeckKey}" ToolTip.Tip="Previous block">
+                  <Path Classes="glyph" Data="M0,0 H1.5 V7 H0 Z M1.5,3.5 L6.5,0 V7 Z" />
+                </Button>
+                <Button x:Name="PlayKey" Grid.Column="4" Theme="{StaticResource DeckKey}" ToolTip.Tip="Play">
+                  <Path Classes="glyph" Data="M0,0 L7,4 L0,8 Z" />
+                </Button>
+                <Button x:Name="NextKey" Grid.Column="5" Theme="{StaticResource DeckKey}" ToolTip.Tip="Next block">
+                  <Path Classes="glyph" Data="M0,0 L5,3.5 L0,7 Z M5,0 H6.5 V7 H5 Z" />
+                </Button>
+                <Button x:Name="StopKey" Grid.Column="6" Theme="{StaticResource DeckKey}" ToolTip.Tip="Stop">
+                  <Path Classes="glyph" Data="M0,0 H7 V7 H0 Z" />
+                </Button>
+                <TextBlock Grid.Row="1" Grid.Column="0" Classes="legend" Text="EJECT" Margin="0,4,0,0" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Classes="legend" Text="REC" Margin="0,4,0,0" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" Text="REW" Margin="0,4,0,0" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Classes="legend" Text="PREV" Margin="0,4,0,0" />
+                <TextBlock Grid.Row="1" Grid.Column="4" Classes="legend" Text="PLAY" Margin="0,4,0,0" />
+                <TextBlock Grid.Row="1" Grid.Column="5" Classes="legend" Text="NEXT" Margin="0,4,0,0" />
+                <TextBlock Grid.Row="1" Grid.Column="6" Classes="legend" Text="STOP" Margin="0,4,0,0" />
+              </Grid>
+            </StackPanel>
+
+
+            <Border Grid.Column="5" Classes="divider" />
+
+            <StackPanel Grid.Column="6" VerticalAlignment="Center">
+              <c:DeckKnob x:Name="VolumeKnob" Width="66" Height="66" Minimum="0" Maximum="100" SmallChange="5"
+                          ToolTip.Tip="Volume" />
+              <TextBlock Classes="legend" Text="VOLUME" Margin="0,1,0,0" />
+            </StackPanel>
           </Grid>
+        </c:DeckFaceplate>
+      </Border>
 
-        </StackPanel>
-      </c:DeckFaceplate>
-    </Border>
+      <!-- The receiver: picture, sound and speed settings, and the disk drives. The sections share
+           the deck's width evenly. -->
+      <Border x:Name="ReceiverDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
+        <c:DeckFaceplate Padding="16,10,16,9">
+          <Grid ColumnDefinitions="*,Auto,*,Auto,Auto,Auto,*,Auto,*" VerticalAlignment="Center">
 
-  </StackPanel>
+            <!-- Picture. -->
+            <StackPanel Grid.Column="0" Width="112" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Grid ColumnDefinitions="*,6,*" RowDefinitions="Auto,Auto" Margin="0,0,0,8">
+                <ToggleButton x:Name="CrtKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" ToolTip.Tip="CRT effects" />
+                <ToggleButton x:Name="ScanKey" Grid.Column="2" Theme="{StaticResource DeckToggle}" Width="50" Height="14" ToolTip.Tip="Scanlines" />
+                <TextBlock Grid.Row="1" Classes="legend" Text="CRT" Margin="0,3,0,0" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" Text="SCAN" Margin="0,3,0,0" />
+              </Grid>
+              <Grid ColumnDefinitions="34,*" RowDefinitions="18,6,18">
+                <TextBlock Classes="legend" Text="CURVE" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <c:DeckFader x:Name="CurveFader" Grid.Column="1" ToolTip.Tip="Screen curvature" />
+                <TextBlock Grid.Row="2" Classes="legend" Text="GLOW" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <c:DeckFader x:Name="GlowFader" Grid.Row="2" Grid.Column="1" ToolTip.Tip="Phosphor glow" />
+              </Grid>
+            </StackPanel>
+
+            <Border Grid.Column="1" Classes="divider" />
+
+            <!-- Sound: stereo mode and mute. -->
+            <StackPanel Grid.Column="2" Width="64" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <c:DeckKnob x:Name="StereoKnob" Width="64" Height="50" Positions="MONO,ACB,ABC" ToolTip.Tip="Stereo mode" />
+              <TextBlock Classes="legend" Text="STEREO" Margin="0,-9,0,10" />
+              <ToggleButton x:Name="MuteKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
+                            ToolTip.Tip="Mute" />
+              <TextBlock Classes="legend" Text="MUTE" Margin="0,3,0,0" />
+            </StackPanel>
+
+            <Border Grid.Column="3" Width="18" />
+
+            <!-- Speed: CPU and full speed. -->
+            <StackPanel Grid.Column="4" Width="64" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <c:DeckKnob x:Name="CpuKnob" Width="64" Height="50" Positions="1X,2X,4X" ToolTip.Tip="CPU speed" />
+              <TextBlock Classes="legend" Text="CPU" Margin="0,-9,0,10" />
+              <ToggleButton x:Name="TurboKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
+                            ToolTip.Tip="Full speed" />
+              <TextBlock Classes="legend" Text="TURBO" Margin="0,3,0,0" />
+            </StackPanel>
+
+            <Border Grid.Column="5" Classes="divider" />
+
+            <!-- The +3's drives, after its own: a slot, a busy light and an eject button each. -->
+            <StackPanel Grid.Column="6" Width="150" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <StackPanel Spacing="3">
+                  <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
+                  <Border Height="36" CornerRadius="3" Background="#141517" BorderBrush="#050506" BorderThickness="1"
+                          BoxShadow="inset 0 1 2 0 #A0000000">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
+                      <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock Classes="legend" Text="A" />
+                        <c:DeckLed x:Name="DriveALed" Width="7" Height="7" Color="#FF3B30" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                        <Border Height="8" CornerRadius="2" Background="#020202" BorderBrush="#2E3034" BorderThickness="0,0,0,1">
+                          <!-- A disk in the slot: its case, with the label edge showing. -->
+                          <Border x:Name="DriveADisk" IsVisible="False" Margin="2,1,2,1" CornerRadius="1" Background="#34363B">
+                            <Border Width="34" HorizontalAlignment="Left" Margin="6,1,0,1" CornerRadius="1" Background="#D9D3BC" />
+                          </Border>
+                        </Border>
+                        <TextBlock x:Name="DriveAName" Classes="bayname" Text="NO DISK" />
+                      </StackPanel>
+                      <Button x:Name="DriveAEject" Grid.Column="2" Theme="{StaticResource DeckKey}" Width="22" Height="16"
+                              Margin="7,0,0,0" ToolTip.Tip="Eject the disk from drive A, or insert one when it is empty">
+                        <Path Classes="glyph" Data="M0,4 L3.5,0 L7,4 Z M0,5.2 H7 V6.4 H0 Z" />
+                      </Button>
+                    </Grid>
+                  </Border>
+                </StackPanel>
+                <StackPanel Spacing="3">
+                  <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
+                  <Border Height="36" CornerRadius="3" Background="#141517" BorderBrush="#050506" BorderThickness="1"
+                          BoxShadow="inset 0 1 2 0 #A0000000">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
+                      <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock Classes="legend" Text="B" />
+                        <c:DeckLed x:Name="DriveBLed" Width="7" Height="7" Color="#FF3B30" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                        <Border Height="8" CornerRadius="2" Background="#020202" BorderBrush="#2E3034" BorderThickness="0,0,0,1">
+                          <!-- A disk in the slot: its case, with the label edge showing. -->
+                          <Border x:Name="DriveBDisk" IsVisible="False" Margin="2,1,2,1" CornerRadius="1" Background="#34363B">
+                            <Border Width="34" HorizontalAlignment="Left" Margin="6,1,0,1" CornerRadius="1" Background="#D9D3BC" />
+                          </Border>
+                        </Border>
+                        <TextBlock x:Name="DriveBName" Classes="bayname" Text="NO DISK" />
+                      </StackPanel>
+                      <Button x:Name="DriveBEject" Grid.Column="2" Theme="{StaticResource DeckKey}" Width="22" Height="16"
+                              Margin="7,0,0,0" ToolTip.Tip="Eject the disk from drive B, or insert one when it is empty">
+                        <Path Classes="glyph" Data="M0,4 L3.5,0 L7,4 Z M0,5.2 H7 V6.4 H0 Z" />
+                      </Button>
+                    </Grid>
+                  </Border>
+                </StackPanel>
+            </StackPanel>
+
+          </Grid>
+        </c:DeckFaceplate>
+      </Border>
+
+    </Panel>
+  </Grid>
 </UserControl>
