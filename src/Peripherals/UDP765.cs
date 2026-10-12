@@ -1,36 +1,66 @@
 namespace Peripherals
 {
     /// <summary>
-    /// µPD765 floppy controller (+3 disk) — managed stub.
-    ///
-    /// The original implementation lived in the native x86 fdc765.dll, which was dropped in the
-    /// cross-platform port. Public surface preserved; status/data reads return 0xFF ("drive not
-    /// ready") so +3DOS fails cleanly instead of hanging. Replace the bodies with a managed FDC
-    /// when +3 disk support returns.
+    /// µPD765 floppy controller for the +3: the surface zx_plus3 talks to, over the managed port of
+    /// fdc765 (<see cref="Fdc765"/>). Before the cross-platform port this wrapped the native x86
+    /// fdc765.dll through P/Invoke, with the same calls.
     /// </summary>
     public class UDP765
     {
+        private Fdc765 fdc;
+
         public bool DiskWriteProtect {
             get;
             set;
         }
 
-        public byte DiskReadByte() { return 0xFF; }
+        /// <summary>The controller, once initialised; null before that and after shutdown.</summary>
+        public Fdc765 Controller => fdc;
 
-        public void DiskWriteByte(byte _data) { }
+        public byte DiskReadByte() {
+            if (fdc != null)
+                return fdc.DataPortRead();
 
-        public byte DiskStatusRead() { return 0xFF; }
+            return 0;
+        }
 
-        public void DiskMotorState(byte _state) { }
+        public void DiskWriteByte(byte _data) {
+            if ((fdc != null) && (!DiskWriteProtect))
+                fdc.DataPortWrite(_data);
+        }
 
-        public void DiskInsert(string filename, byte _unit) { }
+        public byte DiskStatusRead() {
+            if (fdc != null)
+                return fdc.StatusPortRead();
 
-        public void DiskEject(byte _unit) { }
+            return 0;
+        }
 
-        public void DiskReset() { }
+        public void DiskMotorState(byte _state) {
+            fdc?.SetMotorState(_state);
+        }
 
-        public void DiskInitialise() { }
+        public void DiskInsert(string filename, byte _unit) {
+            fdc?.InsertDisk(filename, _unit);
+        }
 
-        public void DiskShutdown() { }
+        public void DiskEject(byte _unit) {
+            fdc?.EjectDisk(_unit);
+        }
+
+        public void DiskReset() {
+            fdc?.ResetDevice();
+        }
+
+        public void DiskInitialise() {
+            fdc?.Dispose();
+            fdc = new Fdc765();
+        }
+
+        /// <summary>Eject both drives, writing back any disk the Spectrum changed, and release the controller.</summary>
+        public void DiskShutdown() {
+            fdc?.Dispose();
+            fdc = null;
+        }
     }
 }

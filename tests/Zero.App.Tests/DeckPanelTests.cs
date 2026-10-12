@@ -166,6 +166,52 @@ namespace Zero.App.Tests
         }
 
         [AvaloniaFact]
+        public void The_display_shows_the_disks_in_the_plus3_drives()
+        {
+            MainWindow w = Boot();
+            var d = w.Deck;
+            Assert.True(d.VfdDisk.Classes.Contains("off"));         // a 48K has no drives
+            Assert.False(w.DiskEjectA.IsEnabled);
+
+            string dir = Path.Combine(Path.GetTempPath(), "zero-deck-disk-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(dir);
+            try
+            {
+                string disk = Path.Combine(dir, "games.dsk");
+                Peripherals.DskImage.WriteBlankPlus3(disk);
+                Assert.True(w.Session.InsertDiskAsync(0, disk).Result); // switches to the +3
+                PumpUntil(() => d.VfdDisk.Text == "A:GAMES B:--");
+                Assert.False(d.VfdDisk.Classes.Contains("off"));
+                Assert.True(w.DiskEjectA.IsEnabled);
+                Assert.False(w.DiskEjectB.IsEnabled);
+                Capture(w, "deck-disk");
+
+                w.DiskEjectA.Command.Execute(null);
+                PumpUntil(() => d.VfdDisk.Text == "A:-- B:--");
+                Assert.False(w.DiskEjectA.IsEnabled);
+            }
+            finally
+            {
+                w.Close();
+                try { Directory.Delete(dir, true); } catch { }
+            }
+        }
+
+        [AvaloniaFact]
+        public void A_long_message_is_trimmed_rather_than_widening_the_deck()
+        {
+            MainWindow w = Boot();
+            double width = w.Deck.CassetteDeck.Bounds.Width;
+            Rect screen = w.Display.Bounds;
+            w.Deck.ShowMessage(new string('X', 300));
+            w.RefreshMenuState();
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(width, w.Deck.CassetteDeck.Bounds.Width, 1);
+            Assert.Equal(screen, w.Display.Bounds);
+            w.Close();
+        }
+
+        [AvaloniaFact]
         public void The_power_key_quits()
         {
             Func<EmulatorSettings> loader = MainWindow.SettingsLoader;

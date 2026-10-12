@@ -9,8 +9,8 @@ namespace Zero.Core.Tests
 {
     /// <summary>
     /// Boots every supported machine headless from its ROM and checks the expected firmware
-    /// screen appears. This is the acceptance test for the managed FDC stubs: +3 and Pentagon
-    /// must still reach their menus with no disk controller behind the ports.
+    /// screen appears. The +3 must reach its menu with the ported floppy controller behind its
+    /// ports and no disk in the drive, and the Pentagon with its TR-DOS controller still a stub.
     /// </summary>
     public class MachineBootTests
     {

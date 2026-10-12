@@ -22,6 +22,7 @@ namespace Zero.App
         internal NativeMenuItem RzxRecordItem, RZXRecordStopItem, RZXRecordContinueItem, RzxBookmarkItem, RzxRollbackItem, RzxFinishItem, RzxDiscardItem;
         internal NativeMenuItem TapeDeckItem, TapePlayItem, TapeStopItem, TapeRewindItem;
         internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFastLoadItem, TapeRomTrapsItem;
+        internal NativeMenuItem DiskEjectA, DiskEjectB;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
         internal NativeMenuItem CrtItem;
         internal NativeMenuItem DeckItem, ReceiverItem, FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
@@ -130,6 +131,16 @@ namespace Zero.App
                 Sep(),
                 Item("Set SAVE Target (.tap)…", () => _ = SetTapSaveTargetAsync()));
 
+            // The +3's drives. Inserting a disk switches to the +3 if need be.
+            var disk = Submenu("Disk",
+                Item("Insert Disk in Drive A…", () => _ = InsertDiskAsync(0)),
+                Item("Insert Disk in Drive B…", () => _ = InsertDiskAsync(1)),
+                Sep(),
+                DiskEjectA = Item("Eject Drive A", () => _session.EjectDisk(0)),
+                DiskEjectB = Item("Eject Drive B", () => _session.EjectDisk(1)),
+                Sep(),
+                Item("New Blank Disk…", () => _ = NewBlankDiskAsync()));
+
             var sound = Submenu("Sound",
                 MuteItem = Item("Mute", () => SetMute(!_settings.Audio.Mute), G(Key.F8), checkable: true),
                 Submenu("Volume",
@@ -192,7 +203,7 @@ namespace Zero.App
                 Item("About Zero X", ShowAbout));
 
             var root = new NativeMenu();
-            foreach (NativeMenuItem m in new[] { file, machine, tape, sound, view, input, help }) root.Items.Add(m);
+            foreach (NativeMenuItem m in new[] { file, machine, tape, disk, sound, view, input, help }) root.Items.Add(m);
             return root;
         }
 
@@ -376,6 +387,9 @@ namespace Zero.App
             TapeEdgeLoadItem.IsChecked = _settings.Tape.EdgeLoad;
             TapeFastLoadItem.IsChecked = _settings.Tape.FastLoad;
             TapeRomTrapsItem.IsChecked = _settings.Tape.RomTraps;
+
+            DiskEjectA.IsEnabled = _session.DiskInDrive(0) != null;
+            DiskEjectB.IsEnabled = _session.DiskInDrive(1) != null;
 
             MuteItem.IsChecked = _settings.Audio.Mute;
             Ay48kItem.IsChecked = _settings.Audio.EnableAYFor48K;

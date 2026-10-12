@@ -87,6 +87,7 @@ namespace Zero.App
             _session.StateChanged += _ => Dispatcher.UIThread.Post(RefreshMenuState);
             _session.FileLoaded += path => Dispatcher.UIThread.Post(() => { RebuildRecentMenu(); SetStatus("Loaded " + Path.GetFileName(path)); });
             _session.Tape.Changed += () => Dispatcher.UIThread.Post(RefreshTapeStatus);
+            _session.DisksChanged += () => Dispatcher.UIThread.Post(RefreshMenuState);
             _session.Tape.BlockSaved += path => Dispatcher.UIThread.Post(() => { SetStatus("Saved block to " + Path.GetFileName(path)); RefreshDeck(); });
 
             NativeMenu.SetMenu(this, BuildMenu());
@@ -459,6 +460,7 @@ namespace Zero.App
             new FilePickerFileType("All supported files") { Patterns = EmulatorSession.AllOpenableExtensions.Select(x => "*" + x).ToArray() },
             new FilePickerFileType("Snapshots") { Patterns = new[] { "*.szx", "*.sna", "*.z80" } },
             new FilePickerFileType("Tapes") { Patterns = new[] { "*.pzx", "*.tap", "*.tzx", "*.csw" } },
+            new FilePickerFileType("+3 disks") { Patterns = new[] { "*.dsk" } },
             new FilePickerFileType("Action Replay recordings") { Patterns = new[] { "*.rzx" } },
             new FilePickerFileType("Screens") { Patterns = new[] { "*.scr" } },
             new FilePickerFileType("ZIP archives") { Patterns = new[] { "*.zip" } },
@@ -635,6 +637,43 @@ namespace Zero.App
             Display.Focus();
         }
 
+        // ------------------------------------------------------------------ disk menu
+
+        private static readonly FilePickerFileType[] DiskFilters =
+        {
+            new FilePickerFileType("+3 disks") { Patterns = new[] { "*.dsk" } },
+            FilePickerFileTypes.All
+        };
+
+        private async Task InsertDiskAsync(int unit)
+        {
+            bool wasPaused = _session.IsPaused;
+            _session.Pause();
+            string path = await PickOpenFileAsync($"Insert Disk in Drive {(char)('A' + unit)}", DiskFilters);
+            if (!wasPaused) _session.Resume();
+            if (path != null && await _session.InsertDiskAsync(unit, path))
+                SetStatus($"Drive {(char)('A' + unit)}: {Path.GetFileName(path)}");
+            Display.Focus();
+        }
+
+        /// <summary>
+        /// Make a formatted +3 disk and put it in drive A. +3 BASIC's FORMAT cannot do this here: the
+        /// controller, like the DLL it was ported from, does not format.
+        /// </summary>
+        private async Task NewBlankDiskAsync()
+        {
+            bool wasPaused = _session.IsPaused;
+            _session.Pause();
+            string path = await PickSaveFileAsync("New Blank Disk", "blank.dsk", "dsk", "+3 disk");
+            if (!wasPaused) _session.Resume();
+            if (path == null) return;
+            try { Peripherals.DskImage.WriteBlankPlus3(path); }
+            catch (Exception ex) { ShowError("Could not create the disk: " + ex.Message); return; }
+            if (await _session.InsertDiskAsync(0, path))
+                SetStatus("Drive A: new disk " + Path.GetFileName(path));
+            Display.Focus();
+        }
+
         private void ShowTapeDeck()
         {
             if (_tapeDeckWindow == null)
@@ -716,7 +755,7 @@ namespace Zero.App
         private void ShowAbout() => _ = MessageDialog.ShowAsync(this, "About Zero X",
             "Zero X — a ZX Spectrum emulator\nCopyright © 2009-2026 Arjun Nair\n\n" +
             "Cross-platform build: .NET " + Environment.Version + ", Avalonia UI, SDL3 audio & gamepads.\n" +
-            "Emulates the 48K, 128K, 128Ke, +3 (no disk) and Pentagon 128K.");
+            "Emulates the 48K, 128K, 128Ke, +3 (with its disk drives) and Pentagon 128K.");
 
         private void ToggleTape()
         {

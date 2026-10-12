@@ -61,9 +61,11 @@ namespace Zero.App.Controls
             VfdStereo.Text = settings.Audio.StereoSoundMode switch { 0 => "MONO", 2 => "ABC", _ => "ACB" };
             SetLit(VfdTurbo, settings.Emulation.EmulationSpeed > 1);
             SetLit(VfdMute, settings.Audio.Mute);
-            // The +3 and the Pentagon (TR-DOS) have drives. Zero cannot emulate disks yet, so they
-            // always read empty.
-            SetLit(VfdDisk, session.Model is MachineModel._plus3 or MachineModel._pentagon);
+            // The +3's drives. (The Pentagon's TR-DOS drives are not emulated, so it reads as having none.)
+            bool drives = session.HasDiskDrives;
+            VfdDisk.Text = $"A:{DiskLabel(session.DiskInDrive(0))} B:{DiskLabel(session.DiskInDrive(1))}";
+            SetLit(VfdDisk, drives);
+            SetLit(VfdDiskActive, drives && session.DiskMotorOn);
 
             if (!tape.IsInserted)
             {
@@ -131,6 +133,14 @@ namespace Zero.App.Controls
 
         /// <summary>The CPU multiplier for each stop on the CPU knob.</summary>
         public static int CpuMultiplierAt(double stop) => stop >= 2 ? 4 : stop >= 1 ? 2 : 1;
+
+        /// <summary>A disk's name as the display shows it: the file name, short and upper case.</summary>
+        internal static string DiskLabel(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return "--";
+            string name = System.IO.Path.GetFileNameWithoutExtension(path).ToUpperInvariant();
+            return name.Length > 8 ? name.Substring(0, 8) : name;
+        }
 
         private static string RecordTarget(TapeDeck tape) =>
             System.IO.Path.GetFileNameWithoutExtension(tape.TapSavePath ?? "").ToUpperInvariant();

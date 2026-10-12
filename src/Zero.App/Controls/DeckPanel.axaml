@@ -210,7 +210,9 @@
 
           <Border Grid.Column="3" Classes="divider" />
 
-          <StackPanel Grid.Column="4" MinWidth="236" Spacing="6">
+          <!-- A fixed width: the decks are measured at their natural size, so without one a long
+               message on the display would widen the deck instead of being trimmed. -->
+          <StackPanel Grid.Column="4" Width="240" Spacing="6">
             <Border Height="52" CornerRadius="3" Background="#050B0B" BorderBrush="#000000" BorderThickness="1"
                     BoxShadow="inset 0 1 3 0 #C0000000">
               <Grid Margin="7,3,7,3" RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,Auto">
@@ -236,8 +238,12 @@
                     <TextBlock x:Name="VfdCounter" Classes="vfd" FontSize="18" FontWeight="Bold" Text="000" />
                   </Panel>
                 </StackPanel>
-                <!-- Disk drives: lit on the machines that have them, unlit segments on those that don't. -->
-                <TextBlock x:Name="VfdDisk" Grid.Row="2" Classes="vfd off" FontSize="8" Text="DISK A:-- B:--" />
+                <!-- Disk drives: the disk in each drive, lit on the +3 and unlit segments elsewhere.
+                     DISK lights while the drive motor runs. -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="5">
+                  <TextBlock x:Name="VfdDiskActive" Classes="vfd off" FontSize="8" Text="DISK" />
+                  <TextBlock x:Name="VfdDisk" Classes="vfd off" FontSize="8" Text="A:-- B:--" />
+                </StackPanel>
                 <TextBlock x:Name="VfdFps" Grid.Row="2" Grid.Column="1" Classes="vfd" FontSize="8" HorizontalAlignment="Right" Text="" />
               </Grid>
             </Border>

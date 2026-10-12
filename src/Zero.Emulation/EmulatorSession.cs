@@ -405,6 +405,7 @@ namespace Zero.Emulation
 
             ApplySettingsTo(zx);
             Tape.Attach(zx);
+            AttachDisks(zx);
 
             _zx = zx;
             Model = model;
@@ -560,13 +561,19 @@ namespace Zero.Emulation
         private static readonly byte[] AutoLoadPlus3Keys =                                    // (down) ENTER  load "t:":load ""  ENTER
             { 10, 13, 108, 111, 97, 100, 32, 34, 116, 58, 34, 58, 108, 111, 97, 100, 32, 34, 34, 13 };
 
-        /// <summary>Hard-reset and then type LOAD "" once the ROM is ready (emulation thread).</summary>
-        private void BeginAutoLoad()
+        /// <summary>
+        /// Hard-reset and then type LOAD "" once the ROM is ready (emulation thread). A machine's
+        /// own key sequence can be given instead, as the +3 does to boot a disk.
+        /// </summary>
+        private void BeginAutoLoad(byte[] keys = null)
         {
             ResetCore(true);
             _autoLoadPending = true;
             _autoLoadIndex = 0;
+            _autoLoadKeys = keys;
         }
+
+        private byte[] _autoLoadKeys;
 
         private void AutoLoadStep(zx_spectrum zx)
         {
@@ -574,7 +581,8 @@ namespace Zero.Emulation
                 return; // previous key not consumed yet
 
             byte[] keys;
-            if (zx.model == MachineModel._plus3) keys = AutoLoadPlus3Keys;
+            if (_autoLoadKeys != null) keys = _autoLoadKeys;
+            else if (zx.model == MachineModel._plus3) keys = AutoLoadPlus3Keys;
             else if (zx.model == MachineModel._48k) keys = AutoLoad48Keys;
             else keys = null; // 128K menus: ENTER selects "Tape Loader"
 

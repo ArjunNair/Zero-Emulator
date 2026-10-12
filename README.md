@@ -21,7 +21,7 @@ dotnet test tests/Zero.App.Tests           # headless UI tests
 ```
 
 See [docs/porting-status.md](docs/porting-status.md) for what is in this build, what was cut for v1
-(TZX/CSW, disks, debugger) and how it differs from the Windows-only original, and
+(TZX/CSW, TR-DOS disks, debugger) and how it differs from the Windows-only original, and
 [packaging/README.md](packaging/README.md) for self-contained builds.
 
 ## Features 
@@ -31,7 +31,7 @@ See [docs/porting-status.md](docs/porting-status.md) for what is in this build, 
 
 * Supports the following snapshot formats: SZX, SNA, and the Z80. It can save to SNA and SZX formats.
 
-* Supports the following disk formats: DSK, TRD and SCL.
+* Supports +3 disk images (DSK and extended DSK) in two drives, and can make blank formatted disks. TR-DOS images (TRD, SCL) for the Pentagon are not supported yet.
 
 * Supports the playback and recording of RZX files, with bookmarks and rollback. Stopping and resuming of recordings is also supported.
 
@@ -182,4 +182,5 @@ Additional contributors whose feedback have helped in shaping the emulator are c
 
 ## License & Copyrights
 Copyright (c) 2009-2026 Arjun Nair. See the LICENSE file for license rights and limitations (MIT).  
-Zero uses various public domain icons. Copyright rests with their respective authors. 
+Zero uses various public domain icons. Copyright rests with their respective authors.  
+The +3 floppy disk controller is a C# port of [fdc765](https://github.com/leiradel/fdc765) by Andre Leiradella (MIT), itself a C port of the freeware fdc765.dll. 

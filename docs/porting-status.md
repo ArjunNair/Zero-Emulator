@@ -82,9 +82,15 @@ where the work stands and every place the implementation deliberately deviates f
 
 ## Known gaps / v1 cut list (unchanged from the plan)
 
-TZX/CSW tapes (converter needed), +3 and TR-DOS disks (managed FDCs needed), debugger, library browser,
+TZX/CSW tapes (converter needed), TR-DOS disks for the Pentagon (a managed WD1793 needed), debugger, library browser,
 BASIC importer (the old one shelled out to a Windows-only `zmakebas.exe`, now removed; a C# port of
 zmakebas next to `TapFile` is the natural v1.1 replacement), file associations.
+
++3 disks are back: `src/Peripherals/Fdc765.cs` is a C# port of [fdc765](https://github.com/leiradel/fdc765),
+the C port of the fdc765.dll the Windows build used, behind the same `UDP765` surface `zx_plus3` always
+called. DSK and extended DSK, two drives, changes written back to the image (extended DSKs are read-only,
+as they were in the DLL). Like the DLL it cannot format, so Disk > New Blank Disk makes formatted images.
+`Fdc765Tests` drive it port by port; `Plus3DiskTests` boot +3DOS and CAT, SAVE and LOAD through it.
 
 RZX recording, bookmarks, rollback, stop/resume and finalise are all wired up (File > RZX Recording),
 and `tests/Zero.Core.Tests/RzxContinueTests.cs` round-trips a recording across three separate sessions.

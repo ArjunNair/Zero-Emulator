@@ -7,6 +7,9 @@ v 1.1
 * Refactored command line arguments for cross platform usage.
 * Fixed Kempston Joystick emulation
 * Fixed tapes always playing at full speed, even with Edge and Fast loading switched off.
+* +3 disk drives are back: DSK and extended DSK images in drives A and B (Disk menu, or open a .dsk),
+  written back when changed, and Disk > New Blank Disk for formatted disks. The floppy controller is a
+  C# port of Andre Leiradella's fdc765, the C port of the fdc765.dll the Windows version used.
 * Added a hi-fi stack under the screen at 2x and up, each part switchable from View > Hi-Fi Decks:
   - a cassette deck, in place of the status bar: power key, machine selector, a VFD with a three-digit tape
     counter, tape transport keys with REC for choosing the SAVE tape, and volume;
