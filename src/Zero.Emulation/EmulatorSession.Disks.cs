@@ -79,8 +79,10 @@ namespace Zero.Emulation
         /// drives glow dim otherwise: between commands the µPD765 polls the drives by cycling its
         /// unit select lines, and with only US0 wired that flips the select between A and B, each
         /// selected half the time. While a command holds one drive selected the other is dark.
-        /// (From the µPD765 data sheet and owners' reports of the drive LED glowing at rest and
-        /// going bright on access; not from a schematic.) The Pentagon's lights are off at rest.
+        /// The glow does not need a disk in the drive: polling selects it all the same. (From the
+        /// µPD765 data sheet and owners' reports of the drive LED glowing at rest and going bright
+        /// on access, one of whom confirmed it glows with the drive empty; not from a schematic.)
+        /// The Pentagon's lights are off at rest.
         /// A stock +3 has no drive B, so an empty B stands for none fitted and stays dark, even
         /// when +3DOS looks for one.
         /// </summary>

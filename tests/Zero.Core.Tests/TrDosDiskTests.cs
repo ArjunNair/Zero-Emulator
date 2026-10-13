@@ -117,6 +117,7 @@ namespace Zero.Core.Tests
             await Boot(disk);
             await Type($"{Down}{Down}{Down}{Down}{Enter}");
             await WaitForScreen("TR-DOS Ver 5.03");
+            await WaitForScreen("A>");                      // keys typed before the prompt are thrown away
         }
 
         /// <summary>The menu's fourth entry: 48 BASIC, where programs are typed and TR-DOS is called by USR.</summary>
