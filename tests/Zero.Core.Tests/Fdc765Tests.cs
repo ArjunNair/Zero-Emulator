@@ -192,6 +192,33 @@ namespace Zero.Core.Tests
         }
 
         [Fact]
+        public void Counts_the_commands_that_select_each_drive()
+        {
+            using var fdc = Ready(BlankDisk());
+            Assert.Equal(0, fdc.Selections(0));
+            Assert.Equal(0, fdc.Selections(1));
+
+            Send(fdc, 0x03, 0xaf, 0x03);                      // SPECIFY: no drive
+            Send(fdc, 0x10);                                  // VERSION: no drive
+            Receive(fdc);
+            Assert.Equal(0, fdc.Selections(0) + fdc.Selections(1));
+
+            SeekTo(fdc, 2);                                   // a seek on A (and SENSE INTERRUPT, which selects none)
+            Assert.Equal(1, fdc.Selections(0));
+            Send(fdc, 0x46, 0x00, 2, 0, 3, 2, 3, 0x2a, 0xff); // a read on A
+            Receive(fdc, 512);
+            Receive(fdc, 7);
+            Assert.Equal(2, fdc.Selections(0));
+
+            Send(fdc, 0x04, 0x01);                            // SENSE DRIVE STATUS on B
+            Receive(fdc);
+            Send(fdc, 0x04, 0x02);                            // unit 2 is A again: only US0 is wired
+            Receive(fdc);
+            Assert.Equal(1, fdc.Selections(1));
+            Assert.Equal(3, fdc.Selections(0));
+        }
+
+        [Fact]
         public void Reads_an_extended_dsk()
         {
             byte[] data = Pattern(29);

@@ -19,7 +19,7 @@ namespace Zero.Emulation
         public static readonly string[] DiskExtensions = { ".dsk", ".trd", ".scl" };
 
         public static IEnumerable<string> AllOpenableExtensions =>
-            SnapshotExtensions.Concat(TapeExtensions).Concat(OtherExtensions).Append(".dsk");
+            SnapshotExtensions.Concat(TapeExtensions).Concat(OtherExtensions).Concat(DiskExtensions);
 
         /// <summary>
         /// Called (on the emulation thread) when a ZIP holds several loadable files. Return the entry to
@@ -87,18 +87,17 @@ namespace Zero.Emulation
                     }
                     case ".zip": return LoadArchive(name, readBytes());
                     case ".dsk":
-                    {
-                        // The drive works on the file itself (it writes changes back), so a disk
-                        // from an archive gets a file of its own first.
-                        if (diskPath == null) diskPath = WriteTemp(name, readBytes());
-                        if (!InsertDiskCore(0, diskPath)) return false;
-                        if (Tape.AutoLoad) BeginAutoLoad(AutoLoadPlus3DiskKeys);
-                        return true;
-                    }
                     case ".trd":
                     case ".scl":
-                        Error?.Invoke("TR-DOS disk images (Pentagon) are not supported yet. +3 disk images (DSK) are.");
-                        return false;
+                    {
+                        // The drive works on the file itself (it writes changes back), so a disk
+                        // from an archive gets a file of its own first. Inserting it switches to
+                        // the machine that takes it: a DSK the +3, a TRD or SCL the Pentagon.
+                        if (diskPath == null) diskPath = WriteTemp(name, readBytes());
+                        if (!InsertDiskCore(0, diskPath)) return false;
+                        if (Tape.AutoLoad) BeginAutoLoad(Model == MachineModel._pentagon ? AutoLoadTrDosKeys : AutoLoadPlus3DiskKeys);
+                        return true;
+                    }
                     default:
                         Error?.Invoke("Sorry, Zero doesn't recognise this file format: " + ext);
                         return false;

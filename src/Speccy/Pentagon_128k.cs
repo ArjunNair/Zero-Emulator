@@ -11,6 +11,9 @@ namespace Speccy
         protected bool[] diskInserted = { false, false, false, false };
 
         private WD1793 wdDrive = new WD1793();
+
+        /// <summary>The Beta 128 disk interface, for reading the drives' state (which is busy).</summary>
+        public WD1793 FloppyController => wdDrive;
         private int pixelData = 0;
         private int pixelsWritten = 0;
 
@@ -127,6 +130,7 @@ namespace Speccy
         public override void Reset(bool coldBoot)
         {
             base.Reset(true);
+            wdDrive.DiskReset();
             PageReadPointer[0] = ROMpage[0];
             PageReadPointer[1] = ROMpage[1];
             PageReadPointer[2] = RAMpage[(int)RAM_BANK.FIVE_LOW];  //Bank 5

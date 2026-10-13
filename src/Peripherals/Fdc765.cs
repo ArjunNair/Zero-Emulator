@@ -12,6 +12,9 @@
 // Where this differs from the C, it is to fix a problem the C port introduced or to stay inside
 // memory C# will not let us overrun. Each such place is marked "Port fix".
 //
+// One thing the C does not have is marked "Port addition": a count of drive selections, for the
+// emulator's drive lights.
+//
 // Copyright 2025 Andre Leiradella (fdc765 C port). MIT licence:
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 // and associated documentation files (the "Software"), to deal in the Software without
@@ -483,7 +486,22 @@ namespace Peripherals
             callback(bytes);
         }
 
-        private void GetUnitPtr(Context* ctx, byte unit) => ctx->eax.disk = Unit(unit);
+        private void GetUnitPtr(Context* ctx, byte unit)
+        {
+            _selections[unit & 1]++;   // Port addition: see Selections
+            ctx->eax.disk = Unit(unit);
+        }
+
+        private readonly int[] _selections = new int[2];
+
+        /// <summary>
+        /// Port addition, for the drive lights: how many commands have selected this drive (a read,
+        /// write, Read ID, seek, recalibrate or Sense Drive Status). Between commands the µPD765
+        /// polls the drives, which on the +3 (only US0 wired) flips the select line between A and
+        /// B; during a command it holds the one selected. The controller has no timing, so a count
+        /// that has moved says that drive was held selected since it was last looked at.
+        /// </summary>
+        public int Selections(int unit) => _selections[unit & 1];
 
         private void SetFastDisk(Context* ctx) => ActiveCallback?.Invoke();
 

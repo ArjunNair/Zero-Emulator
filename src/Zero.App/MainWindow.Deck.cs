@@ -24,6 +24,8 @@ namespace Zero.App
             d.DeckRequested += SelectDeck;
             d.DriveAEject.Click += (_, __) => EjectOrInsertDisk(0);
             d.DriveBEject.Click += (_, __) => EjectOrInsertDisk(1);
+            d.DriveCEject.Click += (_, __) => EjectOrInsertDisk(2);
+            d.DriveDEject.Click += (_, __) => EjectOrInsertDisk(3);
 
             d.PauseKey.Click += (_, __) => TogglePause();
             d.PowerKey.Click += (_, __) => Close(); // asks first when Confirm on Exit is set

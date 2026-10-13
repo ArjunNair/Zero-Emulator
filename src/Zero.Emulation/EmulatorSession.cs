@@ -259,10 +259,12 @@ namespace Zero.Emulation
 
             ApplyInput(zx);
 
+            int ran = 0;
             if (zx.doRun)
             {
                 zx.Run();
                 int frames = Math.Max(1, zx.emulationSpeed);
+                ran = frames;
                 Interlocked.Add(ref _emulatedFrames, frames);
                 Tape.AdvanceCounter(frames / 50.0); // near enough 1/50 s on every model
                 PaceTapePlayback(zx);
@@ -270,6 +272,7 @@ namespace Zero.Emulation
 
             if (zx.isResetOver && _autoLoadPending)
                 AutoLoadStep(zx);
+            TrackDiskActivity(zx, ran);
 
             PublishFrame(zx);
             zx.needsPaint = false;
@@ -389,6 +392,7 @@ namespace Zero.Emulation
             Tape.Detach();
             if (_zx != null)
             {
+                DetachDisks(_zx);
                 _zx.Shutdown();
                 _zx = null;
             }
@@ -571,14 +575,30 @@ namespace Zero.Emulation
             _autoLoadPending = true;
             _autoLoadIndex = 0;
             _autoLoadKeys = keys;
+            _autoLoadWait = 0;
         }
 
         private byte[] _autoLoadKeys;
+
+        /// <summary>
+        /// In a key sequence, not a key: wait <see cref="AutoLoadPauseFrames"/> frames before the next
+        /// one, for a ROM that takes a moment to start up and drops keys typed before it is ready.
+        /// </summary>
+        private const byte AutoLoadPause = 0;
+        private const int AutoLoadPauseFrames = 50;
+        private int _autoLoadWait;
 
         private void AutoLoadStep(zx_spectrum zx)
         {
             if ((zx.PeekByteNoContend(SV_FLAGS) & 0x20) != 0)
                 return; // previous key not consumed yet
+            if (_autoLoadWait > 0) { _autoLoadWait--; return; }
+            if (_autoLoadKeys != null && _autoLoadKeys[_autoLoadIndex] == AutoLoadPause)
+            {
+                _autoLoadWait = AutoLoadPauseFrames;
+                if (++_autoLoadIndex >= _autoLoadKeys.Length) _autoLoadPending = false;
+                return;
+            }
 
             byte[] keys;
             if (_autoLoadKeys != null) keys = _autoLoadKeys;

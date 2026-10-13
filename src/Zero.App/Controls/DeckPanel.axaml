@@ -168,6 +168,10 @@
       <Setter Property="Background" Value="#5EF2DC" />
       <Setter Property="BoxShadow" Value="0 0 4 1 #905EF2DC" />
     </Style>
+    <!-- Part lit: a +3 drive's light at rest, its select line pulsed by the controller's polling. -->
+    <Style Selector="Border.vfdled.dim">
+      <Setter Property="Background" Value="#2F9488" />
+    </Style>
     <Style Selector="TextBlock.vfd.off">
       <Setter Property="Foreground" Value="#163A36" />
       <Setter Property="Effect" Value="{x:Null}" />
@@ -278,12 +282,21 @@
                   </StackPanel>
                   <!-- Disk drives, a line each: a segment that lights while that drive is busy, then the
                        disk in it (its file name). Lit when the drive holds a disk; unlit when it is
-                       empty or the machine has no drives. -->
-                  <Grid Grid.Row="2" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
-                    <Border x:Name="VfdLedA" Classes="vfdled" />
-                    <TextBlock x:Name="VfdDiskA" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="A: --" />
-                    <Border x:Name="VfdLedB" Grid.Row="1" Classes="vfdled" />
-                    <TextBlock x:Name="VfdDiskB" Grid.Row="1" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="B: --" />
+                       empty or the machine has no drives. The Pentagon's C and D take a second
+                       column; with only A and B, their column spans both. -->
+                  <Grid Grid.Row="2" ColumnDefinitions="*,*">
+                    <Grid x:Name="VfdDrivesAB" Grid.ColumnSpan="2" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                      <Border x:Name="VfdLedA" Classes="vfdled" />
+                      <TextBlock x:Name="VfdDiskA" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="A: --" />
+                      <Border x:Name="VfdLedB" Grid.Row="1" Classes="vfdled" />
+                      <TextBlock x:Name="VfdDiskB" Grid.Row="1" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="B: --" />
+                    </Grid>
+                    <Grid x:Name="VfdDrivesCD" Grid.Column="1" IsVisible="False" Margin="6,0,0,0" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                      <Border x:Name="VfdLedC" Classes="vfdled" />
+                      <TextBlock x:Name="VfdDiskC" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="C: --" />
+                      <Border x:Name="VfdLedD" Grid.Row="1" Classes="vfdled" />
+                      <TextBlock x:Name="VfdDiskD" Grid.Row="1" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="D: --" />
+                    </Grid>
                   </Grid>
                   <TextBlock x:Name="VfdFps" Grid.Row="2" Grid.Column="1" Classes="vfd" FontSize="8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="" />
                 </Grid>
@@ -379,59 +392,104 @@
 
             <Border Grid.Column="5" Classes="divider" />
 
-            <!-- The +3's drives, after its own: a slot, a busy light and an eject button each. -->
-            <StackPanel Grid.Column="6" Width="150" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Top">
-                <StackPanel Spacing="3">
-                  <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
-                  <Border Height="36" CornerRadius="3" Background="#141517" BorderBrush="#050506" BorderThickness="1"
-                          BoxShadow="inset 0 1 2 0 #A0000000">
-                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
-                      <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
-                        <TextBlock Classes="legend" Text="A" />
-                        <c:DeckLed x:Name="DriveALed" Width="7" Height="7" Color="#FF3B30" />
-                      </StackPanel>
-                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-                        <Border Height="8" CornerRadius="2" Background="#020202" BorderBrush="#2E3034" BorderThickness="0,0,0,1">
-                          <!-- A disk in the slot: its case, with the label edge showing. -->
-                          <Border x:Name="DriveADisk" IsVisible="False" Margin="2,1,2,1" CornerRadius="1" Background="#34363B">
-                            <Border Width="34" HorizontalAlignment="Left" Margin="6,1,0,1" CornerRadius="1" Background="#D9D3BC" />
-                          </Border>
-                        </Border>
-                        <TextBlock x:Name="DriveAName" Classes="bayname" Text="NO DISK" />
-                      </StackPanel>
-                      <Button x:Name="DriveAEject" Grid.Column="2" Theme="{StaticResource DeckKey}" Width="22" Height="16"
-                              Margin="7,0,0,0" ToolTip.Tip="Eject the disk from drive A, or insert one when it is empty">
-                        <Path Classes="glyph" Data="M0,4 L3.5,0 L7,4 Z M0,5.2 H7 V6.4 H0 Z" />
-                      </Button>
-                    </Grid>
-                  </Border>
-                </StackPanel>
-                <StackPanel Spacing="3">
-                  <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
-                  <Border Height="36" CornerRadius="3" Background="#141517" BorderBrush="#050506" BorderThickness="1"
-                          BoxShadow="inset 0 1 2 0 #A0000000">
-                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
-                      <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
-                        <TextBlock Classes="legend" Text="B" />
-                        <c:DeckLed x:Name="DriveBLed" Width="7" Height="7" Color="#FF3B30" />
-                      </StackPanel>
-                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-                        <Border Height="8" CornerRadius="2" Background="#020202" BorderBrush="#2E3034" BorderThickness="0,0,0,1">
-                          <!-- A disk in the slot: its case, with the label edge showing. -->
-                          <Border x:Name="DriveBDisk" IsVisible="False" Margin="2,1,2,1" CornerRadius="1" Background="#34363B">
-                            <Border Width="34" HorizontalAlignment="Left" Margin="6,1,0,1" CornerRadius="1" Background="#D9D3BC" />
-                          </Border>
-                        </Border>
-                        <TextBlock x:Name="DriveBName" Classes="bayname" Text="NO DISK" />
-                      </StackPanel>
-                      <Button x:Name="DriveBEject" Grid.Column="2" Theme="{StaticResource DeckKey}" Width="22" Height="16"
-                              Margin="7,0,0,0" ToolTip.Tip="Eject the disk from drive B, or insert one when it is empty">
-                        <Path Classes="glyph" Data="M0,4 L3.5,0 L7,4 Z M0,5.2 H7 V6.4 H0 Z" />
-                      </Button>
-                    </Grid>
-                  </Border>
-                </StackPanel>
-            </StackPanel>
+            <!-- The drives, after the machines' own: a slot, a busy light and an eject button each. The
+                 +3's A over B; the Pentagon's four two by two, A and B on the left and C and D in the
+                 room to their right, so the deck gets no taller. -->
+            <Grid x:Name="DriveBays" Grid.Column="6" Width="150" ColumnDefinitions="*,6,*" RowDefinitions="Auto,8,Auto"
+                  HorizontalAlignment="Center" VerticalAlignment="Top">
+              <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
+              <Border x:Name="DriveABay" Grid.ColumnSpan="3" Grid.Row="0" Grid.Column="0" Height="36" CornerRadius="3" Background="#141517"
+                      BorderBrush="#050506" BorderThickness="1" BoxShadow="inset 0 1 2 0 #A0000000">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
+                  <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Classes="legend" Text="A" />
+                    <c:DeckLed x:Name="DriveALed" Width="7" Height="7" Color="#FF3B30" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                    <Border Height="8" CornerRadius="2" Background="#020202" BorderBrush="#2E3034" BorderThickness="0,0,0,1">
+                      <!-- A disk in the slot: its case, with the label edge showing. -->
+                      <Border x:Name="DriveADisk" IsVisible="False" Margin="2,1,2,1" CornerRadius="1" Background="#34363B">
+                        <Border Width="34" HorizontalAlignment="Left" Margin="6,1,0,1" CornerRadius="1" Background="#D9D3BC" />
+                      </Border>
+                    </Border>
+                    <TextBlock x:Name="DriveAName" Classes="bayname" Text="NO DISK" />
+                  </StackPanel>
+                  <Button x:Name="DriveAEject" Grid.Column="2" Theme="{StaticResource DeckKey}" Width="22" Height="16"
+                          Margin="7,0,0,0" ToolTip.Tip="Eject the disk from drive A, or insert one when it is empty">
+                    <Path Classes="glyph" Data="M0,4 L3.5,0 L7,4 Z M0,5.2 H7 V6.4 H0 Z" />
+                  </Button>
+                </Grid>
+              </Border>
+              <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
+              <Border x:Name="DriveBBay" Grid.ColumnSpan="3" Grid.Row="2" Grid.Column="0" Height="36" CornerRadius="3" Background="#141517"
+                      BorderBrush="#050506" BorderThickness="1" BoxShadow="inset 0 1 2 0 #A0000000">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
+                  <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Classes="legend" Text="B" />
+                    <c:DeckLed x:Name="DriveBLed" Width="7" Height="7" Color="#FF3B30" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                    <Border Height="8" CornerRadius="2" Background="#020202" BorderBrush="#2E3034" BorderThickness="0,0,0,1">
+                      <!-- A disk in the slot: its case, with the label edge showing. -->
+                      <Border x:Name="DriveBDisk" IsVisible="False" Margin="2,1,2,1" CornerRadius="1" Background="#34363B">
+                        <Border Width="34" HorizontalAlignment="Left" Margin="6,1,0,1" CornerRadius="1" Background="#D9D3BC" />
+                      </Border>
+                    </Border>
+                    <TextBlock x:Name="DriveBName" Classes="bayname" Text="NO DISK" />
+                  </StackPanel>
+                  <Button x:Name="DriveBEject" Grid.Column="2" Theme="{StaticResource DeckKey}" Width="22" Height="16"
+                          Margin="7,0,0,0" ToolTip.Tip="Eject the disk from drive B, or insert one when it is empty">
+                    <Path Classes="glyph" Data="M0,4 L3.5,0 L7,4 Z M0,5.2 H7 V6.4 H0 Z" />
+                  </Button>
+                </Grid>
+              </Border>
+              <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
+              <Border x:Name="DriveCBay" IsVisible="False" Grid.Row="0" Grid.Column="2" Height="36" CornerRadius="3" Background="#141517"
+                      BorderBrush="#050506" BorderThickness="1" BoxShadow="inset 0 1 2 0 #A0000000">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
+                  <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Classes="legend" Text="C" />
+                    <c:DeckLed x:Name="DriveCLed" Width="7" Height="7" Color="#FF3B30" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                    <Border Height="8" CornerRadius="2" Background="#020202" BorderBrush="#2E3034" BorderThickness="0,0,0,1">
+                      <!-- A disk in the slot: its case, with the label edge showing. -->
+                      <Border x:Name="DriveCDisk" IsVisible="False" Margin="2,1,2,1" CornerRadius="1" Background="#34363B">
+                        <Border Width="34" HorizontalAlignment="Left" Margin="6,1,0,1" CornerRadius="1" Background="#D9D3BC" />
+                      </Border>
+                    </Border>
+                    <TextBlock x:Name="DriveCName" Classes="bayname" Text="NO DISK" />
+                  </StackPanel>
+                  <Button x:Name="DriveCEject" Grid.Column="2" Theme="{StaticResource DeckKey}" Width="22" Height="16"
+                          Margin="7,0,0,0" ToolTip.Tip="Eject the disk from drive C, or insert one when it is empty">
+                    <Path Classes="glyph" Data="M0,4 L3.5,0 L7,4 Z M0,5.2 H7 V6.4 H0 Z" />
+                  </Button>
+                </Grid>
+              </Border>
+              <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
+              <Border x:Name="DriveDBay" IsVisible="False" Grid.Row="2" Grid.Column="2" Height="36" CornerRadius="3" Background="#141517"
+                      BorderBrush="#050506" BorderThickness="1" BoxShadow="inset 0 1 2 0 #A0000000">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
+                  <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Classes="legend" Text="D" />
+                    <c:DeckLed x:Name="DriveDLed" Width="7" Height="7" Color="#FF3B30" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                    <Border Height="8" CornerRadius="2" Background="#020202" BorderBrush="#2E3034" BorderThickness="0,0,0,1">
+                      <!-- A disk in the slot: its case, with the label edge showing. -->
+                      <Border x:Name="DriveDDisk" IsVisible="False" Margin="2,1,2,1" CornerRadius="1" Background="#34363B">
+                        <Border Width="34" HorizontalAlignment="Left" Margin="6,1,0,1" CornerRadius="1" Background="#D9D3BC" />
+                      </Border>
+                    </Border>
+                    <TextBlock x:Name="DriveDName" Classes="bayname" Text="NO DISK" />
+                  </StackPanel>
+                  <Button x:Name="DriveDEject" Grid.Column="2" Theme="{StaticResource DeckKey}" Width="22" Height="16"
+                          Margin="7,0,0,0" ToolTip.Tip="Eject the disk from drive D, or insert one when it is empty">
+                    <Path Classes="glyph" Data="M0,4 L3.5,0 L7,4 Z M0,5.2 H7 V6.4 H0 Z" />
+                  </Button>
+                </Grid>
+              </Border>
+            </Grid>
 
           </Grid>
         </c:DeckFaceplate>

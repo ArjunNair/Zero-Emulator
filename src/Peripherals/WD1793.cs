@@ -1,50 +1,69 @@
 namespace Peripherals
 {
     /// <summary>
-    /// WD1793 floppy controller (Beta 128 / TR-DOS) — managed stub.
-    ///
-    /// The original implementation lived in the native x86 wd1793.dll, which was dropped in the
-    /// cross-platform port. This class keeps the public surface intact so the Pentagon machine
-    /// compiles and boots; it reports "no drive ready" (0xFF on all reads) so TR-DOS fails cleanly.
-    /// A managed WD1793 can replace the bodies below without touching callers.
+    /// WD1793 floppy controller and Beta 128 interface (TR-DOS) for the Pentagon: the surface
+    /// Pentagon_128k talks to, over the managed port of Spin's Beta 128 (<see cref="Beta128"/>).
+    /// Before the cross-platform port this wrapped the native x86 wd1793.dll, with the same calls.
     /// </summary>
     public class WD1793
     {
-        // Fix for index mark toggle in Seek command (woody). Preserved for the future managed port.
-        protected byte current_command = 0;
-        protected byte status_read_count = 0;
+        private Beta128 beta;
 
-        public void DiskInsert(string filename, byte _unit) { }
+        /// <summary>The controller, once initialised; null before that and after shutdown.</summary>
+        public Beta128 Controller => beta;
 
-        public void DiskEject(byte _unit) { }
-
-        public byte ReadStatusReg() {
-            status_read_count += 1;
-            return 0xFF;
+        public void DiskInsert(string filename, byte _unit) {
+            beta?.InsertDisk(_unit, filename);
         }
 
-        public byte ReadSectorReg() { return 0xFF; }
+        public void DiskEject(byte _unit) {
+            beta?.EjectDisk(_unit);
+        }
 
-        public byte ReadDataReg() { return 0xFF; }
+        public byte ReadStatusReg() => beta?.ReadStatus() ?? 0xFF;
 
-        public byte ReadTrackReg() { return 0xFF; }
+        public byte ReadSectorReg() => beta?.ReadSectorReg() ?? 0xFF;
 
-        public byte ReadSystemReg() { return 0xFF; }
+        public byte ReadDataReg() => beta?.ReadData() ?? 0xFF;
 
+        public byte ReadTrackReg() => beta?.ReadTrack() ?? 0xFF;
+
+        public byte ReadSystemReg() => beta?.ReadSystemRegister() ?? 0xFF;
+
+        // The program counter was for the DLL's debugging; the controller does not need it.
         public void WriteCommandReg(byte _data, ushort _pc) {
-            current_command = _data;
+            beta?.WriteCommand(_data);
         }
 
-        public void WriteSectorReg(byte _data) { }
+        public void WriteSectorReg(byte _data) {
+            beta?.WriteSectorReg(_data);
+        }
 
-        public void WriteTrackReg(byte _data) { }
+        public void WriteTrackReg(byte _data) {
+            beta?.WriteTrack(_data);
+        }
 
-        public void WriteDataReg(byte _data) { }
+        public void WriteDataReg(byte _data) {
+            beta?.WriteData(_data);
+        }
 
-        public void WriteSystemReg(byte _data) { }
+        public void WriteSystemReg(byte _data) {
+            beta?.WriteSystemRegister(_data);
+        }
 
-        public void DiskInitialise() { }
+        public void DiskReset() {
+            beta?.Reset();
+        }
 
-        public void DiskShutdown() { }
+        public void DiskInitialise() {
+            beta?.FlushAll();
+            beta = new Beta128();
+        }
+
+        /// <summary>Write back every disk the Spectrum changed, and release the controller.</summary>
+        public void DiskShutdown() {
+            beta?.FlushAll();
+            beta = null;
+        }
     }
 }

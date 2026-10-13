@@ -175,6 +175,7 @@ namespace Zero.App.Tests
             var d = w.Deck;
             Assert.True(d.VfdDiskA.Classes.Contains("off"));        // a 48K has no drives
             Assert.False(w.DiskEjectA.IsEnabled);
+            Assert.False(d.DriveALed.IsLit || d.VfdLedA.Classes.Contains("dim"));  // nor any lights
 
             string dir = Path.Combine(Path.GetTempPath(), "zero-deck-disk-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(dir);
@@ -187,7 +188,17 @@ namespace Zero.App.Tests
                 Assert.Equal("B: --", d.VfdDiskB.Text);
                 Assert.False(d.VfdDiskA.Classes.Contains("off"));
                 Assert.True(d.VfdDiskB.Classes.Contains("off"));      // empty: unlit
-                Assert.False(d.VfdLedA.Classes.Contains("lit"));    // idle: the motor is off
+                // At rest drive A glows dim (the controller polls the drives by turns); a command
+                // makes its drive bright for a moment. An empty B stands for no drive B fitted, so it
+                // stays dark, even while booting looks for one.
+                PumpUntil(() => w.Session.DiskLightOf(0) == Zero.Emulation.DiskLight.Dim, 15000);
+                w.RefreshMenuState();
+                Dispatcher.UIThread.RunJobs();
+                Assert.True(d.VfdLedA.Classes.Contains("dim"));
+                Assert.False(d.VfdLedA.Classes.Contains("lit"));
+                Assert.True(d.DriveALed.IsLit && d.DriveALed.Dim);
+                Assert.False(d.VfdLedB.Classes.Contains("dim") || d.VfdLedB.Classes.Contains("lit"));
+                Assert.False(d.DriveBLed.IsLit);
 
                 // The receiver's drive fronts: A occupied and named, B empty.
                 Assert.True(d.DriveADisk.IsVisible);
@@ -213,6 +224,124 @@ namespace Zero.App.Tests
             }
             finally
             {
+                w.Close();
+                try { Directory.Delete(dir, true); } catch { }
+            }
+        }
+
+        [AvaloniaFact]
+        public void The_pentagon_shows_four_drives_without_the_decks_growing()
+        {
+            MainWindow w = Boot();
+            var d = w.Deck;
+            Size deckSize = d.DesiredSize;
+            double shelf = w.DeckShelf.Bounds.Height;
+            Rect screen = w.Display.Bounds;
+            Assert.False(d.VfdDrivesCD.IsVisible);                   // a 48K shows the +3's two, unlit
+            Assert.False(d.DriveCBay.IsVisible);
+            Assert.False(w.DiskInsertC.IsVisible);
+
+            string dir = Path.Combine(Path.GetTempPath(), "zero-deck-trd-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(dir);
+            try
+            {
+                string games = Path.Combine(dir, "games.trd"), inferno = Path.Combine(dir, "Inferno Demo Disk.trd");
+                Peripherals.TrdImage.WriteBlank(games);
+                Peripherals.TrdImage.WriteBlank(inferno);
+                Assert.True(w.Session.InsertDiskAsync(0, games).Result);   // switches to the Pentagon
+                Assert.True(w.Session.InsertDiskAsync(2, inferno).Result);
+                PumpUntil(() => d.VfdDiskC.Text == "C: INFERNO DEMO DISK");
+
+                // The display: A and B in the first column, C and D in the second.
+                Assert.True(d.VfdDrivesCD.IsVisible);
+                Assert.Equal("A: GAMES", d.VfdDiskA.Text);
+                Assert.Equal("B: --", d.VfdDiskB.Text);
+                Assert.Equal("D: --", d.VfdDiskD.Text);
+                Assert.False(d.VfdDiskA.Classes.Contains("off"));
+                Assert.True(d.VfdDiskB.Classes.Contains("off"));
+                Assert.False(d.VfdDiskC.Classes.Contains("off"));
+                Assert.True(d.VfdDiskD.Classes.Contains("off"));
+
+                // The receiver: four bays, two by two.
+                Assert.True(d.DriveCBay.IsVisible && d.DriveDBay.IsVisible);
+                Assert.True(d.DriveADisk.IsVisible && d.DriveCDisk.IsVisible);
+                Assert.False(d.DriveBDisk.IsVisible || d.DriveDDisk.IsVisible);
+                Assert.Equal("INFERNO DEMO DISK", d.DriveCName.Text);
+                Assert.Equal("NO DISK", d.DriveDName.Text);
+                Assert.Equal(d.DriveABay.Bounds.Top, d.DriveCBay.Bounds.Top, 1);
+                Assert.True(d.DriveCBay.Bounds.Left > d.DriveABay.Bounds.Right);
+
+                // Neither deck grows, so the screen keeps its size.
+                d.Measure(Size.Infinity);
+                Assert.Equal(deckSize.Height, d.DesiredSize.Height, 1);
+                Assert.Equal(deckSize.Width, d.DesiredSize.Width, 1);
+                Assert.Equal(shelf, w.DeckShelf.Bounds.Height, 1);
+                Assert.Equal(screen.Height, w.Display.Bounds.Height, 1.5);
+
+                // The menu has drives C and D too.
+                Assert.True(w.DiskInsertC.IsVisible && w.DiskEjectD.IsVisible);
+                Assert.True(w.DiskEjectC.IsEnabled);
+                Assert.False(w.DiskEjectD.IsEnabled);
+                Capture(w, "deck-pentagon-a");
+                w.DeckBItem.Command.Execute(null);
+                Dispatcher.UIThread.RunJobs();
+                Capture(w, "deck-pentagon-b");
+
+                // Drive C's own eject button takes it out.
+                Press(d.DriveCEject);
+                PumpUntil(() => d.VfdDiskC.Text == "C: --");
+                Assert.False(d.DriveCDisk.IsVisible);
+                Assert.False(w.DiskEjectC.IsEnabled);
+
+                // Back to the +3: two bays again, full width.
+                w.Session.SwitchMachine(SpeccyCommon.MachineModel._plus3);
+                PumpUntil(() => w.Session.Model == SpeccyCommon.MachineModel._plus3);
+                w.RefreshMenuState();
+                Dispatcher.UIThread.RunJobs();
+                Assert.False(d.VfdDrivesCD.IsVisible);
+                Assert.False(d.DriveCBay.IsVisible);
+                Assert.False(w.DiskInsertC.IsVisible);
+                w.DeckAItem.Command.Execute(null);
+            }
+            finally
+            {
+                w.Close();
+                try { Directory.Delete(dir, true); } catch { }
+            }
+        }
+
+        [AvaloniaFact]
+        public void A_pentagon_drive_light_stays_on_while_its_head_is_loaded_then_goes_out()
+        {
+            Func<EmulatorSettings> loader = MainWindow.SettingsLoader;
+            MainWindow.SettingsLoader = () => { EmulatorSettings s = loader(); s.Tape.AutoLoad = true; return s; };
+            MainWindow w = Boot();
+            var d = w.Deck;
+            string dir = Path.Combine(Path.GetTempPath(), "zero-deck-hld-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(dir);
+            try
+            {
+                string disk = Path.Combine(dir, "games.trd");
+                Peripherals.TrdImage.WriteBlank(disk);
+                Assert.True(w.Session.LoadFileAsync(disk).Result);  // boots TR-DOS, which reads drive A
+                PumpUntil(() => d.DriveALed.IsLit, 15000);
+
+                // Lit steady, on the bay and on the display together.
+                Assert.True(d.VfdLedA.Classes.Contains("lit"));
+                Assert.False(d.DriveALed.Blink);
+
+                // It goes out once the head unloads, three seconds after the controller goes idle.
+                // (On the way, TR-DOS's delay loop selects drive D for a moment with the head
+                // loaded, which lights D's light instead, as on the real interface.)
+                PumpUntil(() => w.Session.BusyDiskUnit == -1, 15000);
+                w.RefreshMenuState();
+                Dispatcher.UIThread.RunJobs();
+                Assert.False(d.DriveALed.IsLit || d.DriveBLed.IsLit || d.DriveCLed.IsLit || d.DriveDLed.IsLit);
+                Assert.False(d.VfdLedA.Classes.Contains("lit"));
+            }
+            finally
+            {
+                MainWindow.SettingsLoader = loader;
                 w.Close();
                 try { Directory.Delete(dir, true); } catch { }
             }

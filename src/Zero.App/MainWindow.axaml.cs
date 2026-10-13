@@ -460,7 +460,7 @@ namespace Zero.App
             new FilePickerFileType("All supported files") { Patterns = EmulatorSession.AllOpenableExtensions.Select(x => "*" + x).ToArray() },
             new FilePickerFileType("Snapshots") { Patterns = new[] { "*.szx", "*.sna", "*.z80" } },
             new FilePickerFileType("Tapes") { Patterns = new[] { "*.pzx", "*.tap", "*.tzx", "*.csw" } },
-            new FilePickerFileType("+3 disks") { Patterns = new[] { "*.dsk" } },
+            new FilePickerFileType("Disks (+3, TR-DOS)") { Patterns = new[] { "*.dsk", "*.trd", "*.scl" } },
             new FilePickerFileType("Action Replay recordings") { Patterns = new[] { "*.rzx" } },
             new FilePickerFileType("Screens") { Patterns = new[] { "*.scr" } },
             new FilePickerFileType("ZIP archives") { Patterns = new[] { "*.zip" } },
@@ -641,7 +641,9 @@ namespace Zero.App
 
         private static readonly FilePickerFileType[] DiskFilters =
         {
+            new FilePickerFileType("Disks") { Patterns = new[] { "*.dsk", "*.trd", "*.scl", "*.zip" } },
             new FilePickerFileType("+3 disks") { Patterns = new[] { "*.dsk", "*.zip" } },
+            new FilePickerFileType("TR-DOS disks (Pentagon)") { Patterns = new[] { "*.trd", "*.scl", "*.zip" } },
             FilePickerFileTypes.All
         };
 
@@ -657,17 +659,25 @@ namespace Zero.App
         }
 
         /// <summary>
-        /// Make a formatted +3 disk and put it in drive A. +3 BASIC's FORMAT cannot do this here: the
-        /// controller, like the DLL it was ported from, does not format.
+        /// Make a formatted disk and put it in drive A: a TR-DOS disk (TRD) on the Pentagon, a +3
+        /// disk (DSK) otherwise. +3 BASIC's FORMAT cannot do this here: the +3's controller, like the
+        /// DLL it was ported from, does not format.
         /// </summary>
         private async Task NewBlankDiskAsync()
         {
+            bool trdos = _session.Model == MachineModel._pentagon;
             bool wasPaused = _session.IsPaused;
             _session.Pause();
-            string path = await PickSaveFileAsync("New Blank Disk", "blank.dsk", "dsk", "+3 disk");
+            string path = trdos
+                ? await PickSaveFileAsync("New Blank Disk", "blank.trd", "trd", "TR-DOS disk")
+                : await PickSaveFileAsync("New Blank Disk", "blank.dsk", "dsk", "+3 disk");
             if (!wasPaused) _session.Resume();
             if (path == null) return;
-            try { Peripherals.DskImage.WriteBlankPlus3(path); }
+            try
+            {
+                if (trdos) Peripherals.TrdImage.WriteBlank(path);
+                else Peripherals.DskImage.WriteBlankPlus3(path);
+            }
             catch (Exception ex) { ShowError("Could not create the disk: " + ex.Message); return; }
             if (await _session.InsertDiskAsync(0, path))
                 SetStatus("Drive A: new disk " + Path.GetFileName(path));

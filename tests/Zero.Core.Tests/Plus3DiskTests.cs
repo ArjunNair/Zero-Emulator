@@ -156,6 +156,41 @@ namespace Zero.Core.Tests
             await WaitForScreen("zero x disk");
         }
 
+        private async Task WaitForLights(DiskLight a, DiskLight b, int maxFrames = 1500)
+        {
+            for (int frame = 0; _session.DiskLightOf(0) != a || _session.DiskLightOf(1) != b; frame++)
+            {
+                if (frame > maxFrames)
+                    throw new TimeoutException($"lights never went {a}/{b}; they are {_session.DiskLightOf(0)}/{_session.DiskLightOf(1)}");
+                await RunFrames(1);
+            }
+        }
+
+        [Fact]
+        public async Task Drive_lights_glow_dim_at_rest_and_go_bright_while_a_command_runs()
+        {
+            await BootToPlus3Basic(BlankDisk());
+            await WaitForLights(DiskLight.Dim, DiskLight.Off);   // at rest: A polled, so dim; no drive B fitted
+
+            // With a disk in B it is a drive like A: polled by turns, so both dim.
+            string second = Path.Combine(_dir, "second.dsk");
+            DskImage.WriteBlankPlus3(second);
+            Assert.True(await _session.InsertDiskAsync(1, second));
+            await WaitForLights(DiskLight.Dim, DiskLight.Dim);
+
+            // CAT holds drive A selected: A bright, B dark. Then back to rest.
+            await Type($"cat{Enter}");
+            await WaitForLights(DiskLight.Bright, DiskLight.Off);
+            Assert.Equal(0, _session.BusyDiskUnit);
+            await WaitForScreen("173K free");
+            await WaitForLights(DiskLight.Dim, DiskLight.Dim);
+            Assert.Equal(-1, _session.BusyDiskUnit);
+
+            // Out with B's disk, and its light goes out with it.
+            await _session.EjectDiskAsync(1);
+            Assert.Equal(DiskLight.Off, _session.DiskLightOf(1));
+        }
+
         [Fact]
         public async Task A_disk_stays_in_the_drive_across_a_change_of_machine()
         {

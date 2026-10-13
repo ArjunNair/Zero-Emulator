@@ -65,12 +65,16 @@ namespace Zero.App.Controls
             VfdStereo.Text = settings.Audio.StereoSoundMode switch { 0 => "MONO", 2 => "ABC", _ => "ACB" };
             SetLit(VfdTurbo, settings.Emulation.EmulationSpeed > 1);
             SetLit(VfdMute, settings.Audio.Mute);
-            // The +3's drives, on the display and on the receiver's drive fronts. (The Pentagon's
-            // TR-DOS drives are not emulated, so it reads as having none.)
+            // The drives, on the display and on the receiver's drive fronts: the +3's two, or the
+            // Pentagon's four (a machine without drives shows the ones it had last, unlit).
             bool drives = session.HasDiskDrives;
-            int busy = drives ? session.BusyDiskUnit : -1;
-            ShowDrive(0, session.DiskInDrive(0), drives, busy == 0, VfdLedA, VfdDiskA, DriveADisk, DriveALed, DriveAName);
-            ShowDrive(1, session.DiskInDrive(1), drives, busy == 1, VfdLedB, VfdDiskB, DriveBDisk, DriveBLed, DriveBName);
+            ShowDriveCount(session.DiskDriveCount);
+            ShowDrive(0, session.DiskInDrive(0), drives, VfdDiskA, DriveADisk, DriveAName);
+            ShowDrive(1, session.DiskInDrive(1), drives, VfdDiskB, DriveBDisk, DriveBName);
+            ShowDrive(2, session.DiskInDrive(2), drives, VfdDiskC, DriveCDisk, DriveCName);
+            ShowDrive(3, session.DiskInDrive(3), drives, VfdDiskD, DriveDDisk, DriveDName);
+            for (int unit = 0; unit < 4; unit++)
+                ShowLight(unit, drives ? session.DiskLightOf(unit) : DiskLight.Off);
 
             if (!tape.IsInserted)
             {
@@ -112,17 +116,53 @@ namespace Zero.App.Controls
             TurboKey.IsChecked = settings.Emulation.EmulationSpeed > 1;
         }
 
-        private static void ShowDrive(int unit, string disk, bool drives, bool busy,
-            Border vfdLed, TextBlock vfdLine, Border slotDisk, DeckLed driveLed, TextBlock driveName)
+        /// <summary>Width of the drive bays: the +3's two full width, or the Pentagon's four two by two.</summary>
+        private const double TwoBaysWidth = 150, FourBaysWidth = 222;
+
+        /// <summary>
+        /// Two drives (A over B) or four (A and B, then C and D beside them) on the display and the
+        /// receiver. Neither deck grows taller: C and D take a second column.
+        /// </summary>
+        private void ShowDriveCount(int count)
+        {
+            bool four = count > 2;
+            VfdDrivesCD.IsVisible = four;
+            Grid.SetColumnSpan(VfdDrivesAB, four ? 1 : 2);
+            DriveBays.Width = four ? FourBaysWidth : TwoBaysWidth;
+            DriveCBay.IsVisible = DriveDBay.IsVisible = four;
+            Grid.SetColumnSpan(DriveABay, four ? 1 : 3);
+            Grid.SetColumnSpan(DriveBBay, four ? 1 : 3);
+        }
+
+        private static void ShowDrive(int unit, string disk, bool drives,
+            TextBlock vfdLine, Border slotDisk, TextBlock driveName)
         {
             char letter = (char)('A' + unit);
             vfdLine.Text = $"{letter}: {DiskLabel(disk)}";
             SetLit(vfdLine, drives && disk != null);  // an empty drive's line stays unlit
-            vfdLed.Classes.Set("lit", busy);
             slotDisk.IsVisible = disk != null;          // the slot looks occupied
-            driveLed.IsLit = busy;
             driveName.Text = disk == null ? "NO DISK" : DiskLabel(disk);
             driveName.Classes.Set("empty", disk == null);
+        }
+
+        /// <summary>
+        /// A drive's busy light, on the receiver's drive front and as the segment on the display:
+        /// bright while the drive is in use, dim for a +3 drive at rest, otherwise off. See
+        /// <see cref="EmulatorSession.DiskLightOf"/>.
+        /// </summary>
+        private void ShowLight(int unit, DiskLight light)
+        {
+            (Border vfdLed, DeckLed driveLed) = unit switch
+            {
+                0 => (VfdLedA, DriveALed),
+                1 => (VfdLedB, DriveBLed),
+                2 => (VfdLedC, DriveCLed),
+                _ => (VfdLedD, DriveDLed)
+            };
+            vfdLed.Classes.Set("lit", light == DiskLight.Bright);
+            vfdLed.Classes.Set("dim", light == DiskLight.Dim);
+            driveLed.IsLit = light != DiskLight.Off;
+            driveLed.Dim = light == DiskLight.Dim;
         }
 
         /// <summary>The deck showing: 0 the cassette deck (A), 1 the receiver (B).</summary>

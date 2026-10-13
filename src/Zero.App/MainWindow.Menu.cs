@@ -22,7 +22,7 @@ namespace Zero.App
         internal NativeMenuItem RzxRecordItem, RZXRecordStopItem, RZXRecordContinueItem, RzxBookmarkItem, RzxRollbackItem, RzxFinishItem, RzxDiscardItem;
         internal NativeMenuItem TapeDeckItem, TapePlayItem, TapeStopItem, TapeRewindItem;
         internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFastLoadItem, TapeRomTrapsItem;
-        internal NativeMenuItem DiskEjectA, DiskEjectB;
+        internal NativeMenuItem DiskInsertC, DiskInsertD, DiskEjectA, DiskEjectB, DiskEjectC, DiskEjectD;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
         internal NativeMenuItem CrtItem;
         internal NativeMenuItem DeckItem, DeckAItem, DeckBItem, FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
@@ -131,13 +131,18 @@ namespace Zero.App
                 Sep(),
                 Item("Set SAVE Target (.tap)…", () => _ = SetTapSaveTargetAsync()));
 
-            // The +3's drives. Inserting a disk switches to the +3 if need be.
+            // The +3's two drives and the Pentagon's four (C and D show for the Pentagon). Inserting
+            // a disk switches to the machine that takes it: a DSK the +3, a TRD or SCL the Pentagon.
             var disk = Submenu("Disk",
                 Item("Insert Disk in Drive A…", () => _ = InsertDiskAsync(0)),
                 Item("Insert Disk in Drive B…", () => _ = InsertDiskAsync(1)),
+                DiskInsertC = Item("Insert Disk in Drive C…", () => _ = InsertDiskAsync(2)),
+                DiskInsertD = Item("Insert Disk in Drive D…", () => _ = InsertDiskAsync(3)),
                 Sep(),
                 DiskEjectA = Item("Eject Drive A", () => _session.EjectDisk(0)),
                 DiskEjectB = Item("Eject Drive B", () => _session.EjectDisk(1)),
+                DiskEjectC = Item("Eject Drive C", () => _session.EjectDisk(2)),
+                DiskEjectD = Item("Eject Drive D", () => _session.EjectDisk(3)),
                 Sep(),
                 Item("New Blank Disk…", () => _ = NewBlankDiskAsync()));
 
@@ -392,6 +397,10 @@ namespace Zero.App
 
             DiskEjectA.IsEnabled = _session.DiskInDrive(0) != null;
             DiskEjectB.IsEnabled = _session.DiskInDrive(1) != null;
+            DiskEjectC.IsEnabled = _session.DiskInDrive(2) != null;
+            DiskEjectD.IsEnabled = _session.DiskInDrive(3) != null;
+            DiskInsertC.IsVisible = DiskInsertD.IsVisible = DiskEjectC.IsVisible = DiskEjectD.IsVisible =
+                _session.DiskDriveCount > 2;
 
             MuteItem.IsChecked = _settings.Audio.Mute;
             Ay48kItem.IsChecked = _settings.Audio.EnableAYFor48K;
