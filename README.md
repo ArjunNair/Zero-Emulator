@@ -21,17 +21,17 @@ dotnet test tests/Zero.App.Tests           # headless UI tests
 ```
 
 See [docs/porting-status.md](docs/porting-status.md) for what is in this build, what was cut for v1
-(TZX/CSW, TR-DOS disks, debugger) and how it differs from the Windows-only original, and
+(TZX/CSW, debugger) and how it differs from the Windows-only original, and
 [packaging/README.md](packaging/README.md) for self-contained builds.
 
 ## Features 
-* Emulates the 48k, 128k, 128k SE, the Spectrum +2 and the Spectrum +3 (with 2 disk drives), and the Pentagon 128k models.
+* Emulates the 48k, 128k, 128k SE, the Spectrum +2 and the Spectrum +3 (with 2 disk drives), and the Pentagon 128k (with a Beta 128 interface and 4 TR-DOS disk drives) models.
 
 * Supports the following tape formats: TZX, TAP, CSW, and PZX. It only saves .TAP files though.
 
 * Supports the following snapshot formats: SZX, SNA, and the Z80. It can save to SNA and SZX formats.
 
-* Supports +3 disk images (DSK and extended DSK) in two drives, and can make blank formatted disks. TR-DOS images (TRD, SCL) for the Pentagon are not supported yet.
+* Supports +3 disk images (DSK and extended DSK) in two drives, and TR-DOS disk images (TRD, and SCL, saved back as TRD) in the Pentagon's four. Opening a disk switches to the machine that supports it, and Zero can make blank formatted disks of either kind.
 
 * Supports the playback and recording of RZX files, with bookmarks and rollback. Stopping and resuming of recordings is also supported.
 
@@ -184,3 +184,4 @@ Additional contributors whose feedback have helped in shaping the emulator are c
 Copyright (c) 2009-2026 Arjun Nair. See the LICENSE file for license rights and limitations (MIT).  
 Zero uses various public domain icons. Copyright rests with their respective authors.  
 The +3 floppy disk controller is a C# port of [fdc765](https://github.com/leiradel/fdc765) by Andre Leiradella (MIT), itself a C port of the freeware fdc765.dll. 
+The Pentagon's Beta 128 disk interface (WD1793 controller) is a C# port of ZXBeta128.pas from Paul Dunn's Spin emulator, used with his permission. 
