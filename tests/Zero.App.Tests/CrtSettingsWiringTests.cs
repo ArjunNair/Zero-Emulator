@@ -28,6 +28,22 @@ namespace Zero.App.Tests
         }
 
         [AvaloniaFact]
+        public void The_glass_corners_round_less_when_less_border_shows()
+        {
+            // A rounded corner should eat into the border, not the picture: with none showing it
+            // rounds less, trimming no more than a pixel or two off the picture's very corner.
+            var w = Open(new CrtSettings { Enabled = true, Bezel = 0.05 });
+            w.Session.Settings.Render.BorderCrop = 0;
+            w.ApplyCrtSettings();
+            Assert.Equal(0.16f, w.Display.CrtOptions.Corner);
+            w.Session.Settings.Render.BorderCrop = 48;
+            w.ApplyCrtSettings();
+            float none = w.Display.CrtOptions.Corner ?? 1f;
+            Assert.True(none < 0.16f && none <= 0.08f, $"with no border the corners still round by {none}");
+            w.Close();
+        }
+
+        [AvaloniaFact]
         public void Every_crt_setting_reaches_the_shader()
         {
             var crt = new CrtSettings
@@ -35,7 +51,6 @@ namespace Zero.App.Tests
                 Enabled = true,
                 Curvature = 0.31,
                 Glow = 0.42,
-                GlassReflect = 0.53,
                 EdgeLight = 0.64,
                 Bezel = 0.04,
                 Diffuse = 0.62,
@@ -46,7 +61,6 @@ namespace Zero.App.Tests
             Assert.True(o.Enabled);
             Assert.Equal(0.31f, o.Curvature, 3);
             Assert.Equal(0.42f, o.Glow, 3);
-            Assert.Equal(0.53f, o.Reflection, 3);
             Assert.Equal(0.64f, o.EdgeLight, 3);
             Assert.Equal(0.04f, o.Bezel, 3);
             Assert.Equal(0.62f, o.Diffuse, 3);

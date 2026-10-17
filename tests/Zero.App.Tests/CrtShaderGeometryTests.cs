@@ -46,7 +46,7 @@ namespace Zero.App.Tests
 
             var source = new Rect(48, 48, FrameWidth - 96, FrameHeight - 48 - 56);  // border fully cropped
             var dest = new Rect(0, 0, Width, Height);
-            var op = new CrtDrawOperation(dest, frame, source, dest, options, smooth, null, 0f);
+            var op = new CrtDrawOperation(dest, frame, source, dest, options, smooth, null);
 
             using var surface = SKSurface.Create(new SKImageInfo(Width, Height, SKColorType.Bgra8888, SKAlphaType.Premul));
             op.DrawShaded(surface.Canvas, CrtShader.Effect, Width, Height,
@@ -67,54 +67,6 @@ namespace Zero.App.Tests
                     n++;
                 }
             return (double)total / n;
-        }
-
-        /// <summary>
-        /// Mean brightness of a strip just inside the glass on each edge, clear of the rim itself and
-        /// of the corners. The strips are a fraction of each axis rather than a fixed number of
-        /// pixels: the shader works in coordinates normalised to the screen, so on a window that is
-        /// not square, 60 px in from the side and 60 px down from the top are not the same place and
-        /// comparing them would measure the window's shape instead of the shader.
-        /// </summary>
-        private static (double Left, double Right, double Top, double Bottom) Edges(SKBitmap bmp)
-        {
-            const double Near = 0.025, Far = 0.10;   // 2.5%..10% of the way in from each edge
-            int lx0 = (int)(Width * Near), lx1 = (int)(Width * Far);
-            int ty0 = (int)(Height * Near), ty1 = (int)(Height * Far);
-            return (Band(bmp, lx0, lx1, Height / 4, 3 * Height / 4),
-                    Band(bmp, Width - lx1, Width - lx0, Height / 4, 3 * Height / 4),
-                    Band(bmp, Width / 4, 3 * Width / 4, ty0, ty1),
-                    Band(bmp, Width / 4, 3 * Width / 4, Height - ty1, Height - ty0));
-        }
-
-        [Fact]
-        public void The_glass_highlight_lights_no_edge_more_than_the_others()
-        {
-            // Turned up to the maximum, so a highlight that reaches an edge cannot be missed. Every
-            // other effect is off: this test is about the highlight and nothing else.
-            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, Reflection = 1f };
-            (double left, double right, double top, double bottom) = Edges(Render(options));
-
-            double spread = Math.Max(Math.Max(left, right), Math.Max(top, bottom))
-                          - Math.Min(Math.Min(left, right), Math.Min(top, bottom));
-            Assert.True(spread < 2.0,
-                $"the highlight lights one edge more than the rest: left={left:F1} right={right:F1} " +
-                $"top={top:F1} bottom={bottom:F1} (spread {spread:F1} of 255)");
-        }
-
-        [Fact]
-        public void The_highlight_is_still_there()
-        {
-            // The cheap way to pass the test above would be to remove the highlight altogether.
-            SKBitmap with = Render(new CrtShaderOptions { Enabled = true, Curvature = 0.2f, Reflection = 1f });
-            SKBitmap without = Render(new CrtShaderOptions { Enabled = true, Curvature = 0.2f, Reflection = 0f });
-            using (with)
-            using (without)
-            {
-                double lit = Band(with, Width / 4, Width / 2, Height / 5, Height / 2);
-                double unlit = Band(without, Width / 4, Width / 2, Height / 5, Height / 2);
-                Assert.True(lit - unlit > 5.0, $"the highlight has gone: {lit:F1} vs {unlit:F1}");
-            }
         }
 
         [Fact]
@@ -179,37 +131,41 @@ namespace Zero.App.Tests
         }
 
         [Fact]
-        public void The_light_on_the_housing_reaches_the_corners_without_a_step()
+        public void The_light_on_the_housing_fades_out_round_the_corners_without_a_step()
         {
-            // Each face used to fade towards its ends, to stop a corner -- lit by the two faces that
-            // meet there -- carrying a third reflection of the picture turned back on itself
-            // diagonally. Reflecting a blurred copy settles that at the source, so the light runs
-            // evenly along each face again and a corner is lit much like the middle of one.
-            //
-            // What must not come back is the earlier failure: measuring the light from the nearer
-            // edge alone, which left the corners black and the housing reading as four separate
-            // panels with gaps between them.
-            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            // The screen lights the housing along its sides, but not round its corners, where the
+            // housing turns away: there the light fades out, gradually rather than at a line.
+            // Measured as the difference the light makes, against the same housing unlit, along a
+            // row just below the glass.
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.1f };
             using SKBitmap bmp = Render(options);
+            using SKBitmap dark = Render(options with { EdgeLight = 0f });
+            double Light(int x0, int x1, int y0, int y1) => Band(bmp, x0, x1, y0, y1) - Band(dark, x0, x1, y0, y1);
 
-            double middle = Band(bmp, Width / 2 - 40, Width / 2 + 40, Height - 10, Height);
-            double corner = Band(bmp, 0, 20, Height - 20, Height);
-            Assert.True(corner > middle * 0.5,
-                $"the corner of the housing is unlit next to the middle of a face: {corner:F1} against {middle:F1}");
+            int bottom = Height - 1, left = 0;
+            while (bottom > Height / 2 && Band(dark, Width / 2, Width / 2 + 1, bottom, bottom + 1) < 150) bottom--;
+            while (left < Width / 2 && Band(dark, left, left + 1, Height / 2, Height / 2 + 1) < 150) left++;
+            int row = bottom + 4;
+
+            double middle = Light(Width / 2 - 40, Width / 2 + 40, row - 1, row + 1);
+            double corner = Light(left - 6, left, bottom, bottom + 6);
+            Assert.True(middle > 5, $"the housing below the middle of the glass is unlit: {middle:F1}");
+            Assert.True(corner < middle * 0.25,
+                $"the housing round the corner is lit like the middle of a side: {corner:F1} against {middle:F1}");
 
             // And the way out to it falls away rather than dropping off a cliff.
-            double biggest = 0, previous = Band(bmp, Width / 2, Width / 2 + 10, Height - 10, Height);
-            for (int x = Width / 2 - 10; x >= 10; x -= 10)
+            double biggest = 0, previous = Light(Width / 2, Width / 2 + 10, row - 1, row + 1);
+            for (int x = Width / 2 - 10; x >= left; x -= 10)
             {
-                double here = Band(bmp, x, x + 10, Height - 10, Height);
+                double here = Light(x, x + 10, row - 1, row + 1);
                 biggest = Math.Max(biggest, Math.Abs(here - previous));
                 previous = here;
             }
 
-            Assert.True(biggest < 12.0,
-                $"the housing steps by {biggest:F1} of 255 on the way to the corner");
+            // No ten-pixel step takes more than about a third of it: the fade is spread over several.
+            Assert.True(biggest < middle * 0.35,
+                $"the light on the housing steps by {biggest:F1} of {middle:F1} on the way to the corner");
         }
-
 
         [Fact]
         public void The_panel_mirrors_the_picture_across_its_depth()
@@ -318,30 +274,89 @@ namespace Zero.App.Tests
             Assert.True(shrunk > 0.92 && shrunk < 0.98,
                 $"the housing should shrink the picture to about 0.95 of the window, not {shrunk:F2}");
 
-            // And the room it took is lit, on every side: it is housing catching the screen's light,
-            // not an empty margin.
-            double side = Band(with, 6, 16, Height / 2 - 30, Height / 2 + 30);
-            double top = Band(with, Width / 2 - 30, Width / 2 + 30, 6, 16);
-            double bottom = Band(with, Width / 2 - 30, Width / 2 + 30, Height - 16, Height - 6);
+            // And the room it took is housing, not an empty margin: its tunnel walls, running back to
+            // the tube, catch the screen's light on every side -- measured as the difference the light
+            // makes, since the walls are deliberately different shades. The frame round the front
+            // faces the room, not the tube, and catches none.
+            using SKBitmap dark = Render(housed with { EdgeLight = 0f }, frame, smooth: true);
+            double Light(int x0, int x1, int y0, int y1) => Band(with, x0, x1, y0, y1) - Band(dark, x0, x1, y0, y1);
+            // Just beyond the glass on each side, wherever the curve has put it.
+            int left = 0, top0 = 0, bottom0 = Height - 1;
+            while (left < Width / 2 && Band(dark, left, left + 1, Height / 2, Height / 2 + 1) < 150) left++;
+            while (top0 < Height / 2 && Band(dark, Width / 2, Width / 2 + 1, top0, top0 + 1) < 150) top0++;
+            while (bottom0 > Height / 2 && Band(dark, Width / 2, Width / 2 + 1, bottom0, bottom0 + 1) < 150) bottom0--;
+            double side = Light(left - 8, left - 3, Height / 2 - 30, Height / 2 + 30);
+            double top = Light(Width / 2 - 30, Width / 2 + 30, top0 - 8, top0 - 3);
+            double bottom = Light(Width / 2 - 30, Width / 2 + 30, bottom0 + 4, bottom0 + 9);
             foreach ((string name, double v) in new[] { ("side", side), ("top", top), ("bottom", bottom) })
-                Assert.True(v > 12, $"the {name} of the housing is unlit: {v:F1}");
+                Assert.True(v > 4, $"the {name} wall of the housing catches no light: {v:F1}");
+            double onFrame = Light(0, 3, Height / 2 - 30, Height / 2 + 30);
+            Assert.True(onFrame < 1, $"the frame round the front catches the picture's light: {onFrame:F1}");
         }
 
-        [Fact]
-        public void The_housing_is_mitred_at_the_corners()
-        {
-            // A moulding is cut at forty-five degrees where two lengths meet, and the seam that
-            // leaves is what says the housing is four faces rather than one flat rectangle. Two
-            // points either side of that seam, out beyond the corner of the screen, must differ.
-            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 0f, Bezel = 0.05f };
-            using SKBitmap bmp = Render(options);
 
-            // Well out in the top-left corner: one point above the diagonal, on the top face, and one
-            // below it, on the left face.
-            double onTop = Band(bmp, 40, 60, 10, 20);
-            double onSide = Band(bmp, 10, 20, 40, 60);
-            Assert.True(Math.Abs(onTop - onSide) > 2.0,
-                $"the corner shows no mitre: the top face reads {onTop:F1} and the left {onSide:F1}");
+
+
+
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void A_trinitron_keeps_its_vertical_lines_straight_and_a_sphere_does_not(bool trinitron)
+        {
+            // A Trinitron's glass is curved only from side to side, so a vertical line near the edge
+            // of the picture stays straight from top to bottom; on a spherical tube it bows. Both bow
+            // their horizontal lines, the Trinitron's through perspective alone.
+            using SKBitmap frame = Frame(new SKColor(0x20, 0x20, 0x20), new SKColor(0x20, 0x20, 0x20));
+            using (var c = new SKCanvas(frame))
+            using (var white = new SKPaint { Color = SKColors.White })
+                c.DrawRect(new SKRect(48 + 24, 48, 48 + 26, 48 + 192), white);   // a line near the left edge
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.6f, Trinitron = trinitron };
+            using SKBitmap bmp = Render(options, frame, smooth: true);
+
+            int LineAt(int y)
+            {
+                for (int x = 0; x < Width / 2; x++)
+                    if (bmp.GetPixel(x, y).Red > 128) return x;
+                return -1;
+            }
+            int middle = LineAt(Height / 2), nearTop = LineAt(Height / 8);
+            Assert.True(middle > 0 && nearTop > 0, "the line was not found");
+            if (trinitron)
+                Assert.True(Math.Abs(middle - nearTop) <= 1, $"a Trinitron's vertical line bows: x={middle} mid-height, {nearTop} near the top");
+            else
+                Assert.True(nearTop - middle >= 3, $"a spherical tube's vertical line does not bow: x={middle} mid-height, {nearTop} near the top");
+        }
+
+
+        [Fact]
+        public void The_tube_sits_rounded_at_the_back_of_a_mitred_tunnel()
+        {
+            // The cabinet's tunnel is four walls mitred where they meet, lit from above: the top wall
+            // faces down into shadow and the side is lighter, so either side of the corner's diagonal
+            // the two must differ.
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 0f, Bezel = 0.1f };
+            using (SKBitmap bmp = Render(options))
+            {
+                // On the walls near the tunnel's back, either side of the top-left mitre.
+                double onTop = Band(bmp, 90, 110, 27, 33);
+                double onSide = Band(bmp, 36, 42, 90, 110);
+                Assert.True(onSide - onTop > 3.0,
+                    $"the tunnel shows no mitre: the top wall reads {onTop:F1} and the side {onSide:F1}");
+            }
+
+            // And the tube at the back has rounded corners: with the glass flat, just inside where its
+            // top and left edges would meet is still the dark mask, while as far in along either edge
+            // is picture.
+            var flat = new CrtShaderOptions { Enabled = true, EdgeLight = 0f, Bezel = 0.1f };
+            using SKBitmap square = Render(flat);
+            int top = 0, left = 0;
+            while (top < Height / 2 && Band(square, Width / 2, Width / 2 + 1, top, top + 1) < 150) top++;
+            while (left < Width / 2 && Band(square, left, left + 1, Height / 2, Height / 2 + 1) < 150) left++;
+            Assert.True(Band(square, Width / 2, Width / 2 + 1, top + 4, top + 5) > 150, "the top edge is not where it was found");
+            Assert.True(Band(square, left + 4, left + 5, Height / 2, Height / 2 + 1) > 150, "the left edge is not where it was found");
+            double corner = Band(square, left + 4, left + 5, top + 4, top + 5);
+            Assert.True(corner < 60, $"the tube's corner is square, not rounded: it reads {corner:F1}");
         }
 
         [Fact]
@@ -392,14 +407,16 @@ namespace Zero.App.Tests
                 // of the rim, where picture and housing are blended and the picture's own detail
                 // shows through whatever the reflection is doing. Further out again the light has
                 // faded to nothing and reads as smooth however sharply it was reflected.
-                return (picture, Roughness(lastPictureRow + 8));
+                return (picture, Roughness(lastPictureRow + 5));
             }
 
             (double comb, double mirrored) sharp = Reflected(0f);
             (double _, double washed) = Reflected(1f);
 
             Assert.True(sharp.comb > 20, $"the comb is not where the test thinks it is: {sharp.comb:F1}");
-            Assert.True(sharp.mirrored > sharp.comb * 0.25,
+            // The reflection is kept faint, so a bright picture does not paint a pale band round the
+            // glass; faint, but still the comb, legibly.
+            Assert.True(sharp.mirrored > sharp.comb * 0.1,
                 $"with diffusion off the housing should mirror the comb, not blur it: {sharp.mirrored:F1}");
             Assert.True(washed < sharp.mirrored * 0.25,
                 $"turning diffusion up did not blur the reflection: {washed:F1} against {sharp.mirrored:F1}");
@@ -413,7 +430,7 @@ namespace Zero.App.Tests
             // edge it is nowhere near. Taking the brighter of a left-right and a top-bottom term does
             // exactly that, and the outer row of the bottom face comes back at the brightness of the
             // picture instead of the near-darkness of a moulding that far from the opening.
-            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f };
+            var options = new CrtShaderOptions { Enabled = true, Curvature = 0.2f, EdgeLight = 1f, Bezel = 0.1f };
             using SKBitmap bmp = Render(options);
 
             double outerRow = Band(bmp, Width / 2 - 40, Width / 2 + 40, Height - 1, Height);

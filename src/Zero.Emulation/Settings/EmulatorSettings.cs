@@ -71,6 +71,8 @@ namespace Zero.Emulation.Settings
         public int WindowScale { get; set; } = 2;
         /// <summary>UI theme for the windows and dialogs. Applied at start-up; unknown names fall back to the default.</summary>
         public string UiTheme { get; set; } = "Semi";
+        /// <summary>The decks' faceplates: "Black", or "Silver" with dark print. Unknown names mean black.</summary>
+        public string DeckFinish { get; set; } = "Black";
         /// <summary>Show the hi-fi decks under the screen.</summary>
         public bool ShowDeck { get; set; } = true;
         /// <summary>Which deck is showing: 0 the cassette deck (A), 1 the receiver (B).</summary>
@@ -87,18 +89,18 @@ namespace Zero.Emulation.Settings
         public bool Enabled { get; set; } = true;
         public bool Scanlines { get; set; } = true;
         public bool Vignette { get; set; } = true;
-        public bool Flicker { get; set; } = false;
-        public bool Noise { get; set; } = false;
-        public double Curvature { get; set; } = 0.2;
+        /// <summary>How curved the glass is: 0 flat, 0.08 a portable set's gentle curve, 1 as curved as a tube goes.</summary>
+        public double Curvature { get; set; } = 0.08;
+        /// <summary>The shape of the glass: "Spherical", as most sets had, or "Trinitron", curved only from side to side.</summary>
+        public string Tube { get; set; } = "Spherical";
         public double Glow { get; set; } = 0.35;
-        public double GlassReflect { get; set; } = 0.2;
         /// <summary>Light from the picture spilling onto the surround, in place of plain black.</summary>
         public double EdgeLight { get; set; } = 0.5;
         /// <summary>
         /// Share of the window given to the housing the screen sits in, 0 for none. The picture is
         /// pushed in by this much to make room for it, so it is a trade against picture size.
         /// </summary>
-        public double Bezel { get; set; } = 0.03;
+        public double Bezel { get; set; } = 0.1;
         /// <summary>
         /// How blurred the picture is before the housing reflects it: 0 is a mirror, 1 a wash.
         /// </summary>

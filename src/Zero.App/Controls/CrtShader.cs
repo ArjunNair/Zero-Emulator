@@ -15,7 +15,6 @@ namespace Zero.App.Controls
         public bool Enabled;
         public float Curvature;
         public float Glow;
-        public float Reflection;
         /// <summary>How much of the window the cabinet round the screen takes, 0 for none.</summary>
         public float Bezel;
         /// <summary>How blurred the picture is before the housing reflects it, 0 for not at all.</summary>
@@ -24,22 +23,27 @@ namespace Zero.App.Controls
         public bool Sharp;
         /// <summary>Light from the picture spilling onto the surround, instead of plain black.</summary>
         public float EdgeLight;
+        /// <summary>
+        /// How round the glass's corners are, in units of half the screen's height; unset is the
+        /// standard 0.16. Smaller when little or no border shows, so the corners never cut into the
+        /// picture itself.
+        /// </summary>
+        public float? Corner;
+        /// <summary>A Trinitron's glass, curved only from side to side, instead of a sphere.</summary>
+        public bool Trinitron;
         public float Scanlines;
         public float Vignette;
-        public float Flicker;
-        public float Noise;
 
         // Sharp counts: it is the shader that places the sample, so the picture has to go through it
         // even when every effect is off.
-        public bool Any => Sharp || (Enabled && (Curvature > 0 || Glow > 0 || Reflection > 0 || Bezel > 0
-                                     || EdgeLight > 0 || Scanlines > 0 || Vignette > 0 || Flicker > 0 || Noise > 0));
+        public bool Any => Sharp || (Enabled && (Curvature > 0 || Glow > 0 || Bezel > 0
+                                     || EdgeLight > 0 || Scanlines > 0 || Vignette > 0));
 
         public bool Equals(CrtShaderOptions other) =>
             Enabled == other.Enabled && Curvature.Equals(other.Curvature) && Glow.Equals(other.Glow)
-            && Reflection.Equals(other.Reflection) && Bezel.Equals(other.Bezel)
+            && Bezel.Equals(other.Bezel)
             && Diffuse.Equals(other.Diffuse) && Sharp == other.Sharp && EdgeLight.Equals(other.EdgeLight)
-            && Scanlines.Equals(other.Scanlines) && Vignette.Equals(other.Vignette)
-            && Flicker.Equals(other.Flicker) && Noise.Equals(other.Noise);
+            && Scanlines.Equals(other.Scanlines) && Vignette.Equals(other.Vignette) && Corner == other.Corner && Trinitron == other.Trinitron;
     }
 
     /// <summary>
@@ -55,17 +59,15 @@ uniform shader srcSoft;     // the same picture, blurred, for the housing to ref
 uniform float2 dest;        // destination size in pixels
 uniform float2 srcOrigin;   // top-left of the visible part of the frame
 uniform float2 srcSize;     // size of the visible part of the frame
-uniform float time;         // seconds, for the effects that move
-uniform float curvature;
+uniform float tubeRadius;   // the glass's radius of curvature, in units of half the screen's height; 0 is flat
+uniform float tubeCylinder; // 1 for a tube curved only side to side, as a Trinitron is
 uniform float glow;
-uniform float reflection;
 uniform float sharp;        // confine the blend to the pixel boundaries
 uniform float bezel;        // share of the window given to the housing the screen sits in
+uniform float cornerRadius; // how round the glass's corners are, in units of half the screen's height
 uniform float edgeLight;
 uniform float scanline;
 uniform float vignette;
-uniform float flicker;
-uniform float noise;
 
 /// Where to sample the picture so that a blend between neighbouring pixels happens only at the
 /// boundary between them, and only across a pixel of the screen.
@@ -82,6 +84,29 @@ float2 atPixel(float2 q) {
     return (seam + clamp((inPixels - seam) * size, -0.5, 0.5)) * size;
 }
 
+// How far the glass lies behind its own front at a point (in units of half the screen's height):
+// a sphere, or for a Trinitron a cylinder curved only from side to side.
+float tubeDepth(float2 h) {
+    float r2 = tubeCylinder > 0.5 ? h.x * h.x : dot(h, h);
+    return tubeRadius - sqrt(max(tubeRadius * tubeRadius - r2, 0.0));
+}
+
+// Where on the picture a point on the window shows, measured across the curved glass: the point is
+// carried back along the line of sight onto the glass, with a viewer at a usual distance, and the
+// picture is laid evenly along the glass's surface, as the tube's own scan draws it. A few rounds
+// of perspective settle where the line meets the glass. Flat glass leaves the point as it is.
+float2 onTube(float2 p) {
+    if (tubeRadius <= 0.0) return p;
+    const float view = 3.0;
+    float2 h = p;
+    for (int i = 0; i < 4; ++i) h = p * (view + tubeDepth(h)) / view;
+    float r = tubeRadius;
+    if (tubeCylinder > 0.5) return float2(r * asin(clamp(h.x / r, -1.0, 1.0)), h.y);
+    float len = length(h);
+    if (len < 0.00001) return h;
+    return h / len * (r * asin(clamp(len / r, -1.0, 1.0)));
+}
+
 float hash(float2 p) {
     return fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
 }
@@ -95,7 +120,12 @@ half4 main(float2 xy) {
     float opening = max(1.0 - bezel, 0.05);
     float outer = 1.0 / opening;
     float2 c0 = (uv * 2.0 - 1.0) / opening;           // -1..1 across the opening, from the centre
-    float2 c = c0 * (1.0 + curvature * dot(c0, c0) * 0.25);   // bulge the glass
+    float aspect = dest.x / max(dest.y, 1.0);
+    float2 extent = float2(aspect, 1.0);
+    // The curved glass: where each point of the opening shows on the picture, scaled so the middle
+    // of each edge of the picture meets the middle of each edge of the opening. Further out, along
+    // the edges and most at the corners, the curve carries the picture away from the viewer.
+    float2 c = onTube(c0 * extent) / float2(onTube(float2(aspect, 0.0)).x, onTube(float2(0.0, 1.0)).y);
 
     // Keep every sample half a source pixel inside the visible frame. The frame we are handed still
     // has its border attached and the tile mode clamps to the whole of it, so a sample taken exactly
@@ -130,29 +160,18 @@ half4 main(float2 xy) {
     if (vignette > 0.0) {
         picture *= 1.0 - vignette * dot(c, c) * 0.35;
     }
-    if (flicker > 0.0) {                              // mains hum on the brightness
-        picture *= 1.0 - flicker * 0.12 * (0.5 + 0.5 * sin(time * 37.0));
-    }
-    if (noise > 0.0) {
-        float n = hash(floor(p) + floor(time * 24.0));
-        picture += half3(half((n - 0.5) * noise * 0.18));
-    }
-    if (reflection > 0.0) {                           // a soft sheen across the glass
-        // Measured in units of the screen's height, so the highlight stays round whatever shape the
-        // window is rather than stretching with it, and faded out before the rim. A highlight that
-        // runs off an edge lights that edge instead of falling away, which is what made the left and
-        // top of the screen brighter than the right and bottom.
-        float2 q = (uv - float2(0.32, 0.26)) * float2(dest.x / max(dest.y, 1.0), 1.0);
-        float sheen = clamp(1.0 - length(q) * 2.2, 0.0, 1.0);
-        float contain = smoothstep(0.0, 0.45, 1.0 - max(abs(c.x), abs(c.y)));
-        picture += half3(half(sheen * sheen * contain * reflection * 0.3));
-    }
-
     // Blend across the rim rather than switching at it, or the curve stair-steps. 'pixel' is one
     // output pixel expressed in this -1..1 space; three of them is the narrowest band that still
     // reads as smooth once the software path scales its output up.
-    float beyond = distance(c, inside);
-    float pixel = 2.0 / max(min(dest.x, dest.y), 1.0);
+    //
+    // The glass's corners are rounded, as a tube's are, wherever there is a housing to round them
+    // against. Measured with the width scaled to the height, so the corners stay circular whatever
+    // shape the window is; 'corner' is their radius in units of half the screen's height.
+    float corner = bezel > 0.0 ? cornerRadius : 0.0;
+    float2 qr = abs(c * extent) - (extent - corner);
+    float beyond = length(max(qr, 0.0)) + min(max(qr.x, qr.y), 0.0) - corner;
+    beyond = max(beyond, 0.0);
+    float pixel = 2.0 / max(dest.y, 1.0);
     float rim = smoothstep(0.0, pixel * 3.0, beyond);
 
     // The surround, lit by the picture it frames -- as a mirror of it. Clamping to the glass gives
@@ -162,50 +181,148 @@ half4 main(float2 xy) {
     // into the picture for every pixel out across the panel, so the panel carries the edge of the
     // picture turned back on itself. At the glass the two agree, so the seam stays invisible.
     //
-    // 'reach' is how far out we are as a fraction of the panel's own depth: 0 against the glass, 1 at
-    // the frame. A plain distance leaves the corners dark, because the curve cuts a corner about four
-    // times deeper than it cuts the sides, so light fading over the width of a side panel has run out
-    // long before it crosses a corner.
-    float2 qc = c0;
-    for (int k = 0; k < 2; ++k) {
-        float wq = 1.0 + curvature * dot(qc, qc) * 0.25;
-        qc = clamp(qc * wq, -1.0, 1.0) / wq;
+    // How far out a point is, for the light the picture throws on the housing: 0 at the glass, 1 at
+    // the window edge, measured from the rounded, curved glass so it runs smoothly round the corners
+    // and the light with it. Both distances in units of half the window's height.
+    float2 wp = c0 * opening * extent;                                        // window space
+    float toWindow = max(min(aspect - abs(wp.x), 1.0 - abs(wp.y)), 0.0);
+    float fromGlass = beyond * opening;
+    float depth = clamp(fromGlass / max(fromGlass + toWindow, 0.0001), 0.0, 1.0);
+
+    // The cabinet, as on a set of the early eighties: a flat frame round the front, and inside it a
+    // rectangular tunnel running back to the tube, its four walls mitred where they meet. The tube
+    // sits at the back of the tunnel in a dark mask, its own corners rounded. Lit from above: the
+    // top wall faces down into shadow, the bottom one faces up and catches the light, the sides are
+    // between. 'tunnel' runs from 0 at the back of the tunnel, round the tube, to 1 at the window
+    // edge, on whichever wall a point is on; below 0 is the mask.
+    half3 housing = half3(0.03);                                            // the mask round the tube
+    float catches = 1.0;            // how much of the picture's light a point can catch: see below
+    float reach = exp(-depth * 3.2);    // and how much of it gets that far: see below
+    if (bezel > 0.0) {
+        // The back of the tunnel meets the tube at the middle of each edge; towards the corners the
+        // curve carries the glass away from it, and the mask fills the gap.
+        float2 back = opening * extent;
+        float2 tw = (abs(wp) - back) / max(extent - back, float2(0.0001, 0.0001));
+        float tunnel = max(tw.x, tw.y);
+
+        if (tunnel > 0.0) {
+            bool side = tw.x > tw.y;
+            float frameStart = 0.45;   // a shallow tunnel inside a broad frame
+            // Only the tunnel's walls face the tube and can catch its light, and less the further
+            // forward they run; the frame faces the room, so none reaches it.
+            catches = 1.0 - smoothstep(frameStart * 0.6, frameStart, tunnel);
+            // On the walls the light carries their whole depth, fading as they run forward, rather
+            // than dying out halfway along: a wall faces the screen all the way to the frame.
+            reach = exp(-(tunnel / frameStart) * 1.0);
+            if (tunnel < frameStart) {
+                float wall = side ? (wp.x < 0.0 ? 0.06 : 0.05) : (wp.y < 0.0 ? 0.034 : 0.11);
+                float forward = 0.65 + 0.35 * tunnel / frameStart;         // darker the further back
+                housing = half3(half(wall * forward));
+            } else {
+                // The frame's flat face, with a stepped inner edge and a rounded outer one.
+                float step = exp(-pow((tunnel - frameStart - 0.05) / 0.025, 2.0));
+                float rounded = smoothstep(0.96, 1.0, tunnel);
+                housing = half3(half((0.065 + 0.06 * step) * (1.0 - 0.45 * rounded)));
+            }
+        } else {
+            housing = half3(0.012);   // the mask round the tube
+            reach = 1.0;              // right against the tube, as the back of the tunnel is
+        }
     }
-    float2 t = clamp((abs(c0) - abs(qc)) / max(outer - abs(qc), float2(0.0001, 0.0001)), 0.0, 1.0);
 
-    // The housing is four flat faces meeting at mitres, the way a moulding is cut. Which face a
-    // point belongs to is whichever it is further past in units of that face's own depth, so the
-    // seam between two of them runs out from the corner of the screen to the corner of the window.
-    float2 w = c0 * opening;                 // back to -1..1 across the window
-    float sideFace = step(t.y, t.x);         // 1 on the left and right faces, 0 on the top and bottom
-    float depth = mix(t.y, t.x, sideFace);   // into this face: 0 against the glass, 1 at the window
-
-    // Each face takes a slightly different shade, as though lit from above: that difference is the
-    // only thing that makes a mitre visible, and without it the housing is one flat rectangle.
-    float shade = sideFace > 0.5 ? (w.x < 0.0 ? 0.013 : -0.013) : (w.y < 0.0 ? 0.030 : -0.018);
-    half3 housing = half3(half(0.055 + shade));
-    housing += half3(half(0.045 * exp(-depth * 26.0)));   // the lip round the opening, standing proud
-
-    // The screen's own light on it, close in. It falls away far faster than it used to: over the
-    // depth of a housing rather than the width of a thin panel, it washed the whole moulding out.
-    //
-    // Evenly along each face. It used to fade towards the ends as well, to stop a corner -- lit by
-    // the two faces that meet there -- carrying a third reflection of the picture turned back on
-    // itself diagonally. Reflecting a blurred copy settles that at the source: there is no longer a
-    // second legible copy of anything for a corner to show a third of.
-    // How far into its own face a point is -- which is max(t.x, t.y), so it runs smoothly across a
-    // mitre even though which face it belongs to switches there.
-    //
-    // Not the brighter of a left-right term and a top-bottom term. Halfway along the bottom face
-    // nothing is past the left or right edge at all, so the left-right term is exp(0) and lights it
-    // at full strength from an edge it is nowhere near.
-    float2 reflected = clamp(2.0 * inside - c, -1.0, 1.0);
+    // The screen's own light on it, close in: a faint glow off the glass, falling away across the
+    // bezel and the same all the way round, since 'depth' runs smoothly round the corners. Kept
+    // faint: at full strength a bright picture -- the Spectrum's white border -- painted a pale band
+    // round the glass, where a set's bezel is dark. And only where the cabinet can catch it.
+    // Mirrored across the edge of the glass as it really is, rounded corners and all: from the
+    // nearest point on that edge, as far back in along its normal as the point is out. Along a
+    // straight side that is the plain mirror across it; round a corner the normal turns, so the
+    // picture's lines bend round the corner on the housing instead of running on straight past it.
+    // With no rounding the corner is a point, and the mirror through it is the point reflection the
+    // straight-edged version gave there.
+    float2 cp = c * extent;
+    float2 centres = extent - corner;
+    float2 qe = abs(cp) - centres;
+    float2 sgn = float2(cp.x < 0.0 ? -1.0 : 1.0, cp.y < 0.0 ? -1.0 : 1.0);
+    float2 normal;
+    float2 edgePoint;
+    if (qe.x > 0.0 && qe.y > 0.0) {
+        float2 centre = sgn * centres;
+        float2 away = cp - centre;
+        normal = away / max(length(away), 0.0001);
+        edgePoint = centre + normal * corner;
+    } else if (qe.x > qe.y) {
+        normal = float2(sgn.x, 0.0);
+        edgePoint = float2(sgn.x * extent.x, cp.y);
+    } else {
+        normal = float2(0.0, sgn.y);
+        edgePoint = float2(cp.x, sgn.y * extent.y);
+    }
+    float2 reflected = clamp((edgePoint - normal * beyond) / extent, -1.0, 1.0);
+    // None of it round the corners, though: there the housing turns away from the screen, and the
+    // light fades out as it goes round rather than stopping at a line.
+    catches *= 1.0 - smoothstep(0.0, max(corner, 0.06), min(qe.x, qe.y));
     float2 mirror = clamp((reflected * 0.5 + 0.5) * dest, lo, hi);
-    half3 spill = housing + srcSoft.eval(mirror).rgb * half(exp(-depth * 3.2)) * edgeLight;
+    half3 spill = housing + srcSoft.eval(mirror).rgb * half(reach * 0.45 * catches) * edgeLight;
 
     return half4(mix(picture, spill, half(rim)), 1.0);
 }";
 
+
+        /// <summary>
+        /// The glass's radius for a curvature setting, in units of half the screen's height, for a
+        /// window of the given shape: the radius that carries the corners of the picture out by 30%
+        /// of the setting (2.4% at 8%, a portable set's gentle curve; 30% at full). Found by
+        /// bisection against the same projection the shader makes. 0 is flat.
+        /// </summary>
+        internal static float TubeRadiusFor(float curvature, float aspect, bool cylinder)
+        {
+            if (curvature <= 0.001f) return 0f;
+            double target = 0.3 * curvature, lo = 2.0, hi = 1e4;
+            if (CornerPull(lo, aspect, cylinder) < target) return (float)lo;    // as curved as a tube goes
+            for (int i = 0; i < 50; i++)
+            {
+                double mid = Math.Sqrt(lo * hi);
+                if (CornerPull(mid, aspect, cylinder) > target) lo = mid; else hi = mid;
+            }
+            return (float)Math.Sqrt(lo * hi);
+        }
+
+        // The shader's onTube and tubeDepth, in doubles: how far the curve carries the picture's
+        // corner beyond the line of its top edge.
+        private static double CornerPull(double r, double aspect, bool cylinder)
+        {
+            (double, double) OnTube(double px, double py)
+            {
+                const double view = 3.0;
+                double hx = px, hy = py;
+                for (int i = 0; i < 4; i++)
+                {
+                    double r2 = cylinder ? hx * hx : hx * hx + hy * hy;
+                    double z = r - Math.Sqrt(Math.Max(r * r - r2, 0));
+                    hx = px * (view + z) / view;
+                    hy = py * (view + z) / view;
+                }
+                if (cylinder) return (r * Math.Asin(Math.Clamp(hx / r, -1, 1)), hy);
+                double len = Math.Sqrt(hx * hx + hy * hy);
+                double arc = r * Math.Asin(Math.Clamp(len / r, -1, 1));
+                return (hx / len * arc, hy / len * arc);
+            }
+            double edge = OnTube(0, 1).Item2;
+            return OnTube(aspect, 1).Item2 / edge - 1;
+        }
+
+        // Solved once per window shape and setting, not every frame.
+        private static (float Curvature, float Aspect, bool Cylinder, float Radius) _radius;
+
+        internal static float TubeRadius(float curvature, float aspect, bool cylinder)
+        {
+            var key = _radius;
+            if (key.Curvature == curvature && Math.Abs(key.Aspect - aspect) < 0.001f && key.Cylinder == cylinder) return key.Radius;
+            float r = TubeRadiusFor(curvature, aspect, cylinder);
+            _radius = (curvature, aspect, cylinder, r);
+            return r;
+        }
 
         private static SKRuntimeEffect _effect;
         private static bool _tried;
@@ -274,13 +391,11 @@ half4 main(float2 xy) {
         private readonly bool _smooth;
         private readonly CrtSurfaceCache _cache;
         private readonly CrtSurfaceCache _soft;
-        private readonly float _time;
 
-        public CrtDrawOperation(Rect bounds, SKBitmap frame, Rect source, Rect dest, CrtShaderOptions options, bool smooth, CrtSurfaceCache cache, float time, CrtSurfaceCache soft = null)
+        public CrtDrawOperation(Rect bounds, SKBitmap frame, Rect source, Rect dest, CrtShaderOptions options, bool smooth, CrtSurfaceCache cache, CrtSurfaceCache soft = null)
         {
             _cache = cache;
             _soft = soft;
-            _time = time;
             Bounds = bounds;
             _frame = frame;
             _source = source;
@@ -409,17 +524,15 @@ half4 main(float2 xy) {
                 ["dest"] = new[] { (float)width, (float)height },
                 ["srcOrigin"] = new[] { (float)_source.X, (float)_source.Y },
                 ["srcSize"] = new[] { (float)_source.Width, (float)_source.Height },
-                ["time"] = _time,
-                ["curvature"] = _options.Curvature,
+                ["tubeRadius"] = CrtShader.TubeRadius(_options.Curvature, (float)(width / Math.Max(height, 1.0)), _options.Trinitron),
+                ["tubeCylinder"] = _options.Trinitron ? 1f : 0f,
                 ["glow"] = _options.Glow,
-                ["reflection"] = _options.Reflection,
                 ["bezel"] = _options.Bezel,
+                ["cornerRadius"] = _options.Corner ?? 0.16f,
                 ["sharp"] = _options.Sharp ? 1f : 0f,
                 ["edgeLight"] = _options.EdgeLight,
                 ["scanline"] = _options.Scanlines,
                 ["vignette"] = _options.Vignette,
-                ["flicker"] = _options.Flicker,
-                ["noise"] = _options.Noise,
             };
             var children = new SKRuntimeEffectChildren(effect) { ["src"] = source, ["srcSoft"] = softSource ?? source };
 

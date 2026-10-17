@@ -93,6 +93,9 @@ namespace Zero.App
             NativeMenu.SetMenu(this, BuildMenu());
             if (IsMac && Application.Current != null) NativeMenu.SetMenu(Application.Current, BuildAppMenu());
             WireDeck();
+            // The deck's display draws its lettering from the Spectrum's own character set, in the 48K ROM.
+            Controls.VfdText.LoadCharacterSet(Path.Combine(AppPaths.Resolve(_settings.Paths.Roms, "roms"), _settings.Roms.Rom48k));
+            ApplyDeckFinish();
             ApplyCrtSettings();
             ApplyViewSettings();
             RefreshMenuState();
@@ -722,6 +725,7 @@ namespace Zero.App
                 else _session.ApplySettings();
                 RefreshMenuState();
                 SaveSettings();
+                ApplyDeckFinish();
                 ApplyCrtSettings();
                 if (dialog.ThemeChanged)
                     await MessageDialog.ShowAsync(this, "Theme",
@@ -815,6 +819,19 @@ namespace Zero.App
         /// Push the CRT settings into the display's shader. Safe to call at any time. Scanlines stand
         /// on their own; the CRT switch governs the rest (curvature, glow, the housing and so on).
         /// </summary>
+        /// <summary>
+        /// How round the glass's corners can be without cutting into the picture: a rounded corner
+        /// eats about 0.29 of its radius in from the corner, so it may be up to about three times the
+        /// border that shows. With no border at all it still rounds, trimming a pixel or two off the
+        /// picture's very corner, which reads as a tube rather than a cut.
+        /// </summary>
+        internal static float GlassCornerFor(int borderCrop)
+        {
+            int shown = 48 - Math.Clamp(borderCrop, 0, 48);                    // border pixels at the top and sides
+            double halfHeight = (192 + shown + shown * 56.0 / 48) / 2;          // the visible height, halved
+            return (float)Math.Clamp(3 * shown / halfHeight, 0.08, 0.16);
+        }
+
         internal void ApplyCrtSettings()
         {
             CrtSettings crt = _settings.Render.Crt;
@@ -825,14 +842,13 @@ namespace Zero.App
                 Enabled = on || crt.Scanlines,
                 Curvature = Strength(crt.Curvature),
                 Glow = Strength(crt.Glow),
-                Reflection = Strength(crt.GlassReflect),
                 EdgeLight = Strength(crt.EdgeLight),
-                Bezel = on ? (float)Math.Clamp(crt.Bezel, 0, 0.05) : 0f,
+                Bezel = on ? (float)Math.Clamp(crt.Bezel, 0, 0.15) : 0f,
                 Diffuse = Strength(crt.Diffuse),
                 Scanlines = crt.Scanlines ? 0.35f : 0f,
                 Vignette = on && crt.Vignette ? 0.6f : 0f,
-                Flicker = on && crt.Flicker ? 1f : 0f,
-                Noise = on && crt.Noise ? 1f : 0f
+                Corner = GlassCornerFor(_settings.Render.BorderCrop),
+                Trinitron = string.Equals(crt.Tube, "Trinitron", StringComparison.OrdinalIgnoreCase)
             };
         }
 
@@ -890,7 +906,7 @@ namespace Zero.App
                 _lastFrameCount = frames;
                 _lastFpsSample = now;
                 StatusFps.Text = _session.IsPaused ? "paused" : $"{fps:F0} fps";
-                Deck.ShowFps(_session.IsPaused ? "PAUSE" : $"{fps:F0} FPS");
+                Deck.ShowFps(_session.IsPaused ? "PAUSE" : $"{fps:F0}");   // the deck prints FPS beside the rate
             }
             RefreshTapeStatus();
         }

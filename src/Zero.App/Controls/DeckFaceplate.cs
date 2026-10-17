@@ -5,51 +5,76 @@ using Avalonia.Media;
 
 namespace Zero.App.Controls
 {
+    /// <summary>What the decks' faceplates are made of.</summary>
+    public enum DeckFinish { Black, Silver }
+
     /// <summary>
-    /// The deck's front panel: black brushed aluminium with a bevelled edge and a screw in each
-    /// corner. Draws behind its child, which lays out inside <see cref="Decorator.Padding"/>.
+    /// The deck's front panel: brushed aluminium, black or silver, with a bevelled edge and a screw
+    /// in each corner. Draws behind its child, which lays out inside <see cref="Decorator.Padding"/>.
     /// </summary>
     public sealed class DeckFaceplate : Decorator
     {
+        public static readonly StyledProperty<DeckFinish> FinishProperty =
+            AvaloniaProperty.Register<DeckFaceplate, DeckFinish>(nameof(Finish));
+
+        public DeckFinish Finish { get => GetValue(FinishProperty); set => SetValue(FinishProperty, value); }
+
         private const double Corner = 5;
+
+        static DeckFaceplate()
+        {
+            AffectsRender<DeckFaceplate>(FinishProperty);
+        }
 
         public override void Render(DrawingContext ctx)
         {
             var r = new Rect(Bounds.Size);
             if (r.Width <= 0 || r.Height <= 0) return;
+            bool silver = Finish == DeckFinish.Silver;
 
             var body = new LinearGradientBrush
             {
                 StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
                 EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
-                GradientStops =
-                {
-                    new GradientStop(Color.FromRgb(0x2E, 0x30, 0x34), 0),
-                    new GradientStop(Color.FromRgb(0x1E, 0x1F, 0x22), 0.5),
-                    new GradientStop(Color.FromRgb(0x15, 0x16, 0x18), 1)
-                }
+                GradientStops = silver
+                    ? new GradientStops
+                    {
+                        new GradientStop(Color.FromRgb(0xD8, 0xDB, 0xDF), 0),
+                        new GradientStop(Color.FromRgb(0xC2, 0xC6, 0xCB), 0.5),
+                        new GradientStop(Color.FromRgb(0xA9, 0xAD, 0xB3), 1)
+                    }
+                    : new GradientStops
+                    {
+                        new GradientStop(Color.FromRgb(0x2E, 0x30, 0x34), 0),
+                        new GradientStop(Color.FromRgb(0x1E, 0x1F, 0x22), 0.5),
+                        new GradientStop(Color.FromRgb(0x15, 0x16, 0x18), 1)
+                    }
             };
-            ctx.DrawRectangle(body, new Pen(Brushes.Black, 1), r.Deflate(0.5), Corner, Corner);
+            ctx.DrawRectangle(body, new Pen(silver ? new SolidColorBrush(Color.FromRgb(0x4A, 0x4C, 0x50)) : Brushes.Black, 1),
+                r.Deflate(0.5), Corner, Corner);
 
-            // Brushing: faint horizontal streaks of varying strength, the same every time.
+            // Brushing: grain running edge to edge, as the brush leaves it, lighter and darker by
+            // turns. Each line's strength is blended with the last, so the grain drifts rather than
+            // flickering line to line, and it is the same every time and on every plate. Silver
+            // shows its grain more, in light and shade alike.
             using (ctx.PushClip(new RoundedRect(r.Deflate(1.5), Corner - 1)))
             {
                 var rng = new Random(1982);
+                double grain = 0;
                 for (double y = 2; y < r.Height - 2; y += 1)
                 {
-                    byte a = (byte)rng.Next(0, 14);
-                    bool light = rng.Next(2) == 0;
-                    var pen = new Pen(new SolidColorBrush(light ? Color.FromArgb(a, 255, 255, 255) : Color.FromArgb((byte)(a * 2), 0, 0, 0)), 1);
-                    double x0 = rng.NextDouble() * r.Width * 0.3;
-                    double x1 = r.Width - rng.NextDouble() * r.Width * 0.3;
-                    ctx.DrawLine(pen, new Point(x0, y + 0.5), new Point(x1, y + 0.5));
+                    grain = grain * 0.55 + (rng.NextDouble() * 2 - 1) * 0.45;
+                    Color c = grain >= 0
+                        ? Color.FromArgb((byte)(grain * (silver ? 70 : 22)), 255, 255, 255)
+                        : Color.FromArgb((byte)(-grain * (silver ? 34 : 40)), 0, 0, 0);
+                    ctx.DrawLine(new Pen(new SolidColorBrush(c), 1), new Point(0, y + 0.5), new Point(r.Width, y + 0.5));
                 }
             }
 
             // Bevel: a lit top edge and a shadowed bottom one.
-            ctx.DrawLine(new Pen(new SolidColorBrush(Color.FromArgb(90, 255, 255, 255)), 1),
+            ctx.DrawLine(new Pen(new SolidColorBrush(Color.FromArgb((byte)(silver ? 200 : 90), 255, 255, 255)), 1),
                 new Point(Corner, 1.5), new Point(r.Width - Corner, 1.5));
-            ctx.DrawLine(new Pen(new SolidColorBrush(Color.FromArgb(160, 0, 0, 0)), 1),
+            ctx.DrawLine(new Pen(new SolidColorBrush(Color.FromArgb((byte)(silver ? 90 : 160), 0, 0, 0)), 1),
                 new Point(Corner, r.Height - 1.5), new Point(r.Width - Corner, r.Height - 1.5));
 
             double inset = 6.5;

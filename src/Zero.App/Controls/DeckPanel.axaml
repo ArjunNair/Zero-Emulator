@@ -2,14 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="using:Zero.App.Controls"
              x:Class="Zero.App.Controls.DeckPanel"
-             FontFamily="fonts:Inter#Inter, $Default"
              Focusable="False">
   <!-- The hi-fi deck under the screen. Its look is the hardware's, not the UI theme's: every key
        and legend is styled here so Semi, Simple and Pipboy all show the same black faceplate. -->
   <UserControl.Resources>
     <SolidColorBrush x:Key="DeckLegend" Color="#9A9DA3" />
     <SolidColorBrush x:Key="DeckGlyph" Color="#D8DADE" />
-    <FontFamily x:Key="VfdFont">Menlo, Consolas, DejaVu Sans Mono, Courier New</FontFamily>
+    <!-- The faceplate's lettering. Set by style, not inherited, because themes (Pipboy) style every
+         TextBlock with their own font and a style beats an inherited value. -->
+    <FontFamily x:Key="DeckFont">avares://Zero/Assets/Fonts#Barlow Semi Condensed, fonts:Inter#Inter, $Default</FontFamily>
 
     <LinearGradientBrush x:Key="KeyFace" StartPoint="0%,0%" EndPoint="0%,100%">
       <GradientStop Color="#45474C" Offset="0" />
@@ -24,6 +25,22 @@
     <LinearGradientBrush x:Key="KeyFacePressed" StartPoint="0%,0%" EndPoint="0%,100%">
       <GradientStop Color="#1A1B1D" Offset="0" />
       <GradientStop Color="#26272A" Offset="1" />
+    </LinearGradientBrush>
+
+    <!-- The same, in satin aluminium, for the silver finish. -->
+    <LinearGradientBrush x:Key="SilverKeyFace" StartPoint="0%,0%" EndPoint="0%,100%">
+      <GradientStop Color="#F3F4F6" Offset="0" />
+      <GradientStop Color="#CDD0D4" Offset="0.5" />
+      <GradientStop Color="#A9ADB3" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="SilverKeyFaceHover" StartPoint="0%,0%" EndPoint="0%,100%">
+      <GradientStop Color="#FAFBFC" Offset="0" />
+      <GradientStop Color="#D9DCE0" Offset="0.5" />
+      <GradientStop Color="#B6BABF" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="SilverKeyFacePressed" StartPoint="0%,0%" EndPoint="0%,100%">
+      <GradientStop Color="#A3A7AD" Offset="0" />
+      <GradientStop Color="#C3C6CB" Offset="1" />
     </LinearGradientBrush>
 
     <!-- A transport key: a rectangular black key that sinks a pixel when pressed. -->
@@ -57,6 +74,42 @@
       </Style>
       <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Opacity" Value="0.35" />
+      </Style>
+    </ControlTheme>
+
+    <!-- A small round push button set in a shallow ring in the faceplate, for an action that
+         should not be hit by accident (reset). -->
+    <ControlTheme x:Key="DeckRecessedKey" TargetType="Button">
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Width" Value="16" />
+      <Setter Property="Height" Value="16" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Panel>
+            <!-- A shallow recess round it: a fine edge in shadow at the top, catching the light at
+                 the bottom. Even sizes keep the button dead centre in it. -->
+            <Border CornerRadius="8" BorderThickness="0.8">
+              <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                  <GradientStop Color="#A0000000" Offset="0" />
+                  <GradientStop Color="#30FFFFFF" Offset="1" />
+                </LinearGradientBrush>
+              </Border.BorderBrush>
+            </Border>
+            <Border Name="PART_Body" Width="14" Height="14" CornerRadius="7" BorderBrush="#050506" BorderThickness="0.8"
+                    Background="{StaticResource KeyFace}">
+              <Border CornerRadius="6.5" BorderThickness="0,1,0,0" BorderBrush="#38FFFFFF" />
+            </Border>
+          </Panel>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:pointerover /template/ Border#PART_Body">
+        <Setter Property="Background" Value="{StaticResource KeyFaceHover}" />
+      </Style>
+      <Style Selector="^:pressed /template/ Border#PART_Body">
+        <Setter Property="Background" Value="{StaticResource KeyFacePressed}" />
+        <Setter Property="RenderTransform" Value="scale(0.92)" />
       </Style>
     </ControlTheme>
 
@@ -100,9 +153,47 @@
         <Setter Property="BoxShadow" Value="0 0 4 1 #A0FF9A20" />
       </Style>
     </ControlTheme>
+
+    <!-- A latching key that stays down while it is on, its lamp lit (pause). -->
+    <ControlTheme x:Key="DeckLatchKey" TargetType="ToggleButton" BasedOn="{StaticResource DeckToggle}">
+      <Style Selector="^:checked /template/ Border#PART_Body">
+        <Setter Property="Background" Value="{StaticResource KeyFacePressed}" />
+        <Setter Property="RenderTransform" Value="translate(0px, 1px)" />
+      </Style>
+    </ControlTheme>
   </UserControl.Resources>
 
   <UserControl.Styles>
+    <Style Selector="TextBlock">
+      <Setter Property="FontFamily" Value="{StaticResource DeckFont}" />
+    </Style>
+    <Style Selector="c|DeckKnob, c|DeckSlideSwitch">
+      <Setter Property="TextElement.FontFamily" Value="{StaticResource DeckFont}" />
+    </Style>
+
+    <!-- The badge: steel letters with a dark edge below, where they stand off the plate. -->
+    <Style Selector="Canvas.badge">
+      <Setter Property="Effect">
+        <DropShadowEffect OffsetX="0" OffsetY="0.8" BlurRadius="0.8" Color="#000000" Opacity="0.9" />
+      </Setter>
+    </Style>
+    <Style Selector="Canvas.badge Path">
+      <Setter Property="StrokeThickness" Value="1.6" />
+      <Setter Property="StrokeLineCap" Value="Square" />
+      <Setter Property="Stroke">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Color="#F6F7F9" Offset="0" />
+          <GradientStop Color="#C3C7CC" Offset="0.42" />
+          <GradientStop Color="#8C9097" Offset="0.5" />
+          <GradientStop Color="#D9DCE0" Offset="0.62" />
+          <GradientStop Color="#9A9EA5" Offset="1" />
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+    <Style Selector="TextBlock.version">
+      <Setter Property="Foreground" Value="#8A8D93" />
+    </Style>
+
     <!-- Printed legends on the faceplate. -->
     <Style Selector="TextBlock.legend">
       <Setter Property="Foreground" Value="{StaticResource DeckLegend}" />
@@ -110,6 +201,14 @@
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="LetterSpacing" Value="0.2" />
       <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+    <!-- The slide switches' end stops sit the same way in, so their slots line up. -->
+    <Style Selector="c|DeckSlideSwitch">
+      <Setter Property="Inset" Value="9" />
+    </Style>
+    <!-- Printed lines joining controls that work together. -->
+    <Style Selector="Border.bracket">
+      <Setter Property="BorderBrush" Value="#6A6D73" />
     </Style>
     <!-- The disk's name inside a drive bay: muted, and fainter still for an empty drive. -->
     <Style Selector="TextBlock.bayname">
@@ -147,34 +246,189 @@
       <Setter Property="BorderBrush" Value="#14FFFFFF" />
       <Setter Property="Background" Value="#0A0A0B" />
     </Style>
-    <!-- VFD text: phosphor teal with a soft bloom. Unlit segments stay faintly visible. -->
-    <Style Selector="TextBlock.vfd">
-      <Setter Property="Foreground" Value="#5EF2DC" />
-      <Setter Property="FontFamily" Value="{StaticResource VfdFont}" />
+    <!-- VFD text, in the muted phosphor colours of an old display: cyan by default, with a soft bloom.
+         Unlit segments stay faintly visible. -->
+    <Style Selector="c|VfdText.vfd">
+      <Setter Property="Foreground" Value="#66D4CF" />
       <Setter Property="Effect">
-        <DropShadowEffect Color="#5EF2DC" BlurRadius="5" OffsetX="0" OffsetY="0" Opacity="0.75" />
+        <DropShadowEffect Color="#66D4CF" BlurRadius="4" OffsetX="0" OffsetY="0" Opacity="0.5" />
       </Setter>
     </Style>
-    <!-- A square display segment: a drive's busy light. -->
+    <!-- A square display segment: a drive's busy light, red like the drive bays' own lights. -->
     <Style Selector="Border.vfdled">
       <Setter Property="Width" Value="6" />
       <Setter Property="Height" Value="6" />
       <Setter Property="Margin" Value="0,0,5,0" />
       <Setter Property="CornerRadius" Value="1" />
       <Setter Property="VerticalAlignment" Value="Center" />
-      <Setter Property="Background" Value="#163A36" />
+      <Setter Property="Background" Value="#3A1816" />
     </Style>
     <Style Selector="Border.vfdled.lit">
-      <Setter Property="Background" Value="#5EF2DC" />
-      <Setter Property="BoxShadow" Value="0 0 4 1 #905EF2DC" />
+      <Setter Property="Background" Value="#E0645C" />
+      <Setter Property="BoxShadow" Value="0 0 3 1 #70E0645C" />
     </Style>
     <!-- Part lit: a +3 drive's light at rest, its select line pulsed by the controller's polling. -->
     <Style Selector="Border.vfdled.dim">
-      <Setter Property="Background" Value="#2F9488" />
+      <Setter Property="Background" Value="#80352F" />
     </Style>
-    <Style Selector="TextBlock.vfd.off">
-      <Setter Property="Foreground" Value="#163A36" />
+    <Style Selector="c|SegmentDisplay.vfdseg">
+      <Setter Property="Foreground" Value="#66D4CF" />
+      <Setter Property="Unlit" Value="Transparent" />
+      <Setter Property="Effect">
+        <DropShadowEffect Color="#66D4CF" BlurRadius="4" OffsetX="0" OffsetY="0" Opacity="0.5" />
+      </Setter>
+    </Style>
+    <Style Selector="c|SegmentDisplay.vfdseg.unlit">
+      <Setter Property="Foreground" Value="#163331" />
       <Setter Property="Effect" Value="{x:Null}" />
+    </Style>
+    <Style Selector="c|VfdText.vfd.off">
+      <Setter Property="Foreground" Value="#163331" />
+      <Setter Property="Effect" Value="{x:Null}" />
+    </Style>
+    <!-- Printed legends on the display glass: plain ink, never lit. -->
+    <Style Selector="TextBlock.vfdink">
+      <Setter Property="Foreground" Value="#8E949C" />
+      <Setter Property="FontSize" Value="6.5" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="LetterSpacing" Value="0.6" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <!-- The other zones, as a real VFD gets from filters over parts of the glass: light yellow for the
+         settings, green for PLAY, bluish white for RZX, red for recording. Each has its own unlit tint;
+         listed after the cyan default so they win, each unlit style after its lit one. -->
+    <Style Selector="c|VfdText.vfd.yellow">
+      <Setter Property="Foreground" Value="#E6D88E" />
+      <Setter Property="Effect">
+        <DropShadowEffect Color="#E6D88E" BlurRadius="4" OffsetX="0" OffsetY="0" Opacity="0.5" />
+      </Setter>
+    </Style>
+    <Style Selector="c|VfdText.vfd.yellow.off">
+      <Setter Property="Foreground" Value="#38331C" />
+      <Setter Property="Effect" Value="{x:Null}" />
+    </Style>
+    <Style Selector="c|VfdText.vfd.green">
+      <Setter Property="Foreground" Value="#8EDB8A" />
+      <Setter Property="Effect">
+        <DropShadowEffect Color="#8EDB8A" BlurRadius="4" OffsetX="0" OffsetY="0" Opacity="0.5" />
+      </Setter>
+    </Style>
+    <Style Selector="c|VfdText.vfd.green.off">
+      <Setter Property="Foreground" Value="#1A3319" />
+      <Setter Property="Effect" Value="{x:Null}" />
+    </Style>
+    <Style Selector="c|VfdText.vfd.white">
+      <Setter Property="Foreground" Value="#CFDDEE" />
+      <Setter Property="Effect">
+        <DropShadowEffect Color="#CFDDEE" BlurRadius="4" OffsetX="0" OffsetY="0" Opacity="0.5" />
+      </Setter>
+    </Style>
+    <Style Selector="c|VfdText.vfd.white.off">
+      <Setter Property="Foreground" Value="#2A3038" />
+      <Setter Property="Effect" Value="{x:Null}" />
+    </Style>
+    <Style Selector="c|VfdText.vfd.red">
+      <Setter Property="Foreground" Value="#E0645C" />
+      <Setter Property="Effect">
+        <DropShadowEffect Color="#E0645C" BlurRadius="4" OffsetX="0" OffsetY="0" Opacity="0.5" />
+      </Setter>
+    </Style>
+    <Style Selector="c|VfdText.vfd.red.off">
+      <Setter Property="Foreground" Value="#3A1816" />
+      <Setter Property="Effect" Value="{x:Null}" />
+    </Style>
+    <!-- The silver finish: light brushed plates with dark print, as on silver hi-fi of the late
+         seventies. Keys, the display and the drive bays stay black, as they did on those decks. -->
+    <Style Selector="c|DeckPanel.silver c|DeckFaceplate">
+      <Setter Property="Finish" Value="Silver" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver TextBlock.legend">
+      <Setter Property="Foreground" Value="#2A2C30" />
+    </Style>
+    <!-- Print inside the black drive bays stays light. -->
+    <Style Selector="c|DeckPanel.silver Border.bay TextBlock.legend">
+      <Setter Property="Foreground" Value="{StaticResource DeckLegend}" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver TextBlock.section">
+      <Setter Property="Foreground" Value="#45474C" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver TextBlock.version">
+      <Setter Property="Foreground" Value="#45474C" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver Border.bracket">
+      <Setter Property="BorderBrush" Value="#45474C" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver Border.divider">
+      <Setter Property="BorderBrush" Value="#70FFFFFF" />
+      <Setter Property="Background" Value="#7C8086" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver c|DeckKnob">
+      <Setter Property="Finish" Value="Silver" />
+      <Setter Property="LegendBrush" Value="#2A2C30" />
+      <Setter Property="LegendLitBrush" Value="#C2410C" />
+      <Setter Property="TickBrush" Value="#45474C" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver c|DeckSlideSwitch">
+      <Setter Property="Finish" Value="Silver" />
+      <Setter Property="LegendBrush" Value="#2A2C30" />
+      <Setter Property="LegendLitBrush" Value="#C2410C" />
+      <Setter Property="TickBrush" Value="#45474C" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver c|DeckFader">
+      <Setter Property="Finish" Value="Silver" />
+      <Setter Property="ScaleBrush" Value="#45474C" />
+    </Style>
+    <!-- Silver keys with dark symbols. Later styles here win over the keys' own themes, so hover,
+         press and a latched pause each need saying again. -->
+    <Style Selector="c|DeckPanel.silver :is(Button) /template/ Border#PART_Body">
+      <Setter Property="Background" Value="{StaticResource SilverKeyFace}" />
+      <Setter Property="BorderBrush" Value="#5E6166" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver :is(Button):pointerover /template/ Border#PART_Body">
+      <Setter Property="Background" Value="{StaticResource SilverKeyFaceHover}" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver :is(Button):pressed /template/ Border#PART_Body">
+      <Setter Property="Background" Value="{StaticResource SilverKeyFacePressed}" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver ToggleButton#PauseKey:checked /template/ Border#PART_Body">
+      <Setter Property="Background" Value="{StaticResource SilverKeyFacePressed}" />
+    </Style>
+    <!-- Bright orange lamp strips, to stand out on the light keys. Only a faint, tight glow: on a
+         light key a wide one spreads over the face and washes the lamp out. -->
+    <Style Selector="c|DeckPanel.silver ToggleButton /template/ Border#PART_Lamp">
+      <Setter Property="Background" Value="#4A2A14" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver ToggleButton:checked /template/ Border#PART_Lamp">
+      <Setter Property="Background" Value="#FF5200" />
+      <Setter Property="BoxShadow" Value="0 0 1.5 0 #70D04000" />
+    </Style>
+    <!-- The keys' shadow on the plate: solid black under a black key, but under a light one it
+         shows round the bottom corners, so on silver it is a soft dark instead. Reset sits in a
+         ring rather than casting a shadow, and keeps it. -->
+    <Style Selector="c|DeckPanel.silver :is(Button):not(#ResetKey) /template/ Panel > Border:nth-child(1)">
+      <Setter Property="Background" Value="#38000000" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver Path.glyph">
+      <Setter Property="Fill" Value="#2A2C30" />
+    </Style>
+    <Style Selector="c|DeckPanel.silver Path.glyphline">
+      <Setter Property="Stroke" Value="#2A2C30" />
+    </Style>
+    <!-- On silver the badge is dark polished metal, catching the light along its lower edge. -->
+    <Style Selector="c|DeckPanel.silver Canvas.badge">
+      <Setter Property="Effect">
+        <DropShadowEffect OffsetX="0" OffsetY="0.8" BlurRadius="0.6" Color="#FFFFFF" Opacity="0.75" />
+      </Setter>
+    </Style>
+    <Style Selector="c|DeckPanel.silver Canvas.badge Path">
+      <Setter Property="Stroke">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Color="#5C6066" Offset="0" />
+          <GradientStop Color="#2C2E32" Offset="0.45" />
+          <GradientStop Color="#17181A" Offset="0.55" />
+          <GradientStop Color="#34363A" Offset="1" />
+        </LinearGradientBrush>
+      </Setter>
     </Style>
   </UserControl.Styles>
 
@@ -185,15 +439,40 @@
 
     <Border CornerRadius="5" BoxShadow="0 3 8 0 #B0000000" Margin="0,0,5,0">
       <c:DeckFaceplate Padding="8,10,8,9">
-        <!-- Slim selector keys, each lamp lit for the deck showing, with the deck's letter beside it. -->
-        <Grid ColumnDefinitions="Auto,5,Auto" RowDefinitions="Auto,Auto,8,Auto" VerticalAlignment="Center">
-          <TextBlock Grid.ColumnSpan="3" Classes="legend" HorizontalAlignment="Left" Margin="0,0,0,7" Text="DECK" />
-          <ToggleButton x:Name="DeckAKey" Grid.Row="1" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
-                        ToolTip.Tip="Deck A: the cassette deck" />
-          <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" VerticalAlignment="Center" Text="A" />
-          <ToggleButton x:Name="DeckBKey" Grid.Row="3" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
-                        ToolTip.Tip="Deck B: the receiver" />
-          <TextBlock Grid.Row="3" Grid.Column="2" Classes="legend" VerticalAlignment="Center" Text="B" />
+        <!-- The badge, here so it shows whichever deck is up; under it the slim selector keys, each
+             lamp lit for the deck showing, with the deck's letter beside it. -->
+        <Grid RowDefinitions="Auto,*">
+          <StackPanel VerticalAlignment="Top" Margin="0,2,0,0">
+            <!-- The name in thin, squared-off lower-case strokes like Sinclair's own lettering, in
+                 steel like a hi-fi maker's badge: a sheen across each letter, and a dark edge below
+                 where it stands off the plate. Drawn rather than set in a font: five letters need
+                 no font file. -->
+            <Canvas Classes="badge" Width="54" Height="10" HorizontalAlignment="Left" Margin="1,3,0,0" AutomationProperties.Name="zero x">
+              <Path Data="M0.7,0.7 H7.3 L0.7,9.3 H7.3" />
+              <Path Data="M17.9,9.3 H13.3 Q11.3,9.3 11.3,7.3 V2.7 Q11.3,0.7 13.3,0.7 H15.9 Q17.9,0.7 17.9,2.7 V4.8 H11.3" />
+              <Path Data="M21.9,9.3 V2.7 Q21.9,0.7 23.9,0.7 H27.5" />
+              <Path Data="M33.5,0.7 H36.1 Q38.1,0.7 38.1,2.7 V7.3 Q38.1,9.3 36.1,9.3 H33.5 Q31.5,9.3 31.5,7.3 V2.7 Q31.5,0.7 33.5,0.7 Z" />
+              <Path Data="M46.6,0.7 L53.2,9.3 M53.2,0.7 L46.6,9.3" />
+            </Canvas>
+            <!-- A thin rule in the Spectrum's rainbow colours, as long as the name. -->
+            <Grid Width="54" Height="1.5" ColumnDefinitions="*,*,*,*" HorizontalAlignment="Left" Margin="1,4,0,0">
+              <Border Background="#E8302A" />
+              <Border Grid.Column="1" Background="#F7B500" />
+              <Border Grid.Column="2" Background="#3BAA45" />
+              <Border Grid.Column="3" Background="#1D9AD6" />
+            </Grid>
+            <TextBlock x:Name="VersionText" Classes="version" FontFamily="fonts:Inter#Inter, $Default" FontSize="8" FontWeight="SemiBold"
+                       LetterSpacing="0.8" Margin="1,3,0,0" />
+          </StackPanel>
+          <Grid Grid.Row="1" ColumnDefinitions="Auto,5,Auto" RowDefinitions="Auto,Auto,8,Auto" VerticalAlignment="Bottom" Margin="0,0,0,6">
+            <TextBlock Grid.ColumnSpan="3" Classes="legend" HorizontalAlignment="Left" Margin="0,0,0,7" Text="DECK" />
+            <ToggleButton x:Name="DeckAKey" Grid.Row="1" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
+                          ToolTip.Tip="Deck A: the cassette deck" />
+            <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" VerticalAlignment="Center" Text="A" />
+            <ToggleButton x:Name="DeckBKey" Grid.Row="3" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
+                          ToolTip.Tip="Deck B: the receiver" />
+            <TextBlock Grid.Row="3" Grid.Column="2" Classes="legend" VerticalAlignment="Center" Text="B" />
+          </Grid>
         </Grid>
       </c:DeckFaceplate>
     </Border>
@@ -205,50 +484,67 @@
       <Border x:Name="CassetteDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
         <c:DeckFaceplate Padding="16,10,16,9">
           <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto">
-            <Grid RowDefinitions="*,Auto" MinWidth="76">
-              <StackPanel VerticalAlignment="Top" Margin="0,2,0,0">
-                <TextBlock Text="ZERO X" FontSize="15" FontWeight="Black" FontStyle="Italic"
-                           LetterSpacing="1.5" Foreground="#E4E6EA" />
-                <!-- The rainbow flash from the Spectrum's case. -->
-                <Canvas Width="63" Height="4" HorizontalAlignment="Left" Margin="1,3,0,0">
-                  <Path Fill="#E8302A" Data="M3,0 H18 L15,4 H0 Z" />
-                  <Path Fill="#F7B500" Data="M18,0 H33 L30,4 H15 Z" />
-                  <Path Fill="#3BAA45" Data="M33,0 H48 L45,4 H30 Z" />
-                  <Path Fill="#1D9AD6" Data="M48,0 H63 L60,4 H45 Z" />
-                </Canvas>
-                <TextBlock x:Name="VersionText" FontSize="8" FontWeight="SemiBold"
-                           LetterSpacing="0.8" Foreground="#8A8D93" Margin="1,3,0,0" />
-              </StackPanel>
-              <!-- Power, with slim pause and reset keys stacked beside it; each name printed under its key. -->
-              <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left" Margin="0,8,0,0">
-                <StackPanel>
-                  <Button x:Name="PowerKey" Theme="{StaticResource DeckKey}" Width="44" Height="28" ToolTip.Tip="Power: quit Zero X">
-                    <Panel Width="40" Height="24">
-                      <c:DeckLed x:Name="PowerLed" Width="7" Height="7" Color="#FF3B30"
-                                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0" />
-                    </Panel>
-                  </Button>
-                  <TextBlock Classes="legend" Text="POWER" Margin="0,4,0,0" />
-                </StackPanel>
-                <StackPanel VerticalAlignment="Bottom">
-                  <Button x:Name="PauseKey" Theme="{StaticResource DeckKey}" Width="30" Height="10" ToolTip.Tip="Pause the emulator (F7)" />
-                  <TextBlock Classes="legend" Text="PAUSE" Margin="0,2,0,4" />
-                  <Button x:Name="ResetKey" Theme="{StaticResource DeckKey}" Width="30" Height="10"
-                          ToolTip.Tip="Reset the Spectrum (F9). Hold it down for a hard reset (Shift+F9)." />
-                  <TextBlock Classes="legend" Text="RESET" Margin="0,2,0,0" />
-                </StackPanel>
+            <!-- Power and pause side by side as a split key, centred in the room above reset: power
+                 on the left with its light, and a latching pause on the right that stays down while
+                 paused. At the bottom, reset in a shallow ring, its name level with the other keys';
+                 a quick press is a soft reset, holding it a hard one. -->
+            <Grid RowDefinitions="*,Auto,Auto,*,Auto" ColumnDefinitions="50,3,28">
+              <Button x:Name="PowerKey" Grid.Row="1" Theme="{StaticResource DeckKey}" Width="50" Height="30"
+                      ToolTip.Tip="Power: quit Zero X">
+                <Panel Width="46" Height="26">
+                  <c:DeckLed x:Name="PowerLed" Width="7" Height="7" Color="#FF3B30"
+                             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4,4,0,0" />
+                </Panel>
+              </Button>
+              <ToggleButton x:Name="PauseKey" Grid.Row="1" Grid.Column="2" Theme="{StaticResource DeckLatchKey}" Width="28" Height="30"
+                            ToolTip.Tip="Pause the emulator (F7)" />
+              <TextBlock Grid.Row="2" Classes="legend" Text="POWER" Margin="0,3,0,0" />
+              <TextBlock Grid.Row="2" Grid.Column="2" Classes="legend" Text="PAUSE" Margin="0,3,0,0" />
+              <StackPanel Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Center">
+                <Button x:Name="ResetKey" Theme="{StaticResource DeckRecessedKey}" HorizontalAlignment="Center"
+                        ToolTip.Tip="Reset the Spectrum (F9). Hold it down for a hard reset (Shift+F9)." />
+                <TextBlock Classes="legend" Text="RESET" Margin="0,2,0,0" />
               </StackPanel>
             </Grid>
 
             <Border Grid.Column="1" Classes="divider" />
 
-            <!-- Like a receiver's input selector. Changing machine resets it, so the knob acts only
-                 when let go, and ignores the wheel. -->
-            <StackPanel Grid.Column="2" VerticalAlignment="Center">
-              <c:DeckKnob x:Name="MachineKnob" Width="78" Height="62" CommitOnRelease="True"
-                          Positions="48K,128K,128KE,+3,PENT" ToolTip.Tip="Machine: click or drag to choose. Switching resets the Spectrum." />
-              <TextBlock Classes="legend" Text="MACHINE" Margin="0,1,0,0" />
-            </StackPanel>
+            <!-- Detented slide switches, like a tape-type selector, the full width of the column.
+                 Changing machine resets it, so they act only when let go, and ignore the wheel. Under
+                 the joystick, slim keys for what plays it, bracketed up into it. The column fills the
+                 deck's height, which the display and tape keys set: the machine at the top, the keys'
+                 names level with the other keys' along the bottom, and the room left over shared
+                 between the gap above the joystick and the bracket's stem, the stem taking more. -->
+            <Grid Grid.Column="2" RowDefinitions="Auto,3*,Auto,14*,Auto">
+              <c:DeckSlideSwitch x:Name="MachineSwitch" Margin="0,4,0,0" Positions="48K,128K,128KE,+3,PENT"
+                                 ToolTip.Tip="Machine: slide or click to choose. Switching resets the Spectrum." />
+              <c:DeckSlideSwitch x:Name="JoystickSwitch" Grid.Row="2" Margin="0,6,0,0" Positions="KEMP,SINC 1,SINC 2,CURS"
+                                 ToolTip.Tip="Joystick: which interface the Spectrum sees" />
+              <!-- The bracket: a stem down from the joystick's slot, branching to each key. Six even
+                   columns put its branches over the centres of the three keys below. -->
+              <Grid Grid.Row="3" ColumnDefinitions="*,*,*,*,*,*" RowDefinitions="*,4" MinHeight="7" Margin="0,1,0,1">
+                <Border Grid.Column="3" Classes="bracket" BorderThickness="0.8,0,0,0" />
+                <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Classes="bracket" BorderThickness="0.8,0.8,0.8,0" />
+                <Border Grid.Row="1" Grid.Column="3" Classes="bracket" BorderThickness="0.8,0,0,0" />
+              </Grid>
+              <Grid Grid.Row="4" ColumnDefinitions="*,*,*">
+                <StackPanel>
+                  <ToggleButton x:Name="JoystickCursorKey" Theme="{StaticResource DeckToggle}" Width="24" Height="10"
+                                ToolTip.Tip="The cursor keys play the joystick" />
+                  <TextBlock Classes="legend" Text="CURSOR" Margin="0,2,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                  <ToggleButton x:Name="JoystickGamepadKey" Theme="{StaticResource DeckToggle}" Width="24" Height="10"
+                                ToolTip.Tip="Gamepad 1 plays the joystick" />
+                  <TextBlock Classes="legend" Text="GAMEPAD" Margin="0,2,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                  <ToggleButton x:Name="JoystickNoneKey" Theme="{StaticResource DeckToggle}" Width="24" Height="10"
+                                ToolTip.Tip="Nothing plays the joystick" />
+                  <TextBlock Classes="legend" Text="NONE" Margin="0,2,0,0" />
+                </StackPanel>
+              </Grid>
+            </Grid>
 
             <Border Grid.Column="3" Classes="divider" />
 
@@ -258,28 +554,43 @@
               <Border Height="63" CornerRadius="3" Background="#050B0B" BorderBrush="#000000" BorderThickness="1"
                       BoxShadow="inset 0 1 3 0 #C0000000">
                 <Grid Margin="7,3,7,3" RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,Auto">
-                  <TextBlock x:Name="VfdMachine" Classes="vfd" FontSize="8" Text="ZX SPECTRUM 48K" />
+                  <!-- The machines, as fixed legends with the current one lit. 128K lights for both 128
+                       models; its E only for the 128KE. -->
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <c:VfdText x:Name="Vfd48k" Classes="vfd off" Text="48K" />
+                    <StackPanel Orientation="Horizontal">
+                      <c:VfdText x:Name="Vfd128k" Classes="vfd off" Text="128K" />
+                      <c:VfdText x:Name="Vfd128kE" Classes="vfd off" Text="E" />
+                    </StackPanel>
+                    <c:VfdText x:Name="VfdPlus3" Classes="vfd off" Text="+3" />
+                    <c:VfdText x:Name="VfdPentagon" Classes="vfd off" Text="PENT" />
+                  </StackPanel>
                   <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
-                    <TextBlock x:Name="VfdStereo" Classes="vfd" FontSize="8" Text="ACB" />
-                    <TextBlock x:Name="VfdTurbo" Classes="vfd off" FontSize="8" Text="TURBO" />
-                    <TextBlock x:Name="VfdMute" Classes="vfd off" FontSize="8" Text="MUTE" />
+                    <c:VfdText x:Name="VfdStereo" Classes="vfd yellow" Text="ACB" />
+                    <c:VfdText x:Name="VfdTurbo" Classes="vfd yellow off" Text="TURBO" />
+                    <c:VfdText x:Name="VfdMute" Classes="vfd yellow off" Text="MUTE" />
                   </StackPanel>
                   <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="1">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                      <TextBlock x:Name="VfdMode" Classes="vfd" FontSize="8" Width="30" Text="STOP" />
-                      <TextBlock x:Name="VfdBlock" Classes="vfd" FontSize="8" Text="BLK --/--" />
-                    </StackPanel>
-                    <TextBlock x:Name="VfdTitle" Classes="vfd" FontSize="8"
-                               TextTrimming="CharacterEllipsis" Text="NO TAPE" />
+                    <!-- The transport, as fixed legends: PLAY, STOP and REC, with RZX lit as well when it is
+                         a recording that is playing back or being made. -->
+                    <Grid ColumnDefinitions="Auto,*">
+                      <StackPanel Orientation="Horizontal" Spacing="7">
+                        <c:VfdText x:Name="VfdPlay" Classes="vfd green off" Text="▶ PLAY" />
+                        <c:VfdText x:Name="VfdStop" Classes="vfd off" Text="■ STOP" />
+                        <c:VfdText x:Name="VfdRec" Classes="vfd red off" Text="● REC" />
+                      </StackPanel>
+                      <c:VfdText x:Name="VfdRzx" Grid.Column="1" Classes="vfd white off" HorizontalAlignment="Center" Text="RZX" />
+                    </Grid>
+                    <c:VfdText x:Name="VfdTitle" Classes="vfd" Trim="True" Margin="0,2,0,0" Text="NO TAPE" />
                   </StackPanel>
-                  <!-- The tape counter, with its unlit segments showing through like a real VFD. -->
-                  <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                    <TextBlock Classes="vfd" FontSize="7" VerticalAlignment="Bottom" Margin="0,0,0,3" Text="COUNTER" />
-                    <Panel>
-                      <TextBlock Classes="vfd off" FontSize="18" FontWeight="Bold" Text="888" />
-                      <TextBlock x:Name="VfdCounter" Classes="vfd" FontSize="18" FontWeight="Bold" Text="000" />
-                    </Panel>
-                  </StackPanel>
+                  <!-- The tape counter, the display's main readout, with its unlit segments showing through. -->
+                  <!-- Two layers of the same digits: every segment unlit underneath, the lit ones and their glow
+                       on top. One control doing both would put the glow round the unlit segments too. -->
+                  <!-- Raised a little off centre, to leave the block and frame rate below it room. -->
+                  <Panel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,6">
+                    <c:SegmentDisplay Classes="vfdseg unlit" Digits="3" DigitHeight="19" Text="888" />
+                    <c:SegmentDisplay x:Name="VfdCounter" Classes="vfdseg" Digits="3" DigitHeight="19" Text="000" />
+                  </Panel>
                   <!-- Disk drives, a line each: a segment that lights while that drive is busy, then the
                        disk in it (its file name). Lit when the drive holds a disk; unlit when it is
                        empty or the machine has no drives. The Pentagon's C and D take a second
@@ -287,18 +598,29 @@
                   <Grid Grid.Row="2" ColumnDefinitions="*,*">
                     <Grid x:Name="VfdDrivesAB" Grid.ColumnSpan="2" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
                       <Border x:Name="VfdLedA" Classes="vfdled" />
-                      <TextBlock x:Name="VfdDiskA" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="A: --" />
+                      <c:VfdText x:Name="VfdDiskA" Grid.Column="1" Classes="vfd off" Trim="True" Text="A: --" />
                       <Border x:Name="VfdLedB" Grid.Row="1" Classes="vfdled" />
-                      <TextBlock x:Name="VfdDiskB" Grid.Row="1" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="B: --" />
+                      <c:VfdText x:Name="VfdDiskB" Grid.Row="1" Grid.Column="1" Classes="vfd off" Trim="True" Text="B: --" />
                     </Grid>
                     <Grid x:Name="VfdDrivesCD" Grid.Column="1" IsVisible="False" Margin="6,0,0,0" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
                       <Border x:Name="VfdLedC" Classes="vfdled" />
-                      <TextBlock x:Name="VfdDiskC" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="C: --" />
+                      <c:VfdText x:Name="VfdDiskC" Grid.Column="1" Classes="vfd off" Trim="True" Text="C: --" />
                       <Border x:Name="VfdLedD" Grid.Row="1" Classes="vfdled" />
-                      <TextBlock x:Name="VfdDiskD" Grid.Row="1" Grid.Column="1" Classes="vfd off" FontSize="8" TextTrimming="CharacterEllipsis" Text="D: --" />
+                      <c:VfdText x:Name="VfdDiskD" Grid.Row="1" Grid.Column="1" Classes="vfd off" Trim="True" Text="D: --" />
                     </Grid>
                   </Grid>
-                  <TextBlock x:Name="VfdFps" Grid.Row="2" Grid.Column="1" Classes="vfd" FontSize="8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="" />
+                  <!-- Under the counter: the tape's block, then the frame rate. -->
+                  <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                    <!-- Nudged up off the frame rate, without growing the row under the counter. -->
+                    <StackPanel Orientation="Horizontal" Spacing="3" HorizontalAlignment="Right" RenderTransform="translate(0px, -2px)">
+                      <TextBlock Classes="vfdink" Text="BLK" />
+                      <c:VfdText x:Name="VfdBlock" Classes="vfd" Text="--/--" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="3" HorizontalAlignment="Right">
+                      <c:VfdText x:Name="VfdFps" Classes="vfd" Text="" />
+                      <TextBlock x:Name="VfdFpsLabel" Classes="vfdink" IsVisible="False" Text="FPS" />
+                    </StackPanel>
+                  </StackPanel>
                 </Grid>
               </Border>
 
@@ -339,7 +661,7 @@
 
             <StackPanel Grid.Column="6" VerticalAlignment="Center">
               <c:DeckKnob x:Name="VolumeKnob" Width="66" Height="66" Minimum="0" Maximum="100" SmallChange="5"
-                          ToolTip.Tip="Volume" />
+                          Ends="MIN,MAX" ToolTip.Tip="Volume" />
               <TextBlock Classes="legend" Text="VOLUME" Margin="0,1,0,0" />
             </StackPanel>
           </Grid>
@@ -362,9 +684,9 @@
               </Grid>
               <Grid ColumnDefinitions="34,*" RowDefinitions="18,6,18">
                 <TextBlock Classes="legend" Text="CURVE" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                <c:DeckFader x:Name="CurveFader" Grid.Column="1" ToolTip.Tip="Screen curvature" />
-                <TextBlock Grid.Row="2" Classes="legend" Text="GLOW" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                <c:DeckFader x:Name="GlowFader" Grid.Row="2" Grid.Column="1" ToolTip.Tip="Phosphor glow" />
+                <c:DeckFader x:Name="CurveFader" Grid.Column="1" />
+                <TextBlock Grid.Row="2" Classes="legend" Text="HOUSING" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <c:DeckFader x:Name="HousingFader" Grid.Row="2" Grid.Column="1" />
               </Grid>
             </StackPanel>
 
@@ -398,7 +720,7 @@
             <Grid x:Name="DriveBays" Grid.Column="6" Width="150" ColumnDefinitions="*,6,*" RowDefinitions="Auto,8,Auto"
                   HorizontalAlignment="Center" VerticalAlignment="Top">
               <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
-              <Border x:Name="DriveABay" Grid.ColumnSpan="3" Grid.Row="0" Grid.Column="0" Height="36" CornerRadius="3" Background="#141517"
+              <Border x:Name="DriveABay" Classes="bay" Grid.ColumnSpan="3" Grid.Row="0" Grid.Column="0" Height="36" CornerRadius="3" Background="#141517"
                       BorderBrush="#050506" BorderThickness="1" BoxShadow="inset 0 1 2 0 #A0000000">
                 <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
                   <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
@@ -421,7 +743,7 @@
                 </Grid>
               </Border>
               <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
-              <Border x:Name="DriveBBay" Grid.ColumnSpan="3" Grid.Row="2" Grid.Column="0" Height="36" CornerRadius="3" Background="#141517"
+              <Border x:Name="DriveBBay" Classes="bay" Grid.ColumnSpan="3" Grid.Row="2" Grid.Column="0" Height="36" CornerRadius="3" Background="#141517"
                       BorderBrush="#050506" BorderThickness="1" BoxShadow="inset 0 1 2 0 #A0000000">
                 <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
                   <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
@@ -444,7 +766,7 @@
                 </Grid>
               </Border>
               <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
-              <Border x:Name="DriveCBay" IsVisible="False" Grid.Row="0" Grid.Column="2" Height="36" CornerRadius="3" Background="#141517"
+              <Border x:Name="DriveCBay" Classes="bay" IsVisible="False" Grid.Row="0" Grid.Column="2" Height="36" CornerRadius="3" Background="#141517"
                       BorderBrush="#050506" BorderThickness="1" BoxShadow="inset 0 1 2 0 #A0000000">
                 <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
                   <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">
@@ -467,7 +789,7 @@
                 </Grid>
               </Border>
               <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
-              <Border x:Name="DriveDBay" IsVisible="False" Grid.Row="2" Grid.Column="2" Height="36" CornerRadius="3" Background="#141517"
+              <Border x:Name="DriveDBay" Classes="bay" IsVisible="False" Grid.Row="2" Grid.Column="2" Height="36" CornerRadius="3" Background="#141517"
                       BorderBrush="#050506" BorderThickness="1" BoxShadow="inset 0 1 2 0 #A0000000">
                 <Grid ColumnDefinitions="Auto,*,Auto" Margin="7,0,5,0">
                   <StackPanel Margin="0,0,7,0" VerticalAlignment="Center" Spacing="2">

@@ -324,6 +324,7 @@ namespace Zero.App
         {
             _settings.Render.BorderCrop = crop;
             Display.BorderCrop = crop;
+            ApplyCrtSettings();   // the glass's corners round less when less border shows
             if (WindowState == WindowState.Normal) ApplyWindowScale(); // keep the window snug: no letterbox
             RefreshMenuState();
         }

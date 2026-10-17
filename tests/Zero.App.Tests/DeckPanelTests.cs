@@ -12,6 +12,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Xunit;
+using Zero.App.Controls;
 using Zero.Emulation.Settings;
 using Zero.TestSupport;
 
@@ -106,12 +107,14 @@ namespace Zero.App.Tests
 
             string tap = Path.Combine(TestPaths.ProgramsDir, "Demos", "Overscan.tap");
             Assert.True(w.Session.LoadFileAsync(tap).Result);
-            PumpUntil(() => d.VfdBlock.Text == "BLK 01/12");
+            PumpUntil(() => d.VfdBlock.Text == "01/12");
             Assert.Equal("000", d.VfdCounter.Text);
             Assert.Equal("LOADED OVERSCAN.TAP", d.VfdTitle.Text); // status messages borrow the info line
 
             Press(d.PlayKey);
-            PumpUntil(() => d.VfdMode.Text == "PLAY");
+            PumpUntil(() => !d.VfdPlay.Classes.Contains("off"));
+            Assert.True(d.VfdStop.Classes.Contains("off"));
+            Assert.True(d.VfdRzx.Classes.Contains("off"));     // it is the tape playing, not a recording
 
             // The counter only moves while the tape runs. Fast forward so it gets going quickly.
             Press(d.TurboKey);
@@ -121,7 +124,8 @@ namespace Zero.App.Tests
             Capture(w, "deck-playing");
 
             Press(d.StopKey);
-            PumpUntil(() => d.VfdMode.Text == "STOP");
+            PumpUntil(() => !d.VfdStop.Classes.Contains("off"));
+            Assert.True(d.VfdPlay.Classes.Contains("off"));
             string stopped = d.VfdCounter.Text;
             Thread.Sleep(300);
             Dispatcher.UIThread.RunJobs();
@@ -130,13 +134,15 @@ namespace Zero.App.Tests
             Press(d.RewindKey);
             PumpUntil(() => d.VfdCounter.Text == "000");
 
-            // Pausing blinks the power light.
+            // Pausing latches the pause key down and blinks the power light.
             Press(d.PauseKey);
             Assert.True(w.Session.IsPaused);
+            Assert.True(d.PauseKey.IsChecked);
             Assert.True(d.PowerLed.Blink);
             Assert.True(w.PauseItem.IsChecked);
             Press(d.PauseKey);
             Assert.False(w.Session.IsPaused);
+            Assert.False(d.PauseKey.IsChecked);
             Assert.False(d.PowerLed.Blink);
 
             Press(d.EjectKey);
@@ -362,6 +368,40 @@ namespace Zero.App.Tests
         }
 
         [AvaloniaFact]
+        public void Recording_an_rzx_lights_rec_and_rzx_and_the_machine_row_follows_the_model()
+        {
+            MainWindow w = Boot();
+            var d = w.Deck;
+            Assert.False(d.Vfd48k.Classes.Contains("off"));
+            Assert.True(d.Vfd128k.Classes.Contains("off"));
+
+            string dir = Path.Combine(Path.GetTempPath(), "zero-deck-rzx-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(dir);
+            try
+            {
+                Assert.True(w.Session.StartRzxRecordingAsync(Path.Combine(dir, "run.rzx")).Result);
+                w.RefreshMenuState();
+                PumpUntil(() => !d.VfdRzx.Classes.Contains("off"));
+                Assert.False(d.VfdRec.Classes.Contains("off"));     // REC serves the recording too
+                Assert.True(d.VfdPlay.Classes.Contains("off"));
+                Capture(w, "deck-rzx-rec");
+                w.Session.DiscardRzxRecording();
+                w.RefreshMenuState();
+                PumpUntil(() => d.VfdRzx.Classes.Contains("off"));
+                Assert.True(d.VfdRec.Classes.Contains("off"));
+            }
+            finally { try { Directory.Delete(dir, true); } catch { } }
+
+            // The 128KE lights 128K and its E.
+            w.Machine128ke.Command.Execute(null);
+            PumpUntil(() => !d.Vfd128kE.Classes.Contains("off"));
+            Assert.False(d.Vfd128k.Classes.Contains("off"));
+            Assert.True(d.Vfd48k.Classes.Contains("off"));
+            Capture(w, "deck-128ke");
+            w.Close();
+        }
+
+        [AvaloniaFact]
         public void The_power_key_quits()
         {
             Func<EmulatorSettings> loader = MainWindow.SettingsLoader;
@@ -464,7 +504,7 @@ namespace Zero.App.Tests
             Assert.InRange(ratio, 352.0 / 296 - 0.02, 352.0 / 296 + 0.02); // fitted with the decks showing
             Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.PlayKey));
             Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.VolumeKnob));
-            Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.MachineKnob));
+            Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.MachineSwitch));
             Assert.True(d.ReceiverDeck.IsVisualAncestorOf(d.StereoKnob));
             Assert.True(d.ReceiverDeck.IsVisualAncestorOf(d.DriveAEject));
 
@@ -546,36 +586,129 @@ namespace Zero.App.Tests
         }
 
         [AvaloniaFact]
-        public void The_machine_knob_switches_only_on_a_deliberate_turn()
+        public void The_decks_can_be_silver()
         {
             MainWindow w = Boot();
-            var knob = w.Deck.MachineKnob;
-            Point at = CentreOf(knob, w);
+            var d = w.Deck;
+            Assert.Equal(DeckFinish.Black, d.Finish);
+
+            // Chosen in Options.
+            w.Session.Settings.Render.DeckFinish = "Silver";
+            w.ApplyDeckFinish();
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(DeckFinish.Silver, d.Finish);
+            Assert.Contains("silver", d.Classes);
+            Assert.All(d.GetVisualDescendants().OfType<DeckFaceplate>(), p => Assert.Equal(DeckFinish.Silver, p.Finish));
+            Capture(w, "decks-a-silver");
+            Press(d.DeckBKey);
+            Dispatcher.UIThread.RunJobs();
+            Capture(w, "decks-b-silver");
+
+            w.Session.Settings.Render.DeckFinish = "Black";
+            w.ApplyDeckFinish();
+            Dispatcher.UIThread.RunJobs();
+            Assert.DoesNotContain("silver", d.Classes);
+            Assert.All(d.GetVisualDescendants().OfType<DeckFaceplate>(), p => Assert.Equal(DeckFinish.Black, p.Finish));
+            w.Close();
+        }
+
+        [AvaloniaFact]
+        public void The_housing_fader_sets_the_cabinet_and_both_faders_say_what_they_are_at()
+        {
+            MainWindow w = Boot();
+            var d = w.Deck;
+            CrtSettings crt = w.Session.Settings.Render.Crt;
+            Press(d.DeckBKey);
+            Dispatcher.UIThread.RunJobs();
+
+            double before = crt.Bezel;
+            w.MouseWheel(CentreOf(d.HousingFader, w), new Vector(0, 1));
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(before + 0.05 * DeckPanel.MaxHousing, crt.Bezel, 4);
+            Assert.Equal((float)crt.Bezel, w.Display.CrtOptions.Bezel, 4);
+
+            Assert.Equal($"Television housing: {crt.Bezel:P0} of the window", ToolTip.GetTip(d.HousingFader));
+            Assert.Equal($"Screen curvature: {crt.Curvature:P0}", ToolTip.GetTip(d.CurveFader));
+            w.Close();
+        }
+
+        [AvaloniaFact]
+        public void The_joystick_switches_set_what_plays_which_joystick()
+        {
+            MainWindow w = Boot();
+            var d = w.Deck;
+            InputSettings input = w.Session.Settings.Input;
+            void Click(Point at) { w.MouseDown(at, MouseButton.Left); w.MouseUp(at, MouseButton.Left); Dispatcher.UIThread.RunJobs(); }
+            Point Stop(DeckSlideSwitch slide, int i) => slide.TranslatePoint(slide.StopPoint(i), w) ?? throw new InvalidOperationException("not in window");
+
+            // Out of the box gamepad 1 plays a Kempston joystick.
+            Assert.True(d.JoystickGamepadKey.IsChecked == true && d.JoystickCursorKey.IsChecked == false && d.JoystickNoneKey.IsChecked == false);
+            Assert.Equal(0, d.JoystickSwitch.Value);
+
+            // The joystick switch picks what the gamepad plays.
+            Click(Stop(d.JoystickSwitch, 2));
+            Assert.Equal(3, input.Gamepad1Emulates);
+            Assert.False(input.EnableKeyboardJoystick);
+            Assert.True(w.Pad1Sinclair2.IsChecked);
+
+            // Played by nothing: the gamepad lets go, and the joystick switch dims but keeps its place.
+            Press(d.JoystickNoneKey);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(0, input.Gamepad1Emulates);
+            Assert.False(input.EnableKeyboardJoystick);
+            Assert.True(w.Pad1None.IsChecked);
+            Assert.Equal(2, d.JoystickSwitch.Value);
+            Assert.True(d.JoystickSwitch.Opacity < 1);
+
+            // Played by the cursor keys, which take up the same joystick.
+            Press(d.JoystickCursorKey);
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(input.EnableKeyboardJoystick);
+            Assert.Equal(3, input.KeyboardJoystickType);
+            Assert.Equal(0, input.Gamepad1Emulates);
+            Assert.True(w.KeyJoyItem.IsChecked && w.KeyJoySinclair2.IsChecked);
+            Assert.True(d.JoystickCursorKey.IsChecked == true && d.JoystickGamepadKey.IsChecked == false && d.JoystickNoneKey.IsChecked == false);
+            Assert.Equal(1, d.JoystickSwitch.Opacity);
+            Capture(w, "deck-joystick");
+            w.Close();
+        }
+
+        [AvaloniaFact]
+        public void The_machine_switch_changes_machine_only_when_let_go()
+        {
+            MainWindow w = Boot();
+            var slide = w.Deck.MachineSwitch;
+            Point Stop(int i) => slide.TranslatePoint(slide.StopPoint(i), w) ?? throw new InvalidOperationException("not in window");
             int reported = 0;
-            knob.ValueChangedByUser += (_, __) => reported++;
+            slide.ValueChangedByUser += (_, __) => reported++;
 
             // Scrolling past it does nothing.
-            w.MouseWheel(at, new Vector(0, 1));
+            w.MouseWheel(Stop(0), new Vector(0, 1));
             Dispatcher.UIThread.RunJobs();
             Assert.Equal(0, reported);
 
-            // A drag reports only where it is let go: 48K -> (128K) -> 128KE, one switch not two.
-            w.MouseDown(at, MouseButton.Left);
-            w.MouseMove(at + Up(w, 25));
-            Assert.Equal(1, knob.Value);
+            // A slide reports only where it is let go: 48K -> (128K) -> 128KE, one switch not two.
+            w.MouseDown(Stop(0), MouseButton.Left);
+            w.MouseMove(Stop(1));
+            Assert.Equal(1, slide.Value);
             Assert.Equal(0, reported);
-            w.MouseMove(at + Up(w, 46));
-            w.MouseUp(at + Up(w, 46), MouseButton.Left);
+            w.MouseMove(Stop(2));
+            w.MouseUp(Stop(2), MouseButton.Left);
             Assert.Equal(1, reported);
+            // It stays where it was let go while the session switches (the deck refreshes as the
+            // switch is asked for), not back on 48K meanwhile.
+            Assert.Equal(2, slide.Value);
             PumpUntil(() => w.Session.Model == SpeccyCommon.MachineModel._128ke, 10000);
             Assert.True(w.Machine128ke.IsChecked);
+            Capture(w, "deck-machine-switch");
 
-            // A click steps on to the next one.
-            w.MouseDown(at, MouseButton.Left);
-            w.MouseUp(at, MouseButton.Left);
+            // A click on another stop moves it there.
+            w.MouseDown(Stop(3), MouseButton.Left);
+            w.MouseUp(Stop(3), MouseButton.Left);
             PumpUntil(() => w.Session.Model == SpeccyCommon.MachineModel._plus3, 10000);
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal(3, knob.Value);
+            Assert.Equal(3, slide.Value);
+            Assert.Equal(2, reported);
             w.Close();
         }
     }

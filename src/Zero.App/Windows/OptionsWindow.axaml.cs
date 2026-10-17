@@ -19,6 +19,8 @@ namespace Zero.App.Windows
     public partial class OptionsWindow : Window
     {
         private static readonly string[] JoystickNames = { "None", "Kempston", "Sinclair 1", "Sinclair 2", "Cursor" };
+        private static readonly string[] DeckFinishes = { "Black", "Silver" };
+        private static readonly string[] Tubes = { "Spherical", "Trinitron" };
 
         private readonly EmulatorSettings _settings;
         private readonly EmulatorSession _session;
@@ -68,15 +70,14 @@ namespace Zero.App.Windows
             CrtEnabled.IsChecked = settings.Render.Crt.Enabled;
             CrtScanlines.IsChecked = settings.Render.Crt.Scanlines;
             CrtVignette.IsChecked = settings.Render.Crt.Vignette;
-            CrtFlicker.IsChecked = settings.Render.Crt.Flicker;
-            CrtNoise.IsChecked = settings.Render.Crt.Noise;
             CrtGlow.Value = settings.Render.Crt.Glow;
             CrtCurvature.Value = settings.Render.Crt.Curvature;
-            CrtGlass.Value = settings.Render.Crt.GlassReflect;
             CrtEdge.Value = settings.Render.Crt.EdgeLight;
             CrtBezel.Value = settings.Render.Crt.Bezel;
+            CrtTube.ItemsSource = Tubes;
+            CrtTube.SelectedItem = Array.Find(Tubes, t => t.Equals(settings.Render.Crt.Tube, StringComparison.OrdinalIgnoreCase)) ?? Tubes[0];
             CrtDiffuse.Value = settings.Render.Crt.Diffuse;
-            foreach ((Slider slider, TextBlock label) in new[] { (CrtGlow, CrtGlowValue), (CrtCurvature, CrtCurvatureValue), (CrtGlass, CrtGlassValue), (CrtEdge, CrtEdgeValue), (CrtBezel, CrtBezelValue), (CrtDiffuse, CrtDiffuseValue) })
+            foreach ((Slider slider, TextBlock label) in new[] { (CrtGlow, CrtGlowValue), (CrtCurvature, CrtCurvatureValue), (CrtEdge, CrtEdgeValue), (CrtBezel, CrtBezelValue), (CrtDiffuse, CrtDiffuseValue) })
             {
                 Slider s = slider; TextBlock l = label;
                 void Show() => l.Text = ((int)Math.Round(s.Value * 100)) + "%";
@@ -86,6 +87,8 @@ namespace Zero.App.Windows
 
             ThemeBox.ItemsSource = ThemeCatalog.Names;
             ThemeBox.SelectedItem = ThemeCatalog.Normalise(settings.Render.UiTheme);
+            DeckFinishBox.ItemsSource = DeckFinishes;
+            DeckFinishBox.SelectedItem = Array.Find(DeckFinishes, f => f.Equals(settings.Render.DeckFinish, StringComparison.OrdinalIgnoreCase)) ?? DeckFinishes[0];
 
             var pads = session?.Gamepads;
             if (pads != null)
@@ -163,18 +166,17 @@ namespace Zero.App.Windows
             _settings.Render.Crt.Enabled = CrtEnabled.IsChecked == true;
             _settings.Render.Crt.Scanlines = CrtScanlines.IsChecked == true;
             _settings.Render.Crt.Vignette = CrtVignette.IsChecked == true;
-            _settings.Render.Crt.Flicker = CrtFlicker.IsChecked == true;
-            _settings.Render.Crt.Noise = CrtNoise.IsChecked == true;
             _settings.Render.Crt.Glow = CrtGlow.Value;
             _settings.Render.Crt.Curvature = CrtCurvature.Value;
-            _settings.Render.Crt.GlassReflect = CrtGlass.Value;
             _settings.Render.Crt.EdgeLight = CrtEdge.Value;
             _settings.Render.Crt.Bezel = CrtBezel.Value;
+            _settings.Render.Crt.Tube = CrtTube.SelectedItem as string ?? Tubes[0];
             _settings.Render.Crt.Diffuse = CrtDiffuse.Value;
 
             string theme = ThemeCatalog.Normalise(ThemeBox.SelectedItem as string);
             ThemeChanged = theme != ThemeCatalog.Normalise(_settings.Render.UiTheme);
             _settings.Render.UiTheme = theme;
+            _settings.Render.DeckFinish = DeckFinishBox.SelectedItem as string ?? DeckFinishes[0];
 
             _settings.Input.KempstonUsesPort1F = KempstonPort1F.IsChecked == true;
             _settings.Input.EnableKempstonMouse = MouseEnabled.IsChecked == true;

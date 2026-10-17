@@ -27,7 +27,7 @@
               <TextBlock Grid.Row="2" Text="Saves" VerticalAlignment="Center" />
               <TextBox Grid.Row="2" Grid.Column="1" x:Name="SavesPath" Margin="0,2" />
               <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="SavesPath" Click="OnBrowseFolder" />
-              <TextBlock Grid.Row="3" Text="Screenshots" VerticalAlignment="Center" />
+              <TextBlock Grid.Row="2" Text="Screenshots" VerticalAlignment="Center" />
               <TextBox Grid.Row="3" Grid.Column="1" x:Name="ScreenshotsPath" Margin="0,2" />
               <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="ScreenshotsPath" Click="OnBrowseFolder" />
             </Grid>
@@ -47,10 +47,10 @@
               <TextBlock Grid.Row="2" Text="Spectrum 128Ke" VerticalAlignment="Center" />
               <TextBox Grid.Row="2" Grid.Column="1" x:Name="Rom128ke" Margin="0,2" />
               <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128ke" Click="OnBrowseRom" />
-              <TextBlock Grid.Row="3" Text="Spectrum +3" VerticalAlignment="Center" />
+              <TextBlock Grid.Row="2" Text="Spectrum +3" VerticalAlignment="Center" />
               <TextBox Grid.Row="3" Grid.Column="1" x:Name="RomPlus3" Margin="0,2" />
               <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPlus3" Click="OnBrowseRom" />
-              <TextBlock Grid.Row="4" Text="Pentagon 128K" VerticalAlignment="Center" />
+              <TextBlock Grid.Row="3" Text="Pentagon 128K" VerticalAlignment="Center" />
               <TextBox Grid.Row="4" Grid.Column="1" x:Name="RomPentagon" Margin="0,2" />
               <Button Grid.Row="4" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPentagon" Click="OnBrowseRom" />
             </Grid>
@@ -109,34 +109,40 @@
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
                        Text="Applies when Zero next starts. Themes change the windows and dialogs, never the emulated screen." />
             <Separator />
-            <CheckBox x:Name="CrtScanlines" Content="Scanlines" />
-            <CheckBox x:Name="CrtEnabled" Content="CRT effects over the emulated screen" />
-            <StackPanel Margin="24,0,0,0" Spacing="6">
-              <CheckBox x:Name="CrtVignette" Content="Vignette (darkened corners)" />
-              <CheckBox x:Name="CrtFlicker" Content="Flicker" />
-              <CheckBox x:Name="CrtNoise" Content="Noise" />
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <TextBlock Text="Deck finish" VerticalAlignment="Center" />
+              <ComboBox x:Name="DeckFinishBox" Width="160" />
             </StackPanel>
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
-                       Text="Flicker and noise animate continuously and cost a little more than the other two." />
-              <Grid ColumnDefinitions="Auto,160,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" Margin="24,0,0,0">
-              <TextBlock Grid.Row="0" Text="Glow" VerticalAlignment="Center" Margin="0,0,10,0" />
-              <Slider Grid.Row="0" Grid.Column="1" x:Name="CrtGlow" Minimum="0" Maximum="1" />
+                       Text="The decks' faceplates: black, or silver with dark print. Applies straight away." />
+            <Separator />
+            <CheckBox x:Name="CrtScanlines" ToolTip.Tip="Dark bands between the emulated lines, as on a real tube. Works with CRT effects off too." Content="Scanlines" />
+            <CheckBox x:Name="CrtEnabled" ToolTip.Tip="Turns on the picture-tube effects below." Content="CRT effects over the emulated screen" />
+            <StackPanel Margin="24,0,0,0" Spacing="6">
+              <CheckBox x:Name="CrtVignette" ToolTip.Tip="Darkens the corners of the picture, as the light of a tube falls off towards its edges." Content="Vignette (darkened corners)" />
+            </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="10" Margin="24,0,0,0">
+                <TextBlock Text="Tube" VerticalAlignment="Center"
+                           ToolTip.Tip="The shape of the glass: spherical, as most sets had, or a Trinitron's, curved only from side to side so its vertical lines stay straight." />
+                <ComboBox x:Name="CrtTube" Width="160"
+                          ToolTip.Tip="The shape of the glass: spherical, as most sets had, or a Trinitron's, curved only from side to side so its vertical lines stay straight." />
+              </StackPanel>
+              <Grid ColumnDefinitions="Auto,160,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" Margin="24,0,0,0">
+              <TextBlock Grid.Row="0" Text="Glow" ToolTip.Tip="Phosphor glow: each line of the picture bleeds a little into its neighbours." VerticalAlignment="Center" Margin="0,0,10,0" />
+              <Slider Grid.Row="0" Grid.Column="1" x:Name="CrtGlow" ToolTip.Tip="Phosphor glow: each line of the picture bleeds a little into its neighbours." Minimum="0" Maximum="1" />
               <TextBlock Grid.Row="0" Grid.Column="2" x:Name="CrtGlowValue" VerticalAlignment="Center" Margin="10,0,0,0" />
-              <TextBlock Grid.Row="1" Text="Curvature" VerticalAlignment="Center" Margin="0,0,10,0" />
-              <Slider Grid.Row="1" Grid.Column="1" x:Name="CrtCurvature" Minimum="0" Maximum="1" />
+              <TextBlock Grid.Row="1" Text="Curvature" ToolTip.Tip="How curved the glass is. Around 8% is a real portable set; more is a stylised, rounder tube." VerticalAlignment="Center" Margin="0,0,10,0" />
+              <Slider Grid.Row="1" Grid.Column="1" x:Name="CrtCurvature" ToolTip.Tip="How curved the glass is. Around 8% is a real portable set; more is a stylised, rounder tube." Minimum="0" Maximum="1" />
               <TextBlock Grid.Row="1" Grid.Column="2" x:Name="CrtCurvatureValue" VerticalAlignment="Center" Margin="10,0,0,0" />
-              <TextBlock Grid.Row="2" Text="Reflection" VerticalAlignment="Center" Margin="0,0,10,0" />
-              <Slider Grid.Row="2" Grid.Column="1" x:Name="CrtGlass" Minimum="0" Maximum="1" />
-              <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CrtGlassValue" VerticalAlignment="Center" Margin="10,0,0,0" />
-              <TextBlock Grid.Row="3" Text="Edge light" VerticalAlignment="Center" Margin="0,0,10,0" />
-              <Slider Grid.Row="3" Grid.Column="1" x:Name="CrtEdge" Minimum="0" Maximum="1" />
-              <TextBlock Grid.Row="3" Grid.Column="2" x:Name="CrtEdgeValue" VerticalAlignment="Center" Margin="10,0,0,0" />
-              <TextBlock Grid.Row="4" Text="Housing" VerticalAlignment="Center" Margin="0,0,10,0" />
-              <Slider Grid.Row="4" Grid.Column="1" x:Name="CrtBezel" Minimum="0" Maximum="0.05" />
-              <TextBlock Grid.Row="4" Grid.Column="2" x:Name="CrtBezelValue" VerticalAlignment="Center" Margin="10,0,0,0" />
-              <TextBlock Grid.Row="5" Text="Diffusion" VerticalAlignment="Center" Margin="0,0,10,0" />
-              <Slider Grid.Row="5" Grid.Column="1" x:Name="CrtDiffuse" Minimum="0" Maximum="1" />
-              <TextBlock Grid.Row="5" Grid.Column="2" x:Name="CrtDiffuseValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+              <TextBlock Grid.Row="2" Text="Edge light" ToolTip.Tip="How much of the picture&apos;s light falls on the housing round it." VerticalAlignment="Center" Margin="0,0,10,0" />
+              <Slider Grid.Row="2" Grid.Column="1" x:Name="CrtEdge" ToolTip.Tip="How much of the picture&apos;s light falls on the housing round it." Minimum="0" Maximum="1" />
+              <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CrtEdgeValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+              <TextBlock Grid.Row="3" Text="Housing" ToolTip.Tip="How much of the window the television cabinet takes. The picture shrinks to make room." VerticalAlignment="Center" Margin="0,0,10,0" />
+              <Slider Grid.Row="3" Grid.Column="1" x:Name="CrtBezel" ToolTip.Tip="How much of the window the television cabinet takes. The picture shrinks to make room." Minimum="0" Maximum="0.15" />
+              <TextBlock Grid.Row="3" Grid.Column="2" x:Name="CrtBezelValue" VerticalAlignment="Center" Margin="10,0,0,0" />
+              <TextBlock Grid.Row="4" Text="Diffusion" ToolTip.Tip="How blurred the picture&apos;s reflection on the housing is: none is a mirror, full a wash of colour." VerticalAlignment="Center" Margin="0,0,10,0" />
+              <Slider Grid.Row="4" Grid.Column="1" x:Name="CrtDiffuse" ToolTip.Tip="How blurred the picture&apos;s reflection on the housing is: none is a mirror, full a wash of colour." Minimum="0" Maximum="1" />
+              <TextBlock Grid.Row="4" Grid.Column="2" x:Name="CrtDiffuseValue" VerticalAlignment="Center" Margin="10,0,0,0" />
             </Grid>
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
                        Text="Zero&apos;s own shader, which Skia runs on the GPU where there is one and on the CPU otherwise. Edge light spills the picture onto the surround instead of leaving it black. Housing is the inner casing the screen sits in, which the edge light falls on; the picture is pushed in to make room for it, so widening it trades picture size for the illusion of looking into a set. Diffusion is how blurred the picture is before the housing reflects it: none is a mirror, full a wash of colour." />

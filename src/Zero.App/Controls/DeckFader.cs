@@ -17,6 +17,16 @@ namespace Zero.App.Controls
         public static readonly StyledProperty<double> ValueProperty =
             AvaloniaProperty.Register<DeckFader, double>(nameof(Value), coerce: (_, v) => Math.Clamp(v, 0, 1));
 
+        /// <summary>What the cap is made of, to match the deck: black plastic, or brushed metal on silver.</summary>
+        public static readonly StyledProperty<DeckFinish> FinishProperty =
+            AvaloniaProperty.Register<DeckFader, DeckFinish>(nameof(Finish));
+        public DeckFinish Finish { get => GetValue(FinishProperty); set => SetValue(FinishProperty, value); }
+
+        /// <summary>The scale printed beside the slot; set by the deck's finish.</summary>
+        public static readonly StyledProperty<IBrush> ScaleBrushProperty =
+            AvaloniaProperty.Register<DeckFader, IBrush>(nameof(ScaleBrush), new SolidColorBrush(Color.FromRgb(0x7A, 0x7D, 0x84)));
+        public IBrush ScaleBrush { get => GetValue(ScaleBrushProperty); set => SetValue(ScaleBrushProperty, value); }
+
         public double Value { get => GetValue(ValueProperty); set => SetValue(ValueProperty, value); }
 
         public event EventHandler<double> ValueChangedByUser;
@@ -27,7 +37,7 @@ namespace Zero.App.Controls
 
         static DeckFader()
         {
-            AffectsRender<DeckFader>(ValueProperty);
+            AffectsRender<DeckFader>(ValueProperty, ScaleBrushProperty, FinishProperty);
             FocusableProperty.OverrideDefaultValue<DeckFader>(false);
             CursorProperty.OverrideDefaultValue<DeckFader>(new Cursor(StandardCursorType.SizeWestEast));
         }
@@ -87,7 +97,6 @@ namespace Zero.App.Controls
             e.Handled = true;
         }
 
-        private static readonly IBrush ScaleBrush = new SolidColorBrush(Color.FromRgb(0x7A, 0x7D, 0x84));
 
         public override void Render(DrawingContext ctx)
         {
@@ -111,7 +120,7 @@ namespace Zero.App.Controls
             ctx.DrawLine(new Pen(new SolidColorBrush(Color.FromArgb(70, 255, 255, 255)), 0.6),
                 new Point(slot.Left + 1, slot.Bottom + 0.4), new Point(slot.Right - 1, slot.Bottom + 0.4));
 
-            // Cap: brushed metal with ridges and a centre index line.
+            // Cap: black plastic, or brushed metal on silver, with ridges and a centre index line.
             double cx = CapCentre;
             double capH = Math.Min(h - 1, 14);
             var cap = new Rect(cx - CapWidth / 2, mid - capH / 2, CapWidth, capH);
@@ -120,15 +129,24 @@ namespace Zero.App.Controls
             {
                 StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
                 EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
-                GradientStops =
-                {
-                    new GradientStop(Color.FromRgb(0xEE, 0xEF, 0xF1), 0),
-                    new GradientStop(Color.FromRgb(0xA9, 0xAC, 0xB1), 0.55),
-                    new GradientStop(Color.FromRgb(0x6E, 0x71, 0x77), 1)
-                }
+                GradientStops = Finish == DeckFinish.Silver
+                    ? new GradientStops
+                    {
+                        new GradientStop(Color.FromRgb(0xEE, 0xEF, 0xF1), 0),
+                        new GradientStop(Color.FromRgb(0xA9, 0xAC, 0xB1), 0.55),
+                        new GradientStop(Color.FromRgb(0x6E, 0x71, 0x77), 1)
+                    }
+                    : new GradientStops
+                    {
+                        new GradientStop(Color.FromRgb(0x52, 0x54, 0x5A), 0),
+                        new GradientStop(Color.FromRgb(0x26, 0x27, 0x2B), 0.55),
+                        new GradientStop(Color.FromRgb(0x12, 0x13, 0x15), 1)
+                    }
             };
-            ctx.DrawRectangle(metal, new Pen(new SolidColorBrush(Color.FromRgb(0x3A, 0x3C, 0x40)), 0.8), cap, 1.5, 1.5);
-            var ridge = new Pen(new SolidColorBrush(Color.FromArgb(60, 0, 0, 0)), 0.6);
+            bool silver = Finish == DeckFinish.Silver;
+            ctx.DrawRectangle(metal, new Pen(new SolidColorBrush(silver ? Color.FromRgb(0x3A, 0x3C, 0x40) : Color.FromRgb(0x05, 0x05, 0x06)), 0.8), cap, 1.5, 1.5);
+            // Grip ridges: dark grooves in metal, light edges catching the light on black plastic.
+            var ridge = new Pen(new SolidColorBrush(silver ? Color.FromArgb(60, 0, 0, 0) : Color.FromArgb(34, 255, 255, 255)), 0.6);
             for (double y = cap.Top + 2.5; y < cap.Bottom - 2; y += 2)
                 ctx.DrawLine(ridge, new Point(cap.Left + 1.5, y), new Point(cap.Right - 1.5, y));
             ctx.DrawLine(new Pen(new SolidColorBrush(Color.FromRgb(0xFF, 0x8A, 0x1E)), 1.2),

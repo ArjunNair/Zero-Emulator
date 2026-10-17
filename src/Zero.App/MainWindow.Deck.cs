@@ -8,6 +8,7 @@ using Avalonia.Threading;
 using Avalonia.Platform;
 using Zero.App.Controls;
 using Zero.Emulation;
+using Zero.Emulation.Settings;
 
 namespace Zero.App
 {
@@ -52,10 +53,15 @@ namespace Zero.App
                 RefreshDeck();
             };
             d.CurveFader.ValueChangedByUser += (_, v) => { _settings.Render.Crt.Curvature = v; ApplyCrtSettings(); };
-            d.GlowFader.ValueChangedByUser += (_, v) => { _settings.Render.Crt.Glow = v; ApplyCrtSettings(); };
+            d.HousingFader.ValueChangedByUser += (_, v) => { _settings.Render.Crt.Bezel = v * DeckPanel.MaxHousing; ApplyCrtSettings(); };
 
-            // Switching machine resets it, so this knob only acts once it is let go (see CommitOnRelease).
-            d.MachineKnob.ValueChangedByUser += (_, v) => SelectMachine(DeckPanel.MachineAt(v));
+            // Switching machine resets it, so the switch only reports once it is let go.
+            d.MachineSwitch.ValueChangedByUser += (_, v) => SelectMachine(DeckPanel.MachineAt(v));
+            d.JoystickSwitch.ValueChangedByUser += (_, v) => SetDeckJoystick(DeckPanel.JoystickSourceAt(_settings.Input), v + 1);
+            // The source keys are radio buttons: pressing the lit one leaves it lit (RefreshDeck relights them).
+            d.JoystickCursorKey.Click += (_, __) => SetDeckJoystick(DeckPanel.JoystickSourceCursor, d.JoystickSwitch.Value + 1);
+            d.JoystickGamepadKey.Click += (_, __) => SetDeckJoystick(DeckPanel.JoystickSourceGamepad, d.JoystickSwitch.Value + 1);
+            d.JoystickNoneKey.Click += (_, __) => SetDeckJoystick(DeckPanel.JoystickSourceNone, d.JoystickSwitch.Value + 1);
             d.StereoKnob.ValueChangedByUser += (_, v) => SelectStereo((int)v);
             d.CpuKnob.ValueChangedByUser += (_, v) => SelectCpuSpeed(DeckPanel.CpuMultiplierAt(v));
             d.VolumeKnob.ValueChangedByUser += (_, v) => _session.SetVolume((int)Math.Round(v));
@@ -96,6 +102,25 @@ namespace Zero.App
                 _session.Reset(false);
             };
         }
+
+        /// <summary>
+        /// The deck's joystick controls: one source plays one joystick. The cursor keys or gamepad 1
+        /// emulate it and the other is turned off; with no source both are. The type is kept as the
+        /// keys' in every case, so the switch remembers it while nothing plays it.
+        /// </summary>
+        private void SetDeckJoystick(int source, int type)
+        {
+            InputSettings input = _settings.Input;
+            input.KeyboardJoystickType = type;
+            input.EnableKeyboardJoystick = source == DeckPanel.JoystickSourceCursor;
+            input.Gamepad1Emulates = source == DeckPanel.JoystickSourceGamepad ? type : 0;
+            _session.ApplySettings();
+            RefreshMenuState();
+        }
+
+        /// <summary>Dress the decks in the finish chosen in Options; anything unknown is black.</summary>
+        internal void ApplyDeckFinish() =>
+            Deck.Finish = Enum.TryParse(_settings.Render.DeckFinish, true, out DeckFinish finish) ? finish : DeckFinish.Black;
 
         /// <summary>Mirror the session onto the deck. A hidden deck is left alone.</summary>
         private void RefreshDeck()

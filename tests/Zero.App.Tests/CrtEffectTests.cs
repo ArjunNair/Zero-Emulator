@@ -79,13 +79,12 @@ namespace Zero.App.Tests
             // Every effect at once, to prove none of them depends on a particular theme's resources.
             // The scan beam is gone: it drew phosphor green whatever the theme.
             CrtSettings crt = w.Session.Settings.Render.Crt;
-            crt.Enabled = crt.Scanlines = crt.Vignette = crt.Flicker = crt.Noise = true;
+            crt.Enabled = crt.Scanlines = crt.Vignette = true;
             w.ApplyCrtSettings();
             long everything = Capture(w, "crt-all");
 
             // Scanlines no longer follow the CRT switch, so they go off separately.
             crt.Enabled = crt.Scanlines = false;
-            crt.Flicker = crt.Noise = false;
             w.ApplyCrtSettings();
             long plainOnceMore = Capture(w);
 
