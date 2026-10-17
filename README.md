@@ -184,4 +184,5 @@ Additional contributors whose feedback have helped in shaping the emulator are c
 Copyright (c) 2009-2026 Arjun Nair. See the LICENSE file for license rights and limitations (MIT).  
 Zero uses various public domain icons. Copyright rests with their respective authors.  
 The +3 floppy disk controller is a C# port of [fdc765](https://github.com/leiradel/fdc765) by Andre Leiradella (MIT), itself a C port of the freeware fdc765.dll. 
-The Pentagon's Beta 128 disk interface (WD1793 controller) is a C# port of ZXBeta128.pas from Paul Dunn's Spin emulator, used with his permission. 
+The Pentagon's Beta 128 disk interface (WD1793 controller) is a C# port of ZXBeta128.pas from Paul Dunn's Spin emulator, used with his permission.   
+The deck labels are set in [Barlow Semi Condensed](https://github.com/jpt/barlow) (SIL Open Font License 1.1; licence in `src/Zero.App/Assets/Fonts`).
