@@ -278,6 +278,9 @@ namespace Speccy
         public bool tapeBitWasFlipped = false;
         public bool tapeBitFlipAck = false;
         public bool tape_AutoPlay = false;
+        //The user stopped the tape. Auto play and the ROM's fast-load trap leave it alone until
+        //it is played again, the tape is changed or rewound, or the machine is reset.
+        public bool tape_heldStopped = false;
         public bool tape_AutoStarted = false;
         public bool tape_readToPlay = false;
         private const int TAPE_TIMEOUT = 100;// 69888 * 10;
@@ -6296,6 +6299,7 @@ namespace Speccy
         //Resets the speccy
         public virtual void Reset(bool hardReset) {
             isResetOver = false;
+            tape_heldStopped = false;
             isPlayingRZX = false;
             isRecordingRZX = false;
 
@@ -6367,6 +6371,7 @@ namespace Speccy
 
         // Reset tape state
         public void ResetTape() {
+            tape_heldStopped = false;
             tapeBitFlipAck = false;
             tapeBitWasFlipped = false;
             tapeIsPlaying = false;
@@ -6457,7 +6462,7 @@ namespace Speccy
         }
 
         private void OnTapeEdgeCpA() {
-            if (tape_readToPlay && !tapeTrapsDisabled)
+            if (tape_readToPlay && !tapeTrapsDisabled && !tape_heldStopped)
                 if(cpu.regs.PC == 0x56b)
                     FlashLoadTape();
         }
@@ -6594,7 +6599,7 @@ namespace Speccy
                     tape_tstatesSinceLastIn = cpu.t_states;
                 }
             } else if (DetectLoaderLoop()) {
-                if (tape_AutoPlay) {
+                if (tape_AutoPlay && !tape_heldStopped) {
                     tapeIsPlaying = true;
                     tape_AutoStarted = true;
                     tape_stopTimeOut = TAPE_TIMEOUT;

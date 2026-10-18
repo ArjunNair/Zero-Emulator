@@ -92,6 +92,17 @@ namespace Zero.App.Tests
             _output.WriteLine("screenshot: " + path);
         }
 
+        [Theory]
+        [InlineData(3, 12, "03/12")]
+        [InlineData(42, 99, "42/99")]
+        [InlineData(7, 100, "007/100")]
+        [InlineData(42, 1234, "0042/1234")]
+        [InlineData(12000, 12000, "9999/9999")]
+        public void Block_readout_widens_to_four_digits_for_long_tapes(int block, int count, string shown)
+        {
+            Assert.Equal(shown, DeckPanel.BlockReadout(block, count));
+        }
+
         [AvaloniaFact]
         public void Lights_and_display_follow_the_tape_and_the_keys_drive_it()
         {
