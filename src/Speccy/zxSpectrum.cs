@@ -6345,8 +6345,11 @@ namespace Speccy
             lastScanlineColorCounter = 0;
 
             //We jiggle the wait period after resetting so that FRAMES/RANDOMIZE works randomly enough on the speccy.
+            //The count starts afresh: a reset before the last one was over would otherwise carry its
+            //count over, and the new boot would be declared over while the ROM was still setting up.
             rnd_generator = new Random();
-            resetFrameTarget = rnd_generator.Next(40, 90);        
+            resetFrameTarget = rnd_generator.Next(40, 90);
+            resetFrameCounter = 0;
             inputFrameTime = rnd_generator.Next(FrameLength);
         }
 
@@ -6466,6 +6469,18 @@ namespace Speccy
                 return;
 
             if (tapeIsPlaying) {
+                if (cpu.regs.PC != tape_PCatLastIn) {
+                    //Many games load the rest of the tape with their own loader. Follow it to its
+                    //edge loop, or the stop timeout runs out while the tape is still being read.
+                    if (DetectLoaderLoop()) {
+                        tape_PCatLastIn = cpu.regs.PC;
+                        if (tape_AutoPlay) {
+                            tape_stopTimeOut = TAPE_TIMEOUT;
+                            tape_AutoStarted = true;
+                        }
+                    }
+                    return;
+                }
                 if (cpu.regs.PC == tape_PCatLastIn) {
                     if (tape_AutoPlay) {
                         tape_stopTimeOut = TAPE_TIMEOUT;
@@ -6578,101 +6593,98 @@ namespace Speccy
                     }
                     tape_tstatesSinceLastIn = cpu.t_states;
                 }
-            } else {
-                if (FrameCount != tape_FrameCount)
-                    tape_detectionCount = 0;
+            } else if (DetectLoaderLoop()) {
+                if (tape_AutoPlay) {
+                    tapeIsPlaying = true;
+                    tape_AutoStarted = true;
+                    tape_stopTimeOut = TAPE_TIMEOUT;
+                    //if (TapeEvent != null)
+                    //    OnTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE)); //Yes! Start tape!
+                    DoTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE));
+                    tapeTStates = 0;
+                }
+                tape_PCatLastIn = cpu.regs.PC;
+            }
+        }
 
-                int elapsedTapeTstates = cpu.t_states - tape_tstatesSinceLastIn;
-                if (((elapsedTapeTstates > 0) && (elapsedTapeTstates < 96)) && (cpu.regs.PC == tape_PC)) {
-                    tape_tstatesStep = elapsedTapeTstates;
-                    //which reg has changes since last IN
-                    int numRegsThatHaveChanged = 0;
-                    tape_diff = 0;
+        //Looks for a loader's edge loop: the same IN, under 96 T-states after the last one, with
+        //exactly one register stepped by 1. True once that has been seen 8 times in a frame, and
+        //only then does it set which register and step the edge loading speed-up uses.
+        private bool DetectLoaderLoop() {
+            bool found = false;
+            if (FrameCount != tape_FrameCount)
+                tape_detectionCount = 0;
 
-                    if (tape_A != cpu.regs.A) {
-                        tape_regValue = cpu.regs.A;
-                        tape_whichRegToCheck = 1;
-                        tape_diff = tape_A - cpu.regs.A;
-                        numRegsThatHaveChanged++;
-                    }
-                    if (tape_B != cpu.regs.B) {
-                        tape_regValue = cpu.regs.B;
-                        tape_whichRegToCheck = 2;
-                        tape_diff = tape_B - cpu.regs.B;
-                        numRegsThatHaveChanged++;
-                    }
-                    if (tape_C != cpu.regs.C) {
-                        tape_regValue = cpu.regs.C;
-                        tape_whichRegToCheck = 3;
-                        tape_diff = tape_C - cpu.regs.C;
-                        numRegsThatHaveChanged++;
-                    }
-                    if (tape_D != cpu.regs.D) {
-                        tape_regValue = cpu.regs.D;
-                        tape_whichRegToCheck = 4;
-                        tape_diff = tape_D - cpu.regs.D;
-                        numRegsThatHaveChanged++;
-                    }
-                    if (tape_E != cpu.regs.E) {
-                        tape_regValue = cpu.regs.E;
-                        tape_whichRegToCheck = 5;
-                        tape_diff = tape_E - cpu.regs.E;
-                        numRegsThatHaveChanged++;
-                    }
-                    if (tape_H != cpu.regs.H) {
-                        tape_regValue = cpu.regs.H;
-                        tape_whichRegToCheck = 6;
-                        tape_diff = tape_H - cpu.regs.H;
-                        numRegsThatHaveChanged++;
-                    }
-                    if (tape_L != cpu.regs.L) {
-                        tape_regValue = cpu.regs.L;
-                        tape_whichRegToCheck = 7;
-                        tape_diff = tape_L - cpu.regs.L;
-                        numRegsThatHaveChanged++;
-                    }
+            int elapsedTapeTstates = cpu.t_states - tape_tstatesSinceLastIn;
+            if (((elapsedTapeTstates > 0) && (elapsedTapeTstates < 96)) && (cpu.regs.PC == tape_PC)) {
+                //which reg has changes since last IN
+                int numRegsThatHaveChanged = 0;
+                int whichReg = 0;
+                int diff = 0;
 
-                    tape_A = cpu.regs.A;
-                    tape_B = cpu.regs.B;
-                    tape_C = cpu.regs.C;
-                    tape_D = cpu.regs.D;
-                    tape_E = cpu.regs.E;
-                    tape_H = cpu.regs.H;
-                    tape_L = cpu.regs.L;
+                if (tape_A != cpu.regs.A) {
+                    whichReg = 1;
+                    diff = tape_A - cpu.regs.A;
+                    numRegsThatHaveChanged++;
+                }
+                if (tape_B != cpu.regs.B) {
+                    whichReg = 2;
+                    diff = tape_B - cpu.regs.B;
+                    numRegsThatHaveChanged++;
+                }
+                if (tape_C != cpu.regs.C) {
+                    whichReg = 3;
+                    diff = tape_C - cpu.regs.C;
+                    numRegsThatHaveChanged++;
+                }
+                if (tape_D != cpu.regs.D) {
+                    whichReg = 4;
+                    diff = tape_D - cpu.regs.D;
+                    numRegsThatHaveChanged++;
+                }
+                if (tape_E != cpu.regs.E) {
+                    whichReg = 5;
+                    diff = tape_E - cpu.regs.E;
+                    numRegsThatHaveChanged++;
+                }
+                if (tape_H != cpu.regs.H) {
+                    whichReg = 6;
+                    diff = tape_H - cpu.regs.H;
+                    numRegsThatHaveChanged++;
+                }
+                if (tape_L != cpu.regs.L) {
+                    whichReg = 7;
+                    diff = tape_L - cpu.regs.L;
+                    numRegsThatHaveChanged++;
+                }
 
-                    tape_diff *= -1;
-                    if (numRegsThatHaveChanged == 1) //Has only 1 reg changed?
+                diff *= -1;
+                if (numRegsThatHaveChanged == 1) //Has only 1 reg changed?
+                {
+                    if (Math.Abs(diff) == 1)    //Changed only by +1 or -1
                     {
-                        if (Math.Abs(tape_diff) == 1)    //Changed only by +1 or -1
+                        tape_detectionCount++;
+                        if (tape_detectionCount >= 8) //Is the above true 8 times?
                         {
-                            tape_detectionCount++;
-                            if (tape_detectionCount >= 8) //Is the above true 8 times?
-                            {
-                                if (tape_AutoPlay) {
-                                    tapeIsPlaying = true;
-                                    tape_AutoStarted = true;
-                                    tape_stopTimeOut = TAPE_TIMEOUT;
-                                    //if (TapeEvent != null)
-                                    //    OnTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE)); //Yes! Start tape!
-                                    DoTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE));
-                                    tapeTStates = 0;
-                                }
-                                tape_PCatLastIn = cpu.regs.PC;
-                            }
+                            tape_tstatesStep = elapsedTapeTstates;
+                            tape_whichRegToCheck = whichReg;
+                            tape_diff = diff;
+                            found = true;
                         }
                     }
                 }
-                tape_tstatesSinceLastIn = cpu.t_states;
-                tape_FrameCount = FrameCount;
-                tape_A = cpu.regs.A;
-                tape_B = cpu.regs.B;
-                tape_C = cpu.regs.C;
-                tape_D = cpu.regs.D;
-                tape_E = cpu.regs.E;
-                tape_H = cpu.regs.H;
-                tape_L = cpu.regs.L;
-                tape_PC = cpu.regs.PC;
             }
+            tape_tstatesSinceLastIn = cpu.t_states;
+            tape_FrameCount = FrameCount;
+            tape_A = cpu.regs.A;
+            tape_B = cpu.regs.B;
+            tape_C = cpu.regs.C;
+            tape_D = cpu.regs.D;
+            tape_E = cpu.regs.E;
+            tape_H = cpu.regs.H;
+            tape_L = cpu.regs.L;
+            tape_PC = cpu.regs.PC;
+            return found;
         }
 
         //The main loop which executes opcodes repeatedly till 1 frame (69888 tstates)
@@ -8265,10 +8277,12 @@ namespace Speccy
                         tapeTStates = -diff;
                     }
                     continue;
-                } else if ((currentBlock is PZXFile.STOP_Block)) {
+                } else if ((currentBlock is PZXFile.STOP_Block stop)) {
+                    //flag 1 = stop only on 48K; 0 and any value we don't know = always stop
+                    bool is48K = model == MachineModel._16k || model == MachineModel._48k || model == MachineModel._NTSC48k;
+                    if (stop.flag == 1 && !is48K)
+                        continue;
                     StopTape();
-                   // if (ziggyWin.zx.keyBuffer[(int)ZeroWin.Form1.keyCode.ALT])
-                   //     ziggyWin.saveSnapshotMenuItem_Click(this, null);
                     break;
                 }
             }
@@ -8314,11 +8328,33 @@ namespace Speccy
             return false;
         }
 
+        //Arms the current bit's pulse at pulseCounter. A zero pulse, or one the tape has already
+        //run past, just flips the level and moves on to the bit's next pulse.
+        //Returns false once the bit has no pulses left.
+        private bool NextBitPulse(PZXFile.DATA_Block block) {
+            List<ushort> seq = currentBit == 0 ? block.s0 : block.s1;
+            while (pulseCounter < seq.Count) {
+                edgeDuration = seq[pulseCounter];
+                if (edgeDuration > 0) {
+                    int diff = (int)edgeDuration - tapeTStates;
+                    if (diff > 0) {
+                        edgeDuration = (uint)diff;
+                        tapeTStates = 0;
+                        return true;
+                    }
+                    tapeTStates = -diff;
+                }
+                FlipTapeBit();
+                pulseCounter++;
+            }
+            return false;
+        }
+
         public bool NextDataBit() {
             PZXFile.DATA_Block block = (PZXFile.DATA_Block)currentBlock;
            
             //Bits left for processing?
-            while (bitCounter < block.count - 1) {
+            while (bitCounter + 1 < block.count) {
                 bitCounter++;
                 if (bitShifter == 0) {
                     bitShifter = 0x80;
@@ -8331,32 +8367,8 @@ namespace Speccy
                 currentBit = ((dataByte & bitShifter) == 0 ? 0 : 1);
                 bitShifter >>= 1;
                 pulseCounter = 0;
-                int numPulses = 0;
-
-                if (currentBit == 0) {
-                    edgeDuration = (block.s0[0]);
-                    numPulses = block.p0;
-                }
-                else {
-                    edgeDuration = (block.s1[0]);
-                    numPulses = block.p1;
-                }
-
-                if (numPulses == 0)
-                    continue;
-
-                if (edgeDuration > 0) {
-                    int diff = (int)edgeDuration - tapeTStates;
-                    if(diff > 0) {
-                        edgeDuration = (uint)diff;
-                        tapeTStates = 0;
-                        return true;
-                    }
-                    else
-                        tapeTStates = -diff;
-                }
-
-                FlipTapeBit();
+                if (NextBitPulse(block))
+                    return true;
             }
 
             //All bits done. Now do the tail pulse to finish off things
@@ -8378,6 +8390,7 @@ namespace Speccy
                 //HACK: Sometimes a tape might have its last tail pulse missing.
                 //In case it's the last block in the tape, it's best to flip the tape bit
                 //a last time to ensure that the process is terminated properly.
+                //This departs from the PZX spec on purpose: a zero tail should have no effect.
                 if (blockCounter == PZXFile.blocks.Count - 1) {
                     currentBit = -1;
                     edgeDuration = (3500 * 2);
@@ -8415,25 +8428,15 @@ namespace Speccy
                 }
             }*/
 
-            if (!(currBlock is PZXFile.PULS_Block))
-                blockCounter++;
-
-            if (blockCounter >= PZXFile.tapeBlockInfo.Count)
-            {
-                blockCounter--;
-                //tape_readToPlay = false;
-                StopTape();
+            //No DATA block after the pulses (a CSW tape is one long PULS block): nothing to flash
+            //load, so let the tape play on. It stops by itself when it runs out.
+            int puls = currBlock is PZXFile.PULS_Block ? blockCounter : blockCounter + 1;
+            if (puls + 1 >= PZXFile.blocks.Count)
                 return;
-            }
-
-            if (!PZXFile.tapeBlockInfo[blockCounter].IsStandardBlock)
-            {
-                if (!(currBlock is PZXFile.PULS_Block))
-                    blockCounter--;
+            if (!(PZXFile.blocks[puls + 1] is PZXFile.DATA_Block dataBlock) || !PZXFile.IsStandardData(dataBlock))
                 return;
-            }
+            blockCounter = puls;
 
-            PZXFile.DATA_Block dataBlock = (PZXFile.DATA_Block)PZXFile.blocks[blockCounter + 1];
             edgeDuration = (1000);
             //if (pulseLevel != dataBlock.initialPulseLevel)
             //    FlipTapeBit();
@@ -8441,6 +8444,7 @@ namespace Speccy
             int byteCounter = dataBlock.data.Count;
             int dataIndex = 0;
             bool loadStageFlagByte = true;
+            bool readAll = false; //the ROM got every byte it asked for, and the parity byte
             while (true)
             {
                 if (byteCounter == 0)
@@ -8457,6 +8461,7 @@ namespace Speccy
                 {
                     cpu.regs.A = cpu.regs.H;
                     cpu.Cp_R(1);
+                    readAll = true;
                     break;
                 }
                 if (loadStageFlagByte)
@@ -8486,6 +8491,39 @@ namespace Speccy
                 StopTape();
                 return;
             }
+
+            //The ROM reads only as many bytes as it was asked for. Some loaders put more in the
+            //same block, straight after them, and read it with their own code as the tape runs on
+            //(Raxoft's Wizball keeps its whole game there). Play on from where the ROM stopped.
+            if (readAll && dataIndex < dataBlock.data.Count)
+                PlayDataFrom(dataBlock, dataIndex);
+        }
+
+        /// <summary>
+        /// Start the tape at byte <paramref name="byteIndex"/> of <paramref name="block"/>, the
+        /// current block, as if it had played up to there. Standard data only: each bit is two
+        /// pulses, so between bits the level is back where the block started.
+        /// </summary>
+        private void PlayDataFrom(PZXFile.DATA_Block block, int byteIndex)
+        {
+            currentBlock = block;
+            pulseCounter = -1;
+            bitCounter = byteIndex * 8 - 1;
+            dataCounter = byteIndex - 1;
+            bitShifter = 0;
+            tapeTStates = 0;
+            if (pulseLevel != block.initialPulseLevel)
+                FlipTapeBit();
+            if (!NextDataBit())
+                return;
+
+            //Not auto-started: the stop timeout waits until edge detection has found the loader
+            //reading it, or the tape would stop under a loader it hasn't caught up with yet.
+            tapeIsPlaying = true;
+            tape_AutoStarted = false;
+            tape_stopTimeOut = TAPE_TIMEOUT;
+            if (TapeEvent != null)
+                OnTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE));
         }
 
         private void DoTapeEvent(TapeEventArgs e) {
@@ -8526,34 +8564,13 @@ namespace Speccy
                 else if (currentBlock is PZXFile.DATA_Block) {
                     PZXFile.DATA_Block block = (PZXFile.DATA_Block)currentBlock;
 
-                    //Are we done with pulses for a certain sequence?
-                    if (currentBit == 0) {
-                        pulseCounter++;
-                        if (pulseCounter < block.p0) {
-                            edgeDuration = (block.s0[pulseCounter]);
-                        } else {
-                            //All pulses done for this bit so fetch next bit
-                            if (!NextDataBit()) {
-                                NextPZXBlock();
-                                return;
-                            }
-                        }
-                    } else if (currentBit == 1) {
-                        pulseCounter++;
-                        if (pulseCounter < block.p1) {
-                            edgeDuration = (block.s1[pulseCounter]);
-                        } else {
-                            //All pulses done for this bit so fetch next bit
-                            if (!NextDataBit()) {
-                                NextPZXBlock();
-                                return;
-                            }
-                        }
-                    } else //we were doing the tail!
-                    {
+                    if (currentBit < 0) { //we were doing the tail!
                         NextPZXBlock();
                         return;
                     }
+                    pulseCounter++;
+                    if (!NextBitPulse(block) && !NextDataBit())
+                        NextPZXBlock();
                     return;
                 }
 

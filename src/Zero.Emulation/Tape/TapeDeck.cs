@@ -322,7 +322,9 @@ namespace Zero.Emulation.Tape
             _zx.tapeTStates = 0;
             _zx.tape_readToPlay = true;
             if (_fastLoad) _zx.ResetKeyboard();
-            _zx.blockCounter--;
+            bool atStop = _zx.blockCounter >= 0 && _zx.blockCounter < PZXFile.blocks.Count
+              && PZXFile.blocks[_zx.blockCounter] is PZXFile.STOP_Block;
+            if (!atStop) _zx.blockCounter--;
             if (_zx.blockCounter < 0) _zx.blockCounter = 0;
             _zx.NextPZXBlock();
             CueCounter(_zx.blockCounter); // a stopped tape restarts its block from the top
@@ -356,7 +358,7 @@ namespace Zero.Emulation.Tape
         public void NextBlock()
         {
             if (!IsInserted || _zx == null) return;
-            if (_zx.blockCounter < PZXFile.tapeBlockInfo.Count - 1) _zx.blockCounter++;
+            if (_zx.blockCounter < PZXFile.blocks.Count - 1) _zx.blockCounter++;
             if (!IsPlaying) CueCounter(_zx.blockCounter);
             Changed?.Invoke();
         }
@@ -374,7 +376,7 @@ namespace Zero.Emulation.Tape
                         Insert(_tapSavePath);
                     break;
                 case TapeEventType.NEXT_BLOCK:
-                    if (_zx != null && IsInserted && _zx.blockCounter - 1 >= _blocks.Count)
+                    if (_zx != null && IsInserted && _zx.blockCounter >= _blocks.Count)
                         Stop();
                     Changed?.Invoke();
                     break;

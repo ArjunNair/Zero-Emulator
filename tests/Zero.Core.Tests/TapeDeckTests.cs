@@ -84,7 +84,7 @@ namespace Zero.Core.Tests
             Assert.True(deck.Insert("Overscan.tap", tap));
             Assert.Equal("Overscan", deck.Title);
             Assert.False(deck.Metadata.HasDetails);
-            Assert.Equal(12, deck.Blocks.Count);
+            Assert.Equal(13, deck.Blocks.Count);
         }
     }
 }

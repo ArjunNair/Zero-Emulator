@@ -94,15 +94,25 @@ namespace Peripherals
             return idString;
         }
 
+        // Reads a string ending at a 0x00 byte or at limit, whichever comes first, as UTF-8.
+        // An empty string comes back as "", not null.
         public static string GetString(byte[] array, ref int _counter, uint limit) {
-            string newString = null;
-            while ((_counter < limit) && (array[_counter] != 0)) {
-                char c = (char)(array[_counter++]);
-                newString += c;
-            }
+            int start = _counter;
+            while (_counter < limit && array[_counter] != 0)
+                _counter++;
+            string s = System.Text.Encoding.UTF8.GetString(array, start, _counter - start);
             _counter++; //point to next valid data
-            return newString;
+            return s;
         }
+
+        // Determine if it's a standard data block suitable for flashloading
+        // PZX FAQ:
+        // In the common case of the standard loaders you would simply test that
+        // each sequence consists of two non-zero pulses, and that the total duration
+        // of the sequence s0 is less than the total duration of sequence s1
+        public static bool IsStandardData(DATA_Block d) =>
+            d.p0 == 2 && d.p1 == 2 && d.s0[0] != 0 && d.s0[1] != 0 && d.s1[0] != 0 && d.s1[1] != 0
+            && d.s0[0] + d.s0[1] < d.s1[0] + d.s1[1];
 
         public static PZXT_Header GetHeader(byte[] _buffer, int _counter, uint size) {
             PZXT_Header header = new PZXT_Header();
@@ -115,61 +125,58 @@ namespace Peripherals
             if (header.MajorVersion != 1)
                 return null;
 
+            bool hasTitle = false;
             while (_counter < baseCount + size) {
-                string info = GetString(_buffer, ref _counter, baseCount + size);
+                string key = GetString(_buffer, ref _counter, baseCount + size);
 
-                if (info == null)
-                    continue;
-
-                //if we haven't read the header do that now
-                if (header.Title == null) {
-                    header.Title = info;
-                    if (header.Title == null)
-                        header.Title = "No title found!";
+                if (!hasTitle) {
+                    header.Title = key;
+                    hasTitle = true;
                     continue;
                 }
 
-                switch (info) {
+                //Read the value before the switch so an unknown key still consumes its value.
+                //A missing last value reads as "", as the spec asks.
+                string value = GetString(_buffer, ref _counter, baseCount + size);
+                switch (key) {
                     case "Publisher":
-                        header.Publisher = GetString(_buffer, ref _counter, baseCount + size);
+                        header.Publisher = value;
                         break;
 
                     case "Author":
-                        string author = GetString(_buffer, ref _counter, baseCount + size);
-                        header.Authors.Add(author);
+                        header.Authors.Add(value);
                         break;
 
                     case "Year":
-                        header.YearOfPublication = GetString(_buffer, ref _counter, baseCount + size);
+                        header.YearOfPublication = value;
                         break;
 
                     case "Language":
-                        header.Language = GetString(_buffer, ref _counter, baseCount + size);
+                        header.Language = value;
                         break;
 
                     case "Type":
-                        header.Type = GetString(_buffer, ref _counter, baseCount + size);
+                        header.Type = value;
                         break;
 
                     case "Price":
-                        header.Price = GetString(_buffer, ref _counter, baseCount + size);
+                        header.Price = value;
                         break;
 
                     case "Protection":
-                        header.ProtectionScheme = GetString(_buffer, ref _counter, baseCount + size);
+                        header.ProtectionScheme = value;
                         break;
 
                     case "Origin":
-                        header.Origin = GetString(_buffer, ref _counter, baseCount + size);
+                        header.Origin = value;
                         break;
 
                     case "Comment":
-                        string comment = GetString(_buffer, ref _counter, baseCount + size);
-                        header.Comments.Add(comment);
+                        header.Comments.Add(value);
                         break;
 
                     default:
-                        break;
+                        break; //unknown key: its value is already consumed
                 }
             }
             return header;
@@ -177,25 +184,29 @@ namespace Peripherals
 
         public static PULS_Block GetPulse(byte[] _buffer, int _counter, uint size) {
             PULS_Block block = new PULS_Block();
+            int end = _counter + (int)size;
 
-            int baseCount = _counter;
+            //A single leftover byte can't start a value, so it's ignored
 
-            while (_counter < baseCount + size) {
+            while (_counter + 2 <= end) {
                 Pulse p = new Pulse();
                 p.count = 1;
                 p.duration = (System.BitConverter.ToUInt16(_buffer, _counter));
                 _counter += 2;
 
                 if (p.duration > 0x8000) {
+                    if (_counter + 2 > end)
+                        return null; // repeat count with no duration after it
                     p.count = (ushort)(p.duration & 0x7FFF);
                     p.duration = System.BitConverter.ToUInt16(_buffer, _counter);
                     _counter += 2;
                 }
                 if (p.duration >= 0x8000) {
+                    if (_counter + 2 > end)
+                        return null; // high half of a long duration with no low half
                     p.duration &= 0x7FFF;
                     p.duration <<= 16;
                     p.duration |= System.BitConverter.ToUInt16(_buffer, _counter);
-
                     _counter += 2;
                 }
 
@@ -205,35 +216,38 @@ namespace Peripherals
         }
 
         public static DATA_Block GetData(byte[] _buffer, int _counter, uint size) {
-            DATA_Block block = new DATA_Block();
-            int baseCount = _counter;
+            if (size < 8)
+                return null; // too small
 
-            while (_counter < baseCount + size) {
-                block.count = System.BitConverter.ToUInt32(_buffer, _counter);
-                block.initialPulseLevel = (uint)((block.count & 0x80000000) == 0 ? 0 : 1);
-                block.count = (uint)(block.count & 0x7FFFFFFF);
-                _counter += 4;
-                block.tail = System.BitConverter.ToUInt16(_buffer, _counter);
-                _counter += 2;
-                block.p0 = _buffer[_counter++];
-                block.p1 = _buffer[_counter++];
-                for (int i = 0; i < block.p0; i++) {
-                    ushort s = System.BitConverter.ToUInt16(_buffer, _counter);
-                    _counter += 2;
-                    block.s0.Add(s);
-                }
-                for (int i = 0; i < block.p1; i++) {
-                    ushort s = System.BitConverter.ToUInt16(_buffer, _counter);
-                    _counter += 2;
-                    block.s1.Add(s);
-                }
-                for (int i = 0; i < Math.Ceiling((decimal)block.count / 8); i++) {
-                    byte b = _buffer[_counter++];
-                    block.data.Add(b);
-                }
+            DATA_Block block = new DATA_Block();
+            uint count = System.BitConverter.ToUInt32(_buffer, _counter);
+            block.initialPulseLevel = (uint)((count & 0x80000000) == 0 ? 0 : 1);
+            block.count = count & 0x7FFFFFFF;
+            block.tail = System.BitConverter.ToUInt16(_buffer, _counter + 4);
+            block.p0 = _buffer[_counter + 6];
+            block.p1 = _buffer[_counter + 7];
+            _counter += 8;
+
+            //The pulse sequences and the data must fit in what the block says it holds
+            long dataBytes = (block.count + 7L) / 8;
+            if (8 + 2L * (block.p0 + block.p1) + dataBytes > size)
+                return null;
+
+            for (int i = 0; i < block.p0; i++, _counter += 2) {
+                ushort s = System.BitConverter.ToUInt16(_buffer, _counter);
+                block.s0.Add(s);
+            }
+            for (int i = 0; i < block.p1; i++, _counter += 2) {
+                ushort s = System.BitConverter.ToUInt16(_buffer, _counter);
+                block.s1.Add(s);
+            }
+            for (long i = 0; i < dataBytes; i++) {
+                byte b = _buffer[_counter++];
+                block.data.Add(b);
             }
             return block;
         }
+
         public static bool LoadPZX(ref byte[] buffer) {
             try {
                 return LoadPZXCore(buffer);
@@ -254,20 +268,28 @@ namespace Peripherals
                 return false; //something bad happened!
 
             int counter = 0;
+            bool first = true;
 
-            while (counter < buffer.Length) {
-                //Read tag first (in a really lame way)
-                string blockTag = null;
-                for (int i = 0; i < 4; i++) {
-                    blockTag += (char)(buffer[counter++]);
-                }
+            //Fewer than 8 bytes left can't hold a block header, so trailing junk is ignored
+            while (counter + 8 <= buffer.Length) {
+                string blockTag = System.Text.Encoding.ASCII.GetString(buffer, counter, 4);
+                uint blockSize = System.BitConverter.ToUInt32(buffer, counter + 4);
+                counter += 8;
 
-                uint blockSize = System.BitConverter.ToUInt32(buffer, counter);
-                counter += 4;
+                //Every PZX file starts with PZXT: that's how we recognise one
+                if (first && blockTag != "PZXT")
+                    return false;
+                first = false;
+
+                //Block runs past the end of the file: stop here and keep what we've read
+                if (blockSize > buffer.Length - counter)
+                    break;
 
                 switch (blockTag) {
                     case "PZXT":
-                    PZXT_Header header = GetHeader(buffer, counter, blockSize);
+                    PZXT_Header header = blockSize >= 2 ? GetHeader(buffer, counter, blockSize) : null;
+                    if (header == null)
+                        return false; //too small, or a major version we don't implement
                     header.tag = "PZXT Header";
                     header.size = blockSize;
                     blocks.Add(header);
@@ -275,6 +297,8 @@ namespace Peripherals
 
                     case "PULS":
                     PULS_Block pblock = GetPulse(buffer, counter, blockSize);
+                    if (pblock == null)
+                        break; //malformed: skip it
                     pblock.tag = "PULS";
                     pblock.size = blockSize;
                     blocks.Add(pblock);
@@ -282,12 +306,16 @@ namespace Peripherals
 
                     case "DATA":
                     DATA_Block dblock = GetData(buffer, counter, blockSize);
+                    if (dblock == null)
+                        break; //malformed: skip it
                     dblock.tag = "DATA";
                     dblock.size = blockSize;
                     blocks.Add(dblock);
                     break;
 
                     case "PAUS":
+                    if (blockSize < 4)
+                        break; // too small
                     PAUS_Block pauseBlock = new PAUS_Block();
                     pauseBlock.tag = "PAUS";
                     uint d = System.BitConverter.ToUInt32(buffer, counter);
@@ -308,6 +336,8 @@ namespace Peripherals
                     break;
 
                     case "STOP":
+                    if (blockSize < 2)
+                        break; // too small
                     STOP_Block stopBlock = new STOP_Block();
                     stopBlock.tag = "STOP";
                     stopBlock.flag = System.BitConverter.ToUInt16(buffer, counter);
@@ -316,11 +346,11 @@ namespace Peripherals
                     break;
 
                     default:
-                    break;
+                    break; //unknown or custom block: skip it
                 }
                 counter += (int)blockSize;
             }
-            return true;
+            return blocks.Count > 0;
         }
 
         public static bool LoadPZX(System.IO.Stream fs) {
@@ -365,23 +395,15 @@ namespace Peripherals
                     info.Info = ((PZXFile.PAUS_Block)PZXFile.blocks[f]).duration.ToString() + " t-states   (" +
                                  Math.Ceiling(((double)(((PZXFile.PAUS_Block)PZXFile.blocks[f]).duration) / (double)(69888 * 50))).ToString() + " secs)";
                 } else if (PZXFile.blocks[f] is PZXFile.PULS_Block) {
-                    info.Info = ((PZXFile.PULS_Block)PZXFile.blocks[f]).pulse[0].duration.ToString() + " t-states   ";
+                    PZXFile.PULS_Block puls = (PZXFile.PULS_Block)PZXFile.blocks[f];
+                    info.Info = puls.pulse.Count > 0 ? puls.pulse[0].duration.ToString() + " t-states   " : "";
                 } else if (PZXFile.blocks[f] is PZXFile.STOP_Block) {
                     info.Info = "Stop the tape.";
                 } else if (PZXFile.blocks[f] is PZXFile.DATA_Block) {
 
                     PZXFile.DATA_Block _data = (PZXFile.DATA_Block)PZXFile.blocks[f];
                     int d = (int)(_data.count / 8);
-
-                    //Determine if it's a standard data block suitable for flashloading
-                    //Taken from PZX FAQ:
-                    // In the common case of the standard loaders you would simply test that 
-                    //each sequence consists of two non-zero pulses, and that the total duration 
-                    // of the sequence s0 is less than the total duration of sequence s1
-                    if ((_data.p0 == 2 && _data.p1 == 2) &&
-                        (_data.s0[0] != 0 && _data.s0[1] != 0 && _data.s1[0] != 0 && _data.s1[1] != 0) &&
-                        (_data.s0[0] + _data.s0[1] < _data.s1[0] + _data.s1[1]))
-                        info.IsStandardBlock = true;
+                    info.IsStandardBlock = IsStandardData(_data);
 
                     //Check for standard header
                     if ((d == 19) && (_data.data[0] == 0)) {
@@ -419,9 +441,10 @@ namespace Peripherals
                     } else
                         info.Info = ((PZXFile.DATA_Block)PZXFile.blocks[f]).count.ToString() + " bits  (" + Math.Ceiling((double)(((PZXFile.DATA_Block)PZXFile.blocks[f]).count) / (double)8).ToString() + " bytes)";
                 }
-                else if (PZXFile.blocks[f] is PZXFile.PZXT_Header) {
-                    //info.Info = ((PZXFile.PZXT_Header)(PZXFile.blocks[f])).Title;
-                    continue;
+                else if (PZXFile.blocks[f] is PZXFile.PZXT_Header header) {
+                    //Every block gets a row, so a row's index is the block's index in blocks.
+                    //The spec names a PZXT browse point by its title, or "Tape start" without one.
+                    info.Info = string.IsNullOrEmpty(header.Title) ? "Tape start" : header.Title;
                 }
 
                 info.Block = PZXFile.blocks[f].tag;
