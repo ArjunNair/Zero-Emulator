@@ -68,7 +68,11 @@ namespace Zero.Core.Tests
             Assert.Equal("1983", deck.Metadata.Year);
             Assert.Equal("Original release", Assert.Single(deck.Metadata.Comments));
             Assert.True(deck.Metadata.HasDetails);
-            Assert.Single(deck.Blocks);
+            // Every block gets a row, the header included, so rows line up with blockCounter.
+            Assert.Equal(2, deck.Blocks.Count);
+            Assert.Equal("PZXT Header", deck.Blocks[0].Block);
+            Assert.Equal("Manic Miner", deck.Blocks[0].Info);
+            Assert.Equal("PULS", deck.Blocks[1].Block);
 
             deck.Eject();
             Assert.False(deck.IsInserted);

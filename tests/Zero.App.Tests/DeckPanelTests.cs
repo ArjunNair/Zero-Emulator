@@ -118,7 +118,7 @@ namespace Zero.App.Tests
 
             string tap = Path.Combine(TestPaths.ProgramsDir, "Demos", "Overscan.tap");
             Assert.True(w.Session.LoadFileAsync(tap).Result);
-            PumpUntil(() => d.VfdBlock.Text == "01/12");
+            PumpUntil(() => d.VfdBlock.Text == "01/13"); // the PZXT header row, then PULS/DATA/PAUS for each of 4 TAP blocks
             Assert.Equal("000", d.VfdCounter.Text);
             Assert.Equal("LOADED OVERSCAN.TAP", d.VfdTitle.Text); // status messages borrow the info line
 
