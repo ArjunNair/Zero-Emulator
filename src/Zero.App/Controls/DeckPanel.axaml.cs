@@ -122,7 +122,7 @@ namespace Zero.App.Controls
                 int count = tape.Blocks.Count;
                 int block = Math.Min(tape.CurrentBlock + 1, Math.Max(1, count));
                 VfdCounter.Text = tape.Counter.ToString("000");
-                VfdBlock.Text = $"{Math.Min(block, 99):00}/{Math.Min(count, 99):00}";
+                VfdBlock.Text = BlockReadout(block, count);
                 VfdTitle.Text = string.IsNullOrEmpty(tape.Title) ? "UNTITLED" : tape.Title.ToUpperInvariant();
             }
 
@@ -288,6 +288,18 @@ namespace Zero.App.Controls
         /// </summary>
         internal static string DiskLabel(string path) =>
             string.IsNullOrEmpty(path) ? "--" : System.IO.Path.GetFileNameWithoutExtension(path).ToUpperInvariant();
+
+        /// <summary>
+        /// The block and the tape's block count, as "03/12": two digits, or as many as the count
+        /// needs up to four ("0042/1234"). Both sides take the same width, and stop at 9999.
+        /// </summary>
+        internal static string BlockReadout(int block, int count)
+        {
+            block = Math.Min(block, 9999);
+            count = Math.Min(count, 9999);
+            int digits = Math.Max(2, count.ToString().Length);
+            return block.ToString().PadLeft(digits, '0') + "/" + count.ToString().PadLeft(digits, '0');
+        }
 
         private static string RecordTarget(TapeDeck tape) =>
             System.IO.Path.GetFileNameWithoutExtension(tape.TapSavePath ?? "").ToUpperInvariant();

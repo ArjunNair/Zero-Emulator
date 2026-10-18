@@ -318,6 +318,7 @@ namespace Zero.Emulation.Tape
         public void Play()
         {
             if (!IsInserted || _zx == null) return;
+            _zx.tape_heldStopped = false;
             _zx.tapeIsPlaying = true;
             _zx.tapeTStates = 0;
             _zx.tape_readToPlay = true;
@@ -329,9 +330,14 @@ namespace Zero.Emulation.Tape
             Changed?.Invoke();
         }
 
+        /// <summary>
+        /// Stop the tape, and keep it stopped: auto play and fast loading leave it alone until Play
+        /// (or a rewind, a new tape or a reset), as a real deck's loader would find no tape.
+        /// </summary>
         public void Stop()
         {
             if (!IsInserted || _zx == null) return;
+            _zx.tape_heldStopped = true;
             _zx.StopTape(true);
             Changed?.Invoke();
         }
@@ -340,6 +346,7 @@ namespace Zero.Emulation.Tape
         {
             if (!IsInserted || _zx == null) return;
             _zx.StopTape(true);
+            _zx.tape_heldStopped = false;
             _zx.blockCounter = 0;
             CueCounter(0);
             Changed?.Invoke();
@@ -375,7 +382,7 @@ namespace Zero.Emulation.Tape
                     break;
                 case TapeEventType.NEXT_BLOCK:
                     if (_zx != null && IsInserted && _zx.blockCounter - 1 >= _blocks.Count)
-                        Stop();
+                        _zx.StopTape(true); // ran off the end: not the user's stop, so nothing is held
                     Changed?.Invoke();
                     break;
                 case TapeEventType.START_TAPE:

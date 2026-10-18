@@ -278,6 +278,9 @@ namespace Speccy
         public bool tapeBitWasFlipped = false;
         public bool tapeBitFlipAck = false;
         public bool tape_AutoPlay = false;
+        //The user stopped the tape. Auto play and the ROM's fast-load trap leave it alone until
+        //it is played again, the tape is changed or rewound, or the machine is reset.
+        public bool tape_heldStopped = false;
         public bool tape_AutoStarted = false;
         public bool tape_readToPlay = false;
         private const int TAPE_TIMEOUT = 100;// 69888 * 10;
@@ -6296,6 +6299,7 @@ namespace Speccy
         //Resets the speccy
         public virtual void Reset(bool hardReset) {
             isResetOver = false;
+            tape_heldStopped = false;
             isPlayingRZX = false;
             isRecordingRZX = false;
 
@@ -6345,8 +6349,11 @@ namespace Speccy
             lastScanlineColorCounter = 0;
 
             //We jiggle the wait period after resetting so that FRAMES/RANDOMIZE works randomly enough on the speccy.
+            //The count starts afresh: a reset before the last one was over would otherwise carry its
+            //count over, and the new boot would be declared over while the ROM was still setting up.
             rnd_generator = new Random();
-            resetFrameTarget = rnd_generator.Next(40, 90);        
+            resetFrameTarget = rnd_generator.Next(40, 90);
+            resetFrameCounter = 0;
             inputFrameTime = rnd_generator.Next(FrameLength);
         }
 
@@ -6364,6 +6371,7 @@ namespace Speccy
 
         // Reset tape state
         public void ResetTape() {
+            tape_heldStopped = false;
             tapeBitFlipAck = false;
             tapeBitWasFlipped = false;
             tapeIsPlaying = false;
@@ -6454,7 +6462,7 @@ namespace Speccy
         }
 
         private void OnTapeEdgeCpA() {
-            if (tape_readToPlay && !tapeTrapsDisabled)
+            if (tape_readToPlay && !tapeTrapsDisabled && !tape_heldStopped)
                 if(cpu.regs.PC == 0x56b)
                     FlashLoadTape();
         }
@@ -6648,7 +6656,7 @@ namespace Speccy
                             tape_detectionCount++;
                             if (tape_detectionCount >= 8) //Is the above true 8 times?
                             {
-                                if (tape_AutoPlay) {
+                                if (tape_AutoPlay && !tape_heldStopped) {
                                     tapeIsPlaying = true;
                                     tape_AutoStarted = true;
                                     tape_stopTimeOut = TAPE_TIMEOUT;
@@ -8441,6 +8449,7 @@ namespace Speccy
             int byteCounter = dataBlock.data.Count;
             int dataIndex = 0;
             bool loadStageFlagByte = true;
+            bool readAll = false; //the ROM got every byte it asked for, and the parity byte
             while (true)
             {
                 if (byteCounter == 0)
@@ -8457,6 +8466,7 @@ namespace Speccy
                 {
                     cpu.regs.A = cpu.regs.H;
                     cpu.Cp_R(1);
+                    readAll = true;
                     break;
                 }
                 if (loadStageFlagByte)
@@ -8486,6 +8496,39 @@ namespace Speccy
                 StopTape();
                 return;
             }
+
+            //The ROM reads only as many bytes as it was asked for. Some loaders put more in the
+            //same block, straight after them, and read it with their own code as the tape runs on
+            //(Raxoft's Wizball keeps its whole game there). Play on from where the ROM stopped.
+            if (readAll && dataIndex < dataBlock.data.Count)
+                PlayDataFrom(dataBlock, dataIndex);
+        }
+
+        /// <summary>
+        /// Start the tape at byte <paramref name="byteIndex"/> of <paramref name="block"/>, the
+        /// current block, as if it had played up to there. Standard data only: each bit is two
+        /// pulses, so between bits the level is back where the block started.
+        /// </summary>
+        private void PlayDataFrom(PZXFile.DATA_Block block, int byteIndex)
+        {
+            currentBlock = block;
+            pulseCounter = -1;
+            bitCounter = byteIndex * 8 - 1;
+            dataCounter = byteIndex - 1;
+            bitShifter = 0;
+            tapeTStates = 0;
+            if (pulseLevel != block.initialPulseLevel)
+                FlipTapeBit();
+            if (!NextDataBit())
+                return;
+
+            //Not auto-started: the stop timeout waits until edge detection has found the loader
+            //reading it, or the tape would stop under a loader it hasn't caught up with yet.
+            tapeIsPlaying = true;
+            tape_AutoStarted = false;
+            tape_stopTimeOut = TAPE_TIMEOUT;
+            if (TapeEvent != null)
+                OnTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE));
         }
 
         private void DoTapeEvent(TapeEventArgs e) {
