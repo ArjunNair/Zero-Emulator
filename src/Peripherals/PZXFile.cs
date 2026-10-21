@@ -2,23 +2,6 @@
 
 namespace Peripherals
 {
-    public class PZX_TapeInfo
-    {
-        private String block;
-        private String more = null;
-        public bool IsStandardBlock = false;
-
-        public String Block {
-            get { return block; }
-            set { block = value; }
-        }
-
-        public String Info {
-            get { return more; }
-            set { more = value; }
-        }
-    }
-
     public static class PZXFile
     {
         public class Block
@@ -82,12 +65,6 @@ namespace Peripherals
             public ushort flag;
         }
 
-        // PZX_Tape tapeInfo;
-        public static System.Collections.Generic.List<PZX_TapeInfo> tapeBlockInfo = new System.Collections.Generic.List<PZX_TapeInfo>();
-
-        //All the blocks in the tape
-        public static System.Collections.Generic.List<Block> blocks = new System.Collections.Generic.List<Block>();
-
         public static string GetTag(uint id) {
             byte[] b = System.BitConverter.GetBytes(id);
             string idString = String.Format("{0}{1}{2}{3}", (char)b[0], (char)b[1], (char)b[2], (char)b[3]);
@@ -104,15 +81,6 @@ namespace Peripherals
             _counter++; //point to next valid data
             return s;
         }
-
-        // Determine if it's a standard data block suitable for flashloading
-        // PZX FAQ:
-        // In the common case of the standard loaders you would simply test that
-        // each sequence consists of two non-zero pulses, and that the total duration
-        // of the sequence s0 is less than the total duration of sequence s1
-        public static bool IsStandardData(DATA_Block d) =>
-            d.p0 == 2 && d.p1 == 2 && d.s0[0] != 0 && d.s0[1] != 0 && d.s1[0] != 0 && d.s1[1] != 0
-            && d.s0[0] + d.s0[1] < d.s1[0] + d.s1[1];
 
         public static PZXT_Header GetHeader(byte[] _buffer, int _counter, uint size) {
             PZXT_Header header = new PZXT_Header();
@@ -248,24 +216,23 @@ namespace Peripherals
             return block;
         }
 
-        public static bool LoadPZX(ref byte[] buffer) {
+
+        /// <summary>Read a PZX image's blocks. Null if it isn't one, or is too damaged to read.</summary>
+        public static System.Collections.Generic.List<Block> Parse(byte[] buffer) {
             try {
-                return LoadPZXCore(buffer);
+                return ParseCore(buffer);
             }
             catch (System.Exception) {
                 //Truncated or corrupt image: report failure instead of crashing the caller.
-                blocks.Clear();
-                tapeBlockInfo.Clear();
-                return false;
+                return null;
             }
         }
 
-        private static bool LoadPZXCore(byte[] buffer) {
-            blocks.Clear();
-            tapeBlockInfo.Clear();
+        private static System.Collections.Generic.List<Block> ParseCore(byte[] buffer) {
+            var blocks = new System.Collections.Generic.List<Block>();
 
             if (buffer == null || buffer.Length < 8)
-                return false; //something bad happened!
+                return null; //something bad happened!
 
             int counter = 0;
             bool first = true;
@@ -278,7 +245,7 @@ namespace Peripherals
 
                 //Every PZX file starts with PZXT: that's how we recognise one
                 if (first && blockTag != "PZXT")
-                    return false;
+                    return null;
                 first = false;
 
                 //Block runs past the end of the file: stop here and keep what we've read
@@ -289,7 +256,7 @@ namespace Peripherals
                     case "PZXT":
                     PZXT_Header header = blockSize >= 2 ? GetHeader(buffer, counter, blockSize) : null;
                     if (header == null)
-                        return false; //too small, or a major version we don't implement
+                        return null; //too small, or a major version we don't implement
                     header.tag = "PZXT Header";
                     header.size = blockSize;
                     blocks.Add(header);
@@ -350,106 +317,79 @@ namespace Peripherals
                 }
                 counter += (int)blockSize;
             }
-            return blocks.Count > 0;
+            return blocks.Count > 0 ? blocks : null;
         }
 
-        public static bool LoadPZX(System.IO.Stream fs) {
-            blocks.Clear();
-            tapeBlockInfo.Clear();
-            using (System.IO.BinaryReader r = new System.IO.BinaryReader(fs)) {
-                int bytesToRead = (int)fs.Length;
-
-                byte[] buffer = new byte[bytesToRead];
-                int bytesRead = r.Read(buffer, 0, bytesToRead);
-
-                if (bytesRead == 0)
-                    return false; //something bad happened!
-
-                return LoadPZX(ref buffer);
-            }
+        /// <summary>Read a PZX image as a tape to play. Null if it isn't one.</summary>
+        public static TapeImage Load(byte[] buffer) {
+            var blocks = Parse(buffer);
+            return blocks == null ? null : ToTape(blocks);
         }
 
-        public static bool LoadPZX(string filename) {
-            bool readPZX;
-            using (System.IO.FileStream fs = new System.IO.FileStream(filename, System.IO.FileMode.Open)) {
-                readPZX = LoadPZX(fs);
-            }
-            return readPZX;
-        }
-        
-        private static String GetStringFromData(byte[] _buffer, int _from, int _length) {
-            System.Text.StringBuilder s = new System.Text.StringBuilder();
-            for (int f = _from; f < _from + _length; f++) {
-                s.Append((char)_buffer[f]);
-            }
-            return s.ToString();
-        }
-
-        public static void ReadTapeInfo(String filename) {
-            for (int f = 0; f < PZXFile.blocks.Count; f++) {
-                PZX_TapeInfo info = new PZX_TapeInfo();
-
-                if (PZXFile.blocks[f] is PZXFile.BRWS_Block) {
-                    info.Info = ((PZXFile.BRWS_Block)PZXFile.blocks[f]).text;
-                } else if (PZXFile.blocks[f] is PZXFile.PAUS_Block) {
-                    info.Info = ((PZXFile.PAUS_Block)PZXFile.blocks[f]).duration.ToString() + " t-states   (" +
-                                 Math.Ceiling(((double)(((PZXFile.PAUS_Block)PZXFile.blocks[f]).duration) / (double)(69888 * 50))).ToString() + " secs)";
-                } else if (PZXFile.blocks[f] is PZXFile.PULS_Block) {
-                    PZXFile.PULS_Block puls = (PZXFile.PULS_Block)PZXFile.blocks[f];
-                    info.Info = puls.pulse.Count > 0 ? puls.pulse[0].duration.ToString() + " t-states   " : "";
-                } else if (PZXFile.blocks[f] is PZXFile.STOP_Block) {
-                    info.Info = "Stop the tape.";
-                } else if (PZXFile.blocks[f] is PZXFile.DATA_Block) {
-
-                    PZXFile.DATA_Block _data = (PZXFile.DATA_Block)PZXFile.blocks[f];
-                    int d = (int)(_data.count / 8);
-                    info.IsStandardBlock = IsStandardData(_data);
-
-                    //Check for standard header
-                    if ((d == 19) && (_data.data[0] == 0)) {
-                        //Check checksum to ensure it's a standard header
-                        byte checksum = 0;
-                        for (int x = 0; x < _data.data.Count - 1; x++) {
-                            checksum ^= _data.data[x];
+        /// <summary>
+        /// The tape the blocks play. PZX's level rule is the player's own, so each block maps
+        /// straight across: PULS starts low, DATA and PAUS start at the level they give.
+        /// </summary>
+        public static TapeImage ToTape(System.Collections.Generic.List<Block> blocks) {
+            var tape = new TapeImage();
+            foreach (Block b in blocks) {
+                var t = new TapeBlock { Kind = b.tag };
+                switch (b) {
+                    case PULS_Block puls: {
+                        var runs = new PulseRun[puls.pulse.Count];
+                        for (int i = 0; i < runs.Length; i++) {
+                            Pulse p = puls.pulse[i];
+                            runs[i] = new PulseRun(p.count, p.duration, Edge.Keep, p.count > 1 ? TapePhase.Pilot : TapePhase.Sync);
                         }
-
-                        if (checksum == _data.data[18]) {
-                            int type = _data.data[1];
-                            if (type == 0) {
-                                String _name = GetStringFromData(_data.data.ToArray(), 2, 10);
-                                info.Info = "Program: \"" + _name + "\"";
-                                ushort _line = System.BitConverter.ToUInt16(_data.data.ToArray(), 14);
-                                if (_line > 0)
-                                    info.Info += " LINE " + _line.ToString();
-                            } else if (type == 1) {
-                                String _name = GetStringFromData(_data.data.ToArray(), 2, 10);
-                                info.Info = "Num Array: \"" + _name + "\"" + "  " + Convert.ToChar(_data.data[15] - 32) + "(" + _data.data[12].ToString() + ")";
-                            } else if (type == 2) {
-                                String _name = GetStringFromData(_data.data.ToArray(), 2, 10);
-                                info.Info = "Char Array: \"" + _name + "\"" + "  " + Convert.ToChar(_data.data[15] - 96) + "$(" + _data.data[12].ToString() + ")";
-                            } else if (type == 3) {
-                                String _name = GetStringFromData(_data.data.ToArray(), 2, 10);
-                                info.Info = "Bytes: \"" + _name + "\"";
-                                ushort _start = System.BitConverter.ToUInt16(_data.data.ToArray(), 14);
-                                ushort _length = System.BitConverter.ToUInt16(_data.data.ToArray(), 12);
-                                info.Info += " CODE " + _start.ToString() + "," + _length.ToString();
-                            } else {
-                                info.Info = ((PZXFile.DATA_Block)PZXFile.blocks[f]).count.ToString() + " bits  (" + Math.Ceiling((double)(((PZXFile.DATA_Block)PZXFile.blocks[f]).count) / (double)8).ToString() + " bytes)";
+                        t.Segments = new TapeSegment[] { new PulseSegment { Entry = Edge.Low, Runs = runs } };
+                        t.Info = TapeText.DescribePulses(runs);
+                        break;
+                    }
+                    case DATA_Block data: {
+                        byte[] bytes = data.data.ToArray();
+                        var segment = new DataSegment {
+                            Entry = data.initialPulseLevel != 0 ? Edge.High : Edge.Low,
+                            Data = bytes,
+                            SymbolCount = data.count,
+                            Symbols = new[] { new Symbol(Edge.Keep, data.s0.ToArray()), new Symbol(Edge.Keep, data.s1.ToArray()) },
+                            Tail = data.tail
+                        };
+                        t.Segments = new TapeSegment[] { segment };
+                        t.Info = TapeText.DescribeData(bytes, data.count, segment.IsStandardRom);
+                        break;
+                    }
+                    case PAUS_Block pause:
+                        t.Segments = new TapeSegment[] {
+                            new PulseSegment {
+                                Entry = pause.initialPulseLevel != 0 ? Edge.High : Edge.Low,
+                                Runs = pause.duration > 0
+                                    ? new[] { new PulseRun(1, pause.duration, Edge.Keep, TapePhase.Pause) }
+                                    : System.Array.Empty<PulseRun>()
                             }
-                        } else
-                            info.Info = "";
-                    } else
-                        info.Info = ((PZXFile.DATA_Block)PZXFile.blocks[f]).count.ToString() + " bits  (" + Math.Ceiling((double)(((PZXFile.DATA_Block)PZXFile.blocks[f]).count) / (double)8).ToString() + " bytes)";
+                        };
+                        t.Info = TapeText.DescribePause(pause.duration);
+                        break;
+                    case STOP_Block stop:
+                        //flag 1 = stop only on 48K; 0 and any value we don't know = always stop
+                        t.Control = stop.flag == 1 ? TapeControlKind.StopIf48K : TapeControlKind.Stop;
+                        break;
+                    case BRWS_Block brws:
+                        t.Info = brws.text;
+                        break;
+                    case PZXT_Header header:
+                        //The spec names a PZXT browse point by its title, or "Tape start" without one.
+                        t.Info = string.IsNullOrEmpty(header.Title) ? "Tape start" : header.Title;
+                        tape.Info = new TapeInfo {
+                            Title = header.Title, Publisher = header.Publisher, Authors = header.Authors,
+                            Year = header.YearOfPublication, Language = header.Language, Type = header.Type,
+                            Price = header.Price, Protection = header.ProtectionScheme, Origin = header.Origin,
+                            Comments = header.Comments
+                        };
+                        break;
                 }
-                else if (PZXFile.blocks[f] is PZXFile.PZXT_Header header) {
-                    //Every block gets a row, so a row's index is the block's index in blocks.
-                    //The spec names a PZXT browse point by its title, or "Tape start" without one.
-                    info.Info = string.IsNullOrEmpty(header.Title) ? "Tape start" : header.Title;
-                }
-
-                info.Block = PZXFile.blocks[f].tag;
-                tapeBlockInfo.Add(info);
+                tape.Blocks.Add(t);
             }
+            return tape;
         }
     }
 }

@@ -192,7 +192,7 @@ namespace Zero.App.Tests
             Dispatcher.UIThread.RunJobs();
 
             Assert.Equal("Overscan", deck.TitleText.Text);
-            Assert.Equal(3 * 4, deck.BlockList.ItemCount); // (PULS+DATA+PAUS) x 4 TAP blocks; the PZXT header is not a playable block
+            Assert.Equal(1 + 3 * 4, deck.BlockList.ItemCount); // the PZXT header, then (PULS+DATA+PAUS) x 4 TAP blocks: every block gets a row
             Assert.True(deck.PlayButton.IsEnabled);
             Assert.False(deck.StopButton.IsEnabled);
 

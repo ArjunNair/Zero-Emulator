@@ -40,6 +40,12 @@ namespace Zero.Emulation.Host
             _nextDeadline += AudioFormat.FrameSeconds;
             // If we fell far behind (debugger, laptop lid), resync instead of racing to catch up.
             if (_nextDeadline < now - 0.25) _nextDeadline = now;
+            // Frames that came unpaced (Full Speed, edge loading) are as good as dropped, as a
+            // real device's full queue drops them: don't make the machine wait them out afterwards.
+            double ahead = MaxQueuedFrames * AudioFormat.FrameSeconds;
+            if (_nextDeadline > now + ahead) _nextDeadline = now + ahead;
         }
+
+        private const int MaxQueuedFrames = 6;
     }
 }

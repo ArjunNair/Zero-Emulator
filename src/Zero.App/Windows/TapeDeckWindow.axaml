@@ -32,10 +32,10 @@
     <ListBox x:Name="BlockList" SelectionMode="Single" DoubleTapped="OnBlockDoubleTapped">
       <ListBox.ItemTemplate>
         <DataTemplate x:DataType="tape:TapeBlockInfo">
-          <Grid ColumnDefinitions="36,110,*">
+          <Grid ColumnDefinitions="36,*,130">
             <TextBlock Grid.Column="0" Text="{Binding Index}" Foreground="#888888" />
-            <TextBlock Grid.Column="1" Text="{Binding Block}" FontWeight="SemiBold" />
-            <TextBlock Grid.Column="2" Text="{Binding Info}" TextTrimming="CharacterEllipsis" />
+            <TextBlock Grid.Column="1" Text="{Binding Info}" TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
+            <TextBlock Grid.Column="2" Text="{Binding Block}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
           </Grid>
         </DataTemplate>
       </ListBox.ItemTemplate>

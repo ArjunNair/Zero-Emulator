@@ -25,7 +25,10 @@ namespace Zero.Core.Tests
             settings.Tape.AutoLoad = true;
             settings.Tape.AutoPlay = true;
             settings.Tape.EdgeLoad = true;
-            settings.Tape.FastLoad = true;
+            // Fast loading takes every block of this tape without playing it, so it starts off and
+            // auto play starts the tape; it goes on once the tape is stopped, to show its trap
+            // leaves a stopped tape alone too.
+            settings.Tape.FastLoad = false;
             settings.Tape.RomTraps = true;
             using var session = new EmulatorSession(settings)
             {
@@ -54,6 +57,7 @@ namespace Zero.Core.Tests
                         if (frames == 30)
                         {
                             session.Tape.Stop();
+                            session.Tape.FastLoad = true;
                             stoppedAt = zx.blockCounter;
                             phase = Phase.Stopped;
                             frames = 0;

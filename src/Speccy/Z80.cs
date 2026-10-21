@@ -128,6 +128,7 @@ namespace Cpu
         private byte val = 0;               //temp storage
 
         public bool and_32_Or_64 = false;   //tape trap acceleration
+        public int ExxCount;                //EXXs so far: an odd number between two looks means the register sets swapped
         public Z80_Registers regs;
 
         // -----------------------------------------------------
@@ -563,6 +564,7 @@ namespace Cpu
         }
 
         public void exx() {
+            ExxCount++;
             ushort temp;
             temp = regs.HL_;
             regs.HL_ = regs.HL;
@@ -3008,8 +3010,8 @@ namespace Cpu
                 disp = PeekByte(regs.PC);
                 ushort port = (ushort)((regs.A << 8) | disp);
 
-                //Tape Trap
-                if (((disp & 0x1) == 0) && and_32_Or_64)
+                //Tape Trap: every IN from a ULA port, as a loader's edge loop may test the EAR bit any way it likes
+                if ((disp & 0x1) == 0)
                     TapeEdgeDetection?.Invoke();
 
                 // Log(String.Format("IN A, ({0:X})", disp));

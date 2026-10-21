@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Xunit;
 using Zero.Emulation.Tape;
@@ -90,6 +91,43 @@ namespace Zero.Core.Tests
             Assert.False(deck.Metadata.HasDetails);
             Assert.Equal(13, deck.Blocks.Count);
         }
+
+        [Fact]
+        public void Insert_reads_a_tzx_with_its_archive_info()
+        {
+            byte[] archive = TapeBuilders.B((byte)2, (byte)0x00, (byte)9, "Horizons!", (byte)0x01, (byte)8, "Sinclair");
+            byte[] tzx = TapeBuilders.Tzx(
+                TapeBuilders.B((byte)0x32, (ushort)archive.Length, archive),
+                TapeBuilders.Standard(1000, 0xFF, 0x01, 0xFE),
+                TapeBuilders.B((byte)0x20, (ushort)0));
+
+            var deck = new TapeDeck();
+            Assert.True(deck.Insert("side a.tzx", tzx));
+            Assert.Equal("Horizons!", deck.Title);
+            Assert.Equal("Sinclair", deck.Metadata.Publisher);
+            Assert.Equal(new[] { "Archive Info", "Data", "Stop the Tape" }, deck.Blocks.Select(b => b.Block));
+        }
+
+        [Fact]
+        public void Insert_reads_a_csw_recording()
+        {
+            byte[] csw = TapeBuilders.B("Compressed Square Wave", (byte)0x1A, (byte)1, (byte)1, (ushort)44100, (byte)1,
+                                        (byte)0, (byte)0, (byte)0, (byte)0, (byte)20, (byte)20, (byte)40);
+            var deck = new TapeDeck();
+            Assert.True(deck.Insert("recording.csw", csw));
+            Assert.Equal("CSW Recording", Assert.Single(deck.Blocks).Block);
+            Assert.Equal("recording", deck.Title);
+        }
+
+        [Fact]
+        public void A_bad_tape_leaves_the_one_in_the_deck()
+        {
+            var deck = new TapeDeck();
+            Assert.True(deck.Insert("test.pzx", BuildPzx("Title")));
+            Assert.False(deck.Insert("bad.tzx", new byte[] { 1, 2, 3 }));
+            Assert.True(deck.IsInserted);
+            Assert.Equal("Title", deck.Title);
+        }
     }
 }
 
@@ -103,7 +141,7 @@ namespace Zero.Core.Tests
         [InlineData(new byte[] { 0x50, 0x5A, 0x58, 0x54, 200, 0, 0, 0, 1, 0 })] // header claims 200 bytes, has 2
         public void Truncated_pzx_is_rejected_without_throwing(byte[] data)
         {
-            Assert.False(Peripherals.PZXFile.LoadPZX(ref data));
+            Assert.Null(Peripherals.PZXFile.Load(data));
             Assert.False(new Zero.Emulation.Tape.TapeDeck().Insert("bad.pzx", data));
         }
     }

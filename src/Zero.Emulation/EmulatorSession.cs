@@ -283,11 +283,12 @@ namespace Zero.Emulation
         /// original Windows host paced on the display as well, so the core leaves the wait out then.
         /// Here nothing else paces it, and a tape played flat out whatever the loading options said.
         /// Wait on the same audio clock the core uses. Full Speed still runs unpaced, and so does an
-        /// audio sink that never blocks (the tests' NullAudioOutput).
+        /// audio sink that never blocks (the tests' NullAudioOutput). So does edge loading while a
+        /// loader is at work: it's there to load fast, and the audio output drops what it can't play.
         /// </summary>
         private void PaceTapePlayback(zx_spectrum zx)
         {
-            if (!zx.tapeIsPlaying || zx.emulationSpeed > 1 || _audio == null) return;
+            if (!zx.tapeIsPlaying || zx.emulationSpeed > 1 || _audio == null || zx.TapeLoaderAtWork) return;
             while (!_audio.FinishedPlaying() && !_stopRequested)
                 Thread.Sleep(1);
         }

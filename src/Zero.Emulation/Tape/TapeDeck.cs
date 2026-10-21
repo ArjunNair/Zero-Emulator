@@ -10,7 +10,7 @@ namespace Zero.Emulation.Tape
 {
     public enum TapeDeckStatus { Empty, Stopped, Playing }
 
-    /// <summary>Descriptive fields from the PZXT header block (all optional).</summary>
+    /// <summary>Descriptive fields from a PZXT header or a TZX archive info block (all optional).</summary>
     public sealed class TapeMetadata
     {
         public string Title { get; set; }
@@ -38,12 +38,13 @@ namespace Zero.Emulation.Tape
     /// <summary>
     /// Host-neutral tape deck: the logic from the WinForms TapeDeck form without the form.
     /// All members must be called on the emulation thread (the session marshals for you).
-    /// PZX is the only format the core plays; TAP is converted on insert, TZX/CSW are rejected
-    /// until a managed converter exists.
+    /// PZX, TZX and CSW images all decode into one <see cref="TapeImage"/>, which the machine's
+    /// <see cref="TapePlayer"/> plays; TAP is converted to PZX on insert.
     /// </summary>
     public sealed class TapeDeck
     {
         private zx_spectrum _zx;
+        private TapeImage _image = TapeImage.Empty;
         private string _tapSavePath;
         private bool _tapFileOpen;
 
@@ -90,47 +91,27 @@ namespace Zero.Emulation.Tape
             return (int)((radius - hub) / thickness) % 1000;
         }
 
-        // Start and length of each PZX block in seconds, indexed like PZXFile.blocks, which is what
+        // Start and length of each block in seconds, indexed like the tape's blocks, which is what
         // the machine's blockCounter indexes too.
         private readonly List<double> _blockStart = new List<double>();
         private readonly List<double> _blockLength = new List<double>();
         private int _counterBlock;
         private double _counterElapsed;
 
-        private const double PzxClock = 3500000.0; // PZX durations are in 48K T-states
+        private const double TapeClock = 3500000.0; // tape durations are in 48K T-states
 
+        // A block in a loop is counted once: the counter is a guide, not a measurement.
         private void MeasureBlocks()
         {
             _blockStart.Clear();
             _blockLength.Clear();
             double at = 0;
-            foreach (PZXFile.Block b in PZXFile.blocks)
+            foreach (TapeBlock b in _image.Blocks)
             {
-                double tstates = 0;
-                switch (b)
-                {
-                    case PZXFile.PULS_Block puls:
-                        foreach (PZXFile.Pulse p in puls.pulse) tstates += (double)p.count * p.duration;
-                        break;
-                    case PZXFile.DATA_Block data:
-                        double zero = 0, one = 0;
-                        foreach (ushort d in data.s0) zero += d;
-                        foreach (ushort d in data.s1) one += d;
-                        for (int bit = 0; bit < data.count; bit++)
-                        {
-                            int index = bit / 8;
-                            bool set = index < data.data.Count && (data.data[index] & (0x80 >> (bit % 8))) != 0;
-                            tstates += set ? one : zero;
-                        }
-                        tstates += data.tail;
-                        break;
-                    case PZXFile.PAUS_Block pause:
-                        tstates = pause.duration;
-                        break;
-                }
+                double tstates = b.DurationTStates;
                 _blockStart.Add(at);
-                _blockLength.Add(tstates / PzxClock);
-                at += tstates / PzxClock;
+                _blockLength.Add(tstates / TapeClock);
+                at += tstates / TapeClock;
             }
             CueCounter(0);
         }
@@ -193,7 +174,7 @@ namespace Zero.Emulation.Tape
             if (IsInserted)
             {
                 _zx.tapeFilename = FileName;
-                _zx.blockCounter = 0;
+                _zx.InsertTape(_image);
             }
         }
 
@@ -222,31 +203,35 @@ namespace Zero.Emulation.Tape
         public bool Insert(string name, byte[] bytes)
         {
             string ext = Path.GetExtension(name).ToLowerInvariant();
-            byte[] pzx;
+            TapeImage image;
             switch (ext)
             {
                 case ".pzx":
-                    pzx = bytes;
+                    image = PZXFile.Load(bytes);
                     break;
                 case ".tap":
-                    pzx = TapFile.ToPZX(bytes, 500);
+                    byte[] pzx = TapFile.ToPZX(bytes, 500);
                     if (pzx == null) { Error?.Invoke("This doesn't seem to be a valid TAP file."); return false; }
+                    image = PZXFile.Load(pzx);
                     break;
                 case ".tzx":
+                    image = TZXFile.Load(bytes);
+                    break;
                 case ".csw":
-                    Error?.Invoke("TZX and CSW tapes are not supported in this build yet. Please convert the tape to PZX or TAP.");
-                    return false;
+                    image = CSWFile.Load(bytes);
+                    break;
                 default:
                     Error?.Invoke("Unrecognised tape format: " + ext);
                     return false;
             }
 
-            Eject();
-            if (!PZXFile.LoadPZX(ref pzx))
+            if (image == null || image.Blocks.Count == 0)
             {
                 Error?.Invoke("This doesn't seem to be a valid tape file.");
                 return false;
             }
+            Eject();
+            _image = image;
 
             FileName = name;
             IsInserted = true;
@@ -256,11 +241,10 @@ namespace Zero.Emulation.Tape
 
             if (_zx != null)
             {
-                _zx.ResetTape();
+                _zx.InsertTape(_image);
                 _zx.tapeIsPlaying = false;
                 _zx.tape_readToPlay = true;
                 _zx.tapeFilename = name;
-                _zx.blockCounter = 0;
                 _zx.tapeBitWasFlipped = false;
             }
             Changed?.Invoke();
@@ -270,21 +254,20 @@ namespace Zero.Emulation.Tape
         private void ReadTapeInfo(string name)
         {
             _blocks.Clear();
-            PZXFile.ReadTapeInfo(name);
             int i = 1;
-            foreach (PZX_TapeInfo info in PZXFile.tapeBlockInfo)
-                _blocks.Add(new TapeBlockInfo { Index = i++, Block = info.Block, Info = info.Info });
+            foreach (TapeBlock b in _image.Blocks)
+                _blocks.Add(new TapeBlockInfo { Index = i++, Block = b.Kind, Info = b.Info });
 
             Title = Path.GetFileNameWithoutExtension(name);
             Metadata = new TapeMetadata();
-            foreach (PZXFile.Block b in PZXFile.blocks)
+            TapeInfo h = _image.Info;
+            if (h != null)
             {
-                if (!(b is PZXFile.PZXT_Header h)) continue;
                 if (!string.IsNullOrEmpty(h.Title)) Title = h.Title;
                 Metadata = new TapeMetadata
                 {
-                    Title = h.Title, Publisher = h.Publisher, Authors = h.Authors.ToArray(), Year = h.YearOfPublication,
-                    Language = h.Language, Type = h.Type, Price = h.Price, Protection = h.ProtectionScheme,
+                    Title = h.Title, Publisher = h.Publisher, Authors = h.Authors.ToArray(), Year = h.Year,
+                    Language = h.Language, Type = h.Type, Price = h.Price, Protection = h.Protection,
                     Origin = h.Origin, Comments = h.Comments.ToArray()
                 };
             }
@@ -293,8 +276,7 @@ namespace Zero.Emulation.Tape
         public void Eject()
         {
             if (!IsInserted) return;
-            PZXFile.blocks.Clear();
-            PZXFile.tapeBlockInfo.Clear();
+            _image = TapeImage.Empty;
             _blocks.Clear();
             _blockStart.Clear();
             _blockLength.Clear();
@@ -302,8 +284,7 @@ namespace Zero.Emulation.Tape
             if (_zx != null)
             {
                 _zx.StopTape(true);
-                _zx.ResetTape();
-                _zx.blockCounter = 0;
+                _zx.InsertTape(TapeImage.Empty);
                 _zx.tape_readToPlay = false;
                 _zx.tapeFilename = "";
             }
@@ -320,14 +301,9 @@ namespace Zero.Emulation.Tape
             if (!IsInserted || _zx == null) return;
             _zx.tape_heldStopped = false;
             _zx.tapeIsPlaying = true;
-            _zx.tapeTStates = 0;
             _zx.tape_readToPlay = true;
             if (_fastLoad) _zx.ResetKeyboard();
-            bool atStop = _zx.blockCounter >= 0 && _zx.blockCounter < PZXFile.blocks.Count
-              && PZXFile.blocks[_zx.blockCounter] is PZXFile.STOP_Block;
-            if (!atStop) _zx.blockCounter--;
-            if (_zx.blockCounter < 0) _zx.blockCounter = 0;
-            _zx.NextPZXBlock();
+            _zx.ReplayTape();
             CueCounter(_zx.blockCounter); // a stopped tape restarts its block from the top
             Changed?.Invoke();
         }
@@ -349,7 +325,7 @@ namespace Zero.Emulation.Tape
             if (!IsInserted || _zx == null) return;
             _zx.StopTape(true);
             _zx.tape_heldStopped = false;
-            _zx.blockCounter = 0;
+            _zx.tape.Cue(0);
             CueCounter(0);
             Changed?.Invoke();
         }
@@ -357,7 +333,7 @@ namespace Zero.Emulation.Tape
         public void PreviousBlock()
         {
             if (!IsInserted || _zx == null) return;
-            if (_zx.blockCounter > 0) _zx.blockCounter--;
+            if (_zx.blockCounter > 0) _zx.tape.Cue(_zx.blockCounter - 1);
             if (!IsPlaying) CueCounter(_zx.blockCounter);
             Changed?.Invoke();
         }
@@ -365,7 +341,7 @@ namespace Zero.Emulation.Tape
         public void NextBlock()
         {
             if (!IsInserted || _zx == null) return;
-            if (_zx.blockCounter < PZXFile.blocks.Count - 1) _zx.blockCounter++;
+            if (_zx.blockCounter < _image.Blocks.Count - 1) _zx.tape.Cue(_zx.blockCounter + 1);
             if (!IsPlaying) CueCounter(_zx.blockCounter);
             Changed?.Invoke();
         }

@@ -29,11 +29,12 @@ namespace Zero.Core.Tests
 
             Assert.NotNull(pzx);
             Assert.Equal("PZXT", System.Text.Encoding.ASCII.GetString(pzx, 0, 4));
-            Assert.True(PZXFile.LoadPZX(ref pzx));
+            var parsed = PZXFile.Parse(pzx);
+            Assert.NotNull(parsed);
 
             // header + (PULS + DATA + PAUS) per TAP block
             int blocks = CountTapBlocks(tap);
-            Assert.Equal(1 + 3 * blocks, PZXFile.blocks.Count);
+            Assert.Equal(1 + 3 * blocks, parsed.Count);
         }
 
         [Fact]
@@ -42,20 +43,21 @@ namespace Zero.Core.Tests
             // one header block (flag 0x00) and one data block (flag 0xFF), 1 payload byte each
             byte[] tap = { 3, 0, 0x00, 0xAA, 0xAA, 3, 0, 0xFF, 0x55, 0xAA };
             byte[] pzx = TapFile.ToPZX(tap, 0);
-            Assert.True(PZXFile.LoadPZX(ref pzx));
+            var parsed = PZXFile.Parse(pzx);
+            Assert.NotNull(parsed);
 
-            var puls = PZXFile.blocks.OfType<PZXFile.PULS_Block>().ToList();
+            var puls = parsed.OfType<PZXFile.PULS_Block>().ToList();
             Assert.Equal(2, puls.Count);
             Assert.Equal(TapFile.LongLeaderCount, puls[0].pulse[0].count);
             Assert.Equal(TapFile.LeaderCycles, (ushort)puls[0].pulse[0].duration);
             Assert.Equal(TapFile.ShortLeaderCount, puls[1].pulse[0].count);
 
-            var data = PZXFile.blocks.OfType<PZXFile.DATA_Block>().ToList();
+            var data = parsed.OfType<PZXFile.DATA_Block>().ToList();
             Assert.Equal(2, data.Count);
             Assert.Equal(24u, data[0].count);
             Assert.Equal(1u, data[0].initialPulseLevel);
             Assert.Equal(new byte[] { 0x00, 0xAA, 0xAA }, data[0].data.ToArray());
-            Assert.Empty(PZXFile.blocks.OfType<PZXFile.PAUS_Block>());
+            Assert.Empty(parsed.OfType<PZXFile.PAUS_Block>());
         }
 
         [Theory]

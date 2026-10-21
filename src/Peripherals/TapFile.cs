@@ -6,7 +6,7 @@ namespace Peripherals
     /// <summary>
     /// Converts a .TAP image to an in-memory PZX 1.0 stream using standard ROM loader timings.
     /// Managed replacement for the native tap2pzx (pzx_tools.dll); the output is byte-compatible
-    /// with Patrik Rak's tap2pzx so <see cref="PZXFile.LoadPZX"/> consumes it unchanged.
+    /// with Patrik Rak's tap2pzx so <see cref="PZXFile.Load"/> consumes it unchanged.
     ///
     /// TAP layout: repeated [u16 length][length bytes], where the first byte of each block is the
     /// flag (0x00 header / 0xFF data) and the last is the XOR checksum. Both are part of the data

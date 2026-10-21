@@ -19,16 +19,17 @@ namespace Zero.Core.Tests
     [Collection("PZXFile static state")]
     public class FlashLoadTests
     {
-        private const int DataBlockIndex = 4; // PZXT, PULS, DATA (header), PULS, DATA (program)
-
-        [Fact]
-        public async Task Fast_loading_plays_on_after_the_bytes_the_rom_asked_for()
+        // PZX: PZXT, PULS, DATA (header), PULS, DATA (program). TZX: a standard block for each.
+        [Theory]
+        [InlineData(".pzx", 4)]
+        [InlineData(".tzx", 1)]
+        public async Task Fast_loading_plays_on_after_the_bytes_the_rom_asked_for(string format, int DataBlockIndex)
         {
             byte[] program = { 0x00, 0x0A, 0x02, 0x00, 0xEA, 0x0D }; // 10 REM
             byte[] extra = new byte[1000];
             new Random(1).NextBytes(extra);
-            string path = Path.Combine(Path.GetTempPath(), "zero_flash_" + Guid.NewGuid().ToString("N") + ".pzx");
-            File.WriteAllBytes(path, BuildTape(program, extra));
+            string path = Path.Combine(Path.GetTempPath(), "zero_flash_" + Guid.NewGuid().ToString("N") + format);
+            File.WriteAllBytes(path, format == ".pzx" ? BuildTape(program, extra) : BuildTzx(program, extra));
             try
             {
                 var settings = new EmulatorSettings();
@@ -58,6 +59,100 @@ namespace Zero.Core.Tests
                 Assert.True(await outcome.Task, "the tape stopped instead of playing the rest of the block");
             }
             finally { File.Delete(path); }
+        }
+
+        /// <summary>
+        /// Fast loading with auto play off: only the ROM trap moves the tape on. Each block of a
+        /// TAP comes as pilot, data and a pause, so after the first block the trap has a pause
+        /// before the next data; it used to give up there and leave the ROM waiting for a tape
+        /// that never played.
+        /// </summary>
+        [Fact]
+        public async Task Fast_loading_reads_every_block_of_a_tap_without_playing_it()
+        {
+            const int LastDataBlock = 11; // PZXT, then PULS DATA PAUS for each of 4 blocks
+            var settings = new EmulatorSettings();
+            settings.Tape.AutoLoad = true;
+            settings.Tape.FastLoad = true;
+            settings.Tape.AutoPlay = false;
+            settings.Tape.EdgeLoad = false;
+            settings.Tape.RomTraps = true;
+            using var session = new EmulatorSession(settings)
+            {
+                RomDirectory = TestPaths.RomDir,
+                AudioFactory = () => new NullAudioOutput()
+            };
+
+            string path = Path.Combine(TestPaths.ProgramsDir, "Demos", "Overscan.tap");
+            var outcome = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+            long frames = 0;
+            session.FrameReady += () =>
+            {
+                var zx = session.Machine;
+                if (++frames == 5) session.LoadFile(path);
+                if (zx.tapeIsPlaying) outcome.TrySetResult("the tape played");
+                else if (zx.blockCounter == LastDataBlock) outcome.TrySetResult("");
+                else if (frames > 3000) outcome.TrySetResult($"stuck at block {zx.blockCounter}");
+            };
+            session.Start();
+
+            Task done = await Task.WhenAny(outcome.Task, Task.Delay(30000));
+            Assert.True(done == outcome.Task, "timed out");
+            Assert.Equal("", await outcome.Task);
+        }
+
+        /// <summary>A real TZX of standard blocks flash-loads its first program.</summary>
+        [Fact]
+        public async Task Fast_loading_reads_a_tzx()
+        {
+            var settings = new EmulatorSettings();
+            settings.Tape.AutoLoad = true;
+            settings.Tape.FastLoad = true;
+            settings.Tape.AutoPlay = false;
+            settings.Tape.EdgeLoad = false;
+            settings.Tape.RomTraps = true;
+            using var session = new EmulatorSession(settings)
+            {
+                RomDirectory = TestPaths.RomDir,
+                AudioFactory = () => new NullAudioOutput()
+            };
+
+            // Block 0 is a text block, then a program's header (1) and its data (2).
+            string path = Path.Combine(TestPaths.ProgramsDir, "Horizons - Side A.tzx");
+            var outcome = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+            long frames = 0;
+            session.FrameReady += () =>
+            {
+                var zx = session.Machine;
+                if (++frames == 5) session.LoadFile(path);
+                if (zx.blockCounter >= 2 || frames > 3000) outcome.TrySetResult(zx.blockCounter);
+            };
+            session.Start();
+
+            Task done = await Task.WhenAny(outcome.Task, Task.Delay(30000));
+            Assert.True(done == outcome.Task, "timed out");
+            Assert.True(await outcome.Task >= 2, "the program block never loaded");
+            Assert.Equal("Horizons - Side A", await session.InvokeAsync(() => session.Tape.Title));
+        }
+
+        private static (byte[] header, byte[] data) RomBlocks(byte[] program, byte[] extra)
+        {
+            var header = new List<byte> { 0x00, 0x00 };                         // flag, type: program
+            header.AddRange(Encoding.ASCII.GetBytes("flashtest "));
+            header.AddRange(new byte[] { (byte)program.Length, 0, 0x00, 0x80, (byte)program.Length, 0 }); // no autostart
+
+            var data = new List<byte> { 0xFF };
+            data.AddRange(program);
+            var withExtra = new List<byte>(WithParity(data));
+            withExtra.AddRange(extra);
+            return (WithParity(header), withExtra.ToArray());
+        }
+
+        /// <summary>The same tape as <see cref="BuildTape"/>, as two TZX standard speed blocks.</summary>
+        private static byte[] BuildTzx(byte[] program, byte[] extra)
+        {
+            var (header, data) = RomBlocks(program, extra);
+            return TapeBuilders.Tzx(TapeBuilders.Standard(0, header), TapeBuilders.Standard(0, data));
         }
 
         /// <summary>A program header, then a block holding the program and <paramref name="extra"/> after it.</summary>
