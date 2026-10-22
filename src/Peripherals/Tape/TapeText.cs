@@ -3,15 +3,12 @@ using System.Text;
 
 namespace Peripherals
 {
-    /// <summary>Block list text shared by every tape format.</summary>
+    // Block list text shared by every tape format.
     public static class TapeText
     {
-        /// <summary>
-        /// Describe a block of data: a ROM header's file type and name, or its size in bytes.
-        /// <paramref name="bits"/> is how many bits of <paramref name="data"/> the block plays. A
-        /// block the ROM can load (<paramref name="rom"/>) starts with a flag byte and ends with a
-        /// checksum, which aren't counted.
-        /// </summary>
+        // Describe a block of data: a ROM header's file type and name, or its size in bytes. bits
+        // is how many bits of data the block plays. A block the ROM can load (rom) starts with a
+        // flag byte and ends with a checksum, which aren't counted.
         public static string DescribeData(byte[] data, long bits, bool rom) {
             long bytes = (bits + 7) / 8;
             if (rom && bytes >= 2)
@@ -51,15 +48,15 @@ namespace Peripherals
             }
         }
 
-        /// <summary>A pause's length in milliseconds.</summary>
+        // A pause's length in milliseconds.
         public static string DescribePause(long tstates) =>
             Math.Round(tstates / 3500.0).ToString() + " ms";
 
-        /// <summary>A tone: so many pulses of one length.</summary>
+        // A tone: so many pulses of one length.
         public static string DescribeTone(long count, long tstates) =>
             count.ToString() + " pulses of " + tstates.ToString() + " T";
 
-        /// <summary>Pulses of different lengths: how many there are, or the tone if they're all the same.</summary>
+        // Pulses of different lengths: how many there are, or the tone if they're all the same.
         public static string DescribePulses(PulseRun[] runs) {
             if (runs.Length == 1)
                 return DescribeTone(runs[0].Count, runs[0].Duration);
@@ -68,7 +65,7 @@ namespace Peripherals
             return count.ToString() + " pulses";
         }
 
-        /// <summary>Bytes as one character each, as the Spectrum's file names are stored.</summary>
+        // Bytes as one character each, as the Spectrum's file names are stored.
         public static string Latin(byte[] data, int from, int length) {
             var s = new StringBuilder();
             for (int f = from; f < from + length && f < data.Length; f++)

@@ -217,7 +217,7 @@ namespace Peripherals
         }
 
 
-        /// <summary>Read a PZX image's blocks. Null if it isn't one, or is too damaged to read.</summary>
+        // Read a PZX image's blocks. Null if it isn't one, or is too damaged to read.
         public static System.Collections.Generic.List<Block> Parse(byte[] buffer) {
             try {
                 return ParseCore(buffer);
@@ -320,16 +320,14 @@ namespace Peripherals
             return blocks.Count > 0 ? blocks : null;
         }
 
-        /// <summary>Read a PZX image as a tape to play. Null if it isn't one.</summary>
+        // Read a PZX image as a tape to play. Null if it isn't one.
         public static TapeImage Load(byte[] buffer) {
             var blocks = Parse(buffer);
             return blocks == null ? null : ToTape(blocks);
         }
 
-        /// <summary>
-        /// The tape the blocks play. PZX's level rule is the player's own, so each block maps
-        /// straight across: PULS starts low, DATA and PAUS start at the level they give.
-        /// </summary>
+        // The tape the blocks play. PZX's level rule is the player's own, so each block maps
+        // straight across: PULS starts low, DATA and PAUS start at the level they give.
         public static TapeImage ToTape(System.Collections.Generic.List<Block> blocks) {
             var tape = new TapeImage();
             foreach (Block b in blocks) {
@@ -342,6 +340,7 @@ namespace Peripherals
                             runs[i] = new PulseRun(p.count, p.duration, Edge.Keep, p.count > 1 ? TapePhase.Pilot : TapePhase.Sync);
                         }
                         t.Segments = new TapeSegment[] { new PulseSegment { Entry = Edge.Low, Runs = runs } };
+                        t.Id = runs.Length > 0 && runs[0].Count > 1 ? (byte)0x12 : (byte)0x13;
                         t.Info = TapeText.DescribePulses(runs);
                         break;
                     }
@@ -355,6 +354,7 @@ namespace Peripherals
                             Tail = data.tail
                         };
                         t.Segments = new TapeSegment[] { segment };
+                        t.Id = 0x14;
                         t.Info = TapeText.DescribeData(bytes, data.count, segment.IsStandardRom);
                         break;
                     }
@@ -368,17 +368,21 @@ namespace Peripherals
                             }
                         };
                         t.Info = TapeText.DescribePause(pause.duration);
+                        t.Id = 0x20;
                         break;
                     case STOP_Block stop:
                         //flag 1 = stop only on 48K; 0 and any value we don't know = always stop
                         t.Control = stop.flag == 1 ? TapeControlKind.StopIf48K : TapeControlKind.Stop;
+                        t.Id = stop.flag == 1 ? (byte)0x2A : (byte)0x20;
                         break;
                     case BRWS_Block brws:
                         t.Info = brws.text;
+                        t.Id = 0x30;
                         break;
                     case PZXT_Header header:
                         //The spec names a PZXT browse point by its title, or "Tape start" without one.
                         t.Info = string.IsNullOrEmpty(header.Title) ? "Tape start" : header.Title;
+                        t.Id = 0x32;
                         tape.Info = new TapeInfo {
                             Title = header.Title, Publisher = header.Publisher, Authors = header.Authors,
                             Year = header.YearOfPublication, Language = header.Language, Type = header.Type,

@@ -86,9 +86,8 @@ namespace Zero.Core.Tests
             cpu.In = a => 0xFF;
             cpu.Out = (a, v) => { };
             cpu.InstructionFetchSignal = () => { };
-            cpu.TapeEdgeDetection = () => { };
+            cpu.TapeEdgeDetection = () => false;
             cpu.TapeEdgeDecA = () => { };
-            cpu.TapeEdgeCpA = () => { };
             cpu.OnError += msg => throw new InvalidOperationException("Z80 core error: " + msg);
 
             cpu.HardReset();

@@ -11,7 +11,7 @@ namespace Zero.Core.Tests
     /// <summary>
     /// Stopping the tape from the deck stops it until Play. With Auto Play on, the deck used to
     /// start it again as soon as the loader went back to polling, skipping on to the next block,
-    /// and with Fast Loading the ROM's trap went on loading blocks from a stopped tape.
+    /// and flash loading must leave a stopped tape alone too.
     /// </summary>
     [Collection("PZXFile static state")]
     public class TapeStopTests
@@ -25,10 +25,9 @@ namespace Zero.Core.Tests
             settings.Tape.AutoLoad = true;
             settings.Tape.AutoPlay = true;
             settings.Tape.EdgeLoad = true;
-            // Fast loading takes every block of this tape without playing it, so it starts off and
-            // auto play starts the tape; it goes on once the tape is stopped, to show its trap
-            // leaves a stopped tape alone too.
-            settings.Tape.FastLoad = false;
+            // Flash loading starts off, so the tape plays long enough to be stopped; it goes on once
+            // the tape is stopped, to show its handlers leave a stopped tape alone too.
+            settings.Tape.FlashLoad = false;
             settings.Tape.RomTraps = true;
             using var session = new EmulatorSession(settings)
             {
@@ -57,7 +56,7 @@ namespace Zero.Core.Tests
                         if (frames == 30)
                         {
                             session.Tape.Stop();
-                            session.Tape.FastLoad = true;
+                            session.Tape.FlashLoad = true;
                             stoppedAt = zx.blockCounter;
                             phase = Phase.Stopped;
                             frames = 0;

@@ -11,7 +11,7 @@ namespace Zero.Core.Tests
 {
     /// <summary>
     /// A playing tape runs in real time at 1x. The core leaves out its audio wait while the tape
-    /// plays, so until the session paced it a tape always loaded flat out, Fast Loading or not.
+    /// plays, so until the session paced it a tape always loaded flat out, Flash Loading or not.
     /// </summary>
     [Collection("PZXFile static state")]
     public class TapePacingTests
@@ -20,7 +20,7 @@ namespace Zero.Core.Tests
         public async Task A_playing_tape_runs_in_real_time_at_1x()
         {
             var settings = new EmulatorSettings();
-            settings.Tape.FastLoad = false;
+            settings.Tape.FlashLoad = false;
             settings.Tape.EdgeLoad = false;
             using var session = new EmulatorSession(settings)
             {

@@ -25,7 +25,7 @@ namespace Zero.Core.Tests
         {
             _output = output;
             var settings = new EmulatorSettings();
-            settings.Tape.FastLoad = true;
+            settings.Tape.FlashLoad = true;
             settings.Tape.AutoLoad = true;
             _session = new EmulatorSession(settings)
             {

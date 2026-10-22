@@ -6,7 +6,7 @@ using static Zero.Core.Tests.TapeBuilders;
 
 namespace Zero.Core.Tests
 {
-    /// <summary>The tape state machine, played on its own: when each edge comes, and where it goes next.</summary>
+    // The tape state machine, played on its own: when each edge comes, and where it goes next.
     public class TapePlayerTests
     {
         private static readonly ushort[] S0 = { 100, 100 };
@@ -211,33 +211,54 @@ namespace Zero.Core.Tests
         }
 
         [Fact]
-        public void SeekData_passes_pauses_and_pilots_but_not_other_data()
+        public void EndRun_cuts_a_tone_short_after_the_pulse_playing()
         {
-            // header and data: PZXT, then PULS DATA PAUS twice
-            byte[] tap = { 3, 0, 0x00, 0xAA, 0xAA, 3, 0, 0xFF, 0x55, 0xAA };
-            var p = new TapePlayer(PZXFile.Load(TapFile.ToPZX(tap, 500)));
-            Assert.NotNull(p.SeekData(d => d.IsStandardRom));
-            Assert.Equal(2, p.BlockIndex);
-            p.EndFlashLoad(-1, false, out _);
-            Assert.NotNull(p.SeekData(d => d.IsStandardRom)); // past the PAUS and the next PULS
-            Assert.Equal(5, p.BlockIndex);
-
-            // Turbo data in the way: flash loading must not skip it to reach later data.
-            var t = Tzx(Turbo(100, 30, 40, 1710, 855, 4, 8, 0, 0x00), Standard(0, 0xFF));
-            Assert.Null(t.SeekData(d => d.IsStandardRom));
-            Assert.Equal(0, t.BlockIndex);
+            var p = Tzx(Turbo(100, 30, 40, 50, 60, 6, 8, 0, 0x00));
+            p.Begin();
+            Assert.Equal(TapePhase.Pilot, p.Phase);
+            p.EndRun();
+            p.FinishPulse();
+            Assert.Equal(TapePhase.Sync, p.Phase); // both syncs still to come
+            Assert.Equal(30u, p.CurrentPulseLength);
         }
 
         [Fact]
-        public void SeekData_finds_the_data_inside_a_tzx_block_and_parks_after_it()
+        public void FinishSymbol_plays_out_the_bit_playing()
         {
-            var p = Tzx(Standard(1000, 0x00, 0x01), Standard(1000, 0xFF, 0x02));
-            DataSegment d = p.SeekData(x => x.IsStandardRom);
-            Assert.Equal(new byte[] { 0x00, 0x01 }, d.Data);
-            p.EndFlashLoad(-1, false, out _);
-            d = p.SeekData(x => x.IsStandardRom); // past the first block's pause
-            Assert.Equal(new byte[] { 0xFF, 0x02 }, d.Data);
+            var p = Pzx(Data(1, 16, 0, S0, S1, 0xA5, 0x3C));
+            p.Begin();
+            p.FinishSymbol(out int edges);
+            Assert.Equal(2, edges);
+            Assert.Equal(1, p.SymbolIndex);
+            p.AddTime(p.TStatesToNextEdge);
+            p.NextEdge(); // half a bit in
+            p.FinishSymbol(out edges);
+            Assert.Equal(1, edges);
+            Assert.Equal(2, p.SymbolIndex);
+        }
+
+        [Fact]
+        public void ForwardOneBlock_goes_to_the_start_of_the_next_block()
+        {
+            var p = Tzx(PureTone(100, 50), B((byte)0x13, (byte)3, (ushort)10, (ushort)20, (ushort)30));
+            p.Begin();
+            p.ForwardOneBlock();
             Assert.Equal(1, p.BlockIndex);
+            Assert.Equal(0x13, p.CurrentBlock.Id);
+            Assert.Equal(10u, p.CurrentPulseLength);
+        }
+
+        [Fact]
+        public void InvertLevel_turns_the_signal_over_from_there()
+        {
+            var p = Pzx(Puls((3, 100)));
+            p.Begin();
+            Assert.Equal(0, p.Level);
+            p.InvertLevel();
+            Assert.Equal(1, p.Level);
+            p.AddTime(100);
+            p.NextEdge();
+            Assert.Equal(0, p.Level); // the pulses go on flipping it, from the new level
         }
     }
 }

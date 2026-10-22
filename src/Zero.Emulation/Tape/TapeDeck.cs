@@ -148,11 +148,11 @@ namespace Zero.Emulation.Tape
         }
 
         // Options mirrored into the machine.
-        private bool _edgeLoad = true, _autoPlay = true, _fastLoad, _autoLoad;
+        private bool _edgeLoad = true, _autoPlay = true, _flashLoad, _autoLoad;
 
         public bool EdgeLoad { get => _edgeLoad; set { _edgeLoad = value; if (_zx != null) _zx.tape_edgeLoad = value; } }
         public bool AutoPlay { get => _autoPlay; set { _autoPlay = value; if (_zx != null) _zx.tape_AutoPlay = value; } }
-        public bool FastLoad { get => _fastLoad; set { _fastLoad = value; if (_zx != null) _zx.tape_flashLoad = value; } }
+        public bool FlashLoad { get => _flashLoad; set { _flashLoad = value; if (_zx != null) _zx.tape_flashLoad = value; } }
         /// <summary>Type LOAD "" after a hard reset when a tape is inserted.</summary>
         public bool AutoLoad { get => _autoLoad; set => _autoLoad = value; }
 
@@ -169,7 +169,7 @@ namespace Zero.Emulation.Tape
             _zx.TapeEvent += OnTapeEvent;
             _zx.tape_edgeLoad = _edgeLoad;
             _zx.tape_AutoPlay = _autoPlay;
-            _zx.tape_flashLoad = _fastLoad;
+            _zx.tape_flashLoad = _flashLoad;
             _zx.tape_readToPlay = IsInserted;
             if (IsInserted)
             {
@@ -302,14 +302,14 @@ namespace Zero.Emulation.Tape
             _zx.tape_heldStopped = false;
             _zx.tapeIsPlaying = true;
             _zx.tape_readToPlay = true;
-            if (_fastLoad) _zx.ResetKeyboard();
+            if (_flashLoad) _zx.ResetKeyboard();
             _zx.ReplayTape();
             CueCounter(_zx.blockCounter); // a stopped tape restarts its block from the top
             Changed?.Invoke();
         }
 
         /// <summary>
-        /// Stop the tape, and keep it stopped: auto play and fast loading leave it alone until Play
+        /// Stop the tape, and keep it stopped: auto play and flash loading leave it alone until Play
         /// (or a rewind, a new tape or a reset), as a real deck's loader would find no tape.
         /// </summary>
         public void Stop()

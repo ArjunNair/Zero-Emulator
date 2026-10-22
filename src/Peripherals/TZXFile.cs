@@ -3,26 +3,22 @@ using System.Collections.Generic;
 
 namespace Peripherals
 {
-    /// <summary>
-    /// TZX 1.20 images, decoded to a <see cref="TapeImage"/> for <see cref="TapePlayer"/>.
-    /// Adapted from the rustzx TZX player (Arjun Nair), as a decoder rather than a streaming player.
-    ///
-    /// TZX puts an edge at the start of every pulse and keeps a "current level", the level of the
-    /// last pulse. The tape model flips at the end of every pulse instead, so its level is always
-    /// the opposite of TZX's current level: the same edges, one pulse early. So here:
-    /// <list type="bullet">
-    /// <item>a tape starts with TZX's level low, which is high in the model;</item>
-    /// <item>an ordinary pulse needs no edge rule (the flip already happened);</item>
-    /// <item>$2B "set level to L" sets the model's level to !L;</item>
-    /// <item>$19's symbol flags 0 (edge) and 1 (no edge) become Keep and Toggle.</item>
-    /// </list>
-    /// Blocks are read in full; a truncated file keeps the blocks before the damage.
-    /// </summary>
+    // TZX 1.20 images, decoded to a TapeImage for TapePlayer.
+    // Adapted from the rustzx TZX player (Arjun Nair), as a decoder rather than a streaming player.
+    //
+    // TZX puts an edge at the start of every pulse and keeps a "current level", the level of the
+    // last pulse. The tape model flips at the end of every pulse instead, so its level is always
+    // the opposite of TZX's current level: the same edges, one pulse early. So here:
+    // - a tape starts with TZX's level low, which is high in the model;
+    // - an ordinary pulse needs no edge rule (the flip already happened);
+    // - $2B "set level to L" sets the model's level to !L;
+    // - $19's symbol flags 0 (edge) and 1 (no edge) become Keep and Toggle.
+    // Blocks are read in full; a truncated file keeps the blocks before the damage.
     public static class TZXFile
     {
         private const uint Millisecond = TapFile.MillisecondCycles;
 
-        /// <summary>A .tzx file as a tape, or null if it isn't one.</summary>
+        // A .tzx file as a tape, or null if it isn't one.
         public static TapeImage Load(byte[] file) {
             try {
                 return LoadCore(file);
@@ -98,7 +94,7 @@ namespace Peripherals
 
         private static TapeBlock ReadBlock(Reader r, TapeImage tape, int index) {
             byte id = r.U8();
-            var b = new TapeBlock();
+            var b = new TapeBlock { Id = id };
             switch (id) {
                 case 0x10: { // standard speed data
                     uint pause = r.U16();

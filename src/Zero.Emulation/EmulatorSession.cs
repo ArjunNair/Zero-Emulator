@@ -99,7 +99,7 @@ namespace Zero.Emulation
             RomDirectory = AppPaths.Resolve(Settings.Paths.Roms, "roms");
             Tape.EdgeLoad = Settings.Tape.EdgeLoad;
             Tape.AutoPlay = Settings.Tape.AutoPlay;
-            Tape.FastLoad = Settings.Tape.FastLoad;
+            Tape.FlashLoad = Settings.Tape.FlashLoad;
             Tape.AutoLoad = Settings.Tape.AutoLoad;
             Tape.TapSavePath = Path.Combine(AppPaths.Resolve(Settings.Paths.Saves, "saves"), "zero_saved.tap");
             Tape.Error += msg => Error?.Invoke(msg);
@@ -437,7 +437,7 @@ namespace Zero.Emulation
             zx.LateTiming = s.Emulation.LateTimings ? 1 : 0;
             Tape.EdgeLoad = s.Tape.EdgeLoad;
             Tape.AutoPlay = s.Tape.AutoPlay;
-            Tape.FastLoad = s.Tape.FastLoad;
+            Tape.FlashLoad = s.Tape.FlashLoad;
             Tape.AutoLoad = s.Tape.AutoLoad;
             ConfigureJoysticks(zx);
             ApplyPalette(zx, s.Render.Palette);

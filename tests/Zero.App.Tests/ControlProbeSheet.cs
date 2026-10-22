@@ -24,7 +24,7 @@ namespace Zero.App.Tests
                 new Button { Content = "OK", MinWidth = 90, Classes = { "accent" } },
                 new Button { Content = "Browse\u2026", MinWidth = 90 },
                 new Button { Content = "\u25B6 Play", MinWidth = 90 },
-                new CheckBox { Content = "Fast loading" },
+                new CheckBox { Content = "Flash loading" },
                 new ComboBox { ItemsSource = new[] { "Kempston" }, SelectedIndex = 0, Width = 160 },
                 new TextBox { Text = "roms", Width = 160 },
             };

@@ -4,19 +4,17 @@ using Peripherals;
 
 namespace Speccy
 {
-    /// <summary>
-    /// Edge loading: finds a tape loader's edge-sampling loop and skips it ahead to the next edge.
-    ///
-    /// A loader waits for an edge by polling the EAR port in a tight loop, counting the passes in
-    /// one register. Seen from outside, that's the same IN A,($FE) coming round every few dozen
-    /// T-states with exactly one register stepped by 1 and nothing else changed. Once a loop has
-    /// shown that eight times in a row (and a ninth to confirm), <see cref="Skip"/> works out how
-    /// many passes the loop would make before the edge arrives, steps the register that many times
-    /// and hands back the tape time they would have taken, in one go.
-    ///
-    /// Adapted from Spin's generic edge loader (NewEdgeLoader), including Spin 2's cache of
-    /// confirmed loops and its check that stops skipping a loop that doesn't leave on an edge.
-    /// </summary>
+    // Edge loading: finds a tape loader's edge-sampling loop and skips it ahead to the next edge.
+    //
+    // A loader waits for an edge by polling the EAR port in a tight loop, counting the passes in
+    // one register. Seen from outside, that's the same IN A,($FE) coming round every few dozen
+    // T-states with exactly one register stepped by 1 and nothing else changed. Once a loop has
+    // shown that eight times in a row (and a ninth to confirm), Skip works out how
+    // many passes the loop would make before the edge arrives, steps the register that many times
+    // and hands back the tape time they would have taken, in one go.
+    //
+    // Adapted from Spin's generic edge loader (NewEdgeLoader), including Spin 2's cache of
+    // confirmed loops and its check that stops skipping a loop that doesn't leave on an edge.
     public sealed class EdgeLoader
     {
         // The registers a loop may count in. A is left out: it must stay the same, as it holds
@@ -69,26 +67,24 @@ namespace Speccy
             this.cpu = cpu;
         }
 
-        /// <summary>The loop at the IN just observed is a confirmed loader loop.</summary>
+        // The loop at the IN just observed is a confirmed loader loop.
         public bool Verified => verified;
 
-        /// <summary>It may be skipped ahead: confirmed, and not one that carries on past an edge.</summary>
+        // It may be skipped ahead: confirmed, and not one that carries on past an edge.
         public bool CanAccelerate => verified && !doNotAccelerate && period > 0;
 
-        /// <summary>
-        /// A loader is at work: its confirmed loop came round within the last frame. Between visits
-        /// it is handling the edge it saw and waiting for the next, so its delays are loading
-        /// delays; once it stops polling, the program's own countdowns are its own again.
-        /// </summary>
+        // A loader is at work: its confirmed loop came round within the last frame. Between visits
+        // it is handling the edge it saw and waiting for the next, so its delays are loading
+        // delays; once it stops polling, the program's own countdowns are its own again.
         public bool LoaderActive(long now, long window = OneFrame) =>
             lastConfirmed != long.MinValue && now - lastConfirmed <= window;
 
         public const long OneFrame = 69888;
 
-        /// <summary>T-states a pass of the confirmed loop takes.</summary>
+        // T-states a pass of the confirmed loop takes.
         public long Period => period;
 
-        /// <summary>Forget everything learnt: a new tape, or a reset.</summary>
+        // Forget everything learnt: a new tape, or a reset.
         public void Reset() {
             lastTime = long.MinValue;
             lastConfirmed = long.MinValue;
@@ -105,11 +101,9 @@ namespace Speccy
             nextSlot = 0;
         }
 
-        /// <summary>
-        /// An IN A,(n) from an even port is about to run at <paramref name="pc"/> (the address of
-        /// its operand), <paramref name="now"/> T-states into emulation. Learns from it, and
-        /// returns whether it is a confirmed loader loop.
-        /// </summary>
+        // An IN A,(n) from an even port is about to run at pc (the address of its operand), now
+        // T-states into emulation. Learns from it, and returns whether it is a confirmed loader
+        // loop.
         public bool Observe(long now, int pc, byte port, TapePhase phase) {
             long gap = lastTime == long.MinValue ? long.MaxValue : now - lastTime;
             lastTime = now;
@@ -254,12 +248,10 @@ namespace Speccy
             cached = slot;
         }
 
-        /// <summary>
-        /// Skip the confirmed loop to the pass that sees an edge <paramref name="tstatesToEdge"/>
-        /// T-states away: step its register for every pass, and return the tape time they take.
-        /// The register stops short of running out (255 counting up, 1 counting down), so the
-        /// loader's own timeout still happens when no edge comes.
-        /// </summary>
+        // Skip the confirmed loop to the pass that sees an edge tstatesToEdge
+        // T-states away: step its register for every pass, and return the tape time they take.
+        // The register stops short of running out (255 counting up, 1 counting down), so the
+        // loader's own timeout still happens when no edge comes.
         public long Skip(long tstatesToEdge) {
             if (!CanAccelerate || track == NoRegister || tstatesToEdge < 0)
                 return 0;
@@ -274,7 +266,20 @@ namespace Speccy
             return passes * period;
         }
 
-        /// <summary>The skip reached an edge: watch the next pass for a loop that didn't leave.</summary>
+        // A known loader was seen working (flash loading recognised its code).
+        public void NoteActive(long now) => lastConfirmed = now;
+
+        // A flash loading handler moved the loader on: the loop being learnt or confirmed no
+        // longer holds (Spin drops its confirmation the same way). Remembered loops stay.
+        public void Forget() {
+            verified = false;
+            doNotAccelerate = false;
+            checkNextPass = false;
+            lastPC = -1;
+            cached = -1;
+        }
+
+        // The skip reached an edge: watch the next pass for a loop that didn't leave.
         public void EdgeTaken() => checkNextPass = true;
 
         // B C D E H L IXh IXl IYh IYl A' B' C' D' E' H' L'

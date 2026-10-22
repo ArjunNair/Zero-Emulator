@@ -8,14 +8,12 @@ using Zero.TestSupport;
 
 namespace Zero.Core.Tests
 {
-    /// <summary>
-    /// A real TZX loaded through its signal, not the ROM trap: the ROM reads the header and the
-    /// program from the pulses the player makes, so their timing and the pauses must be right.
-    /// </summary>
+    // A real TZX loaded through its signal, not the ROM trap: the ROM reads the header and the
+    // program from the pulses the player makes, so their timing and the pauses must be right.
     [Collection("PZXFile static state")]
     public class TzxLoadingTests
     {
-        /// <remarks>Quick: with no audio to pace it, the machine runs flat out while the tape plays.</remarks>
+        // Quick: with no audio to pace it, the machine runs flat out while the tape plays.
         [Fact]
         public async Task Edge_loading_reads_a_tzx_through_its_signal()
         {
@@ -23,7 +21,7 @@ namespace Zero.Core.Tests
             settings.Tape.AutoLoad = true;
             settings.Tape.AutoPlay = true;
             settings.Tape.EdgeLoad = true;
-            settings.Tape.FastLoad = false;
+            settings.Tape.FlashLoad = false;
             using var session = new EmulatorSession(settings)
             {
                 RomDirectory = TestPaths.RomDir,

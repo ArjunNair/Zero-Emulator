@@ -7,7 +7,7 @@ using static Zero.Core.Tests.TapeBuilders;
 
 namespace Zero.Core.Tests
 {
-    /// <summary>Decoding TZX and CSW images into the tape model.</summary>
+    // Decoding TZX and CSW images into the tape model.
     public class TzxFileTests
     {
         private static TapeImage Load(params byte[][] blocks) => TZXFile.Load(Tzx(blocks));

@@ -24,7 +24,7 @@
       <CheckBox x:Name="AutoLoadBox" Content="Auto load" Click="OnOptionChanged" />
       <CheckBox x:Name="AutoPlayBox" Content="Auto play/stop" Click="OnOptionChanged" />
       <CheckBox x:Name="EdgeLoadBox" Content="Edge loading" Click="OnOptionChanged" />
-      <CheckBox x:Name="FastLoadBox" Content="Fast loading" Click="OnOptionChanged" />
+      <CheckBox x:Name="FlashLoadBox" Content="Flash loading" Click="OnOptionChanged" />
     </StackPanel>
     <Border DockPanel.Dock="Bottom" Background="#1E1E1E" Padding="8,4" Margin="0,8,0,0" CornerRadius="3">
       <TextBlock x:Name="StatusText" Foreground="#DDDDDD" />

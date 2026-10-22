@@ -66,7 +66,7 @@ namespace Zero.App.Windows
             AutoLoadBox.IsChecked = tape.AutoLoad;
             AutoPlayBox.IsChecked = tape.AutoPlay;
             EdgeLoadBox.IsChecked = tape.EdgeLoad;
-            FastLoadBox.IsChecked = tape.FastLoad;
+            FlashLoadBox.IsChecked = tape.FlashLoad;
             _updatingOptions = false;
 
             StatusText.Text = !inserted ? "No tape in tape deck."
@@ -119,7 +119,7 @@ namespace Zero.App.Windows
             s.AutoLoad = AutoLoadBox.IsChecked == true;
             s.AutoPlay = AutoPlayBox.IsChecked == true;
             s.EdgeLoad = EdgeLoadBox.IsChecked == true;
-            s.FastLoad = FastLoadBox.IsChecked == true;
+            s.FlashLoad = FlashLoadBox.IsChecked == true;
             _session.ApplySettings();
         }
     }

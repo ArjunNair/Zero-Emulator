@@ -14,7 +14,7 @@ namespace Speccy
     /// zx_spectrum is the heart of speccy emulation.
     /// It includes core execution, ula, sound, input and interrupt handling
     /// </summary>
-    public abstract class zx_spectrum
+    public abstract partial class zx_spectrum
     {
         #region Event handlers for the Monitor, primarily
         public event MemoryWriteEventHandler MemoryWriteEvent;
@@ -266,14 +266,15 @@ namespace Speccy
         //Tape edge detection variables
         public String tapeFilename = "";
         private EdgeLoader edgeLoader;
+        private FlashLoader flashLoader;
+        private int tapeLevelAtLastIn;  //the EAR level the last IN read
+        private bool tapeEdgeUnseen;    //it has changed since: this IN is the first to see the edge
         private long frameTStateBase;           //T-states of every frame before this one, for timing across frames
 
-        /// <summary>
-        /// Edge loading is at work: a loader's confirmed loop came round within the auto stop's
-        /// timeout. The host runs unpaced then, as Spin does once it recognises a loader, so a tape
-        /// loads as fast as the machine can go, through the stretches between confirmed loops too.
-        /// </summary>
-        public bool TapeLoaderAtWork => tapeIsPlaying && tape_edgeLoad && edgeLoader != null
+        // Edge loading is at work: a loader's confirmed loop came round within the auto stop's
+        // timeout. The host runs unpaced then, as Spin does once it recognises a loader, so a tape
+        // loads as fast as the machine can go, through the stretches between confirmed loops too.
+        public bool TapeLoaderAtWork => tapeIsPlaying && (tape_edgeLoad || tape_flashLoad) && edgeLoader != null
                                         && edgeLoader.LoaderActive(frameTStateBase + cpu.t_states, TAPE_TIMEOUT * (long)FrameLength);
         public bool tape_edgeLoad = false;
         public bool tapeBitWasFlipped = false;
@@ -6199,9 +6200,9 @@ namespace Speccy
                 };
             }) ;
             edgeLoader = new EdgeLoader(cpu);
+            flashLoader = new FlashLoader(cpu, this, a => PeekByteNoContend(a), PokeByteNoContend);
             cpu.TapeEdgeDetection = new TapeEdgeDetectionCallback(OnTapeEdgeDetection);
             cpu.TapeEdgeDecA = new TapeEdgeDecACallback(OnTapeEdgeDecA);
-            cpu.TapeEdgeCpA = new TapeEdgeCpACallback(OnTapeEdgeCpA);
         }
 
         public zx_spectrum(IAudioOutput audioOutput, bool lateTimingModel) {
@@ -6259,15 +6260,6 @@ namespace Speccy
 
             //During warm start, all registers are set to 0xffff
             //http://worldofspectrum.org/forums/showthread.php?t=34574&page=3
-        }
-
-        protected void FlashLoadTape() {
-            if (!tape_flashLoad)
-                return;
-
-            //if (TapeEvent != null)
-            //    OnTapeEvent(new TapeEventArgs(TapeEventType.FLASH_LOAD));
-            DoTapeEvent(new TapeEventArgs(TapeEventType.FLASH_LOAD));
         }
 
         
@@ -6346,12 +6338,13 @@ namespace Speccy
             tape_stopTimeOut = TAPE_TIMEOUT;
             tape_AutoStarted = false;
             edgeLoader?.Reset();
+            flashLoader?.Reset();
             tape.Is48K = model == MachineModel._16k || model == MachineModel._48k || model == MachineModel._NTSC48k;
             tape.Rewind();
             pulseLevel = tape.Level;
         }
 
-        /// <summary>Put a tape in the deck, rewound and stopped.</summary>
+        // Put a tape in the deck, rewound and stopped.
         public void InsertTape(TapeImage image) {
             tape = new TapePlayer(image);
             ResetTape();
@@ -6396,7 +6389,7 @@ namespace Speccy
         //that is at work: run it out at once, on the tape only, leaving A, the flags and the tape
         //where the loop would. Anywhere else it is the program's own countdown, and runs as written.
         private void OnTapeEdgeDecA() {
-            if (!tapeIsPlaying || !tape_edgeLoad)
+            if (!tapeIsPlaying || !(tape_edgeLoad || tape_flashLoad))
                 return;
             if (tape.Phase != TapePhase.Pause && !edgeLoader.LoaderActive(frameTStateBase + cpu.t_states))
                 return;
@@ -6421,35 +6414,84 @@ namespace Speccy
             cpu.regs.F = (byte)((cpu.regs.F & 0x01) | 0x42); //as the last DEC A leaves them: Z and N, carry kept
         }
 
-        private void OnTapeEdgeCpA() {
-            if (tape_readToPlay && !tapeTrapsDisabled && !tape_heldStopped)
-                if(cpu.regs.PC == 0x56b)
-                    FlashLoadTape();
+        //An IN A,(n) from a ULA port (or Speedlock's $9F) is about to run, PC at its operand.
+        //A loader recognised by its code is evidence to start the tape (auto play) or keep it
+        //going, and with flash loading on, its handler may do the work and the IN with it: then
+        //true, with PC and the registers where the loader goes on. A loader only seen as a
+        //counting loop is skipped ahead to its next edge by edge loading. See FlashLoader and
+        //EdgeLoader.
+        private bool OnTapeEdgeDetection() {
+            bool handled = TapePortRead();
+            tapeLevelAtLastIn = pulseLevel; //what the loader read, or was left to read
+            return handled;
         }
 
-        //An IN from a ULA port is about to run. If it's a loader's edge loop, it's evidence to
-        //start the tape (auto play), or to keep it going; with edge loading on, the loop is also
-        //skipped ahead to the pass that sees the next edge. See EdgeLoader.
-        private void OnTapeEdgeDetection() {
+        private bool TapePortRead() {
             if (!tape_readToPlay)
-                return;
+                return false;
+            bool flash = tape_flashLoad;
+            bool speed = tape_edgeLoad || flash;
             bool autoPlay = tape_AutoPlay && !tape_heldStopped;
-            if (!tape_edgeLoad && !autoPlay)
-                return;
-            if (!tapeIsPlaying && !(autoPlay && !tape.AtEnd))
-                return;
+            if (!speed && !autoPlay)
+                return false;
 
             byte port = PeekByteNoContend(cpu.regs.PC);
-            if (!edgeLoader.Observe(frameTStateBase + cpu.t_states, cpu.regs.PC, port, tape.Phase))
+            long now = frameTStateBase + cpu.t_states;
+            tapeEdgeUnseen = pulseLevel != tapeLevelAtLastIn;
+
+            ushort operand = cpu.regs.PC;
+            cpu.regs.PC = (ushort)(operand + 1); //past the IN, as the handlers expect
+            FlashLoader.Result r = flashLoader.ProcessPortRead(port, speed, flash, autoPlay);
+
+            if (r.Matched) {
+                edgeLoader.NoteActive(now);
+                if (tapeIsPlaying) {
+                    if (tape_AutoPlay) {
+                        tape_stopTimeOut = TAPE_TIMEOUT;
+                        tape_AutoStarted = true;
+                    }
+                } else if (autoPlay && !tape.AtEnd && !r.Handled) {
+                    AutoStartTape();
+                }
+            }
+
+            if (r.Handled || r.Accelerated) {
+                //The handler moved the loader on: its edge history no longer holds
+                if (r.Handled)
+                    edgeLoader.Forget();
+                if (!r.SkipPortRead) {
+                    ushort addr = (ushort)((cpu.regs.A << 8) | port);
+                    cpu.regs.A = In(addr);
+                    cpu.regs.MemPtr = (ushort)(addr + 1);
+                }
+                return true;
+            }
+
+            cpu.regs.PC = operand;
+            if (r.BypassGeneric || (port & 1) != 0)
+                return false;
+            EdgeLoad(port, now, speed, autoPlay);
+            return false;
+        }
+
+        //A loader is waiting: start the tape. Its handler or edge loading takes it from its next IN.
+        private void AutoStartTape() {
+            tapeIsPlaying = true;
+            tape_AutoStarted = true;
+            tape_stopTimeOut = TAPE_TIMEOUT;
+            tape.ClearClock();
+            DoTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE));
+        }
+
+        //The generic loop detector: evidence for auto play, and with edge loading the skip.
+        private void EdgeLoad(byte port, long now, bool speed, bool autoPlay) {
+            if (!tapeIsPlaying && !(autoPlay && !tape.AtEnd))
+                return;
+            if (!edgeLoader.Observe(now, cpu.regs.PC, port, tape.Phase))
                 return;
 
             if (!tapeIsPlaying) {
-                //A loader is waiting: start the tape. Skipping starts on its next IN.
-                tapeIsPlaying = true;
-                tape_AutoStarted = true;
-                tape_stopTimeOut = TAPE_TIMEOUT;
-                tape.ClearClock();
-                DoTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE));
+                AutoStartTape();
                 return;
             }
 
@@ -6458,7 +6500,7 @@ namespace Speccy
                 tape_AutoStarted = true;
             }
 
-            if (!tape_edgeLoad || !edgeLoader.CanAccelerate || !tape.IsActive)
+            if (!speed || !edgeLoader.CanAccelerate || !tape.IsActive)
                 return;
 
             //An edge came during the last instruction: this IN reads it as it is.
@@ -7883,7 +7925,9 @@ namespace Speccy
                 prevT = cpu.t_states;
                 cpu.parityBitNeedsReset = false;
 
-                cpu.Step();
+                //Flash loading: a loader routine run as its result, in no time
+                if (!(flashLoader.TrapPC == cpu.regs.PC && tapeIsPlaying && tape_flashLoad && flashLoader.OnTrapPC()))
+                    cpu.Step();
 
                 deltaTStates = cpu.t_states - prevT;
 
@@ -8037,83 +8081,6 @@ namespace Speccy
             OnTapeEdge(tape.Replay());
         }
 
-        private void FlashLoad()
-        {
-            //Data the ROM can read must come next, after at most a pilot, syncs and a pause.
-            //Anything else (a raw recording, turbo data, a stop) is left for the tape to play.
-            bool wasPlaying = tapeIsPlaying;
-            DataSegment dataBlock = tape.SeekData(d => d.IsStandardRom);
-            if (dataBlock == null)
-                return;
-
-            cpu.regs.H = 0;
-            int byteCounter = dataBlock.ByteCount;
-            int dataIndex = 0;
-            bool loadStageFlagByte = true;
-            bool readAll = false; //the ROM got every byte it asked for, and the parity byte
-            while (true)
-            {
-                if (byteCounter == 0)
-                {
-                    cpu.regs.A = (byte)(cpu.regs.C & 32);
-                    cpu.regs.B = 0;
-                    cpu.regs.F = 0x50; //01010000b
-                    break;
-                }
-                byteCounter--;
-                cpu.regs.L = dataBlock.Data[dataIndex++];
-                cpu.regs.H ^= cpu.regs.L;
-                if (cpu.regs.DE == 0)
-                {
-                    cpu.regs.A = cpu.regs.H;
-                    cpu.Cp_R(1);
-                    readAll = true;
-                    break;
-                }
-                if (loadStageFlagByte)
-                {
-                    loadStageFlagByte = false;
-                    cpu.regs.A = (byte)(cpu.regs.AF_ >> 8);
-                    cpu.Xor_R(cpu.regs.L);
-                    if ((cpu.regs.F & 0x040) == 0)
-                        break;
-                }
-                else
-                {
-                    PokeByteNoContend(cpu.regs.IX++, cpu.regs.L);
-                    cpu.regs.DE--;
-                }
-            }
-
-            //Simulate RET
-            cpu.regs.PC = cpu.PopStack();
-            cpu.regs.MemPtr = cpu.regs.PC;
-
-            //The ROM reads only as many bytes as it was asked for. Some loaders put more in the
-            //same block, straight after them, and read it with their own code as the tape runs on
-            //(Raxoft's Wizball keeps its whole game there). Play on from where the ROM stopped.
-            int playFrom = readAll && dataIndex < dataBlock.ByteCount ? dataIndex : -1;
-            TapeEdge e = tape.EndFlashLoad(playFrom, wasPlaying, out bool started);
-            if (playFrom >= 0) {
-                if (!started) {
-                    OnTapeEdge(e);
-                    return;
-                }
-                if ((e & TapeEdge.LevelChanged) != 0)
-                    ApplyTapeLevel();
-
-                //Not auto-started: the stop timeout waits until edge detection has found the loader
-                //reading it, or the tape would stop under a loader it hasn't caught up with yet.
-                tapeIsPlaying = true;
-                tape_AutoStarted = false;
-                tape_stopTimeOut = TAPE_TIMEOUT;
-                if (TapeEvent != null)
-                    OnTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE));
-                return;
-            }
-            OnTapeEdge(e);
-        }
-
         private void DoTapeEvent(TapeEventArgs e) {
             if (tapeBitFlipAck)
                 tapeBitWasFlipped = false;
@@ -8129,8 +8096,6 @@ namespace Speccy
 
                 OnTapeEdge(tape.Begin());
 
-            } else if (e.EventType == TapeEventType.FLASH_LOAD) {
-                FlashLoad();
             }
         }
     }

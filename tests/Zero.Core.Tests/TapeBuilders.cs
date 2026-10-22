@@ -6,7 +6,7 @@ using Peripherals;
 
 namespace Zero.Core.Tests
 {
-    /// <summary>Small synthetic tapes for the tape tests, and a way to watch one play.</summary>
+    // Small synthetic tapes for the tape tests, and a way to watch one play.
     internal static class TapeBuilders
     {
         // ------------------------------------------------------------------ PZX
@@ -83,7 +83,7 @@ namespace Zero.Core.Tests
             return ms.ToArray();
         }
 
-        /// <summary>Little-endian bytes from a mix of byte, ushort, short, uint, int, byte[] and string.</summary>
+        // Little-endian bytes from a mix of byte, ushort, short, uint, int, byte[] and string.
         public static byte[] B(params object[] parts)
         {
             var ms = new MemoryStream();
@@ -118,10 +118,8 @@ namespace Zero.Core.Tests
 
         // ------------------------------------------------------------------ watching it play
 
-        /// <summary>
-        /// Play from where the tape is parked and record when the level changes, in T-states from
-        /// the start: (time, level after). Stops when the tape does, or after maxEdges.
-        /// </summary>
+        // Play from where the tape is parked and record when the level changes, in T-states from
+        // the start: (time, level after). Stops when the tape does, or after maxEdges.
         public static List<(long time, int level)> Edges(TapePlayer player, out TapeEdge seen, int maxEdges = 100000)
         {
             var edges = new List<(long, int)>();
@@ -147,7 +145,7 @@ namespace Zero.Core.Tests
             return edges;
         }
 
-        /// <summary>The lengths of the pulses between level changes.</summary>
+        // The lengths of the pulses between level changes.
         public static List<long> Intervals(List<(long time, int level)> edges)
         {
             var list = new List<long>();

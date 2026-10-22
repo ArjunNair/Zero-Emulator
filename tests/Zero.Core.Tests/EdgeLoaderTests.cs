@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Zero.Core.Tests
 {
-    /// <summary>Edge loading's loop detector and skip, driven by hand on a bare Z80.</summary>
+    // Edge loading's loop detector and skip, driven by hand on a bare Z80.
     public class EdgeLoaderTests
     {
         private const int Loop = 0x8000, Other = 0x9000;

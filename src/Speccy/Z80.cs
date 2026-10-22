@@ -12,9 +12,9 @@ namespace Cpu
     public delegate byte InCallback(ushort addr);
     public delegate void OutCallback(ushort addr, byte val);
     public delegate void InstructionFetchCallback();
-    public delegate void TapeEdgeDetectionCallback();
+    //An IN A,(n) the tape handles: true when it did the IN itself, leaving PC and the registers set.
+    public delegate bool TapeEdgeDetectionCallback();
     public delegate void TapeEdgeDecACallback();
-    public delegate void TapeEdgeCpACallback();
     public struct Z80_Registers {
         public ushort SP, PC, IX, IY;
         public ushort AF_, BC_, DE_, HL_;
@@ -429,7 +429,6 @@ namespace Cpu
         public InstructionFetchCallback InstructionFetchSignal;
         public TapeEdgeDetectionCallback TapeEdgeDetection;
         public TapeEdgeDecACallback TapeEdgeDecA;
-        public TapeEdgeCpACallback TapeEdgeCpA;
         public Z80() {
             //Build Parity Table
             /*
@@ -2483,7 +2482,6 @@ namespace Cpu
                 case 0xBF:  //CP A
                             // Log("CP A");
                 Cp_R(regs.A);
-                TapeEdgeCpA?.Invoke();
                 //Tape trap
                 //if(tape_readToPlay && !tapeTrapsDisabled)
                 //    if(regs.PC == 0x56b)
@@ -3010,9 +3008,12 @@ namespace Cpu
                 disp = PeekByte(regs.PC);
                 ushort port = (ushort)((regs.A << 8) | disp);
 
-                //Tape Trap: every IN from a ULA port, as a loader's edge loop may test the EAR bit any way it likes
-                if ((disp & 0x1) == 0)
-                    TapeEdgeDetection?.Invoke();
+                //Tape Trap: every IN from a ULA port, as a loader's edge loop may test the EAR bit any
+                //way it likes, and Speedlock 2/3's decryptor on $9F
+                if (((disp & 0x1) == 0 || disp == 0x9F) && TapeEdgeDetection != null && TapeEdgeDetection()) {
+                    and_32_Or_64 = false;
+                    break;
+                }
 
                 // Log(String.Format("IN A, ({0:X})", disp));
                 regs.MemPtr = (ushort)((regs.A << 8) + disp + 1);

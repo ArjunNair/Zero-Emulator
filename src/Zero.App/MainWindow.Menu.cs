@@ -21,7 +21,7 @@ namespace Zero.App
                                 Cpu1, Cpu2, Cpu4, LateTimingsItem, Issue2Item;
         internal NativeMenuItem RzxRecordItem, RZXRecordStopItem, RZXRecordContinueItem, RzxBookmarkItem, RzxRollbackItem, RzxFinishItem, RzxDiscardItem;
         internal NativeMenuItem TapeDeckItem, TapePlayItem, TapeStopItem, TapeRewindItem;
-        internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFastLoadItem, TapeRomTrapsItem;
+        internal NativeMenuItem TapeAutoLoadItem, TapeAutoPlayItem, TapeEdgeLoadItem, TapeFlashLoadItem, TapeRomTrapsItem;
         internal NativeMenuItem DiskInsertC, DiskInsertD, DiskEjectA, DiskEjectB, DiskEjectC, DiskEjectD;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
         internal NativeMenuItem CrtItem;
@@ -126,7 +126,7 @@ namespace Zero.App
                 TapeAutoLoadItem = Item("Auto Load (LOAD \"\" on insert)", () => ToggleTapeOption(t => t.AutoLoad = !t.AutoLoad), checkable: true),
                 TapeAutoPlayItem = Item("Auto Play/Stop", () => ToggleTapeOption(t => t.AutoPlay = !t.AutoPlay), checkable: true),
                 TapeEdgeLoadItem = Item("Edge Loading", () => ToggleTapeOption(t => t.EdgeLoad = !t.EdgeLoad), checkable: true),
-                TapeFastLoadItem = Item("Fast Loading", () => ToggleTapeOption(t => t.FastLoad = !t.FastLoad), checkable: true),
+                TapeFlashLoadItem = Item("Flash Loading", () => ToggleTapeOption(t => t.FlashLoad = !t.FlashLoad), checkable: true),
                 TapeRomTrapsItem = Item("ROM Tape Traps", () => ToggleTapeOption(t => t.RomTraps = !t.RomTraps), checkable: true),
                 Sep(),
                 Item("Set SAVE Target (.tap)…", () => _ = SetTapSaveTargetAsync()));
@@ -393,7 +393,7 @@ namespace Zero.App
             TapeAutoLoadItem.IsChecked = _settings.Tape.AutoLoad;
             TapeAutoPlayItem.IsChecked = _settings.Tape.AutoPlay;
             TapeEdgeLoadItem.IsChecked = _settings.Tape.EdgeLoad;
-            TapeFastLoadItem.IsChecked = _settings.Tape.FastLoad;
+            TapeFlashLoadItem.IsChecked = _settings.Tape.FlashLoad;
             TapeRomTrapsItem.IsChecked = _settings.Tape.RomTraps;
 
             DiskEjectA.IsEnabled = _session.DiskInDrive(0) != null;

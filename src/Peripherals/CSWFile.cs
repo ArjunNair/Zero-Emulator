@@ -5,11 +5,9 @@ using System.IO.Compression;
 
 namespace Peripherals
 {
-    /// <summary>
-    /// Compressed Square Wave recordings: .csw files (v1 and v2), and the same pulse data inside a
-    /// TZX $18 block. Each value is a pulse's length in samples, stored run-length (RLE) or
-    /// run-length then zlib-deflated (Z-RLE). A pulse is one level held until the next edge.
-    /// </summary>
+    // Compressed Square Wave recordings: .csw files (v1 and v2), and the same pulse data inside a
+    // TZX $18 block. Each value is a pulse's length in samples, stored run-length (RLE) or
+    // run-length then zlib-deflated (Z-RLE). A pulse is one level held until the next edge.
     public static class CSWFile
     {
         private const string Signature = "Compressed Square Wave\x1A";
@@ -18,7 +16,7 @@ namespace Peripherals
         public const int CompressionRle = 1;
         public const int CompressionZRle = 2;
 
-        /// <summary>A .csw file as a one-block tape, or null if it isn't one.</summary>
+        // A .csw file as a one-block tape, or null if it isn't one.
         public static TapeImage Load(byte[] file) {
             try {
                 return LoadCore(file);
@@ -64,6 +62,7 @@ namespace Peripherals
 
             var tape = new TapeImage();
             tape.Blocks.Add(new TapeBlock {
+                Id = 0x18,
                 Kind = "CSW Recording",
                 Info = pulses.ToString() + " pulses",
                 Segments = new TapeSegment[] { new PulseSegment { Runs = runs } }
@@ -71,11 +70,9 @@ namespace Peripherals
             return tape;
         }
 
-        /// <summary>
-        /// Decode CSW pulse data to runs of T-states (at 3.5 MHz), carrying each pulse's rounding
-        /// error into the next. The first pulse applies <paramref name="first"/>. Null if the
-        /// compression type is unknown or the rate is zero.
-        /// </summary>
+        // Decode CSW pulse data to runs of T-states (at 3.5 MHz), carrying each pulse's rounding
+        // error into the next. The first pulse takes the edge rule first. Null if the compression
+        // type is unknown or the rate is zero.
         public static PulseRun[] DecodePulses(byte[] buffer, int offset, int length, int compression, uint rate,
                                               Edge first, out long pulses) {
             pulses = 0;

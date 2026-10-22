@@ -13,8 +13,8 @@ namespace Zero.Core.Tests
     /// <summary>
     /// The ROM reads only the bytes its header asks for. Some tapes carry more in the same block,
     /// straight after, for the program just loaded to read with its own loader (Raxoft's Wizball
-    /// keeps its whole game there). Fast loading used to skip the rest of the block, so the loader
-    /// found no tape and the game never loaded.
+    /// keeps its whole game there). Flash loading must leave the rest of the block playing, or the
+    /// loader finds no tape and the game never loads.
     /// </summary>
     [Collection("PZXFile static state")]
     public class FlashLoadTests
@@ -23,7 +23,7 @@ namespace Zero.Core.Tests
         [Theory]
         [InlineData(".pzx", 4)]
         [InlineData(".tzx", 1)]
-        public async Task Fast_loading_plays_on_after_the_bytes_the_rom_asked_for(string format, int DataBlockIndex)
+        public async Task Flash_loading_plays_on_after_the_bytes_the_rom_asked_for(string format, int DataBlockIndex)
         {
             byte[] program = { 0x00, 0x0A, 0x02, 0x00, 0xEA, 0x0D }; // 10 REM
             byte[] extra = new byte[1000];
@@ -34,7 +34,7 @@ namespace Zero.Core.Tests
             {
                 var settings = new EmulatorSettings();
                 settings.Tape.AutoLoad = true;
-                settings.Tape.FastLoad = true;
+                settings.Tape.FlashLoad = true;
                 settings.Tape.RomTraps = true;
                 using var session = new EmulatorSession(settings)
                 {
@@ -61,20 +61,16 @@ namespace Zero.Core.Tests
             finally { File.Delete(path); }
         }
 
-        /// <summary>
-        /// Fast loading with auto play off: only the ROM trap moves the tape on. Each block of a
-        /// TAP comes as pilot, data and a pause, so after the first block the trap has a pause
-        /// before the next data; it used to give up there and leave the ROM waiting for a tape
-        /// that never played.
-        /// </summary>
+        // Flash loading, auto play on and edge loading off: the ROM loader's handler takes every
+        // block of a TAP, each pilot, data and pause, through to the last.
         [Fact]
-        public async Task Fast_loading_reads_every_block_of_a_tap_without_playing_it()
+        public async Task Flash_loading_reads_every_block_of_a_tap()
         {
             const int LastDataBlock = 11; // PZXT, then PULS DATA PAUS for each of 4 blocks
             var settings = new EmulatorSettings();
             settings.Tape.AutoLoad = true;
-            settings.Tape.FastLoad = true;
-            settings.Tape.AutoPlay = false;
+            settings.Tape.FlashLoad = true;
+            settings.Tape.AutoPlay = true;
             settings.Tape.EdgeLoad = false;
             settings.Tape.RomTraps = true;
             using var session = new EmulatorSession(settings)
@@ -90,8 +86,7 @@ namespace Zero.Core.Tests
             {
                 var zx = session.Machine;
                 if (++frames == 5) session.LoadFile(path);
-                if (zx.tapeIsPlaying) outcome.TrySetResult("the tape played");
-                else if (zx.blockCounter == LastDataBlock) outcome.TrySetResult("");
+                if (zx.blockCounter >= LastDataBlock) outcome.TrySetResult("");
                 else if (frames > 3000) outcome.TrySetResult($"stuck at block {zx.blockCounter}");
             };
             session.Start();
@@ -101,14 +96,14 @@ namespace Zero.Core.Tests
             Assert.Equal("", await outcome.Task);
         }
 
-        /// <summary>A real TZX of standard blocks flash-loads its first program.</summary>
+        // A real TZX of standard blocks flash-loads its first program.
         [Fact]
-        public async Task Fast_loading_reads_a_tzx()
+        public async Task Flash_loading_reads_a_tzx()
         {
             var settings = new EmulatorSettings();
             settings.Tape.AutoLoad = true;
-            settings.Tape.FastLoad = true;
-            settings.Tape.AutoPlay = false;
+            settings.Tape.FlashLoad = true;
+            settings.Tape.AutoPlay = true;
             settings.Tape.EdgeLoad = false;
             settings.Tape.RomTraps = true;
             using var session = new EmulatorSession(settings)
@@ -148,7 +143,7 @@ namespace Zero.Core.Tests
             return (WithParity(header), withExtra.ToArray());
         }
 
-        /// <summary>The same tape as <see cref="BuildTape"/>, as two TZX standard speed blocks.</summary>
+        // The same tape as BuildTape, as two TZX standard speed blocks.
         private static byte[] BuildTzx(byte[] program, byte[] extra)
         {
             var (header, data) = RomBlocks(program, extra);

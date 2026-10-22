@@ -11,11 +11,9 @@ using Zero.TestSupport;
 
 namespace Zero.Core.Tests
 {
-    /// <summary>
-    /// Edge loading must load exactly what loading at normal speed does, only sooner: the ROM
-    /// loader reads every bit from the pulses, so a skip that counts its passes wrong shows up as
-    /// a wrong byte or a loading error. With edge loading off, auto play must still start the tape.
-    /// </summary>
+    // Edge loading must load exactly what loading at normal speed does, only sooner: the ROM
+    // loader reads every bit from the pulses, so a skip that counts its passes wrong shows up as
+    // a wrong byte or a loading error. With edge loading off, auto play must still start the tape.
     [Collection("PZXFile static state")]
     public class EdgeLoadingTests
     {
@@ -36,10 +34,25 @@ namespace Zero.Core.Tests
             finally { File.Delete(path); }
         }
 
-        /// <summary>
-        /// At 1x the machine keeps to real time on its audio clock, but not while edge loading is
-        /// at work: that's what it's for. And once loading is done, real time again, straight away.
-        /// </summary>
+        // Flash loading's ROM handler skips the pilots and puts the bytes straight into memory:
+        // the same program, in a fraction of the frames edge loading takes.
+        [Fact]
+        public async Task Flash_loading_loads_the_same_bytes_in_fewer_frames_than_edge_loading()
+        {
+            byte[] program = Program(1500);
+            string path = Path.Combine(Path.GetTempPath(), "zero_edge_" + Guid.NewGuid().ToString("N") + ".tzx");
+            File.WriteAllBytes(path, Tape(program));
+            try
+            {
+                long edge = (await FramesToLoad(path, program, edgeLoad: true)).frames;
+                long flash = (await FramesToLoad(path, program, edgeLoad: false, flashLoad: true)).frames;
+                Assert.True(flash < edge * 0.5, $"flash loading took {flash} frames, edge loading {edge}");
+            }
+            finally { File.Delete(path); }
+        }
+
+        // At 1x the machine keeps to real time on its audio clock, but not while edge loading is
+        // at work: that's what it's for. And once loading is done, real time again, straight away.
         [Fact]
         public async Task Edge_loading_runs_unpaced_and_real_time_comes_back_after()
         {
@@ -48,24 +61,25 @@ namespace Zero.Core.Tests
             File.WriteAllBytes(path, Tape(program));
             try
             {
-                var (frames, seconds, after) = await FramesToLoad(path, program, edgeLoad: true, paced: true);
+                var (frames, seconds, after) = await FramesToLoad(path, program, edgeLoad: true, paced: true, untilStopped: true);
                 Assert.True(seconds < frames / 50.0 * 0.6, $"{frames} frames took {seconds:F1}s: loading kept to real time");
                 Assert.InRange(after, 0.5, 2.5); // the next 50 frames, at about 1 s
             }
             finally { File.Delete(path); }
         }
 
-        /// <summary>
-        /// Load the tape with auto load and auto play: the frames until the program is in memory,
-        /// the seconds they took, and the seconds the 50 frames after took.
-        /// </summary>
-        private static async Task<(long frames, double seconds, double after)> FramesToLoad(string path, byte[] program, bool edgeLoad, bool paced = false)
+        // Load the tape with auto load and auto play: the frames from the tape starting until the
+        // program is in memory (and, untilStopped, the tape has stopped), the
+        // seconds they took, and the seconds the 50 frames after took.
+        private static async Task<(long frames, double seconds, double after)> FramesToLoad(string path, byte[] program, bool edgeLoad,
+                                                                                              bool paced = false, bool flashLoad = false,
+                                                                                              bool untilStopped = false)
         {
             var settings = new EmulatorSettings();
             settings.Tape.AutoLoad = true;
             settings.Tape.AutoPlay = true;
             settings.Tape.EdgeLoad = edgeLoad;
-            settings.Tape.FastLoad = false;
+            settings.Tape.FlashLoad = flashLoad;
             using var session = new EmulatorSession(settings)
             {
                 RomDirectory = TestPaths.RomDir,
@@ -73,13 +87,14 @@ namespace Zero.Core.Tests
             };
 
             var outcome = new TaskCompletionSource<(long, double, double)>(TaskCreationOptions.RunContinuationsAsynchronously);
-            long frames = 0, inserted = 0, loadedFrames = 0, loadedAt = 0;
+            long frames = 0, inserted = 0, started = 0, loadedFrames = 0, loadedAt = 0;
             double loadSeconds = 0;
             var clock = new System.Diagnostics.Stopwatch();
             session.FrameReady += () =>
             {
                 var zx = session.Machine;
-                if (++frames == 5) { session.LoadFile(path); inserted = frames; clock.Start(); }
+                if (++frames == 5) { session.LoadFile(path); inserted = frames; }
+                if (started == 0 && zx.tapeIsPlaying) { started = frames; clock.Start(); }
                 if (loadedAt > 0)
                 {
                     if (frames == loadedAt + 50) outcome.TrySetResult((loadedFrames, loadSeconds, clock.Elapsed.TotalSeconds - loadSeconds));
@@ -89,9 +104,9 @@ namespace Zero.Core.Tests
                 string screen = ScreenText.Dump(zx);
                 if (screen.Contains("loading error"))
                     outcome.TrySetException(new Exception($"tape loading error (edge loading {edgeLoad})"));
-                else if (zx.blockCounter == 1 && !zx.tapeIsPlaying && Loaded(zx, program))
+                else if ((!untilStopped || (zx.blockCounter == 1 && !zx.tapeIsPlaying)) && Loaded(zx, program))
                 {
-                    loadedFrames = frames - inserted;
+                    loadedFrames = frames - started;
                     loadSeconds = clock.Elapsed.TotalSeconds;
                     loadedAt = frames;
                 }
@@ -115,7 +130,7 @@ namespace Zero.Core.Tests
             return true;
         }
 
-        /// <summary>10 REM and printable characters: lists cleanly when the ROM shows it after loading.</summary>
+        // 10 REM and printable characters: lists cleanly when the ROM shows it after loading.
         private static byte[] Program(int length)
         {
             var rnd = new Random(7);
@@ -127,7 +142,7 @@ namespace Zero.Core.Tests
             return program.ToArray();
         }
 
-        /// <summary>A program header (no autostart) and the program, as two standard TZX blocks.</summary>
+        // A program header (no autostart) and the program, as two standard TZX blocks.
         private static byte[] Tape(byte[] program)
         {
             var header = new List<byte> { 0x00, 0x00 };

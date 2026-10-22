@@ -11,7 +11,7 @@ namespace Peripherals
     // stream seen one pulse earlier: a TZX "current level" of L is a level of !L here, waiting for
     // the next pulse. The TZX decoder maps onto this rule; see TZXFile.
 
-    /// <summary>What happens to the level before a pulse starts.</summary>
+    // What happens to the level before a pulse starts.
     public enum Edge : byte
     {
         Keep,   // hold what the last pulse left (the usual case: the flip already happened)
@@ -20,7 +20,7 @@ namespace Peripherals
         High    // force high
     }
 
-    /// <summary>The kind of signal playing, for edge loading and future loader acceleration.</summary>
+    // The kind of signal playing, for edge loading and future loader acceleration.
     public enum TapePhase : byte
     {
         Idle,    // between blocks, or a block with no signal
@@ -33,12 +33,12 @@ namespace Peripherals
         Stopped  // the tape stopped or ran out
     }
 
-    /// <summary><see cref="Count"/> pulses of <see cref="Duration"/> T-states.</summary>
+    // Count pulses of Duration T-states.
     public readonly struct PulseRun
     {
         public readonly uint Count;
         public readonly uint Duration;
-        /// <summary>Applied before the run's first pulse only; the rest keep the level.</summary>
+        // Applied before the run's first pulse only; the rest keep the level.
         public readonly Edge FirstEdge;
         public readonly TapePhase Phase;
 
@@ -54,13 +54,13 @@ namespace Peripherals
 
     public abstract class TapeSegment
     {
-        /// <summary>Applied to the level as the segment starts, before its first pulse.</summary>
+        // Applied to the level as the segment starts, before its first pulse.
         public Edge Entry = Edge.Keep;
 
         public abstract long DurationTStates { get; }
     }
 
-    /// <summary>Pilot, sync, pause or raw pulses: anything that isn't data bits.</summary>
+    // Pilot, sync, pause or raw pulses: anything that isn't data bits.
     public sealed class PulseSegment : TapeSegment
     {
         public PulseRun[] Runs = Array.Empty<PulseRun>();
@@ -74,7 +74,7 @@ namespace Peripherals
         }
     }
 
-    /// <summary>One data symbol: a bit's (or a TZX $19 symbol's) pulses.</summary>
+    // One data symbol: a bit's (or a TZX $19 symbol's) pulses.
     public sealed class Symbol
     {
         public Edge FirstEdge = Edge.Keep;
@@ -94,10 +94,8 @@ namespace Peripherals
         }
     }
 
-    /// <summary>
-    /// A stream of symbols, <see cref="BitsPerSymbol"/> bits each, read MSB first from
-    /// <see cref="Data"/>. Ordinary data has two symbols (0 and 1) of one bit each.
-    /// </summary>
+    // A stream of symbols, BitsPerSymbol bits each, read MSB first from
+    // Data. Ordinary data has two symbols (0 and 1) of one bit each.
     public sealed class DataSegment : TapeSegment
     {
         public byte[] Data = Array.Empty<byte>();
@@ -106,13 +104,11 @@ namespace Peripherals
         public Symbol[] Symbols = Array.Empty<Symbol>();
         public uint Tail;
 
-        /// <summary>Two one-bit symbols: bytes can be read off it.</summary>
+        // Two one-bit symbols: bytes can be read off it.
         public bool IsBinary => Symbols.Length == 2 && BitsPerSymbol == 1;
 
-        /// <summary>
-        /// What the ROM loader can read, so flash loading may take it: two non-zero pulses per bit,
-        /// and a 0 bit shorter than a 1 bit (the PZX FAQ's test for standard data).
-        /// </summary>
+        // What the ROM loader can read, so flash loading may take it: two non-zero pulses per bit,
+        // and a 0 bit shorter than a 1 bit (the PZX FAQ's test for standard data).
         public bool IsStandardRom {
             get {
                 if (!IsBinary) return false;
@@ -123,7 +119,7 @@ namespace Peripherals
             }
         }
 
-        /// <summary>Bytes of whole data, for a binary segment.</summary>
+        // Bytes of whole data, for a binary segment.
         public int ByteCount => (int)Math.Min(Data.Length, (SymbolCount * BitsPerSymbol + 7) / 8);
 
         public int SymbolAt(long index) {
@@ -166,9 +162,12 @@ namespace Peripherals
 
     public sealed class TapeBlock
     {
-        /// <summary>The block list's name for it: "Data", "PULS", "Pause" and so on.</summary>
+        // The TZX block ID, or the nearest TZX block for another format's (a PZX PULS of a tone is
+        // $12, other pulses $13; DATA is $14). Loader handlers go by it, as Spin's do.
+        public byte Id;
+        // The block list's name for it: "Data", "PULS", "Pause" and so on.
         public string Kind = "";
-        /// <summary>The block list's details: a header's name, a pause's length, a text block's text.</summary>
+        // The block list's details: a header's name, a pause's length, a text block's text.
         public string Info = "";
         public TapeSegment[] Segments = Array.Empty<TapeSegment>();
 
@@ -178,7 +177,7 @@ namespace Peripherals
         public int Count;               // LoopStart
         public int[] Offsets = Array.Empty<int>(); // Call
 
-        /// <summary>True for a block that is only text or a marker, to skip when cueing.</summary>
+        // True for a block that is only text or a marker, to skip when cueing.
         public bool HasSignal => Segments.Length > 0;
 
         public long DurationTStates {
@@ -190,7 +189,7 @@ namespace Peripherals
         }
     }
 
-    /// <summary>Descriptive fields from a PZXT header or a TZX archive info block (all optional).</summary>
+    // Descriptive fields from a PZXT header or a TZX archive info block (all optional).
     public sealed class TapeInfo
     {
         public string Title;
@@ -209,11 +208,11 @@ namespace Peripherals
     {
         public static readonly TapeImage Empty = new TapeImage();
 
-        /// <summary>One entry per block in the file, so the block list's rows line up with it.</summary>
+        // One entry per block in the file, so the block list's rows line up with it.
         public List<TapeBlock> Blocks = new List<TapeBlock>();
-        /// <summary>Null when the tape has no PZXT header or TZX archive info.</summary>
+        // Null when the tape has no PZXT header or TZX archive info.
         public TapeInfo Info;
-        /// <summary>The level before the first pulse. A TZX tape starts low by its rule, which is high here.</summary>
+        // The level before the first pulse. A TZX tape starts low by its rule, which is high here.
         public int InitialLevel;
     }
 }

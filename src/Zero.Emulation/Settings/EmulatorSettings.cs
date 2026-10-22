@@ -19,7 +19,17 @@ namespace Zero.Emulation.Settings
     public sealed class TapeSettings
     {
         public bool EdgeLoad { get; set; } = true;
-        public bool FastLoad { get; set; } = false;
+        // Flash loading: known loaders' work done for them. Edge loading comes with it.
+        public bool FlashLoad { get; set; } = false;
+
+        // Settings saved before Flash loading replaced Fast loading: read, never written.
+        [JsonPropertyName("FastLoad")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? LegacyFastLoad
+        {
+            get => null;
+            set { if (value == true) FlashLoad = true; }
+        }
         public bool AutoPlay { get; set; } = true;
         public bool AutoLoad { get; set; } = false;
         public bool RomTraps { get; set; } = true;

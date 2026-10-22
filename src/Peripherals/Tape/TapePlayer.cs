@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Peripherals
 {
-    /// <summary>What happened while the player moved on, for the machine to act on.</summary>
+    // What happened while the player moved on, for the machine to act on.
     [Flags]
     public enum TapeEdge
     {
@@ -14,16 +14,13 @@ namespace Peripherals
         EndOfTape = 8     // ran off the end: stop the motor
     }
 
-    /// <summary>
-    /// Plays a <see cref="TapeImage"/>: the state machine for every tape format. The machine adds
-    /// emulated time with <see cref="AddTime"/> and, while <see cref="EdgeDue"/>, takes the next
-    /// edge with <see cref="NextEdge"/>. Each edge ends the current pulse, flipping the level, and
-    /// arms the next one: within a segment, then the block's next segment, then the next block by
-    /// the tape's control flow (jumps, loops, calls, stops).
-    ///
-    /// Time works as the PZX player always has: <c>pending</c> is time run since the last edge was
-    /// armed, and arming takes it off the new pulse, so a late edge is made up on the next one.
-    /// </summary>
+    // Plays a TapeImage: the state machine for every tape format. The machine adds emulated time
+    // with AddTime and, while EdgeDue, takes the next edge with NextEdge. Each edge ends the
+    // current pulse, flipping the level, and arms the next one: within a segment, then the block's
+    // next segment, then the next block by the tape's control flow (jumps, loops, calls, stops).
+    //
+    // Time works as the PZX player always has: pending is time run since the last edge was
+    // armed, and arming takes it off the new pulse, so a late edge is made up on the next one.
     public sealed class TapePlayer
     {
         private readonly TapeImage image;
@@ -31,6 +28,7 @@ namespace Peripherals
 
         private long pending; // T-states run since the current pulse was armed
         private long edge;    // the current pulse's length, less what it was armed late by
+        private uint armedLength; // the current pulse's whole length
 
         // Where the next Begin() starts: a block, and a segment in it.
         private int resumeBlock;
@@ -60,43 +58,43 @@ namespace Peripherals
 
         public TapeImage Image => image;
 
-        /// <summary>The block playing, or the one the tape is parked on.</summary>
+        // The block playing, or the one the tape is parked on.
         public int BlockIndex { get; private set; }
 
         public int Level { get; private set; }
 
         public TapePhase Phase { get; private set; } = TapePhase.Idle;
 
-        /// <summary>Set by the machine: stop blocks for 48K machines only stop it on one.</summary>
+        // Set by the machine: stop blocks for 48K machines only stop it on one.
         public bool Is48K { get; set; }
 
-        /// <summary>A pulse is armed: the tape is producing a signal.</summary>
+        // A pulse is armed: the tape is producing a signal.
         public bool IsActive { get; private set; }
 
         public bool EdgeDue => IsActive && pending >= edge;
 
-        /// <summary>Stopped at the end of the tape: Begin would play nothing.</summary>
+        // Stopped at the end of the tape: Begin would play nothing.
         public bool AtEnd => !IsActive && resumeBlock >= blocks.Count;
 
         public long TStatesToNextEdge => IsActive ? Math.Max(0, edge - pending) : 0;
 
-        /// <summary>The data segment playing, or null.</summary>
+        // The data segment playing, or null.
         public DataSegment CurrentData => IsActive ? segment as DataSegment : null;
 
-        /// <summary>In <see cref="CurrentData"/>: the symbol (bit) whose pulse is playing.</summary>
+        // In CurrentData: the symbol (bit) whose pulse is playing.
         public long SymbolIndex => symbolIndex;
 
-        /// <summary>In <see cref="CurrentData"/>: which of the symbol's pulses is playing, from 0.</summary>
+        // In CurrentData: which of the symbol's pulses is playing, from 0.
         public int PulseInSymbol => symbolPulse - 1;
 
         public void AddTime(long tstates) => pending += tstates;
 
-        /// <summary>Forget time run so far: the next pulse armed gets its full length.</summary>
+        // Forget time run so far: the next pulse armed gets its full length.
         public void ClearClock() => pending = 0;
 
         // ------------------------------------------------------------------ transport
 
-        /// <summary>Back to the start, stopped.</summary>
+        // Back to the start, stopped.
         public void Rewind() {
             Halt();
             Phase = TapePhase.Idle;
@@ -106,8 +104,8 @@ namespace Peripherals
             Cue(0);
         }
 
-        /// <summary>Park the tape at the start of a block. While playing, the block that is playing
-        /// finishes first, and the one after the cued block follows it.</summary>
+        // Park the tape at the start of a block. While playing, the block that is playing
+        // finishes first, and the one after the cued block follows it.
         public void Cue(int block) {
             BlockIndex = Math.Clamp(block, 0, Math.Max(0, blocks.Count - 1));
             resumeBlock = BlockIndex;
@@ -116,11 +114,9 @@ namespace Peripherals
             callBlock = -1;
         }
 
-        /// <summary>
-        /// The motor stopped mid-tape. The next <see cref="Begin"/> plays the segment that was
-        /// playing again from its start, or from the pilot before it if it was data, so a loader
-        /// that missed the start can lock onto it again.
-        /// </summary>
+        // The motor stopped mid-tape. The next Begin plays the segment that was
+        // playing again from its start, or from the pilot before it if it was data, so a loader
+        // that missed the start can lock onto it again.
         public void Stop() {
             if (IsActive && cursorBlock >= 0 && cursorBlock < blocks.Count) {
                 int s = segIndex;
@@ -136,17 +132,15 @@ namespace Peripherals
             Halt();
         }
 
-        /// <summary>Start the motor where the tape is parked.</summary>
+        // Start the motor where the tape is parked.
         public TapeEdge Begin() {
             TapeEdge flags = TapeEdge.None;
             StartAt(resumeBlock, resumeSegment, ref flags);
             return flags;
         }
 
-        /// <summary>
-        /// The deck's Play: start where the tape is parked, or on past it when it's parked on a stop
-        /// block, and with no time run.
-        /// </summary>
+        // The deck's Play: start where the tape is parked, or on past it when it's parked on a stop
+        // block, and with no time run.
         public TapeEdge Replay() {
             pending = 0;
             if (resumeBlock == BlockIndex && resumeSegment == 0 && BlockIndex < blocks.Count && IsStopBlock(blocks[BlockIndex]))
@@ -158,7 +152,7 @@ namespace Peripherals
             return Begin();
         }
 
-        /// <summary>The pulse armed is over: flip the level and arm the next.</summary>
+        // The pulse armed is over: flip the level and arm the next.
         public TapeEdge NextEdge() {
             TapeEdge flags = TapeEdge.None;
             if (!IsActive) return flags;
@@ -171,10 +165,8 @@ namespace Peripherals
 
         // ------------------------------------------------------------------ loader acceleration
 
-        /// <summary>
-        /// Play the rest of the current phase at once (a pilot tone, say), as if that much time had
-        /// passed. Returns the T-states skipped.
-        /// </summary>
+        // Play the rest of the current phase at once (a pilot tone, say), as if that much time had
+        // passed. Returns the T-states skipped.
         public long SkipPhase(out TapeEdge flags) {
             flags = TapeEdge.None;
             long t = 0;
@@ -187,10 +179,8 @@ namespace Peripherals
             return t;
         }
 
-        /// <summary>
-        /// Read the next 8 symbols of a binary data segment as a byte, playing their pulses at once.
-        /// The tape must be at the start of a symbol. False, and nothing played, otherwise.
-        /// </summary>
+        // Read the next 8 symbols of a binary data segment as a byte, playing their pulses at once.
+        // The tape must be at the start of a symbol. False, and nothing played, otherwise.
         public bool TryReadByte(out byte value, out long tstates, out TapeEdge flags) {
             value = 0;
             tstates = 0;
@@ -210,89 +200,64 @@ namespace Peripherals
             return true;
         }
 
-        /// <summary>
-        /// Flash loading: find the data the tape will play next, passing over pilots, syncs, pauses
-        /// and text, but not over other data, raw recordings or a stop. Returns it, with the tape
-        /// moved to its start, or null with the tape left as it was.
-        /// </summary>
-        public DataSegment SeekData(Func<DataSegment, bool> match) {
-            int b, s;
-            if (IsActive && cursorBlock >= 0) {
-                b = cursorBlock;
-                s = segment is DataSegment ? segIndex + 1 : segIndex;
-            } else {
-                b = resumeBlock;
-                s = resumeSegment;
-            }
+        // Where the tape is, pulse by pulse, for flash loading's loader handlers.
 
-            int guard = blocks.Count * 4 + 64;
-            var savedLoops = loops.ToArray();
-            int savedCall = callBlock, savedCallIndex = callIndex;
-            while (guard-- > 0 && b >= 0 && b < blocks.Count) {
-                TapeBlock block = blocks[b];
-                if (s == 0 && block.Control != TapeControlKind.None) {
-                    if (IsStopBlock(block) && (block.Control == TapeControlKind.Stop || Is48K)) break;
-                    if (block.Control == TapeControlKind.SetLevel) { b++; continue; }
-                    b = FollowControl(b);
-                    continue;
-                }
-                if (s >= block.Segments.Length) {
-                    b++;
-                    s = 0;
-                    continue;
-                }
-                TapeSegment seg = block.Segments[s];
-                if (seg is DataSegment data) {
-                    if (!match(data)) break;
-                    Halt();
-                    BlockIndex = b;
-                    cursorBlock = b;
-                    segIndex = s;
-                    segment = data;
-                    return data;
-                }
-                if (!IsLeadIn(seg)) break;
-                s++;
-            }
+        // The pulse segment playing (pilot, sync, pause, raw pulses), or null.
+        public PulseSegment CurrentPulses => IsActive ? segment as PulseSegment : null;
 
-            loops.Clear();
-            for (int i = savedLoops.Length - 1; i >= 0; i--) loops.Push(savedLoops[i]);
-            callBlock = savedCall;
-            callIndex = savedCallIndex;
-            return null;
+        // The block whose signal is playing, or null.
+        public TapeBlock CurrentBlock => IsActive && cursorBlock >= 0 ? blocks[cursorBlock] : null;
+
+        // The segment playing, and its place in CurrentBlock.
+        public TapeSegment CurrentSegment => IsActive ? segment : null;
+        public int SegmentIndex => segIndex;
+
+        // In CurrentPulses: the run playing, and its pulses so far, this one included.
+        public int RunIndex => runIndex;
+        public uint PulseInRun => runPulse;
+
+        // The whole length of the pulse playing, in T-states; 0 when nothing plays.
+        public uint CurrentPulseLength => IsActive ? armedLength : 0;
+
+        // The playing pulse is the last of its run: a tone cut short.
+        public void EndRun() {
+            if (IsActive && segment is PulseSegment p && runIndex < p.Runs.Length)
+                runPulse = p.Runs[runIndex].Count;
         }
 
-        /// <summary>
-        /// Flash loading took the data <see cref="SeekData"/> found. With <paramref name="playFromByte"/>
-        /// set, the tape plays on from that byte of it (the loader wants more than the ROM read);
-        /// otherwise it's parked after it, or carries on after it if it was playing.
-        /// </summary>
-        public TapeEdge EndFlashLoad(int playFromByte, bool wasPlaying, out bool started) {
+        // End the playing pulse now, as if its time had passed.
+        public TapeEdge FinishPulse() {
+            if (!IsActive) return TapeEdge.None;
+            pending = edge;
+            return NextEdge();
+        }
+
+        // End the playing data symbol (bit) now, its remaining pulses' edges and all.
+        // edges is how many there were.
+        public TapeEdge FinishSymbol(out int edges) {
+            edges = 0;
             TapeEdge flags = TapeEdge.None;
-            started = false;
-            if (!(segment is DataSegment data) || cursorBlock < 0) return flags;
-
-            if (playFromByte >= 0) {
-                BeginSegment(segIndex, ref flags);
-                symbolIndex = (long)playFromByte * 8;
-                pending = 0;
-                Arm(ref flags);
-                started = IsActive;
-                return flags;
+            DataSegment data = CurrentData;
+            if (data == null) return flags;
+            long start = symbolIndex;
+            while (IsActive && segment == data && dataStage == 0 && symbolIndex == start) {
+                flags |= FinishPulse();
+                edges++;
             }
-
-            resumeBlock = cursorBlock;
-            resumeSegment = segIndex + 1;
-            if (resumeSegment >= blocks[cursorBlock].Segments.Length) {
-                resumeBlock = cursorBlock + 1;
-                resumeSegment = 0;
-            }
-            if (wasPlaying)
-                StartAt(resumeBlock, resumeSegment, ref flags);
-            else if (resumeBlock >= blocks.Count)
-                flags |= TapeEdge.EndOfTape;
             return flags;
         }
+
+        // Straight on to the start of the next block, by the tape's control flow.
+        public TapeEdge ForwardOneBlock() {
+            TapeEdge flags = TapeEdge.None;
+            pending = 0;
+            StartAt(BlockIndex + 1, 0, ref flags);
+            return flags;
+        }
+
+        // Turn the level over with no edge in the signal: a loader handler putting the EAR bit
+        // where the loader's own code expects it after skipping that code.
+        public void InvertLevel() => Level ^= 1;
 
         // ------------------------------------------------------------------ the state machine
 
@@ -348,6 +313,7 @@ namespace Peripherals
                 if (segment != null && NextPulse(out uint duration, out Edge rule, out TapePhase phase)) {
                     ApplyEdge(rule, ref flags);
                     Phase = phase;
+                    armedLength = duration;
                     if (duration > 0) {
                         long diff = duration - pending;
                         if (diff > 0) {
