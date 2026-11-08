@@ -31,7 +31,7 @@ namespace Speccy {
             Responded = false;
         }
 
-        public void Reset() {
+        public void Reset(bool hardReset) {
             MouseX = 0;
             MouseY = 0;
         }

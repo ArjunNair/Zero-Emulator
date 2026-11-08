@@ -29,7 +29,7 @@ namespace Speccy {
             return 0xff; 
         }
 
-        public void Reset() {
+        public void Reset(bool hardReset) {
             JoystickState = 0;
         }
         public void Out(ushort port, byte val) {

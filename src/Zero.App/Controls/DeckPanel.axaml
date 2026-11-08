@@ -239,6 +239,11 @@
       <Setter Property="StrokeLineCap" Value="Round" />
     </Style>
     <!-- Engraved divider between sections. -->
+    <!-- Keys that do nothing in the current set-up dim: the NMI key without a Multiface, and the
+         Multiface switch on a machine none fits. -->
+    <Style Selector="Button#NmiKey:disabled, ToggleButton#MultifaceKey:disabled">
+      <Setter Property="Opacity" Value="0.4" />
+    </Style>
     <Style Selector="Border.divider">
       <Setter Property="Width" Value="2" />
       <Setter Property="Margin" Value="11,4" />
@@ -403,9 +408,9 @@
       <Setter Property="BoxShadow" Value="0 0 1.5 0 #70D04000" />
     </Style>
     <!-- The keys' shadow on the plate: solid black under a black key, but under a light one it
-         shows round the bottom corners, so on silver it is a soft dark instead. Reset sits in a
-         ring rather than casting a shadow, and keeps it. -->
-    <Style Selector="c|DeckPanel.silver :is(Button):not(#ResetKey) /template/ Panel > Border:nth-child(1)">
+         shows round the bottom corners, so on silver it is a soft dark instead. Reset and NMI sit in
+         a ring rather than casting a shadow, and keep it. -->
+    <Style Selector="c|DeckPanel.silver :is(Button):not(#ResetKey):not(#NmiKey) /template/ Panel > Border:nth-child(1)">
       <Setter Property="Background" Value="#38000000" />
     </Style>
     <Style Selector="c|DeckPanel.silver Path.glyph">
@@ -464,14 +469,17 @@
             <TextBlock x:Name="VersionText" Classes="version" FontFamily="fonts:Inter#Inter, $Default" FontSize="8" FontWeight="SemiBold"
                        LetterSpacing="0.8" Margin="1,3,0,0" />
           </StackPanel>
-          <Grid Grid.Row="1" ColumnDefinitions="Auto,5,Auto" RowDefinitions="Auto,Auto,8,Auto" VerticalAlignment="Bottom" Margin="0,0,0,6">
+          <Grid Grid.Row="1" ColumnDefinitions="Auto,5,Auto" RowDefinitions="Auto,Auto,8,Auto,8,Auto" VerticalAlignment="Bottom" Margin="0,0,0,6">
             <TextBlock Grid.ColumnSpan="3" Classes="legend" HorizontalAlignment="Left" Margin="0,0,0,7" Text="DECK" />
             <ToggleButton x:Name="DeckAKey" Grid.Row="1" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
-                          ToolTip.Tip="Deck A: the cassette deck" />
-            <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" VerticalAlignment="Center" Text="A" />
+                          ToolTip.Tip="Main Deck with cassette and useful controls" />
+            <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" VerticalAlignment="Center" HorizontalAlignment="Left" Text="Main" />
             <ToggleButton x:Name="DeckBKey" Grid.Row="3" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
-                          ToolTip.Tip="Deck B: the receiver" />
-            <TextBlock Grid.Row="3" Grid.Column="2" Classes="legend" VerticalAlignment="Center" Text="B" />
+                          ToolTip.Tip="Peripherals: second deck with disk and other peripherals" />
+            <TextBlock Grid.Row="3" Grid.Column="2" Classes="legend" VerticalAlignment="Center" HorizontalAlignment="Left" Text="Peripherals" />
+            <ToggleButton x:Name="DeckCKey" Grid.Row="5" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
+                          ToolTip.Tip="Audio and Video settings" />
+            <TextBlock Grid.Row="5" Grid.Column="2" Classes="legend" VerticalAlignment="Center" HorizontalAlignment="Left" Text="A/V" />
           </Grid>
         </Grid>
       </c:DeckFaceplate>
@@ -500,10 +508,17 @@
                             ToolTip.Tip="Pause the emulator (F7)" />
               <TextBlock Grid.Row="2" Classes="legend" Text="POWER" Margin="0,3,0,0" />
               <TextBlock Grid.Row="2" Grid.Column="2" Classes="legend" Text="PAUSE" Margin="0,3,0,0" />
-              <StackPanel Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Center">
-                <Button x:Name="ResetKey" Theme="{StaticResource DeckRecessedKey}" HorizontalAlignment="Center"
-                        ToolTip.Tip="Reset the Spectrum (F9). Hold it down for a hard reset (Shift+F9)." />
-                <TextBlock Classes="legend" Text="RESET" Margin="0,2,0,0" />
+              <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="14">
+                <StackPanel>
+                  <Button x:Name="ResetKey" Theme="{StaticResource DeckRecessedKey}" HorizontalAlignment="Center"
+                          ToolTip.Tip="Reset the Spectrum (F9). Hold it down for a hard reset (Shift+F9)." />
+                  <TextBlock Classes="legend" Text="RESET" Margin="0,2,0,0" />
+                </StackPanel>
+                <StackPanel>
+                  <Button x:Name="NmiKey" Theme="{StaticResource DeckRecessedKey}" HorizontalAlignment="Center"
+                          ToolTip.Tip="NMI: the Multiface's red button. Needs the Multiface switched on, on the Storage deck." />
+                  <TextBlock Classes="legend" Text="NMI" Margin="0,2,0,0" />
+                </StackPanel>
               </StackPanel>
             </Grid>
 
@@ -668,32 +683,13 @@
         </c:DeckFaceplate>
       </Border>
 
-      <!-- The receiver: picture, sound and speed settings, and the disk drives. The sections share
-           the deck's width evenly. -->
+      <!-- The receiver: sound and speed settings, the disk drives, and the peripherals. -->
       <Border x:Name="ReceiverDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
         <c:DeckFaceplate Padding="16,10,16,9">
-          <Grid ColumnDefinitions="*,Auto,*,Auto,Auto,Auto,*,Auto,*" VerticalAlignment="Center">
-
-            <!-- Picture. -->
-            <StackPanel Grid.Column="0" Width="112" HorizontalAlignment="Center" VerticalAlignment="Center">
-              <Grid ColumnDefinitions="*,6,*" RowDefinitions="Auto,Auto" Margin="0,0,0,8">
-                <ToggleButton x:Name="CrtKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" ToolTip.Tip="CRT effects" />
-                <ToggleButton x:Name="ScanKey" Grid.Column="2" Theme="{StaticResource DeckToggle}" Width="50" Height="14" ToolTip.Tip="Scanlines" />
-                <TextBlock Grid.Row="1" Classes="legend" Text="CRT" Margin="0,3,0,0" />
-                <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" Text="SCAN" Margin="0,3,0,0" />
-              </Grid>
-              <Grid ColumnDefinitions="34,*" RowDefinitions="18,6,18">
-                <TextBlock Classes="legend" Text="CURVE" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                <c:DeckFader x:Name="CurveFader" Grid.Column="1" />
-                <TextBlock Grid.Row="2" Classes="legend" Text="HOUSING" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                <c:DeckFader x:Name="HousingFader" Grid.Row="2" Grid.Column="1" />
-              </Grid>
-            </StackPanel>
-
-            <Border Grid.Column="1" Classes="divider" />
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
 
             <!-- Sound: stereo mode and mute. -->
-            <StackPanel Grid.Column="2" Width="64" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Width="64" VerticalAlignment="Center">
               <c:DeckKnob x:Name="StereoKnob" Width="64" Height="50" Positions="MONO,ACB,ABC" ToolTip.Tip="Stereo mode" />
               <TextBlock Classes="legend" Text="STEREO" Margin="0,-9,0,10" />
               <ToggleButton x:Name="MuteKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
@@ -701,10 +697,10 @@
               <TextBlock Classes="legend" Text="MUTE" Margin="0,3,0,0" />
             </StackPanel>
 
-            <Border Grid.Column="3" Width="18" />
+            <Border Width="18" />
 
             <!-- Speed: CPU and full speed. -->
-            <StackPanel Grid.Column="4" Width="64" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Width="64" VerticalAlignment="Center">
               <c:DeckKnob x:Name="CpuKnob" Width="64" Height="50" Positions="1X,2X,4X" ToolTip.Tip="CPU speed" />
               <TextBlock Classes="legend" Text="CPU" Margin="0,-9,0,10" />
               <ToggleButton x:Name="TurboKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
@@ -712,12 +708,12 @@
               <TextBlock Classes="legend" Text="TURBO" Margin="0,3,0,0" />
             </StackPanel>
 
-            <Border Grid.Column="5" Classes="divider" />
+            <Border Classes="divider" />
 
             <!-- The drives, after the machines' own: a slot, a busy light and an eject button each. The
                  +3's A over B; the Pentagon's four two by two, A and B on the left and C and D in the
                  room to their right, so the deck gets no taller. -->
-            <Grid x:Name="DriveBays" Grid.Column="6" Width="150" ColumnDefinitions="*,6,*" RowDefinitions="Auto,8,Auto"
+            <Grid x:Name="DriveBays" Width="150" ColumnDefinitions="*,6,*" RowDefinitions="Auto,8,Auto"
                   HorizontalAlignment="Center" VerticalAlignment="Top">
               <!-- The bay: the drive letter over its busy light, the slot with the disk's name under it, and the eject button. -->
               <Border x:Name="DriveABay" Classes="bay" Grid.ColumnSpan="3" Grid.Row="0" Grid.Column="0" Height="36" CornerRadius="3" Background="#141517"
@@ -813,7 +809,39 @@
               </Border>
             </Grid>
 
-          </Grid>
+            <Border Classes="divider" />
+
+            <!-- Peripherals: interfaces that plug into the Spectrum. The Multiface fits the model
+                 the machine takes (the Multiface One on the 48K, the 128 on the 128K, the 3 on the
+                 +3 and 128KE) and has its red button as NMI on the cassette deck, beside reset. -->
+            <StackPanel Width="70" VerticalAlignment="Center">
+              <ToggleButton x:Name="MultifaceKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
+                            ToolTip.Tip="Multiface: fit the Multiface interface that suits the machine. Not on the Pentagon." />
+              <TextBlock Classes="legend" Text="MULTIFACE" Margin="0,3,0,0" />
+            </StackPanel>
+
+          </StackPanel>
+        </c:DeckFaceplate>
+      </Border>
+
+      <!-- The video deck: the picture. CRT effects and scanlines, how curved the glass is and how
+           much of the window the housing takes. -->
+      <Border x:Name="VideoDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
+        <c:DeckFaceplate Padding="16,10,16,9">
+          <StackPanel Width="200" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid ColumnDefinitions="*,6,*" RowDefinitions="Auto,Auto" Margin="0,0,0,8">
+              <ToggleButton x:Name="CrtKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" ToolTip.Tip="CRT effects" />
+              <ToggleButton x:Name="ScanKey" Grid.Column="2" Theme="{StaticResource DeckToggle}" Width="50" Height="14" ToolTip.Tip="Scanlines" />
+              <TextBlock Grid.Row="1" Classes="legend" Text="CRT" Margin="0,3,0,0" />
+              <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" Text="SCAN" Margin="0,3,0,0" />
+            </Grid>
+            <Grid ColumnDefinitions="34,*" RowDefinitions="18,6,18">
+              <TextBlock Classes="legend" Text="CURVE" HorizontalAlignment="Left" VerticalAlignment="Center" />
+              <c:DeckFader x:Name="CurveFader" Grid.Column="1" />
+              <TextBlock Grid.Row="2" Classes="legend" Text="HOUSING" HorizontalAlignment="Left" VerticalAlignment="Center" />
+              <c:DeckFader x:Name="HousingFader" Grid.Row="2" Grid.Column="1" />
+            </Grid>
+          </StackPanel>
         </c:DeckFaceplate>
       </Border>
 

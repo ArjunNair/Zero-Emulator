@@ -116,7 +116,7 @@ namespace Speccy
 
         public AY_8192() {
             UseLastOutForIN = false;
-            Reset();
+            Reset(true);
         }
 
         public void RegisterDevice(zx_spectrum speccyModel) {
@@ -278,7 +278,7 @@ namespace Speccy
             return newArray;
         }
 
-        public void Reset() {
+        public void Reset(bool hardReset) {
             for (int i = 0; i < 16; i++) {
                 AY_SpecVolumes[i] = (short)(AY_Volumes[i] * 8191);
             }

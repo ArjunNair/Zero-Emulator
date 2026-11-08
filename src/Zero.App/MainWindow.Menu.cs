@@ -17,7 +17,7 @@ namespace Zero.App
     {
         internal NativeMenuItem OpenItem, RecentMenu, SaveSnapshotItem, SaveScreenItem, OptionsItem;
         internal NativeMenuItem Machine48k, Machine128k, Machine128ke, MachinePlus3, MachinePentagon;
-        internal NativeMenuItem ResetItem, HardResetItem, PauseItem, FullSpeedItem,
+        internal NativeMenuItem ResetItem, HardResetItem, NmiItem, PauseItem, FullSpeedItem,
                                 Cpu1, Cpu2, Cpu4, LateTimingsItem, Issue2Item;
         internal NativeMenuItem RzxRecordItem, RZXRecordStopItem, RZXRecordContinueItem, RzxBookmarkItem, RzxRollbackItem, RzxFinishItem, RzxDiscardItem;
         internal NativeMenuItem TapeDeckItem, TapePlayItem, TapeStopItem, TapeRewindItem;
@@ -25,7 +25,7 @@ namespace Zero.App
         internal NativeMenuItem DiskInsertC, DiskInsertD, DiskEjectA, DiskEjectB, DiskEjectC, DiskEjectD;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
         internal NativeMenuItem CrtItem;
-        internal NativeMenuItem DeckItem, DeckAItem, DeckBItem, FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
+        internal NativeMenuItem DeckItem, DeckAItem, DeckBItem, DeckCItem, FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
         internal NativeMenuItem KeyJoyItem, KeyJoyKempston, KeyJoySinclair1, KeyJoySinclair2, KeyJoyCursor;
         internal NativeMenuItem Pad1None, Pad1Kempston, Pad1Sinclair1, Pad1Sinclair2, Pad1Cursor, KempstonPortItem, MouseItem, PauseOnFocusItem;
         internal NativeMenuItem KeyboardItem;
@@ -92,6 +92,7 @@ namespace Zero.App
                 ResetItem = Item("Reset", () => _session.Reset(false), G(Key.F9)),
                 HardResetItem = Item("Hard Reset", () => _session.Reset(true), G(Key.F9, KeyModifiers.Shift)),
                 Sep(),
+                NmiItem = Item("NMI", () => _session.Nmi()),
                 PauseItem = Item("Pause", TogglePause, G(Key.F7), checkable: true),
                 // Nothing above 4x: the overclock charges each instruction fewer T states with a
                 // floor of one, so once every instruction costs one a frame holds its own T state
@@ -167,8 +168,9 @@ namespace Zero.App
                 Submenu("Hi-Fi Decks",
                     DeckItem = Item("Show Decks", ToggleDeck, checkable: true),
                     Sep(),
-                    DeckAItem = Item("Deck A: Cassette", () => SelectDeck(0), checkable: true),
-                    DeckBItem = Item("Deck B: Receiver", () => SelectDeck(1), checkable: true)),
+                    DeckAItem = Item("Main Deck", () => SelectDeck(0), checkable: true),
+                    DeckBItem = Item("Disk/Interfaces", () => SelectDeck(1), checkable: true),
+                    DeckCItem = Item("Video", () => SelectDeck(2), checkable: true)),
                 Submenu("Pixel Filter",
                     FilterNone = Item("None", () => SelectFilter(false, false), checkable: true),
                     FilterSmooth = Item("Smooth", () => SelectFilter(true, false), checkable: true),
@@ -411,9 +413,10 @@ namespace Zero.App
 
             FullScreenItem.IsChecked = WindowState == WindowState.FullScreen;
             DeckItem.IsChecked = _settings.Render.ShowDeck;
-            DeckAItem.IsChecked = _settings.Render.ActiveDeck != 1;
+            DeckAItem.IsChecked = _settings.Render.ActiveDeck is < 1 or > 2;
             DeckBItem.IsChecked = _settings.Render.ActiveDeck == 1;
-            DeckItem.IsEnabled = DeckAItem.IsEnabled = DeckBItem.IsEnabled = _settings.Render.WindowScale > 1;
+            DeckCItem.IsChecked = _settings.Render.ActiveDeck == 2;
+            DeckItem.IsEnabled = DeckAItem.IsEnabled = DeckBItem.IsEnabled = DeckCItem.IsEnabled = _settings.Render.WindowScale > 1;
             FilterNone.IsChecked = _settings.Render.PixelFilter == 0;
             FilterSmooth.IsChecked = _settings.Render.PixelFilter == 1;
             FilterSharp.IsChecked = _settings.Render.PixelFilter == 2;

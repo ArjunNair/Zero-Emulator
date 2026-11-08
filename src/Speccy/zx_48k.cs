@@ -80,11 +80,7 @@ namespace Speccy
             PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW]; //Bank 0
             PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH]; //Bank 0
 
-            Random rand = new Random();
-            //Fill memory with random stuff to simulate hard reset
-            for (int i = DisplayStart; i < DisplayStart + 6912; ++i)
-                PokeByteNoContend(i, rand.Next(255));
-
+            InitRam();
             screen = GetPageData(5);
             screenByteCtr = DisplayStart;
             ULAByteCtr = 0;

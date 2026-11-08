@@ -91,7 +91,7 @@ namespace Speccy
             Enabled = true;
         }
 
-        public void Reset() {
+        public void Reset(bool hardReset) {
             lastULAPlusOut = 0;
             GroupMode = 0;
             PaletteGroup = 0;

@@ -82,11 +82,9 @@ namespace Speccy
             showShadowScreen = false;
             contentionStartPeriod = 14361 + LateTiming;
             contentionEndPeriod = contentionStartPeriod + (ScreenHeight * TstatesPerScanline); //57324 + LateTiming;
-            Random rand = new Random();
+            
+            InitRam();
 
-            //Fill memory with zero to simulate hard reset
-            for (int i = DisplayStart; i < DisplayStart + 6912; ++i)
-                PokeByteNoContend(i, rand.Next(255));
             screen = GetPageData(5); //Bank 5 is a copy of the screen
 
             screenByteCtr = DisplayStart;
@@ -415,6 +413,8 @@ namespace Speccy
                 showShadowScreen = false;
                 screen = GetPageData(5); //Bank 5
             }
+
+            PageInMultiface();
         }
 
         private void Out_1ffd(int val) {
@@ -554,6 +554,7 @@ namespace Speccy
 
                 NormalPaging(last7ffdOut);
             }
+            PageInMultiface();
         }
 
         private void Out_7ffd(int val) {
@@ -585,6 +586,7 @@ namespace Speccy
 
                 showShadowScreen = !showShadowScreen;
             }
+
         }
 
         public override void Out(ushort port, byte val) {
@@ -722,6 +724,7 @@ namespace Speccy
                 }
 
                 Out(0x7ffd, val); //Perform a dummy Out to setup the remaining stuff!
+                PageInMultiface();
             }
         }
 
@@ -755,6 +758,7 @@ namespace Speccy
                 Out(0x7ffd, szx.specRegs.x7ffd); //Perform a dummy Out to setup the remaining stuff!
                 borderColour = szx.specRegs.Border;
                 cpu.t_states = (int)szx.z80Regs.CyclesStart;
+                PageInMultiface();
             }
         }
 
@@ -792,9 +796,28 @@ namespace Speccy
                 }
             }
 
-
             Out(0xfffd, z80.PORT_FFFD); //Setup the sound chip
             Out(0x7ffd, z80.PORT_7FFD); //Perform a dummy Out to setup the remaining stuff!
+            PageInMultiface();
+        }
+
+        public override void PageOutMultiface() {
+            if (multiface == null || !multiface.PagedIn) return;
+            //ROM select
+            int romSelect = ((last1ffdOut & 0x04) >> 1) | ((last7ffdOut >> 4) & 0x01);
+            PageReadPointer[0] = ROMpage[romSelect * 2];
+            PageReadPointer[1] = ROMpage[romSelect * 2 + 1];
+
+            PageWritePointer[0] = JunkMemory[0];
+            PageWritePointer[1] = JunkMemory[1];
+            if (romSelect == 3)
+                lowROMis48K = true;
+            else
+                lowROMis48K = false;
+            //Debugging string for monitor
+            BankInPage0 = (romSelect > 1 ? romSelect == 3 ? ROM_48_BAS : ROM_PLUS3_DOS : romSelect == 1 ? ROM_128_SYN : ROM_128_BAS);
+
+
         }
     }
 }

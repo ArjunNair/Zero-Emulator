@@ -85,7 +85,7 @@ namespace Zero.Emulation.Settings
         public string DeckFinish { get; set; } = "Black";
         /// <summary>Show the hi-fi decks under the screen.</summary>
         public bool ShowDeck { get; set; } = true;
-        /// <summary>Which deck is showing: 0 the cassette deck (A), 1 the receiver (B).</summary>
+        /// <summary>Which deck is showing: 0 the cassette deck (A), 1 the receiver (B), 2 the video deck (C).</summary>
         public int ActiveDeck { get; set; }
         public CrtSettings Crt { get; set; } = new CrtSettings();
     }
@@ -130,6 +130,8 @@ namespace Zero.Emulation.Settings
     {
         public bool Use128keForSnapshots { get; set; }
         public bool UseIssue2Keyboard { get; set; }
+        // Fit the Multiface that suits the machine (none on the Pentagon).
+        public bool EnableMultiface { get; set; }
         public bool LateTimings { get; set; }
         public bool PauseOnFocusLost { get; set; } = true;
         public bool ConfirmOnExit { get; set; } = true;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Peripherals;
@@ -385,6 +386,87 @@ namespace Zero.Emulation
             }
         }
 
+        // Which Multiface fits which machine, and the ROM it needs in the roms folder. The Pentagon takes none.
+        private static bool MultifaceFor(MachineModel model, out MultifaceModel type, out string rom)
+        {
+            switch (model)
+            {
+                case MachineModel._16k:
+                case MachineModel._48k:
+                case MachineModel._NTSC48k:
+                    type = MultifaceModel.Multiface_1;
+                    rom = "mf1.rom";
+                    return true;
+                case MachineModel._128k:
+                case MachineModel._plus2:
+                    type = MultifaceModel.Multiface_128;
+                    rom = "mf128.rom";
+                    return true;
+                case MachineModel._plus2A:
+                case MachineModel._plus3:
+                case MachineModel._plus3E:
+                case MachineModel._128ke:
+                    type = MultifaceModel.Multiface_3;
+                    rom = "mf3.rom";
+                    return true;
+                default:
+                    type = MultifaceModel.Multiface_1;
+                    rom = null;
+                    return false;
+            }
+        }
+
+        // True when the machine now running can take a Multiface.
+        public bool CanFitMultiface => MultifaceFor(Model, out _, out _);
+
+        // True while a Multiface is fitted to the machine now running.
+        public bool HasMultiface { get; private set; }
+
+        // Fit the Multiface for this machine. False if none fits it or its ROM could not be loaded.
+        private bool EnableMultiface(zx_spectrum zx)
+        {
+            if (!MultifaceFor(zx.model, out MultifaceModel type, out string romFile)) return false;
+
+            string romDir = RomDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()) ? RomDirectory : RomDirectory + Path.DirectorySeparatorChar;
+            var multiface = new Multiface { Model = type };
+            try
+            {
+                using (var fs = new FileStream(romDir + romFile, FileMode.Open, FileAccess.Read))
+                {
+                    if (fs.Read(multiface.ROM, 0, multiface.ROM.Length) == 0)
+                        throw new IOException("empty file");
+                }
+            }
+            catch (Exception)
+            {
+                Error?.Invoke($"Could not load Multiface ROM '{romFile}' from {romDir}");
+                return false;
+            }
+            zx.AddDevice(multiface);
+            return true;
+        }
+
+        // Bring the machine in line with the Multiface setting: fit one that is wanted and missing, take
+        // away one that is fitted and not wanted. A ROM that will not load turns the setting back off, so
+        // the switch shows that nothing was fitted. Emulation thread.
+        private void SyncMultiface(zx_spectrum zx)
+        {
+            bool want = Settings.Emulation.EnableMultiface && MultifaceFor(zx.model, out _, out _);
+            bool fitted = zx.io_devices.Any(d => d.DeviceID == SPECCY_DEVICE.MULTIFACE);
+            if (want && !fitted)
+            {
+                if (!EnableMultiface(zx)) Settings.Emulation.EnableMultiface = false;
+            }
+            else if (!want && fitted)
+            {
+                zx.RemoveDevice(SPECCY_DEVICE.MULTIFACE);
+            }
+            HasMultiface = zx.io_devices.Any(d => d.DeviceID == SPECCY_DEVICE.MULTIFACE);
+        }
+
+        // Apply the Multiface setting to the machine running (UI thread safe).
+        public void ApplyMultiface() => Post(() => { if (_zx != null) SyncMultiface(_zx); });
+
         // ------------------------------------------------------------------ machine management
 
         /// <summary>Switch machine model (emulation thread). The current machine is discarded.</summary>
@@ -409,6 +491,7 @@ namespace Zero.Emulation
                 Error?.Invoke($"Could not load ROM '{romFile}' from {romDir}");
 
             ApplySettingsTo(zx);
+            SyncMultiface(zx);
             Tape.Attach(zx);
             AttachDisks(zx);
 
@@ -489,6 +572,8 @@ namespace Zero.Emulation
         public void ApplySettings() => Post(() => { if (_zx != null) ApplySettingsTo(_zx); });
 
         public void Reset(bool hard) => Post(() => ResetCore(hard));
+        
+        public void Nmi() => Post(() => NmiCore());
 
         private void ResetCore(bool hard)
         {
@@ -497,6 +582,13 @@ namespace Zero.Emulation
             _zx.Reset(hard);
             _zx.ResetKeyboard();
             Keyboard.ReleaseAll();
+            _autoLoadPending = false;
+        }
+
+        private void NmiCore() {
+            if (_zx == null) return;
+            StopRzxCore();
+            _zx.Nmi();
             _autoLoadPending = false;
         }
 

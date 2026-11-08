@@ -158,11 +158,8 @@ namespace Speccy
             contentionStartPeriod = 14337;
             contentionEndPeriod = contentionStartPeriod + (ScreenHeight * TstatesPerScanline); //57324 + LateTiming;
             lowROMis48K = false;
-            Random rand = new Random();
-
-            //Fill memory with zero to simulate hard reset
-            for (int i = DisplayStart; i < DisplayStart + 6912; ++i)
-                PokeByteNoContend(i, rand.Next(255));
+           
+            InitRam();
             screen = GetPageData(5); //Bank 5 is a copy of the screen
 
             screenByteCtr = DisplayStart;

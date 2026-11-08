@@ -622,6 +622,7 @@ namespace Cpu
         public void NMI() {
             iff_1 = false;
             is_halted = false;
+            regs.R++;
             PushStack(regs.PC);
             t_states += 5;
             regs.PC = 0x66;

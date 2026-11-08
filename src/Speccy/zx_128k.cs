@@ -83,13 +83,9 @@ namespace Speccy
             contendedBankPagedIn = false;
             pagingDisabled = false;
             showShadowScreen = false;
-            borderColour = 7;
+            borderColour = 3;
 
-            Random rand = new Random();
-            //Fill memory with random stuff to simulate hard reset
-            for (int i = DisplayStart; i < DisplayStart + 6912; ++i)
-                PokeByteNoContend(i, rand.Next(255));
-
+            InitRam();
             screen = GetPageData(5); //Bank 5 is a copy of the screen
             screenByteCtr = DisplayStart;
             ULAByteCtr = 0;
@@ -103,7 +99,6 @@ namespace Speccy
             foreach (var ad in audio_devices) {
                 ad.Reset();
             }
-            
         }
 
         public override bool IsContended(int addr) {
@@ -450,6 +445,30 @@ namespace Speccy
             if ((val & 0x20) != 0) {
                 pagingDisabled = true;
             }
+            PageInMultiface();
+        }
+
+        public override void PageOutMultiface() {
+            if (multiface == null || !multiface.PagedIn) return;
+            //ROM select
+            if ((last7ffdOut & 0x10) != 0) {
+                //48k basic
+                PageReadPointer[0] = ROMpage[2];
+                PageReadPointer[1] = ROMpage[3];
+                PageWritePointer[0] = JunkMemory[0];
+                PageWritePointer[1] = JunkMemory[1];
+                BankInPage0 = ROM_48_BAS;
+                lowROMis48K = true;
+            }
+            else {
+                //128k basic
+                PageReadPointer[0] = ROMpage[0];
+                PageReadPointer[1] = ROMpage[1];
+                PageWritePointer[0] = JunkMemory[0];
+                PageWritePointer[1] = JunkMemory[1];
+                BankInPage0 = ROM_128_BAS;
+                lowROMis48K = false;
+            }
         }
 
         public override void Out(ushort port, byte val) {
@@ -566,6 +585,7 @@ namespace Speccy
                 }
 
                 Out(0x7ffd, val); //Perform a dummy Out to setup the remaining stuff!
+                PageInMultiface();
             }
         }
 
@@ -599,6 +619,7 @@ namespace Speccy
                 Out(0x7ffd, szx.specRegs.x7ffd); //Perform a dummy Out to setup the remaining stuff!
                 borderColour = szx.specRegs.Border;
                 cpu.t_states = (int)szx.z80Regs.CyclesStart;
+                PageInMultiface();
             }
         }
 
@@ -639,6 +660,7 @@ namespace Speccy
 
             Out(0xfffd, z80.PORT_FFFD); //Setup the sound chip
             Out(0x7ffd, z80.PORT_7FFD); //Perform a dummy Out to setup the remaining stuff!
+            PageInMultiface();
         }
     }
 }

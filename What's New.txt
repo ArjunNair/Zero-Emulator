@@ -7,6 +7,13 @@ v 1.1
 * Fixed Kempston Joystick emulation
 * Fixed tapes always playing at full speed, even with Edge and Fast loading switched off.
 * Added back +3 disk support using Andre Leiradella's open source fdc765 port of the original Windows version.
+* Added support for Multiface 1, 128 and 3.
+* Added back TZX (all of v1.20) and CSW tape support. TZX decoding is adapted from the TZX player in rustzx 
+(which was also written by me).
+* PZX, TZX and CSW tapes now all play through one tape state machine, for custom loader acceleration to build on.
+* Flash loading support ported from Spin 2's flash loader with the ZXDunny's permission.
+* Fixed fast loading giving up after the first block of a TAP tape, which left the ROM waiting for a tape
+that never played when auto play was off.
 * Added back Pentagon TR-DOS disk support (both TRD and SCL) by porting Spin's Beta128 pascal source provided by
 ZXDunny and used with his permission.
 * Added GUI that looks like a hi-fi deck:

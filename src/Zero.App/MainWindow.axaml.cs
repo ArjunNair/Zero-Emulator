@@ -769,7 +769,7 @@ namespace Zero.App
         private void ShowAbout() => _ = MessageDialog.ShowAsync(this, "About Zero X",
             "Zero X — a ZX Spectrum emulator\nCopyright © 2009-2026 Arjun Nair\n\n" +
             "Cross-platform build: .NET " + Environment.Version + ", Avalonia UI, SDL3 audio & gamepads.\n" +
-            "Emulates the 48K, 128K, 128Ke, +3 (with its disk drives) and Pentagon 128K.");
+            "Emulates the 48K, 128K/+2, 128Ke, +2A/+3 (with its disk drives) and Pentagon 128K.");
 
         private void ToggleTape()
         {

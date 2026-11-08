@@ -35,6 +35,7 @@ namespace Zero.App.Controls
             // The selector keys are radio buttons: pressing the lit one leaves it lit.
             DeckAKey.Click += (_, __) => { SelectDeck(SelectedDeck); DeckRequested?.Invoke(0); };
             DeckBKey.Click += (_, __) => { SelectDeck(SelectedDeck); DeckRequested?.Invoke(1); };
+            DeckCKey.Click += (_, __) => { SelectDeck(SelectedDeck); DeckRequested?.Invoke(2); };
             MachineSwitch.ValueChangedByUser += (_, v) => { _requestedMachine = MachineAt(v); _requestedAt = DateTime.UtcNow; };
             // The faders' tooltips give their setting, and keep up as they are dragged.
             CurveFader.PropertyChanged += (_, e) => { if (e.Property == DeckFader.ValueProperty) ShowFaderTips(); };
@@ -166,6 +167,12 @@ namespace Zero.App.Controls
             VolumeKnob.Value = settings.Audio.Volume;
             MuteKey.IsChecked = settings.Audio.Mute;
             TurboKey.IsChecked = settings.Emulation.EmulationSpeed > 1;
+            // The Multiface switch shows what the user asked for where one fits; the NMI key works
+            // once one is actually fitted.
+            bool canFit = session.CanFitMultiface;
+            MultifaceKey.IsEnabled = canFit;
+            MultifaceKey.IsChecked = canFit && settings.Emulation.EnableMultiface;
+            NmiKey.IsEnabled = session.HasMultiface;
         }
 
         /// <summary>Width of the drive bays: the +3's two full width, or the Pentagon's four two by two.</summary>
@@ -217,26 +224,31 @@ namespace Zero.App.Controls
             driveLed.Dim = light == DiskLight.Dim;
         }
 
-        /// <summary>The deck showing: 0 the cassette deck (A), 1 the receiver (B).</summary>
+        /// <summary>The deck showing: 0 the cassette deck (A), 1 the receiver (B), 2 the video deck (C).</summary>
         public int SelectedDeck { get; private set; }
 
         /// <summary>Raised when a DECK selector key is pressed, with the deck asked for.</summary>
         public event Action<int> DeckRequested;
 
         /// <summary>
-        /// Show one deck. Both stay laid out, one over the other, so the deck area keeps its size;
+        /// Show one deck. All stay laid out, one over the other, so the deck area keeps its size;
         /// the other is made transparent and stops taking the pointer.
         /// </summary>
         public void SelectDeck(int deck)
         {
-            SelectedDeck = deck == 1 ? 1 : 0;
-            bool cassette = SelectedDeck == 0;
-            CassetteDeck.Opacity = cassette ? 1 : 0;
-            CassetteDeck.IsHitTestVisible = cassette;
-            ReceiverDeck.Opacity = cassette ? 0 : 1;
-            ReceiverDeck.IsHitTestVisible = !cassette;
-            DeckAKey.IsChecked = cassette;
-            DeckBKey.IsChecked = !cassette;
+            SelectedDeck = Math.Clamp(deck, 0, 2);
+            ShowOnly(CassetteDeck, SelectedDeck == 0);
+            ShowOnly(ReceiverDeck, SelectedDeck == 1);
+            ShowOnly(VideoDeck, SelectedDeck == 2);
+            DeckAKey.IsChecked = SelectedDeck == 0;
+            DeckBKey.IsChecked = SelectedDeck == 1;
+            DeckCKey.IsChecked = SelectedDeck == 2;
+        }
+
+        private static void ShowOnly(Control deck, bool showing)
+        {
+            deck.Opacity = showing ? 1 : 0;
+            deck.IsHitTestVisible = showing;
         }
 
         /// <summary>Frames per second, or "PAUSE", in the corner of the display.</summary>

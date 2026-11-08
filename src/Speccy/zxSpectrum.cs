@@ -33,6 +33,7 @@ namespace Speccy
         public event FrameStartEventHandler FrameStartEvent;
         public event RZXPlaybackStartEventHandler RZXPlaybackStartEvent;
         public event RZXFrameEndEventHandler RZXFrameEndEvent;
+        public event NmiProcessEventHandler NmiProcessEvent;
 
         protected void OnFrameEndEvent()
         {
@@ -85,8 +86,6 @@ namespace Speccy
 
         #endregion
 
-
-
         public Z80 cpu;
         public ULA_Plus ula_plus = new ULA_Plus();
         //public Z80_Registers regs;
@@ -101,7 +100,8 @@ namespace Speccy
         public List<IODevice> io_devices = new List<IODevice>();
         public List<AudioDevice> audio_devices = new List<AudioDevice>();
         protected Random rnd_generator = new Random();
-
+        protected Multiface multiface;
+        protected bool NmiPending = false;
         protected int[] keyLine = { 255, 255, 255, 255, 255, 255, 255, 255 };
 
         public int[] AttrColors = new int[16];
@@ -158,6 +158,7 @@ namespace Speccy
         protected int lastFEOut = 0;        //The ULA Port
         protected int last7ffdOut = 0;      //Paging port on 128k/+2/+3/Pentagon
         protected int last1ffdOut = 0;      //Paging + drive motor port on +3
+        public int Last7ffdOut => last7ffdOut;
 
         //Port 0xfe constants
         protected const int BORDER_BIT = 0x07;
@@ -440,14 +441,21 @@ namespace Speccy
             int at = io_devices.FindIndex(d => d.Priority < device.Priority);
             if (at < 0) io_devices.Add(device); else io_devices.Insert(at, device);   // stable among equals
             device.RegisterDevice(this);
+            if (device.DeviceID == SPECCY_DEVICE.MULTIFACE) {
+                multiface = (Multiface)device;
+            }
         }
         
         public void RemoveIODevice(IODevice device)
         {
+            // A Multiface that is paged in gives the low 16K back before it goes.
+            if (device.DeviceID == SPECCY_DEVICE.MULTIFACE) PageOutMultiface();
             device.UnregisterDevice(this);
             io_devices.Remove(device);
+            if (device.DeviceID == SPECCY_DEVICE.MULTIFACE) {
+                multiface = null;
+            }
         }
-
 
         public string Disassemble(ushort address) {
             string dis = "";
@@ -6309,10 +6317,14 @@ namespace Speccy
             flashFrameCount = 0;
 
             if (ula_plus != null) {
-                ula_plus.Reset();
+                ula_plus.Reset(hardReset);
+            }
+
+            if (multiface != null) {
+                PageOutMultiface();
             }
             foreach (var d in io_devices) {
-                d.Reset();
+                d.Reset(hardReset);
             }
             timeToOutSound = 0;
             soundCounter = 0;
@@ -6327,6 +6339,46 @@ namespace Speccy
             resetFrameTarget = rnd_generator.Next(40, 90);
             resetFrameCounter = 0;
             inputFrameTime = rnd_generator.Next(FrameLength);
+        }
+
+        // Simulates the visual pattern visible in different spectrum models during reset.
+        // Taken from SpectIde with permission from TheMartian. Nov 7, 2026
+        protected void InitRam() {
+            uint width = 4;
+            int mask = 0xff;
+
+            switch (model) {
+                case MachineModel._128k:
+                case MachineModel._plus2:
+                    width = 8; mask = 0x00; break;
+                case MachineModel._plus2A:
+                case MachineModel._plus3:
+                case MachineModel._plus3E:
+                    width = 64; mask = 0x00; break;
+                case MachineModel._pentagon:
+                    width = 4; mask = 0xff; break;
+                default:
+                    width = 4; mask = 0xff; break;
+
+            }
+            var rand = new Random();
+            for (uint i = 0; i < (1 << 17); i += (2 * width)) {
+                for (uint j = 0; j < width; ++j) {
+                    uint prob = 0x40 * j / width;
+                    int first = ((rand.Next() & 0xff) < prob) ?
+                                    (rand.Next() & 0x0f): mask;
+
+                    int second = ((rand.Next() & 0xff) < prob) ?
+                                    (rand.Next() & 0x0f): ~mask;
+
+                    PokeByteNoContend((int)(i + j), first);
+                    PokeByteNoContend((int)(i + width + j), second);
+                }
+            }
+        }
+
+        public void Nmi() {
+            NmiPending = true;
         }
 
         // Reset tape state
@@ -6541,8 +6593,9 @@ namespace Speccy
                     //lock (lockThis)
                     {
 #region Tape Save Trap
-                        //Tape Save trap is active only if lower ROM is 48k
-                        if (cpu.regs.PC == 0x04d1 && !tapeTrapsDisabled && lowROMis48K)
+                        //Tape Save trap is active only if lower ROM is 48k, and not while a paged in Multiface
+                        //has its own code at that address
+                        if (cpu.regs.PC == 0x04d1 && !tapeTrapsDisabled && lowROMis48K && !(multiface != null && multiface.PagedIn))
                         {
                             OnTapeEvent(new TapeEventArgs(TapeEventType.SAVE_TAP));
                             cpu.regs.IX = (ushort)(cpu.regs.IX + cpu.regs.DE);
@@ -6699,20 +6752,28 @@ namespace Speccy
             }
         }
 
+        public virtual void PageInMultiface() {
+            if (multiface == null || !multiface.PagedIn) return;
+            PageReadPointer[0] = multiface.ROM;
+            PageWritePointer[0] = JunkMemory[0];
+            PageReadPointer[1] = multiface.RAM;
+            PageWritePointer[1] = multiface.RAM;
+        }
+
+        public virtual void PageOutMultiface() {
+            if (multiface == null || !multiface.PagedIn) return;
+            PageReadPointer[0] = ROMpage[0];
+            PageWritePointer[0] = JunkMemory[0];
+            PageReadPointer[1] = ROMpage[1];
+            PageWritePointer[1] = JunkMemory[1];
+        }
+
         //Returns a copy of a full 16K RAM bank (both 8K halves).
         public byte[] GetRAMBank(int bank) {
             byte[] result = new byte[16384];
             System.Buffer.BlockCopy(RAMpage[bank * 2], 0, result, 0, 8192);
             System.Buffer.BlockCopy(RAMpage[bank * 2 + 1], 0, result, 8192, 8192);
             return result;
-        }
-
-        //Pokes bytes from an array into contiguous rom banks.
-        public void PokeROMPages(int bank, int dataLength, byte[] data) {
-            for (int f = 0; f < dataLength; f++) {
-                int indx = f / 8192;
-                ROMpage[bank * 2 + indx][f % 8192] = data[f];
-            }
         }
 
         //Pokes the byte at a given 16 bit address with no contention
@@ -7925,6 +7986,12 @@ namespace Speccy
                 prevT = cpu.t_states;
                 cpu.parityBitNeedsReset = false;
 
+                if (NmiPending) {
+                    NmiPending = false;
+                    cpu.NMI();
+                    NmiProcessEvent?.Invoke();
+                    PageInMultiface();
+                }
                 //Flash loading: a loader routine run as its result, in no time
                 if (!(flashLoader.TrapPC == cpu.regs.PC && tapeIsPlaying && tape_flashLoad && flashLoader.OnTrapPC()))
                     cpu.Step();

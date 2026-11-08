@@ -27,7 +27,7 @@
               <TextBlock Grid.Row="2" Text="Saves" VerticalAlignment="Center" />
               <TextBox Grid.Row="2" Grid.Column="1" x:Name="SavesPath" Margin="0,2" />
               <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="SavesPath" Click="OnBrowseFolder" />
-              <TextBlock Grid.Row="2" Text="Screenshots" VerticalAlignment="Center" />
+              <TextBlock Grid.Row="3" Text="Screenshots" VerticalAlignment="Center" />
               <TextBox Grid.Row="3" Grid.Column="1" x:Name="ScreenshotsPath" Margin="0,2" />
               <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="ScreenshotsPath" Click="OnBrowseFolder" />
             </Grid>
@@ -47,14 +47,14 @@
               <TextBlock Grid.Row="2" Text="Spectrum 128Ke" VerticalAlignment="Center" />
               <TextBox Grid.Row="2" Grid.Column="1" x:Name="Rom128ke" Margin="0,2" />
               <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128ke" Click="OnBrowseRom" />
-              <TextBlock Grid.Row="2" Text="Spectrum +3" VerticalAlignment="Center" />
+              <TextBlock Grid.Row="3" Text="Spectrum +3" VerticalAlignment="Center" />
               <TextBox Grid.Row="3" Grid.Column="1" x:Name="RomPlus3" Margin="0,2" />
               <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPlus3" Click="OnBrowseRom" />
-              <TextBlock Grid.Row="3" Text="Pentagon 128K" VerticalAlignment="Center" />
+              <TextBlock Grid.Row="4" Text="Pentagon 128K" VerticalAlignment="Center" />
               <TextBox Grid.Row="4" Grid.Column="1" x:Name="RomPentagon" Margin="0,2" />
               <Button Grid.Row="4" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPentagon" Click="OnBrowseRom" />
             </Grid>
-            <TextBlock Text="The Pentagon also needs trdos.rom in the same folder." Foreground="#BBBBBB" />
+            <TextBlock Text="You can assign a custom ROM for a system here." Foreground="#BBBBBB" />
           </StackPanel>
         </ScrollViewer>
       </TabItem>
@@ -145,7 +145,7 @@
               <TextBlock Grid.Row="4" Grid.Column="2" x:Name="CrtDiffuseValue" VerticalAlignment="Center" Margin="10,0,0,0" />
             </Grid>
             <TextBlock Foreground="#BBBBBB" TextWrapping="Wrap"
-                       Text="Zero&apos;s own shader, which Skia runs on the GPU where there is one and on the CPU otherwise. Edge light spills the picture onto the surround instead of leaving it black. Housing is the inner casing the screen sits in, which the edge light falls on; the picture is pushed in to make room for it, so widening it trades picture size for the illusion of looking into a set. Diffusion is how blurred the picture is before the housing reflects it: none is a mirror, full a wash of colour." />
+                       Text="Edge light controls the spill of the picture onto the surrounding. Housing is the inner casing the screen sits in, which the edge light falls on; the picture is pushed in to make room for it, so widening it trades picture size for the illusion of looking into a set. Diffusion is how blurred the picture is before the housing reflects it: none is a mirror, full a wash of colour." />
           </StackPanel>
         </ScrollViewer>
       </TabItem>

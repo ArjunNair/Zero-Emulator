@@ -722,5 +722,35 @@ namespace Zero.App.Tests
             Assert.Equal(2, reported);
             w.Close();
         }
+
+        [AvaloniaFact]
+        public void The_video_deck_holds_the_picture_keys_and_the_peripherals_sit_on_the_receiver()
+        {
+            MainWindow w = Boot();
+            var d = w.Deck;
+
+            // The picture controls moved from the receiver to deck C; the Multiface switch joined the
+            // receiver, and its NMI key sits beside reset on the cassette deck.
+            Assert.True(d.VideoDeck.IsVisualAncestorOf(d.CrtKey));
+            Assert.True(d.VideoDeck.IsVisualAncestorOf(d.ScanKey));
+            Assert.True(d.VideoDeck.IsVisualAncestorOf(d.CurveFader));
+            Assert.True(d.VideoDeck.IsVisualAncestorOf(d.HousingFader));
+            Assert.False(d.ReceiverDeck.IsVisualAncestorOf(d.CrtKey));
+            Assert.True(d.ReceiverDeck.IsVisualAncestorOf(d.MultifaceKey));
+            Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.NmiKey));
+
+            Press(d.DeckCKey);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(2, d.SelectedDeck);
+            Assert.True(d.DeckAKey.IsChecked == false && d.DeckBKey.IsChecked == false && d.DeckCKey.IsChecked == true);
+            Assert.Equal(1, d.VideoDeck.Opacity);
+            Assert.Equal(0, d.CassetteDeck.Opacity);
+            Assert.Equal(0, d.ReceiverDeck.Opacity);
+            Assert.False(d.ReceiverDeck.IsHitTestVisible);
+            Assert.Equal(2, w.Session.Settings.Render.ActiveDeck);
+            Assert.True(w.DeckCItem.IsChecked);
+            Assert.False(w.DeckAItem.IsChecked);
+            w.Close();
+        }
     }
 }

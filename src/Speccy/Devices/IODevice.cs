@@ -10,7 +10,7 @@ namespace Speccy {
         void Out(ushort port, byte val);
         void RegisterDevice(zx_spectrum speccyModel) {}
         void UnregisterDevice(zx_spectrum speccyModel);
-        void Reset();
+        void Reset(bool hardReset = false);
         SPECCY_DEVICE DeviceID { get; }
     }
 }

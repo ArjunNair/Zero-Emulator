@@ -31,6 +31,8 @@ namespace Zero.App
             d.PauseKey.Click += (_, __) => TogglePause();
             d.PowerKey.Click += (_, __) => Close(); // asks first when Confirm on Exit is set
             WireResetKey(d.ResetKey);
+            d.NmiKey.Click += (_, __) => { _session.Nmi(); SetStatus("NMI"); };
+            d.MultifaceKey.Click += (_, __) => ToggleMultiface();
 
             // Like a VCR, the eject key loads a tape when the deck is empty.
             d.EjectKey.Click += (_, __) =>
@@ -169,12 +171,23 @@ namespace Zero.App
             RefreshMenuState();
         }
 
-        /// <summary>Show deck A (the cassette deck) or B (the receiver), from the DECK keys or the menu.</summary>
+        /// <summary>Show deck A (cassette), B (receiver) or C (video), from the DECK keys or the menu.</summary>
         private void SelectDeck(int deck)
         {
-            _settings.Render.ActiveDeck = deck == 1 ? 1 : 0;
+            _settings.Render.ActiveDeck = Math.Clamp(deck, 0, 2);
             Deck.SelectDeck(_settings.Render.ActiveDeck);
             RefreshMenuState();
+        }
+
+        /// <summary>
+        /// The Multiface switch: fit the interface that suits the machine, or take it away. The
+        /// session says if the ROM could not be loaded, and the switch goes back off.
+        /// </summary>
+        private void ToggleMultiface()
+        {
+            _settings.Emulation.EnableMultiface = !_settings.Emulation.EnableMultiface;
+            _session.ApplyMultiface();
+            RefreshDeck();
         }
 
         /// <summary>A drive's eject button: out with the disk, or, with none in, choose one to put in.</summary>

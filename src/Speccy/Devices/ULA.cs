@@ -89,9 +89,7 @@ namespace Speccy
             return result;
         }
 
-        public void Reset() {
-
-        }
+        public void Reset(bool hardReset) {}
 
         public void Out(ushort port, byte val) {
             Responded = false;

@@ -48,6 +48,7 @@ namespace SpeccyCommon
         ULA_48K,
         ULA_Pentagon,
         ULA_PLUS,
+        MULTIFACE,
         KEMPSTON_JOYSTICK,
         SINCLAIR1_JOYSTICK,
         SINCLAIR2_JOYSTICK,
@@ -338,5 +339,7 @@ namespace SpeccyCommon
     public delegate void RZXFrameEndEventHandler(object sender, RZXFrameEventArgs e);
 
     public delegate void ULAOutEventHandler();
+
+    public delegate void NmiProcessEventHandler();
     #endregion
 }
