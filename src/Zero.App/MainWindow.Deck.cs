@@ -58,7 +58,7 @@ namespace Zero.App
             d.HousingFader.ValueChangedByUser += (_, v) => { _settings.Render.Crt.Bezel = v * DeckPanel.MaxHousing; ApplyCrtSettings(); };
 
             // Switching machine resets it, so the switch only reports once it is let go.
-            d.MachineSwitch.ValueChangedByUser += (_, v) => SelectMachine(DeckPanel.MachineAt(v));
+            d.MachineKnob.ValueChangedByUser += (_, v) => SelectMachine(DeckPanel.MachineAt((int)v));
             d.JoystickSwitch.ValueChangedByUser += (_, v) => SetDeckJoystick(DeckPanel.JoystickSourceAt(_settings.Input), v + 1);
             // The source keys are radio buttons: pressing the lit one leaves it lit (RefreshDeck relights them).
             d.JoystickCursorKey.Click += (_, __) => SetDeckJoystick(DeckPanel.JoystickSourceCursor, d.JoystickSwitch.Value + 1);

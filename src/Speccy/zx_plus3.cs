@@ -5,6 +5,7 @@ using SpeccyCommon;
 
 namespace Speccy
 {
+    // Also emulates the +2A by simply turning off the disk drives.
     public class zx_plus3 : Speccy.zx_spectrum
     {
         //Disk emulation related stuff
@@ -13,9 +14,11 @@ namespace Speccy
 
         /// <summary>The floppy controller, for reading the drives' state (which is busy).</summary>
         public UDP765 FloppyController => udpDrive;
+        public bool Plus2AMode = false;
 
-        public zx_plus3(IAudioOutput audioOutput, bool lateTimingModel)
+        public zx_plus3(IAudioOutput audioOutput, bool lateTimingModel, bool plus2AMode = false)
             : base(audioOutput, lateTimingModel) {
+            Plus2AMode = plus2AMode;
             FrameLength = 70908;
             InterruptPeriod = 32;
             clockSpeed = 3.54690;
@@ -57,14 +60,16 @@ namespace Speccy
 
             EnableAY(true);
             Reset(true);
-            udpDrive.DiskInitialise();
+            if (!Plus2AMode)
+                udpDrive.DiskInitialise();
         }
 
         public override void Reset(bool coldBoot)
         {
             lock (lockThis) {
                 special64KRAM = false;
-                udpDrive.DiskReset();
+                if (!Plus2AMode)
+                    udpDrive.DiskReset();
                 base.Reset(coldBoot);
 
                 contentionStartPeriod = 14361;// The +3 didn't have late timings!
@@ -116,6 +121,7 @@ namespace Speccy
         }
 
         public override void DiskInsert(string filename, byte _unit) {
+            if (Plus2AMode) return;
             if (diskInserted[_unit])
                 udpDrive.DiskEject(_unit);
 
@@ -125,6 +131,7 @@ namespace Speccy
         }
 
         public override void DiskEject(byte _unit) {
+            if (Plus2AMode) return;
             base.DiskEject(_unit);
             udpDrive.DiskEject(_unit);
 
@@ -135,7 +142,8 @@ namespace Speccy
 
         public override void Shutdown() {
             base.Shutdown();
-            udpDrive.DiskShutdown();
+            if (!Plus2AMode)
+                udpDrive.DiskShutdown();
         }
 
         public override void BuildContentionTable() {
@@ -314,9 +322,9 @@ namespace Speccy
                         result |= TAPE_BIT;
                 }
                 else {                
-                    if ((port & 0xF002) == 0x2000) //Is bit 12 set and bits 13,14,15 and 1 reset?
+                    if (!Plus2AMode && (port & 0xF002) == 0x2000) //Is bit 12 set and bits 13,14,15 and 1 reset?
                         result = udpDrive.DiskStatusRead();
-                    else if ((port & 0xF002) == 0x3000)
+                    else if (!Plus2AMode && (port & 0xF002) == 0x3000)
                         result = udpDrive.DiskReadByte();
                     else if ((port & 0xF002) == 0x0) {
                         if (pagingDisabled)
@@ -451,14 +459,16 @@ namespace Speccy
 
             last1ffdOut = val;
 
-            udpDrive.DiskMotorState((byte)(val & 0xff));
+            if (!Plus2AMode) {
+                udpDrive.DiskMotorState((byte)(val & 0xff));
 
-            if ((val & 0x8) != 0) {
-                diskDriveState |= (1 << 4);
-                OnDiskEvent(new DiskEventArgs(diskDriveState));
-            } else {
-                diskDriveState &= ~(1 << 4);
-                OnDiskEvent(new DiskEventArgs(diskDriveState));
+                if ((val & 0x8) != 0) {
+                    diskDriveState |= (1 << 4);
+                    OnDiskEvent(new DiskEventArgs(diskDriveState));
+                } else {
+                    diskDriveState &= ~(1 << 4);
+                    OnDiskEvent(new DiskEventArgs(diskDriveState));
+                }
             }
 
             if ((val & 0x1) != 0) //Paging mode = special?
@@ -677,7 +687,7 @@ namespace Speccy
                     {
                         Out_1ffd(val);
                     }
-                    else if ((port & 0xF002) == 0x3000) //Is bit 12 set and bits 13,14,15 and 1 reset?
+                    else if (!Plus2AMode && (port & 0xF002) == 0x3000) //Is bit 12 set and bits 13,14,15 and 1 reset?
                     { 
                         udpDrive.DiskWriteByte((byte)(val & 0xff));
                     }
@@ -842,8 +852,6 @@ namespace Speccy
                 lowROMis48K = false;
             //Debugging string for monitor
             BankInPage0 = (romSelect > 1 ? romSelect == 3 ? ROM_48_BAS : ROM_PLUS3_DOS : romSelect == 1 ? ROM_128_SYN : ROM_128_BAS);
-
-
         }
     }
 }

@@ -39,6 +39,7 @@ namespace Zero.Emulation.Settings
     {
         public string Rom48k { get; set; } = "48k.rom";
         public string Rom128k { get; set; } = "128k.rom";
+        public string RomPlus2 { get; set; } = "plus2.rom";
         public string Rom128ke { get; set; } = "128ke.rom";
         public string RomPlus3 { get; set; } = "plus3.rom";
         public string RomPentagon { get; set; } = "pentagon.rom";
@@ -49,7 +50,9 @@ namespace Zero.Emulation.Settings
             {
                 case MachineModel._48k: return Rom48k;
                 case MachineModel._128k: return Rom128k;
+                case MachineModel._plus2: return RomPlus2;
                 case MachineModel._128ke: return Rom128ke;
+                case MachineModel._plus2A: return RomPlus3;
                 case MachineModel._plus3: return RomPlus3;
                 case MachineModel._pentagon: return RomPentagon;
                 default: throw new ArgumentOutOfRangeException(nameof(model), model, "Unsupported machine");

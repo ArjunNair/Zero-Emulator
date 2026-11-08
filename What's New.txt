@@ -2,6 +2,7 @@ What's New
 --------------
 v 1.1
 --------------
+* Added support for +2 and +2A machines.
 * Fixed RZX recording issues related to stop/continue and rollback while recording.
 * Refactored command line arguments for cross platform usage.
 * Fixed Kempston Joystick emulation

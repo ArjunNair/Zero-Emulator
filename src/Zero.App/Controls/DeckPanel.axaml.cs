@@ -36,7 +36,7 @@ namespace Zero.App.Controls
             DeckAKey.Click += (_, __) => { SelectDeck(SelectedDeck); DeckRequested?.Invoke(0); };
             DeckBKey.Click += (_, __) => { SelectDeck(SelectedDeck); DeckRequested?.Invoke(1); };
             DeckCKey.Click += (_, __) => { SelectDeck(SelectedDeck); DeckRequested?.Invoke(2); };
-            MachineSwitch.ValueChangedByUser += (_, v) => { _requestedMachine = MachineAt(v); _requestedAt = DateTime.UtcNow; };
+            MachineKnob.ValueChangedByUser += (_, v) => { _requestedMachine = MachineAt((int)v); _requestedAt = DateTime.UtcNow; };
             // The faders' tooltips give their setting, and keep up as they are dragged.
             CurveFader.PropertyChanged += (_, e) => { if (e.Property == DeckFader.ValueProperty) ShowFaderTips(); };
             HousingFader.PropertyChanged += (_, e) => { if (e.Property == DeckFader.ValueProperty) ShowFaderTips(); };
@@ -153,8 +153,8 @@ namespace Zero.App.Controls
 
             if (_requestedMachine == session.Model || DateTime.UtcNow - _requestedAt > MachineSwitchGrace)
                 _requestedMachine = null;
-            if (!MachineSwitch.IsInteracting && _requestedMachine == null)
-                MachineSwitch.Value = Array.IndexOf(Machines, session.Model);
+            if (_requestedMachine == null)
+                MachineKnob.Value = Array.IndexOf(Machines, session.Model);
             int source = JoystickSourceAt(settings.Input);
             JoystickCursorKey.IsChecked = source == JoystickSourceCursor;
             JoystickGamepadKey.IsChecked = source == JoystickSourceGamepad;
@@ -260,7 +260,7 @@ namespace Zero.App.Controls
 
         /// <summary>The machine at each stop of the machine switch, in the order of its legends.</summary>
         private static readonly MachineModel[] Machines =
-            { MachineModel._48k, MachineModel._128k, MachineModel._128ke, MachineModel._plus3, MachineModel._pentagon };
+            { MachineModel._48k, MachineModel._128k, MachineModel._plus2, MachineModel._plus2A, MachineModel._plus3, MachineModel._128ke, MachineModel._pentagon };
 
         public static MachineModel MachineAt(int stop) => Machines[Math.Clamp(stop, 0, Machines.Length - 1)];
 

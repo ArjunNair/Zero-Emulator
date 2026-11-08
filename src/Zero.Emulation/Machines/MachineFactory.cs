@@ -17,7 +17,9 @@ namespace Zero.Emulation.Machines
             {
                 case MachineModel._48k: return new zx_48k(audio, lateTimings);
                 case MachineModel._128k: return new zx_128k(audio, lateTimings);
+                case MachineModel._plus2: return new zx_128k(audio, lateTimings);
                 case MachineModel._128ke: return new zx_128ke(audio, lateTimings);
+                case MachineModel._plus2A: return new zx_plus3(audio, lateTimings, true);
                 case MachineModel._plus3: return new zx_plus3(audio, lateTimings);
                 case MachineModel._pentagon: return new Pentagon_128k(audio, lateTimings);
                 default: throw new ArgumentOutOfRangeException(nameof(model), model, "Unsupported machine");
@@ -30,7 +32,9 @@ namespace Zero.Emulation.Machines
             {
                 case MachineModel._48k: return "ZX Spectrum 48K";
                 case MachineModel._128k: return "ZX Spectrum 128K";
+                case MachineModel._plus2: return "ZX Spectrum +2";
                 case MachineModel._128ke: return "ZX Spectrum 128Ke";
+                case MachineModel._plus2A: return "ZX Spectrum +2A";
                 case MachineModel._plus3: return "ZX Spectrum +3";
                 case MachineModel._pentagon: return "Pentagon 128K";
                 default: return model.ToString();

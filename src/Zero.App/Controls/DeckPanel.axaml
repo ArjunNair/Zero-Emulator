@@ -531,8 +531,11 @@
                  names level with the other keys' along the bottom, and the room left over shared
                  between the gap above the joystick and the bracket's stem, the stem taking more. -->
             <Grid Grid.Column="2" RowDefinitions="Auto,3*,Auto,14*,Auto">
-              <c:DeckSlideSwitch x:Name="MachineSwitch" Margin="0,4,0,0" Positions="48K,128K,128KE,+3,PENT"
+             <!-- <c:DeckSlideSwitch x:Name="MachineSwitch" Margin="0,4,0,0" Positions="48K,128K,128KE,+3,PENT"
                                  ToolTip.Tip="Machine: slide or click to choose. Switching resets the Spectrum." />
+              -->
+
+              <c:DeckKnob x:Name="MachineKnob" Width="64" Height="50" Positions="48K/+,128K,+2,+2A,+3" ToolTip.Tip="Machine model" />
               <c:DeckSlideSwitch x:Name="JoystickSwitch" Grid.Row="2" Margin="0,6,0,0" Positions="KEMP,SINC 1,SINC 2,CURS"
                                  ToolTip.Tip="Joystick: which interface the Spectrum sees" />
               <!-- The bracket: a stem down from the joystick's slot, branching to each key. Six even
