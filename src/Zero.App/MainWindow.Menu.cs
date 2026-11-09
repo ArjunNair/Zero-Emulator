@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Avalonia;
@@ -25,7 +26,7 @@ namespace Zero.App
         internal NativeMenuItem DiskInsertC, DiskInsertD, DiskEjectA, DiskEjectB, DiskEjectC, DiskEjectD;
         internal NativeMenuItem MuteItem, Ay48kItem, StereoMono, StereoAcb, StereoAbc;
         internal NativeMenuItem CrtItem;
-        internal NativeMenuItem DeckItem, DeckAItem, DeckBItem, DeckCItem, FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus;
+        internal NativeMenuItem DeckItem, DeckAItem, DeckBItem, DeckCItem, FullScreenItem, FilterNone, FilterSmooth, FilterSharp, IntegerScalingItem, BorderFull, BorderMedium, BorderNone, PaletteNormal, PaletteGray, PaletteUlaPlus, PaletteSpectral;
         internal NativeMenuItem KeyJoyItem, KeyJoyKempston, KeyJoySinclair1, KeyJoySinclair2, KeyJoyCursor;
         internal NativeMenuItem Pad1None, Pad1Kempston, Pad1Sinclair1, Pad1Sinclair2, Pad1Cursor, KempstonPortItem, MouseItem, PauseOnFocusItem;
         internal NativeMenuItem KeyboardItem;
@@ -43,6 +44,40 @@ namespace Zero.App
             var menu = new NativeMenu();
             foreach (NativeMenuItemBase i in items) menu.Items.Add(i);
             return new NativeMenuItem(header) { Menu = menu };
+        }
+
+        private NativeMenuItemBase[] SpectralPaletteItems() {
+            List<NativeMenuItemBase> menuItems = new List<NativeMenuItemBase>();
+            string dir = AppPaths.Resolve(_settings.Paths.Palettes, "palettes");
+            Console.WriteLine($"Palette dir: {dir}  exists={Directory.Exists(dir)}");
+            if (Directory.Exists(dir)) {
+                foreach (string file in Directory.GetFiles(dir, "*.pal").OrderBy(f => f))
+                {
+                    string path = file; // captured by the lambda
+                    menuItems.Add(Item(Path.GetFileNameWithoutExtension(path), () => LoadPaletteFile(path)));
+                }
+            }
+            if (menuItems.Count == 0)
+                menuItems.Add(new NativeMenuItem("(none found)") { IsEnabled = false });
+            return menuItems.ToArray();
+        }
+
+        private void LoadPaletteFile(string path) {
+            string[] lines = File.ReadAllLines(path);
+            if (lines.Length < 3 || !lines[0].StartsWith("JASC-PAL") || lines[2].Trim() != "16")
+                return;
+
+            var palette = new List<int>();
+            foreach (string line in lines.Skip(3))
+            {
+                string[] v = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (v.Length < 3) continue;
+                int r = int.Parse(v[0]), g = int.Parse(v[1]), b = int.Parse(v[2]);
+                palette.Add((r << 16) | (g << 8) | b);   // one packed RGB int per colour
+            }
+
+            if (palette.Count == 16)
+                _session.SetCustomPalette(palette.ToArray());
         }
 
         private static NativeMenuItemSeparator Sep() => new NativeMenuItemSeparator();
@@ -184,7 +219,8 @@ namespace Zero.App
                 Submenu("Palette",
                     PaletteNormal = Item("Normal", () => SelectPalette("Normal"), checkable: true),
                     PaletteGray = Item("Grayscale", () => SelectPalette("Grayscale"), checkable: true),
-                    PaletteUlaPlus = Item("ULA Plus", () => SelectPalette("ULA Plus"), checkable: true)));
+                    PaletteUlaPlus = Item("ULA Plus", () => SelectPalette("ULA Plus"), checkable: true),
+                    PaletteSpectral = Submenu("Spectral", SpectralPaletteItems())));
 
             var input = Submenu("Input",
                 KeyJoyItem = Item("Cursor Keys as Joystick", ToggleKeyJoy, checkable: true),
@@ -237,6 +273,12 @@ namespace Zero.App
             }
             if (menu.Items.Count == 0)
                 menu.Items.Add(new NativeMenuItem("(empty)") { IsEnabled = false });
+        }
+
+        private void RebuildSpectralPaletteMenu() {
+            NativeMenu menu = PaletteSpectral.Menu;
+            menu.Items.Clear();
+            PaletteSpectral = Submenu("Spectral", SpectralPaletteItems());
         }
 
         // ------------------------------------------------------------------ menu commands

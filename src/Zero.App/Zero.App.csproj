@@ -46,4 +46,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Zero.App.Tests" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\run\palettes\*.pal" Link="palettes\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

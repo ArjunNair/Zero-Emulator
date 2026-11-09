@@ -101,6 +101,7 @@ namespace Speccy
         public List<AudioDevice> audio_devices = new List<AudioDevice>();
         protected Random rnd_generator = new Random();
         protected Multiface multiface;
+        public MultifaceModel MultifaceModel => multiface.Model;
         protected bool NmiPending = false;
         protected int[] keyLine = { 255, 255, 255, 255, 255, 255, 255, 255 };
 

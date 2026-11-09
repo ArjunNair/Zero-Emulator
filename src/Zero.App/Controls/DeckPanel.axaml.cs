@@ -6,6 +6,7 @@ using Zero.Emulation;
 using Zero.Emulation.Machines;
 using Zero.Emulation.Settings;
 using Zero.Emulation.Tape;
+using Speccy;
 
 namespace Zero.App.Controls
 {
@@ -93,11 +94,22 @@ namespace Zero.App.Controls
 
             // The machine row: the current model's legend lit; the 128KE lights 128K and its E.
             MachineModel model = session.Model;
-            SetLit(Vfd48k, model == MachineModel._48k);
-            SetLit(Vfd128k, model is MachineModel._128k or MachineModel._128ke);
-            SetLit(Vfd128kE, model == MachineModel._128ke);
-            SetLit(VfdPlus3, model == MachineModel._plus3);
-            SetLit(VfdPentagon, model == MachineModel._pentagon);
+            //SetLit(Vfd48k, model == MachineModel._48k);
+            SetLit(VfdMF, session.HasMultiface);
+            if (session.HasMultiface) {
+                switch (session.MultifaceModel) {
+                    case MultifaceModel.Multiface_1:
+                        VfdMF.Text = "MF1"; break;
+                    case MultifaceModel.Multiface_128:
+                        VfdMF.Text = "MF128"; break;
+                    case MultifaceModel.Multiface_3:
+                        VfdMF.Text = "MF3"; break;
+                }
+            }
+            //SetLit(Vfd128k, model is MachineModel._128k or MachineModel._128ke);
+            //SetLit(Vfd128kE, model == MachineModel._128ke);
+            //SetLit(VfdPlus3, model == MachineModel._plus3);
+            //SetLit(VfdPentagon, model == MachineModel._pentagon);
             VfdStereo.Text = settings.Audio.StereoSoundMode switch { 0 => "MONO", 2 => "ABC", _ => "ACB" };
             SetLit(VfdTurbo, settings.Emulation.EmulationSpeed > 1);
             SetLit(VfdMute, settings.Audio.Mute);

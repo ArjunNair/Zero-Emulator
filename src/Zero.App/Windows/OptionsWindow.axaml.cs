@@ -48,6 +48,8 @@ namespace Zero.App.Windows
             Rom48k.Text = settings.Roms.Rom48k;
             Rom128k.Text = settings.Roms.Rom128k;
             Rom128ke.Text = settings.Roms.Rom128ke;
+            RomPlus2.Text = settings.Roms.RomPlus2;
+            RomPlus2A.Text = settings.Roms.RomPlus2A;
             RomPlus3.Text = settings.Roms.RomPlus3;
             RomPentagon.Text = settings.Roms.RomPentagon;
 

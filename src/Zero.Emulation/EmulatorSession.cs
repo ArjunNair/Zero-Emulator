@@ -71,6 +71,7 @@ namespace Zero.Emulation
         public zx_spectrum Machine => _zx;
 
         public MachineModel Model { get; private set; }
+        public MultifaceModel MultifaceModel => _zx.MultifaceModel;
         public EmulatorState State => _state;
         public bool IsPaused => _paused;
         public bool IsRunning => _thread != null && _thread.IsAlive;
@@ -545,6 +546,11 @@ namespace Zero.Emulation
             }
         }
 
+        private static void ApplyCustomPalette(zx_spectrum zx, int[] palette) {
+            zx.RemoveDevice(SPECCY_DEVICE.ULA_PLUS);
+            zx.SetPalette(palette);
+        }
+
         private static int[] Grayscale(int[] rgb)
         {
             var gray = new int[rgb.Length];
@@ -648,6 +654,10 @@ namespace Zero.Emulation
         {
             Settings.Render.Palette = palette;
             Post(() => { if (_zx != null) ApplyPalette(_zx, palette); });
+        }
+
+        public void SetCustomPalette(int[] palette) {
+            Post(() => { if (_zx != null) ApplyCustomPalette(_zx, palette);});
         }
 
         // ------------------------------------------------------------------ tape auto-load

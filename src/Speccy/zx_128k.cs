@@ -5,10 +5,13 @@ using SpeccyCommon;
 
 namespace Speccy
 {
+    // Also emulates the +2 by simply swapping in the ROM. Everything else remains the same.
     public class zx_128k : Speccy.zx_spectrum
     {
-            public zx_128k(IAudioOutput audioOutput, bool lateTimingModel)
+            public bool Plus2Mode = false;
+            public zx_128k(IAudioOutput audioOutput, bool lateTimingModel, bool plus2Mode = false)
             : base(audioOutput, lateTimingModel) {
+            Plus2Mode = plus2Mode;
             FrameLength = 70908;
             InterruptPeriod = 36;
             clockSpeed = 3.54690;

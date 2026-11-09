@@ -13,7 +13,7 @@
       <Button x:Name="OkButton" Classes="accent" Content="OK" MinWidth="90" IsDefault="True" Click="OnOk" />
     </StackPanel>
     <!-- A fixed tab body: the window keeps one size whichever tab is selected, and a taller tab scrolls. -->
-    <TabControl x:Name="Tabs" Height="420">
+    <TabControl x:Name="Tabs" Height="520">
       <TabItem Header="Folders">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">          <StackPanel Spacing="10" Margin="0,10,0,0">
             <TextBlock Text="Relative paths are resolved from the folder Zero runs in." Foreground="#BBBBBB" />
@@ -35,24 +35,37 @@
         </ScrollViewer>
       </TabItem>
       <TabItem Header="ROMs">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">          <StackPanel Spacing="10" Margin="0,10,0,0">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">     
+        <StackPanel Spacing="10" Margin="0,10,0,0">
             <TextBlock Text="ROM image for each machine, inside the ROMs folder. Changing one restarts that machine." Foreground="#BBBBBB" TextWrapping="Wrap" />
-            <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+            <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto, Auto">
               <TextBlock Grid.Row="0" Text="Spectrum 48K" VerticalAlignment="Center" />
               <TextBox Grid.Row="0" Grid.Column="1" x:Name="Rom48k" Margin="0,2" />
               <Button Grid.Row="0" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom48k" Click="OnBrowseRom" />
+
               <TextBlock Grid.Row="1" Text="Spectrum 128K" VerticalAlignment="Center" />
               <TextBox Grid.Row="1" Grid.Column="1" x:Name="Rom128k" Margin="0,2" />
               <Button Grid.Row="1" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128k" Click="OnBrowseRom" />
-              <TextBlock Grid.Row="2" Text="Spectrum 128Ke" VerticalAlignment="Center" />
-              <TextBox Grid.Row="2" Grid.Column="1" x:Name="Rom128ke" Margin="0,2" />
-              <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128ke" Click="OnBrowseRom" />
-              <TextBlock Grid.Row="3" Text="Spectrum +3" VerticalAlignment="Center" />
-              <TextBox Grid.Row="3" Grid.Column="1" x:Name="RomPlus3" Margin="0,2" />
+
+              <TextBlock Grid.Row="2" Text="Spectrum +2" VerticalAlignment="Center" />
+              <TextBox Grid.Row="2" Grid.Column="1" x:Name="RomPlus2" Margin="0,2" />
+              <Button Grid.Row="2" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPlus2" Click="OnBrowseRom" />
+              
+              <TextBlock Grid.Row="3" Text="Spectrum +2A" VerticalAlignment="Center" />
+              <TextBox Grid.Row="3" Grid.Column="1" x:Name="RomPlus2A" Margin="0,2" />
               <Button Grid.Row="3" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPlus3" Click="OnBrowseRom" />
-              <TextBlock Grid.Row="4" Text="Pentagon 128K" VerticalAlignment="Center" />
-              <TextBox Grid.Row="4" Grid.Column="1" x:Name="RomPentagon" Margin="0,2" />
-              <Button Grid.Row="4" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPentagon" Click="OnBrowseRom" />
+
+              <TextBlock Grid.Row="4" Text="Spectrum +3" VerticalAlignment="Center" />
+              <TextBox Grid.Row="4" Grid.Column="1" x:Name="RomPlus3" Margin="0,2" />
+              <Button Grid.Row="4" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPlus3" Click="OnBrowseRom" />
+
+              <TextBlock Grid.Row="5" Text="Spectrum 128Ke" VerticalAlignment="Center" />
+              <TextBox Grid.Row="5" Grid.Column="1" x:Name="Rom128ke" Margin="0,2" />
+              <Button Grid.Row="5" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="Rom128ke" Click="OnBrowseRom" />
+
+              <TextBlock Grid.Row="6" Text="Pentagon 128K" VerticalAlignment="Center" />
+              <TextBox Grid.Row="6" Grid.Column="1" x:Name="RomPentagon" Margin="0,2" />
+              <Button Grid.Row="6" Grid.Column="2" Content="Browse…" Margin="6,2,0,2" Tag="RomPentagon" Click="OnBrowseRom" />
             </Grid>
             <TextBlock Text="You can assign a custom ROM for a system here." Foreground="#BBBBBB" />
           </StackPanel>

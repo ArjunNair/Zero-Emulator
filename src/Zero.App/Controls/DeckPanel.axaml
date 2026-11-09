@@ -476,7 +476,7 @@
             <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" VerticalAlignment="Center" HorizontalAlignment="Left" Text="Main" />
             <ToggleButton x:Name="DeckBKey" Grid.Row="3" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
                           ToolTip.Tip="Peripherals: second deck with disk and other peripherals" />
-            <TextBlock Grid.Row="3" Grid.Column="2" Classes="legend" VerticalAlignment="Center" HorizontalAlignment="Left" Text="Peripherals" />
+            <TextBlock Grid.Row="3" Grid.Column="2" Classes="legend" VerticalAlignment="Center" HorizontalAlignment="Left" Text="Devices" />
             <ToggleButton x:Name="DeckCKey" Grid.Row="5" Theme="{StaticResource DeckToggle}" Width="24" Height="12"
                           ToolTip.Tip="Audio and Video settings" />
             <TextBlock Grid.Row="5" Grid.Column="2" Classes="legend" VerticalAlignment="Center" HorizontalAlignment="Left" Text="A/V" />
@@ -496,7 +496,7 @@
                  on the left with its light, and a latching pause on the right that stays down while
                  paused. At the bottom, reset in a shallow ring, its name level with the other keys';
                  a quick press is a soft reset, holding it a hard one. -->
-            <Grid RowDefinitions="*,Auto,Auto,*,Auto" ColumnDefinitions="50,3,28">
+            <Grid RowDefinitions="*,Auto,Auto,*,Auto" ColumnDefinitions="Auto,3,28">
               <Button x:Name="PowerKey" Grid.Row="1" Theme="{StaticResource DeckKey}" Width="50" Height="30"
                       ToolTip.Tip="Power: quit Zero X">
                 <Panel Width="46" Height="26">
@@ -535,7 +535,7 @@
                                  ToolTip.Tip="Machine: slide or click to choose. Switching resets the Spectrum." />
               -->
 
-              <c:DeckKnob x:Name="MachineKnob" Width="64" Height="50" Positions="48K/+,128K,+2,+2A,+3" ToolTip.Tip="Machine model" />
+              <c:DeckKnob x:Name="MachineKnob" Width="74" Height="60" Positions="48K/+,128K,+2,+2A,+3" ToolTip.Tip="Machine model" />
               <c:DeckSlideSwitch x:Name="JoystickSwitch" Grid.Row="2" Margin="0,6,0,0" Positions="KEMP,SINC 1,SINC 2,CURS"
                                  ToolTip.Tip="Joystick: which interface the Spectrum sees" />
               <!-- The bracket: a stem down from the joystick's slot, branching to each key. Six even
@@ -549,17 +549,17 @@
                 <StackPanel>
                   <ToggleButton x:Name="JoystickCursorKey" Theme="{StaticResource DeckToggle}" Width="24" Height="10"
                                 ToolTip.Tip="The cursor keys play the joystick" />
-                  <TextBlock Classes="legend" Text="CURSOR" Margin="0,2,0,0" />
+                  <TextBlock Classes="legend" Text="CURSOR" Margin="5,2,0,0" />
                 </StackPanel>
                 <StackPanel Grid.Column="1">
                   <ToggleButton x:Name="JoystickGamepadKey" Theme="{StaticResource DeckToggle}" Width="24" Height="10"
                                 ToolTip.Tip="Gamepad 1 plays the joystick" />
-                  <TextBlock Classes="legend" Text="GAMEPAD" Margin="0,2,0,0" />
+                  <TextBlock Classes="legend" Text="GAMEPAD" Margin="5,2,0,0" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                   <ToggleButton x:Name="JoystickNoneKey" Theme="{StaticResource DeckToggle}" Width="24" Height="10"
                                 ToolTip.Tip="Nothing plays the joystick" />
-                  <TextBlock Classes="legend" Text="NONE" Margin="0,2,0,0" />
+                  <TextBlock Classes="legend" Text="NONE" Margin="5,2,0,0" />
                 </StackPanel>
               </Grid>
             </Grid>
@@ -575,13 +575,7 @@
                   <!-- The machines, as fixed legends with the current one lit. 128K lights for both 128
                        models; its E only for the 128KE. -->
                   <StackPanel Orientation="Horizontal" Spacing="6">
-                    <c:VfdText x:Name="Vfd48k" Classes="vfd off" Text="48K" />
-                    <StackPanel Orientation="Horizontal">
-                      <c:VfdText x:Name="Vfd128k" Classes="vfd off" Text="128K" />
-                      <c:VfdText x:Name="Vfd128kE" Classes="vfd off" Text="E" />
-                    </StackPanel>
-                    <c:VfdText x:Name="VfdPlus3" Classes="vfd off" Text="+3" />
-                    <c:VfdText x:Name="VfdPentagon" Classes="vfd off" Text="PENT" />
+                    <c:VfdText x:Name="VfdMF" Classes="vfd off" Text="MF" />
                   </StackPanel>
                   <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
                     <c:VfdText x:Name="VfdStereo" Classes="vfd yellow" Text="ACB" />
