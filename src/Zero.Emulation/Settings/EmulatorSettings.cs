@@ -78,7 +78,7 @@ namespace Zero.Emulation.Settings
         [JsonIgnore]
         public int PixelFilter => !PixelSmoothing ? 0 : SharpPixelEdges ? 2 : 1;
         public bool Scanlines { get; set; }
-        /// <summary>"Normal", "Grayscale" or "ULA Plus".</summary>
+        /// <summary>"Normal", "Grayscale", "ULA Plus" or custom.</summary>
         public string Palette { get; set; } = "Normal";
         /// <summary>Border pixels to crop from each edge (0 = full border).</summary>
         public int BorderCrop { get; set; }
@@ -92,6 +92,7 @@ namespace Zero.Emulation.Settings
         public bool ShowDeck { get; set; } = true;
         /// <summary>Which deck is showing: 0 the cassette deck (A), 1 the receiver (B), 2 the video deck (C).</summary>
         public int ActiveDeck { get; set; }
+        public string SpectralPaletteFile  {get; set;}
         public CrtSettings Crt { get; set; } = new CrtSettings();
     }
 

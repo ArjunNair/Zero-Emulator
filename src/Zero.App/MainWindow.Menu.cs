@@ -30,7 +30,6 @@ namespace Zero.App
         internal NativeMenuItem KeyJoyItem, KeyJoyKempston, KeyJoySinclair1, KeyJoySinclair2, KeyJoyCursor;
         internal NativeMenuItem Pad1None, Pad1Kempston, Pad1Sinclair1, Pad1Sinclair2, Pad1Cursor, KempstonPortItem, MouseItem, PauseOnFocusItem;
         internal NativeMenuItem KeyboardItem;
-
         private static NativeMenuItem Item(string header, Action action, KeyGesture gesture = null, bool checkable = false)
         {
             var item = new NativeMenuItem(header) { Command = new ActionCommand(action) };
@@ -49,12 +48,12 @@ namespace Zero.App
         private NativeMenuItemBase[] SpectralPaletteItems() {
             List<NativeMenuItemBase> menuItems = new List<NativeMenuItemBase>();
             string dir = AppPaths.Resolve(_settings.Paths.Palettes, "palettes");
-            Console.WriteLine($"Palette dir: {dir}  exists={Directory.Exists(dir)}");
             if (Directory.Exists(dir)) {
                 foreach (string file in Directory.GetFiles(dir, "*.pal").OrderBy(f => f))
                 {
                     string path = file; // captured by the lambda
-                    menuItems.Add(Item(Path.GetFileNameWithoutExtension(path), () => LoadPaletteFile(path)));
+                    string name = Path.GetFileNameWithoutExtension(path);
+                    menuItems.Add(Item(name, () => SelectSpectralPalette(path, name), checkable: true));
                 }
             }
             if (menuItems.Count == 0)
@@ -62,24 +61,12 @@ namespace Zero.App
             return menuItems.ToArray();
         }
 
-        private void LoadPaletteFile(string path) {
-            string[] lines = File.ReadAllLines(path);
-            if (lines.Length < 3 || !lines[0].StartsWith("JASC-PAL") || lines[2].Trim() != "16")
-                return;
-
-            var palette = new List<int>();
-            foreach (string line in lines.Skip(3))
-            {
-                string[] v = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (v.Length < 3) continue;
-                int r = int.Parse(v[0]), g = int.Parse(v[1]), b = int.Parse(v[2]);
-                palette.Add((r << 16) | (g << 8) | b);   // one packed RGB int per colour
-            }
-
-            if (palette.Count == 16)
-                _session.SetCustomPalette(palette.ToArray());
+        private void SelectSpectralPalette(string path, string name) {
+            _session.LoadPaletteFile(path);
+            RefreshMenuState();
         }
 
+        
         private static NativeMenuItemSeparator Sep() => new NativeMenuItemSeparator();
 
         private static KeyGesture G(Key key, KeyModifiers mods = KeyModifiers.None) => new KeyGesture(key, mods);
@@ -373,7 +360,10 @@ namespace Zero.App
             RefreshMenuState();
         }
 
-        private void SelectPalette(string palette) { _session.SetPalette(palette); RefreshMenuState(); }
+        private void SelectPalette(string palette) { 
+            _session.SetPalette(palette); 
+            RefreshMenuState(); 
+        }
 
         private void ToggleKeyJoy()
         {
@@ -468,9 +458,19 @@ namespace Zero.App
             BorderFull.IsChecked = _settings.Render.BorderCrop == 0;
             BorderMedium.IsChecked = _settings.Render.BorderCrop == 24;
             BorderNone.IsChecked = _settings.Render.BorderCrop >= 48;
-            PaletteNormal.IsChecked = _settings.Render.Palette == "Normal";
-            PaletteGray.IsChecked = _settings.Render.Palette == "Grayscale";
-            PaletteUlaPlus.IsChecked = _settings.Render.Palette == "ULA Plus";
+
+            string _spectral = _session.SpectralPalette;
+            bool custom = _spectral != null;
+            PaletteNormal.IsChecked = !custom && _settings.Render.Palette == "Normal";
+            PaletteGray.IsChecked = !custom && _settings.Render.Palette == "Grayscale";
+            PaletteUlaPlus.IsChecked = !custom && _settings.Render.Palette == "ULA Plus";
+
+            if (PaletteSpectral.Menu != null) {
+                foreach (var mi in PaletteSpectral.Menu.Items.OfType<NativeMenuItem>()) {
+                    if (mi.ToggleType == MenuItemToggleType.CheckBox)
+                        mi.IsChecked = custom && mi.Header == _spectral;
+                }
+            }
 
             KeyJoyItem.IsChecked = _settings.Input.EnableKeyboardJoystick;
             int kj = _settings.Input.KeyboardJoystickType;

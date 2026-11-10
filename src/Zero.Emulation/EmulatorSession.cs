@@ -94,7 +94,8 @@ namespace Zero.Emulation
         public event Action<EmulatorState> StateChanged;
         /// <summary>A file was loaded (snapshot, tape, RZX). Argument is the path or archive entry name.</summary>
         public event Action<string> FileLoaded;
-
+        public string SpectralPalette { get; private set; } 
+        public static string SpectralPaletteDir => Path.Combine(AppContext.BaseDirectory, "palettes", "palettes");
         public EmulatorSession(EmulatorSettings settings = null)
         {
             Settings = settings ?? new EmulatorSettings();
@@ -525,6 +526,8 @@ namespace Zero.Emulation
             Tape.AutoLoad = s.Tape.AutoLoad;
             ConfigureJoysticks(zx);
             ApplyPalette(zx, s.Render.Palette);
+            if (s.Render.SpectralPaletteFile != null)
+                LoadPaletteFile(s.Render.SpectralPaletteFile);
         }
 
         private static void ApplyPalette(zx_spectrum zx, string palette)
@@ -539,12 +542,37 @@ namespace Zero.Emulation
                     zx.AddDevice(zx.ula_plus);
                     zx.SetPalette(zx.NormalColors);
                     break;
-                default:
+                case "Normal":
                     zx.RemoveDevice(SPECCY_DEVICE.ULA_PLUS);
                     zx.SetPalette(zx.NormalColors);
                     break;
+                default:
+                    zx.RemoveDevice(SPECCY_DEVICE.ULA_PLUS);
+                    break;
             }
         }
+
+        public bool LoadPaletteFile(string path) {
+            string[] lines = File.ReadAllLines(path);
+            if (lines.Length < 3 || !lines[0].StartsWith("JASC-PAL") || lines[2].Trim() != "16")
+                return false;
+
+            var palette = new List<int>();
+            foreach (string line in lines.Skip(3))
+            {
+                string[] v = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (v.Length < 3) continue;
+                int r = int.Parse(v[0]), g = int.Parse(v[1]), b = int.Parse(v[2]);
+                palette.Add((r << 16) | (g << 8) | b);   // one packed RGB int per colour
+            }
+
+            if (palette.Count != 16) return false;
+            SetCustomPalette(palette.ToArray());
+            SpectralPalette = Path.GetFileNameWithoutExtension(path);
+            Settings.Render.SpectralPaletteFile = path;
+            return true;
+        }
+
 
         private static void ApplyCustomPalette(zx_spectrum zx, int[] palette) {
             zx.RemoveDevice(SPECCY_DEVICE.ULA_PLUS);
@@ -653,10 +681,13 @@ namespace Zero.Emulation
         public void SetPalette(string palette)
         {
             Settings.Render.Palette = palette;
+            SpectralPalette = null;
+            Settings.Render.SpectralPaletteFile = null;
             Post(() => { if (_zx != null) ApplyPalette(_zx, palette); });
         }
 
         public void SetCustomPalette(int[] palette) {
+            Settings.Render.Palette = "Spectral";
             Post(() => { if (_zx != null) ApplyCustomPalette(_zx, palette);});
         }
 
