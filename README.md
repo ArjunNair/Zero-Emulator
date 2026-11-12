@@ -2,7 +2,8 @@
 # Zero X - A cross platform ZX Spectrum emulator
 Zero X is a cross platform port of the previous Windows only emulator. This version is based on Avalonia and SDL 3 and was ported using Claude AI. 
 
-Note that much of the code is still my hand rolled one, over 10+ years, so any errors in emulation accuracy or feature implementation in this version are my own. 
+Note that much of the code is still my hand rolled one, over 10+ years, so any errors in emulation accuracy or feature implementation in this version are my own.
+AI was used to create the Hi-Fi deck interface so if that bothers you turn, it off. :)
 
 The philosophy behind Zero X is to provide a highly accurate emulation of the various Spectrum models while also providing a modern, user friendly experience. 
 
@@ -176,6 +177,7 @@ Thanks also to Patrik Rak for permission to use the various PZX conversion tools
 Thanks to Alex Makeev for permission to use his DirectSound routines from ZXMAK 2.
 Thanks to ZXDunny (Paul Dunn) for letting me port Spin's flash load tape process.
 Thanks to Weiv, TheMartian, Woody et al for figuring out snow emulation and sharing it so that others can benefit.
+Thanks to r-lyeh for letting me use his awesome custom color palettes.
 Thanks go out to Dr. Phil Kendall and others for putting together the CSS FAQ, which helped me figure out some of the nuances of the Spectrum hardware and peripherals.
 
 I must also thank my wife Poornima for putting up with my obsession with the speccy and even providing encouragement and help with this project!
