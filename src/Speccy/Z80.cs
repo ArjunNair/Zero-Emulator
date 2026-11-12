@@ -15,6 +15,8 @@ namespace Cpu
     //An IN A,(n) the tape handles: true when it did the IN itself, leaving PC and the registers set.
     public delegate bool TapeEdgeDetectionCallback();
     public delegate void TapeEdgeDecACallback();
+    public delegate void MemoryRefreshCallback();
+
     public struct Z80_Registers {
         public ushort SP, PC, IX, IY;
         public ushort AF_, BC_, DE_, HL_;
@@ -23,15 +25,21 @@ namespace Cpu
         public byte B, C;
         public byte H, L;
         public byte D, E;
-        public byte I, R;
+        public byte I;
         public byte R_;
         public byte Q;
         public bool modified_F;
         private byte f;
+        private byte r;
 
+        public byte R
+        {
+            readonly get { return (byte)(r & 0x7f);}
+            set { r = value;}
+        }
         public byte F
         {
-            get { return f; }
+            readonly get { return f; }
             set { 
                 f = value;
                 modified_F = true;
@@ -39,36 +47,38 @@ namespace Cpu
         }
         public byte IXH
         {
-            get { return (byte)(IX >> 8); }
+            readonly get { return (byte)(IX >> 8); }
             set { IX = (ushort)((IX & 0x00ff) | (value << 8)); }
         }
 
         public byte IXL
         {
-            get { return (byte)IX; }
+            readonly get { return (byte)IX; }
             set { IX = (ushort)((IX & 0xff00) | value); }
         }
 
         public byte IYH
         {
-            get { return (byte)(IY >> 8); }
+            readonly get { return (byte)(IY >> 8); }
             set { IY = (ushort)((IY & 0x00ff) | (value << 8)); }
         }
 
         public byte IYL
         {
-            get { return (byte)IY; }
+            readonly get { return (byte)IY; }
             set { IY = (ushort)((IY & 0xff00) | value); }
         }
 
         public ushort IR
         {
-            get { return (ushort)((I << 8) | (R & 0x7f) | (R_ & 0x80)); }
+             get { return (ushort)((I << 8) | R | (R_ & 0x80)); }
         }
+
+        public readonly ushort IR7 => (ushort)((I << 8) | R );
 
         public ushort AF
         {
-            get { return (ushort)((A << 8) | F); }
+            readonly get { return (ushort)((A << 8) | F); }
             set
             {
                 A = (byte)((value & 0xff00) >> 8);
@@ -78,7 +88,7 @@ namespace Cpu
 
         public ushort BC
         {
-            get { return (ushort)((B << 8) | C); }
+            readonly get { return (ushort)((B << 8) | C); }
             set
             {
                 B = (byte)((value & 0xff00) >> 8);
@@ -88,7 +98,7 @@ namespace Cpu
 
         public ushort DE
         {
-            get { return (ushort)((D << 8) | E); }
+            readonly get { return (ushort)((D << 8) | E); }
             set
             {
                 D = (byte)((value & 0xff00) >> 8);
@@ -98,7 +108,7 @@ namespace Cpu
 
         public ushort HL
         {
-            get { return (ushort)((H << 8) | L); }
+            readonly get { return (ushort)((H << 8) | L); }
             set
             {
                 H = (byte)((value & 0xff00) >> 8);
@@ -429,6 +439,7 @@ namespace Cpu
         public InstructionFetchCallback InstructionFetchSignal;
         public TapeEdgeDetectionCallback TapeEdgeDetection;
         public TapeEdgeDecACallback TapeEdgeDecA;
+        public MemoryRefreshCallback MemoryRefreshSignal;
         public Z80() {
             //Build Parity Table
             /*
@@ -590,6 +601,7 @@ namespace Cpu
             regs.R++;
             InstructionFetchSignal(); //Raise the instruction fetch signal for debugging, rzx etc...
             byte b = PeekByte(regs.PC);
+            MemoryRefreshSignal?.Invoke(); // For snow effect mainly, that relies on R being updated.
 
             if (!is_halted)
                 regs.PC = (ushort)(regs.PC + 1);
@@ -623,6 +635,7 @@ namespace Cpu
             iff_1 = false;
             is_halted = false;
             regs.R++;
+            //MemoryRefreshSignal?.Invoke();
             PushStack(regs.PC);
             t_states += 5;
             regs.PC = 0x66;

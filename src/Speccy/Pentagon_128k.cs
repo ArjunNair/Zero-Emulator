@@ -151,7 +151,7 @@ namespace Speccy
             BankInPage1 = "Bank 5";
             BankInPage2 = "Bank 2";
             BankInPage3 = "Bank 0";
-            contendedBankPagedIn = false;
+            bankPagedIn = 0;
             borderColour = 0;
             pagingDisabled = false;
             showShadowScreen = false;
@@ -250,16 +250,12 @@ namespace Speccy
                 }
             }
         }
+        // The AY is built in, so it stays on whatever is asked: the setting only applies to the 48K
         public override void EnableAY(bool val) {
-            HasAYSound = val;
-            if (val) {
-                AY_8192 ay_device = new AY_8192();
-                ay_device.UseLastOutForIN = true;
-                AddDevice(ay_device);
-            }
-            else {
-                RemoveDevice(SPECCY_DEVICE.AY_3_8912);
-            }
+            HasAYSound = true;
+            AY_8192 ay_device = new AY_8192();
+            ay_device.UseLastOutForIN = true;
+            AddDevice(ay_device);
         }
 
         public override void Shutdown() {
@@ -473,14 +469,14 @@ namespace Speccy
             last7ffdOut = val;
 
             //Bits 0 to 2 select the RAM page
-            switch (val & 0x07) {
+            bankPagedIn = val & 0x07;
+            BankInPage3 = "Bank " + bankPagedIn.ToString();
+            switch (bankPagedIn) {
                 case 0: //Bank 0
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
-                    BankInPage3 = "Bank 0";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 1: //Bank 1
@@ -488,8 +484,6 @@ namespace Speccy
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.ONE_HIGH];
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.ONE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.ONE_HIGH];
-                    BankInPage3 = "Bank 1";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 2: //Bank 2
@@ -497,8 +491,6 @@ namespace Speccy
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.TWO_HIGH];
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.TWO_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.TWO_HIGH];
-                    BankInPage3 = "Bank 2";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 3: //Bank 3
@@ -506,8 +498,6 @@ namespace Speccy
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];
-                    BankInPage3 = "Bank 3";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 4: //Bank 4
@@ -515,8 +505,6 @@ namespace Speccy
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.FOUR_HIGH];
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.FOUR_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.FOUR_HIGH];
-                    BankInPage3 = "Bank 4";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 5: //Bank 5
@@ -524,8 +512,6 @@ namespace Speccy
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.FIVE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
-                    BankInPage3 = "Bank 5";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 6: //Bank 6
@@ -533,8 +519,6 @@ namespace Speccy
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.SIX_HIGH];
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.SIX_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.SIX_HIGH];
-                    BankInPage3 = "Bank 6";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 7: //Bank 7
@@ -542,8 +526,6 @@ namespace Speccy
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];
-                    BankInPage3 = "Bank 7";
-                    contendedBankPagedIn = false;
                     break;
             }
 

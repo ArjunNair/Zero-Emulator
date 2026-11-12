@@ -104,7 +104,8 @@ namespace Speccy
         public MultifaceModel MultifaceModel => multiface.Model;
         protected bool NmiPending = false;
         protected int[] keyLine = { 255, 255, 255, 255, 255, 255, 255, 255 };
-
+        protected bool SnowEffectEnabled = false;
+        protected bool ulaRequiresSync = false; // Whether some ULA write happened during this frame
         public int[] AttrColors = new int[16];
 
         /// <summary>
@@ -136,7 +137,6 @@ namespace Speccy
         protected bool CapsLockOn = false;
         protected int prevT;        //previous cpu t-states
         protected int inputFrameTime = 0;
-
         //Sound
         public const short MIN_SOUND_VOL = 0;
         public const short MAX_SOUND_VOL = short.MaxValue / 2;
@@ -160,7 +160,7 @@ namespace Speccy
         protected int last7ffdOut = 0;      //Paging port on 128k/+2/+3/Pentagon
         protected int last1ffdOut = 0;      //Paging + drive motor port on +3
         public int Last7ffdOut => last7ffdOut;
-
+        public int Last1ffdOut => last1ffdOut;
         //Port 0xfe constants
         protected const int BORDER_BIT = 0x07;
         protected const int EAR_BIT = 0x10;
@@ -205,7 +205,7 @@ namespace Speccy
         protected bool lowROMis48K = true;
         protected bool trDosPagedIn = false ;//TR DOS is swapped in only if the lower ROM is 48k.
         protected bool special64KRAM = false;  //for +3
-        public bool contendedBankPagedIn = false;
+        public int bankPagedIn = 0; // 0 means no contended bank is paged in since no machine contends bank 0 anyway
         public bool showShadowScreen = false;
         public bool pagingDisabled = false;    //on 128k, depends on bit 5 of the value output to port (whose 1st and 15th bits are reset)
 
@@ -223,10 +223,10 @@ namespace Speccy
         //Render related stuff
         public int[] ScreenBuffer;                        //buffer for the windows side rasterizer
         protected int[] LastScanlineColor;
-        protected short lastScanlineColorCounter;
         protected byte[] screen;                           //display memory (16384 for 48k)
         protected short[] attr;                           //attribute memory lookup (mapped 1:1 to screen for convenience)
         protected short[] tstateToDisp;                   //tstate-display mapping
+        protected int[] snowMatrix;                     //stores snow data for every tstate
         protected short[] floatingBusTable;               //table that stores tstate to screen/attr addresses values
         protected int deltaTStates;
         protected int lastTState;                         //tstate at which last render update took place
@@ -6331,7 +6331,6 @@ namespace Speccy
             soundCounter = 0;
             averagedSound = 0;
             flashOn = false;
-            lastScanlineColorCounter = 0;
 
             //We jiggle the wait period after resetting so that FRAMES/RANDOMIZE works randomly enough on the speccy.
             //The count starts afresh: a reset before the last one was over would otherwise carry its
@@ -6428,6 +6427,7 @@ namespace Speccy
                 screen = null;
                 attr = null;
                 tstateToDisp = null;
+                snowMatrix = null;
                 RAMpage = null;
                 ROMpage = null;
                 PageReadPointer = null;
@@ -6838,6 +6838,45 @@ namespace Speccy
 
             return false;
         }
+
+        protected void HandleMemoryRefreshSignal() {
+            if (!SnowEffectEnabled || !IsContended(cpu.regs.IR)) return;
+            int rel = cpu.t_states - contentionStartPeriod;
+            if (rel < 0 || rel >= ScreenHeight * TstatesPerScanline) return;
+            int line = rel / TstatesPerScanline;
+            int x = rel % TstatesPerScanline;
+            if (x >= 128) return;
+            int phase = x & 7;
+            if (phase != 2 && phase != 5) return;
+            int k = x >> 3;
+            int col1Tstate = contentionStartPeriod + 5 + line * TstatesPerScanline + 8 * k;
+            int target = (phase == 2) ? col1Tstate : col1Tstate + 4;
+            int pixel1Addr = tstateToDisp[col1Tstate] - 16384;
+            int pixel, attrib;
+            var source = screen;
+            if (model == MachineModel._128k) {
+                var regIAddr = cpu.regs.I << 8;
+                if ((regIAddr & 0xC000) == 0xC000) {
+                    if ((bankPagedIn & 0x01) != 0)
+                        source = GetPageData((bankPagedIn & 4) | (showShadowScreen ? 3 : 1));  
+                }
+            }
+            if (phase == 2) {
+                // snow: column 2k reads from the R-modified address
+                int r = (cpu.regs.R - 1) & 0x7f;
+                pixel  = source[(pixel1Addr & 0x1F80) | r];
+                attrib = source[((attr[pixel1Addr] - 16384) & 0x1F80) | r];
+            } else {
+                // double: column 2k+1 repeats column 2k's bytes
+                pixel  = screen[pixel1Addr];
+                attrib = screen[attr[pixel1Addr] - 16384];
+            }
+            // Pack the attribute and pixel data into the snow matrix;
+            int cell = (phase == 2) ? pixel1Addr : pixel1Addr + 1;   // double lands on column 2k+1
+            snowMatrix[cell] = 0x10000 | (attrib << 8) | pixel;      // int[6144]
+            ulaRequiresSync = true;
+        }
+
         //Updates the state of the renderer
         public virtual void UpdateScreenBuffer(int _tstates) {
             if (_tstates < ActualULAStart) {
@@ -6846,107 +6885,89 @@ namespace Speccy
                 _tstates = FrameLength - 1;
                 //Since we're updating the entire screen here, we don't need to re-paint
                 //it again in the  process loop on framelength overflow.
-
                 needsPaint = true;
             }
-
             //the additional 1 tstate is required to get correct number of bytes to output in ircontention.sna
             elapsedTStates = (_tstates + 1 - lastTState);
 
             //It takes 4 tstates to write 1 byte. Or, 2 pixels per t-state.
-
             int numBytes = (elapsedTStates >> 2) + ((elapsedTStates % 4) > 0 ? 1 : 0);
 
-            int pixelData;
-            int pixel2Data = 0xff;
-            int attrData;
-            int attr2Data;
-            int bright;
-            int ink;
-            int paper;
-            int flash;
+            // Hoist fields into locals so the JIT can keep them in registers
+            var screenBuffer = ScreenBuffer;
+            var disp = tstateToDisp;
+            var scr = screen;
+            var attrMap = attr;
+            var snow = snowMatrix;
+            bool snowActive = ulaRequiresSync;
+            bool ulaPlusPalette = ula_plus.Enabled && ula_plus.PaletteEnabled;
+            bool flashSwap = flashOn;
+            int ulaByteCtr = ULAByteCtr;
+            int tstate = lastTState;
 
             for (int i = 0; i < numBytes; i++) {
-                if (tstateToDisp[lastTState] > 1) {
-                   // for (int p = 0; p < 2; p++) {
-                        screenByteCtr = tstateToDisp[lastTState] - 16384; //adjust for actual screen offset
-                  
-                        pixelData = screen[screenByteCtr];
-                        attrData = screen[attr[screenByteCtr] - 16384];
+                int dispAddr = disp[tstate];
+                if (dispAddr > 1) {
+                    int offset = dispAddr - 16384; //adjust for actual screen offset
+                    int pixelData = scr[offset];
+                    int attrData = scr[attrMap[offset] - 16384];
 
-                        lastPixelValue = pixelData;
-                        lastAttrValue = attrData;
-                       /* if ((I & 0x40) == 0x40) {
-                            {
-                                if (p == 0) {
-                                    screenByteCtr = (screenByteCtr + 16384) | (R & 0xff);
-                                    pixel2Data = screenByteCtr & 0xff;
-                                }
-                                else
-                                    screenByteCtr = (screenByteCtr + 16384) | (pixel2Data);
-                                pixelData = screen[(screenByteCtr - 1) - 16384];
-                                lastAttrValue = screen[attr[(screenByteCtr - 1) - 16384] - 16384];
-                            }
+                    if (snowActive) {
+                        int p = snow[offset];
+                        if (p != 0) {
+                            pixelData = p & 0xff;
+                            attrData = (p >> 8) & 0xff;
                         }
-                        */
-                        bright = (attrData & 0x40) >> 3;
-                        flash = (attrData & 0x80) >> 7;
-                        ink = (attrData & 0x07);
-                        paper = ((attrData >> 3) & 0x7);
-                        int paletteInk = AttrColors[ink + bright];
-                        int palettePaper = AttrColors[paper + bright];
+                    }
+                    int bright = (attrData & 0x40) >> 3;
+                    int flash = (attrData & 0x80) >> 7;
+                    int ink = attrData & 0x07;
+                    int paper = (attrData >> 3) & 0x7;
+                    int paletteInk, palettePaper;
 
-                        if (flashOn && (flash != 0)) //swap paper and ink when flash is on
-                        {
+                    if (ulaPlusPalette) {
+                        int palBase = ((flash << 1) + (bright >> 3)) << 4; //(flash*2 + bright) * 16
+                        paletteInk = ula_plus.Palette[palBase + ink];
+                        palettePaper = ula_plus.Palette[palBase + paper + 8];
+                    } else {
+                        paletteInk = AttrColors[ink + bright];
+                        palettePaper = AttrColors[paper + bright];
+                        if (flashSwap && flash != 0) { //swap paper and ink when flash is on
                             int temp = paletteInk;
                             paletteInk = palettePaper;
                             palettePaper = temp;
                         }
-
-                        if (ula_plus.Enabled && ula_plus.PaletteEnabled) {
-                            paletteInk = ula_plus.Palette[(((flash << 1) + (bright >> 3)) << 4) + ink]; //(flash*2 + bright) * 16 + ink
-                            palettePaper = ula_plus.Palette[(((flash << 1) + (bright >> 3)) << 4) + paper + 8]; //(flash*2 + bright) * 16 + paper + 8
-                        }
-
-                        for (int a = 0; a < 8; ++a) {
-                            if ((pixelData & 0x80) != 0) {
-                                //PAL interlacing
-                                //int pal = paletteInk/2 + (0xffffff - LastScanlineColor[lastScanlineColorCounter]/2);
-                                //ScreenBuffer[ULAByteCtr++] = pal;
-                                //LastScanlineColor[lastScanlineColorCounter++] = paletteInk;
-                                ScreenBuffer[ULAByteCtr++] = paletteInk;
-                                lastAttrValue = ink;
-                            } else {
-                                //PAL interlacing
-                                //int pal = palettePaper/2 + (0xffffff - LastScanlineColor[lastScanlineColorCounter]/2);
-                                //ScreenBuffer[ULAByteCtr++] = pal;
-                                //LastScanlineColor[lastScanlineColorCounter++] = palettePaper;
-                                ScreenBuffer[ULAByteCtr++] = palettePaper;
-                                lastAttrValue = paper;
-                            }
-                            pixelData <<= 1;
-                        }                 
-                    // pixelData = lastPixelValue;
-                } else if (tstateToDisp[lastTState] == 1) {
-                    int bor;
-                    if (ula_plus.Enabled && ula_plus.PaletteEnabled) {
-                        bor = ula_plus.Palette[borderColour + 8];
-                    } else
-                        bor = AttrColors[borderColour];
-
-                    for(int g = 0; g < 8; g++) {
-                        //PAL interlacing
-                        //int pal = bor/2 + (0xffffff -  LastScanlineColor[lastScanlineColorCounter]/2);
-                        //ScreenBuffer[ULAByteCtr++] = pal;
-                        //LastScanlineColor[lastScanlineColorCounter++] = bor;                        
-                        ScreenBuffer[ULAByteCtr++] = bor;
                     }
-                }
-                lastTState += 4;
 
-                if(lastScanlineColorCounter >= ScanLineWidth)
-                    lastScanlineColorCounter = 0;
+                    // One bounds check for the whole 8 pixel cell
+                    var dst = screenBuffer.AsSpan(ulaByteCtr, 8);
+                    dst[0] = (pixelData & 0x80) != 0 ? paletteInk : palettePaper;
+                    dst[1] = (pixelData & 0x40) != 0 ? paletteInk : palettePaper;
+                    dst[2] = (pixelData & 0x20) != 0 ? paletteInk : palettePaper;
+                    dst[3] = (pixelData & 0x10) != 0 ? paletteInk : palettePaper;
+                    dst[4] = (pixelData & 0x08) != 0 ? paletteInk : palettePaper;
+                    dst[5] = (pixelData & 0x04) != 0 ? paletteInk : palettePaper;
+                    dst[6] = (pixelData & 0x02) != 0 ? paletteInk : palettePaper;
+                    dst[7] = (pixelData & 0x01) != 0 ? paletteInk : palettePaper;
+                    ulaByteCtr += 8;
+                    tstate += 4;
+                } else if (dispAddr == 1) {
+                    int bor = ulaPlusPalette ? ula_plus.Palette[borderColour + 8] : AttrColors[borderColour];
+
+                    // Coalesce consecutive border cells into a single fill
+                    int run = 1;
+                    while (i + run < numBytes && disp[tstate + (run << 2)] == 1)
+                        run++;
+                    screenBuffer.AsSpan(ulaByteCtr, run << 3).Fill(bor);
+                    ulaByteCtr += run << 3;
+                    tstate += run << 2;
+                    i += run - 1;
+                } else {
+                    tstate += 4;
+                }
             }
+            ULAByteCtr = ulaByteCtr;
+            lastTState = tstate;
         }
 
         // Wrapper for ULA events
@@ -7699,7 +7720,10 @@ namespace Speccy
         //Resets the render state everytime an interrupt is generated
         public void ULAUpdateStart() {
             ULAByteCtr = 0;
-            lastScanlineColorCounter = 0;
+            if (ulaRequiresSync && snowMatrix != null) {
+                Array.Clear(snowMatrix, 0, snowMatrix.Length);
+                ulaRequiresSync = false;
+            }
             screenByteCtr = DisplayStart;
             lastTState = ActualULAStart;
             needsPaint = true;
@@ -8009,6 +8033,9 @@ namespace Speccy
                 }
                 /////////////////////////////////////////////////
                 timeToOutSound += deltaTStates;
+            }
+            else {
+                HandleMemoryRefreshSignal();
             }
             
             //UpdateTape

@@ -98,7 +98,7 @@ namespace Speccy
                 BankInPage2 = "Bank 2";
                 BankInPage3 = "Bank 0";
                 lowROMis48K = false;
-                contendedBankPagedIn = false;
+                bankPagedIn = 0;
 
                 borderColour = 0;
                 pagingDisabled = false;
@@ -147,8 +147,9 @@ namespace Speccy
         }
 
         public override void BuildContentionTable() {
+            byte[] pattern = { 1, 0, 7, 6, 5, 4, 3, 2 };
             int t = contentionStartPeriod;
-            while (t < contentionEndPeriod) {
+            /*while (t < contentionEndPeriod) {
                 contentionTable[t++] = 1;
                 contentionTable[t++] = 0;
                 //for 128 t-states
@@ -163,6 +164,10 @@ namespace Speccy
                     contentionTable[t++] = 0;
                 }
                 t += (TstatesPerScanline - 128) - 2;
+            } */
+            while (t < contentionEndPeriod) {
+                for (int p = 0; p < 128; p++) contentionTable[t + p] = pattern[p & 7];
+                t += TstatesPerScanline;
             }
 
             //build top half of tstateToDisp table
@@ -227,16 +232,17 @@ namespace Speccy
         }
 
         public override bool IsContended(int addr) {
-            //int addr_hb = (addr & 0xff00) >> 8;
-            addr = addr & 0xc000;
-
-            //Low port contention
-            if (addr == 0x4000)
-                return true;
-
-            //High port contention
-            if ((addr == 0xc000) && contendedBankPagedIn)
-                return true;
+            // Banks 4,5,6 and 7 are contended when paged in
+            if (!special64KRAM ) {
+                if ((addr & 0xC000) == 0x4000) return true;
+                if (((addr & 0xC000) == 0xC000) && ((bankPagedIn & 0x4) != 0)) return true;
+                
+            } else { // In special mode any of the contended banks could be paged into a slot
+                if ((addr < 0x4000) & ((bankPagedIn & 0x1) != 0)) return true;
+                if (((addr & 0xC000) == 0x4000) && ((bankPagedIn & 0x2) != 0)) return true;
+                if (((addr & 0xC000) == 0x8000) && ((bankPagedIn & 0x4) != 0)) return true;
+                if (((addr & 0xC000) == 0xC000) && ((bankPagedIn & 0x8) != 0)) return true;
+            }
 
             return false;
         }
@@ -341,15 +347,15 @@ namespace Speccy
 
         private void NormalPaging(int val) {
             //Bits 0 to 2 select the RAM page
-            switch (val & 0x07) {
+            bankPagedIn = val & 0x07;
+            BankInPage3 = "Bank " + bankPagedIn.ToString();
+            switch (bankPagedIn) {
                 case 0: //Bank 0
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
-                    BankInPage3 = "Bank 0";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 1: //Bank 1
@@ -358,8 +364,6 @@ namespace Speccy
 
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.ONE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.ONE_HIGH];
-                    BankInPage3 = "Bank 1";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 2: //Bank 2
@@ -368,8 +372,6 @@ namespace Speccy
 
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.TWO_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.TWO_HIGH];
-                    BankInPage3 = "Bank 2";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 3: //Bank 3
@@ -378,8 +380,6 @@ namespace Speccy
 
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];
-                    BankInPage3 = "Bank 3";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 4: //Bank 4
@@ -388,8 +388,6 @@ namespace Speccy
 
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.FOUR_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.FOUR_HIGH];
-                    BankInPage3 = "Bank 4";
-                    contendedBankPagedIn = true;
                     break;
 
                 case 5: //Bank 5
@@ -398,8 +396,6 @@ namespace Speccy
 
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.FIVE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
-                    BankInPage3 = "Bank 5";
-                    contendedBankPagedIn = true;
                     break;
 
                 case 6: //Bank 6
@@ -408,8 +404,6 @@ namespace Speccy
 
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.SIX_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.SIX_HIGH];
-                    BankInPage3 = "Bank 6";
-                    contendedBankPagedIn = true;
                     break;
 
                 case 7: //Bank 7
@@ -418,8 +412,6 @@ namespace Speccy
 
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];
-                    BankInPage3 = "Bank 7";
-                    contendedBankPagedIn = true;
                     break;
             }
 
@@ -499,8 +491,7 @@ namespace Speccy
                         BankInPage1 = "Bank 1";
                         BankInPage2 = "Bank 2";
                         BankInPage3 = "Bank 3";
-                        contendedBankPagedIn = false;
-
+                        bankPagedIn = 0;
                         break;
 
                     case 1:
@@ -525,8 +516,7 @@ namespace Speccy
                         BankInPage1 = "Bank 5";
                         BankInPage2 = "Bank 6";
                         BankInPage3 = "Bank 7";
-                        contendedBankPagedIn = true;
-
+                        bankPagedIn = 0b1111;
                         break;
 
                     case 2:
@@ -551,8 +541,7 @@ namespace Speccy
                         BankInPage1 = "Bank 5";
                         BankInPage2 = "Bank 6";
                         BankInPage3 = "Bank 3";
-                        contendedBankPagedIn = false;
-
+                        bankPagedIn = 0b111;
                         break;
 
                     case 3:
@@ -577,8 +566,7 @@ namespace Speccy
                         BankInPage1 = "Bank 7";
                         BankInPage2 = "Bank 6";
                         BankInPage3 = "Bank 3";
-                        contendedBankPagedIn = false;
-
+                        bankPagedIn = 0b111;
                         break;
                 }
             } else //normal mode
@@ -599,6 +587,7 @@ namespace Speccy
                 PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];   //Bank 2
                 BankInPage1 = "Bank 5";
                 BankInPage2 = "Bank 2";
+                bankPagedIn = 0;
 
                 NormalPaging(last7ffdOut);
             }
@@ -784,7 +773,7 @@ namespace Speccy
                 PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
                 PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                 PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
-                contendedBankPagedIn = false;
+                bankPagedIn = 0;
                 Out(0x1ffd, szx.specRegs.pagePort);
                 Out(0x7ffd, szx.specRegs.x7ffd); //Perform a dummy Out to setup the remaining stuff!
                
@@ -816,7 +805,7 @@ namespace Speccy
             PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];
             PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
             PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
-            contendedBankPagedIn = false;
+            bankPagedIn = 0;
 
             //Check if we are halted.
             if (PeekByteNoContend(cpu.regs.PC) == 0x76) {

@@ -16,6 +16,8 @@ namespace Speccy
             InterruptPeriod = 36;
             clockSpeed = 3.54690;
             model = MachineModel._128k;
+            SnowEffectEnabled = true;
+            cpu.MemoryRefreshSignal += HandleMemoryRefreshSignal;
 
             contentionTable = new byte[70930];
             floatingBusTable = new short[70930];
@@ -41,7 +43,7 @@ namespace Speccy
             TstateAtTop = BorderTopHeight * TstatesPerScanline;
             TstateAtBottom = BorderBottomHeight * TstatesPerScanline;
             tstateToDisp = new short[FrameLength];
-
+            snowMatrix = new int[FrameLength];
             ScreenBuffer = new int[ScanLineWidth * BorderTopHeight //48 lines of border
                                               + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
                                               + ScanLineWidth * BorderBottomHeight]; //56 lines of border
@@ -83,13 +85,15 @@ namespace Speccy
             BankInPage2 = "Bank 2";
             BankInPage3 = "Bank 0";
             lowROMis48K = false;
-            contendedBankPagedIn = false;
+            bankPagedIn = 0;
             pagingDisabled = false;
             showShadowScreen = false;
             borderColour = 3;
 
             InitRam();
             screen = GetPageData(5); //Bank 5 is a copy of the screen
+
+            Array.Clear(snowMatrix, 0, FrameLength);
             screenByteCtr = DisplayStart;
             ULAByteCtr = 0;
 
@@ -105,14 +109,13 @@ namespace Speccy
         }
 
         public override bool IsContended(int addr) {
-            addr = addr & 0xc000;
-
             //Low port contention
-            if (addr == 0x4000)
+            if ((addr & 0xC000) == 0x4000)
                 return true;
 
-            //High port contention
-            if ((addr == 0xc000) && contendedBankPagedIn)
+            // High port contention
+            // Only odd numbered banks are contended
+            if (((addr & 0xC000) == 0xC000) && ((bankPagedIn & 0x01) != 0))
                 return true;
 
             return false;
@@ -341,89 +344,65 @@ namespace Speccy
 
             last7ffdOut = val;
             //Bits 0 to 2 select the RAM page
-            switch (val & 0x07) {
+            bankPagedIn = val & 0x07;
+            BankInPage3 = "Bank " + bankPagedIn.ToString();
+            switch (bankPagedIn) {
                 case 0: //Bank 0
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
-
-                    BankInPage3 = "Bank 0";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 1: //Bank 1
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.ONE_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.ONE_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.ONE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.ONE_HIGH];
-                    BankInPage3 = "Bank 1";
-                    contendedBankPagedIn = true;
                     break;
 
                 case 2: //Bank 2
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.TWO_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.TWO_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.TWO_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.TWO_HIGH];
-                    BankInPage3 = "Bank 2";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 3: //Bank 3
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];
-                    BankInPage3 = "Bank 3";
-                    contendedBankPagedIn = true;
                     break;
 
                 case 4: //Bank 4
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.FOUR_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.FOUR_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.FOUR_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.FOUR_HIGH];
-                    BankInPage3 = "Bank 4";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 5: //Bank 5
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.FIVE_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.FIVE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
-                    BankInPage3 = "Bank 5";
-                    contendedBankPagedIn = true;
                     break;
 
                 case 6: //Bank 6
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.SIX_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.SIX_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.SIX_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.SIX_HIGH];
-                    BankInPage3 = "Bank 6";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 7: //Bank 7
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];
-                    BankInPage3 = "Bank 7";
-                    contendedBankPagedIn = true;
                     break;
             }
-
             //ROM select
             if ((val & 0x10) != 0) {
                 //48k basic

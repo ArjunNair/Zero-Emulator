@@ -2,7 +2,9 @@ What's New
 --------------
 v 1.1
 --------------
+* Added accurate emulation for snow effect (thanks to Weiv, TheMartian, Woody, et al for working it all out)
 * Added support for r-lyeh's custom color palettes (https://github.com/r-lyeh). Palettes included with permission.
+* Accurate emulation of screen blanking during reset for all the machines (thanks to TheMartian).
 * Added support for +2 and +2A machines.
 * Fixed RZX recording issues related to stop/continue and rollback while recording.
 * Refactored command line arguments for cross platform usage.

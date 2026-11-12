@@ -12,6 +12,8 @@ namespace Speccy
             model = MachineModel._48k;
             InterruptPeriod = 32;
             FrameLength = 69888;
+            SnowEffectEnabled = true;
+            cpu.MemoryRefreshSignal += HandleMemoryRefreshSignal;
 
             clockSpeed = 3.50000;
 
@@ -39,7 +41,7 @@ namespace Speccy
             TstateAtTop = BorderTopHeight * TstatesPerScanline;
             TstateAtBottom = BorderBottomHeight * TstatesPerScanline;
             tstateToDisp = new short[FrameLength];
-
+            snowMatrix = new int[FrameLength];
             ScreenBuffer = new int[ScanLineWidth * BorderTopHeight //48 lines of border
                                               + ScanLineWidth * ScreenHeight //border + main + border of 192 lines
                                               + ScanLineWidth * BorderBottomHeight]; //56 lines of border
@@ -82,6 +84,7 @@ namespace Speccy
 
             InitRam();
             screen = GetPageData(5);
+            Array.Clear(snowMatrix, 0, FrameLength);
             screenByteCtr = DisplayStart;
             ULAByteCtr = 0;
 
@@ -96,7 +99,7 @@ namespace Speccy
             BankInPage1 = "-----";
             BankInPage2 = "-----";
             BankInPage3 = "-----";
-            contendedBankPagedIn = false;
+            bankPagedIn = 0;
             showShadowScreen = false;
             pagingDisabled = false;
             foreach (var ad in audio_devices) {
@@ -105,8 +108,7 @@ namespace Speccy
         }
 
         public override bool IsContended(int addr) {
-
-            if ((addr & 49152) == 16384)
+            if ((addr & 0xC000) == 0x4000)
                 return true;
 
             return false;

@@ -272,7 +272,7 @@ namespace Zero.App.Controls
 
         /// <summary>The machine at each stop of the machine switch, in the order of its legends.</summary>
         private static readonly MachineModel[] Machines =
-            { MachineModel._48k, MachineModel._128k, MachineModel._plus2, MachineModel._plus2A, MachineModel._plus3, MachineModel._128ke, MachineModel._pentagon };
+            { MachineModel._48k, MachineModel._128k, MachineModel._plus2, MachineModel._plus2A, MachineModel._plus3, MachineModel._pentagon, MachineModel._128ke };
 
         public static MachineModel MachineAt(int stop) => Machines[Math.Clamp(stop, 0, Machines.Length - 1)];
 

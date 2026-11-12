@@ -75,7 +75,7 @@ namespace Speccy
             BankInPage1 = "Bank 5";
             BankInPage2 = "Bank 2";
             BankInPage3 = "Bank 0";
-            contendedBankPagedIn = false;
+            bankPagedIn = 0;
 
             lowROMis48K = false;
             pagingDisabled = false;
@@ -102,7 +102,8 @@ namespace Speccy
 
         public override void BuildContentionTable() {
             int t = contentionStartPeriod;
-            while (t < contentionEndPeriod) {
+            byte[] pattern = { 1, 0, 7, 6, 5, 4, 3, 2 };
+           /* while (t < contentionEndPeriod) {
                 contentionTable[t++] = 1;
                 contentionTable[t++] = 0;
                 //for 128 t-states
@@ -117,6 +118,10 @@ namespace Speccy
                     contentionTable[t++] = 0;
                 }
                 t += (TstatesPerScanline - 128) - 2;
+            }*/
+            while (t < contentionEndPeriod) {
+                for (int p = 0; p < 128; p++) contentionTable[t + p] = pattern[p & 7];
+                t += TstatesPerScanline;
             }
 
             //build top half of tstateToDisp table
@@ -181,16 +186,17 @@ namespace Speccy
         }
 
         public override bool IsContended(int addr) {
-            //int addr_hb = (addr & 0xff00) >> 8;
-            addr = addr & 0xc000;
-
-            //Low port contention
-            if (addr == 0x4000)
-                return true;
-
-            //High port contention
-            if ((addr == 0xc000) && contendedBankPagedIn)
-                return true;
+            // Banks 4,5,6 and 7 are contended when paged in
+            if (!special64KRAM ) {
+                if ((addr & 0xC000) == 0x4000) return true;
+                if (((addr & 0xC000) == 0xC000) && ((bankPagedIn & 0x4) != 0)) return true;
+                
+            } else { // In special mode any of the contended banks could be paged into a slot
+                if ((addr < 0x4000) & ((bankPagedIn & 0x1) != 0)) return true;
+                if (((addr & 0xC000) == 0x4000) && ((bankPagedIn & 0x2) != 0)) return true;
+                if (((addr & 0xC000) == 0x8000) && ((bankPagedIn & 0x4) != 0)) return true;
+                if (((addr & 0xC000) == 0xC000) && ((bankPagedIn & 0x8) != 0)) return true;
+            }
 
             return false;
         }
@@ -304,85 +310,63 @@ namespace Speccy
 
         private void NormalPaging(int val) {
             //Bits 0 to 2 select the RAM page
-            switch (val & 0x07) {
+            bankPagedIn = val & 0x07;
+            BankInPage3 = "Bank " + bankPagedIn.ToString();
+            switch (bankPagedIn) {
                 case 0: //Bank 0
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
-                    BankInPage3 = "Bank 0";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 1: //Bank 1
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.ONE_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.ONE_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.ONE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.ONE_HIGH];
-                    BankInPage3 = "Bank 1";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 2: //Bank 2
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.TWO_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.TWO_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.TWO_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.TWO_HIGH];
-                    BankInPage3 = "Bank 2";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 3: //Bank 3
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.THREE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.THREE_HIGH];
-                    BankInPage3 = "Bank 3";
-                    contendedBankPagedIn = false;
                     break;
 
                 case 4: //Bank 4
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.FOUR_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.FOUR_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.FOUR_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.FOUR_HIGH];
-                    BankInPage3 = "Bank 4";
-                    contendedBankPagedIn = true;
                     break;
 
                 case 5: //Bank 5
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.FIVE_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.FIVE_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.FIVE_HIGH];
-                    BankInPage3 = "Bank 5";
-                    contendedBankPagedIn = true;
                     break;
 
                 case 6: //Bank 6
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.SIX_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.SIX_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.SIX_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.SIX_HIGH];
-                    BankInPage3 = "Bank 6";
-                    contendedBankPagedIn = true;
                     break;
 
                 case 7: //Bank 7
                     PageReadPointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];
                     PageReadPointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];
-
                     PageWritePointer[6] = RAMpage[(int)RAM_BANK.SEVEN_LOW];
                     PageWritePointer[7] = RAMpage[(int)RAM_BANK.SEVEN_HIGH];
-                    BankInPage3 = "Bank 7";
-                    contendedBankPagedIn = true;
                     break;
             }
 
@@ -428,6 +412,8 @@ namespace Speccy
                 special64KRAM = true;
                 lowROMis48K = false;
                 int mapSelect = (val & 0x6) >> 1;
+                // in special mode bankPagedIn sets its 4 lsb corresponding to whether a contended
+                // bank is paged in for 0x0000, 0x4000, 0xc000 and 0x8000
                 switch (mapSelect) {
                     case 0:
                         PageReadPointer[0] = RAMpage[(int)RAM_BANK.ZERO_LOW];   //Bank 0
@@ -451,8 +437,7 @@ namespace Speccy
                         BankInPage1 = "Bank 1";
                         BankInPage2 = "Bank 2";
                         BankInPage3 = "Bank 3";
-                        contendedBankPagedIn = false;
-
+                        bankPagedIn = 0;
                         break;
 
                     case 1:
@@ -477,8 +462,7 @@ namespace Speccy
                         BankInPage1 = "Bank 5";
                         BankInPage2 = "Bank 6";
                         BankInPage3 = "Bank 7";
-                        contendedBankPagedIn = true;
-
+                        bankPagedIn = 0b1111;
                         break;
 
                     case 2:
@@ -503,8 +487,7 @@ namespace Speccy
                         BankInPage1 = "Bank 5";
                         BankInPage2 = "Bank 6";
                         BankInPage3 = "Bank 3";
-                        contendedBankPagedIn = false;
-
+                        bankPagedIn = 0b111;
                         break;
 
                     case 3:
@@ -529,11 +512,11 @@ namespace Speccy
                         BankInPage1 = "Bank 7";
                         BankInPage2 = "Bank 6";
                         BankInPage3 = "Bank 3";
-                        contendedBankPagedIn = false;
-
+                        bankPagedIn = 0b111;
                         break;
                 }
-            } else //normal mode
+            } 
+            else //normal mode
             {
                 special64KRAM = false;
                 //bit 2 of val is high bit and bit 4 of 0x7ffd out is low bit
@@ -551,6 +534,7 @@ namespace Speccy
                 PageWritePointer[5] = RAMpage[(int)RAM_BANK.TWO_HIGH];   //Bank 2
                 BankInPage1 = "Bank 5";
                 BankInPage2 = "Bank 2";
+                bankPagedIn = 0;
 
                 NormalPaging(last7ffdOut);
             }
@@ -682,16 +666,12 @@ namespace Speccy
             return true;
         }
 
+        // The AY is built in, so it stays on whatever is asked: the setting only applies to the 48K
         public override void EnableAY(bool val) {
-            HasAYSound = val;
-            if (val) {
-                AY_8192 ay_device = new AY_8192();
-                ay_device.UseLastOutForIN = true;
-                AddDevice(ay_device);
-            }
-            else {
-                RemoveDevice(SPECCY_DEVICE.AY_3_8912);
-            }
+            HasAYSound = true;
+            AY_8192 ay_device = new AY_8192();
+            ay_device.UseLastOutForIN = true;
+            AddDevice(ay_device);
         }
 
         public override void UseSNA(SNA_SNAPSHOT sna) {
