@@ -22,10 +22,10 @@ dotnet test tests/Zero.App.Tests           # headless UI tests
 
 See [docs/porting-status.md](docs/porting-status.md) for what is in this build, what was cut for v1
 (TZX/CSW, debugger) and how it differs from the Windows-only original, and
-[packaging/README.md](packaging/README.md) for self-contained builds.
+[Build.md](Build.md) for making a runnable build on each system.
 
 ## Features 
-* Emulates the 48k, 128k, 128k SE, the Spectrum +2 and the Spectrum +3 (with 2 disk drives), and the Pentagon 128k (with a Beta 128 interface and 4 TR-DOS disk drives) models.
+* Emulates the 48k, 128k, +2, +2A, +3 (with 2 disk drives), and the Pentagon 128k (with a Beta 128 interface and 4 TR-DOS disk drives) models.
 
 * Supports the following tape formats: TZX, TAP, CSW, and PZX. It only saves .TAP files though.
 
@@ -42,10 +42,12 @@ See [docs/porting-status.md](docs/porting-status.md) for what is in this build, 
 * There is a built-in debugger with modern conveniences like step-in, step-over, logging and breakpoint facilities.
 
 * Other stuff: Virtual tape drive, POK file support, Zip file support, et al.
-  
+
+* Fairly accurate emulation of all models with all their idiosyncracies (including snow!).
 
 ## Using the Emulator
 The entire emulator is controlled and configured via the menu bar at the top. Additional options are under the Tools section in the menu.
+A Hi-Fi deck design (that can be toggled off) allows controlling the most common parts of the emulator via a nifty user interface.
 
 ### RZX recordings
 Zero supports RXZ recordings. To playback one, simply open a `.rzx` file - the emulator will automatically start playing it back with the status bar showing`▶ RZX` while it runs. 
@@ -171,9 +173,9 @@ Simply delete the folder in which Zero resides.
 Many thanks to Mark Woodmass (Woody) for his patient and detailed technical advice on various aspects of emulation, and to Rich Chandler, Paul Dunn (Dunny) and others on the ZX Spectrum discord group for their help and feedback. This emulator wouldn't have been possible otherwise without their considerable encouragement and support.
 
 Thanks also to Patrik Rak for permission to use the various PZX conversion tools that Zero uses to support other tape format. You can find more information on them on Patrik's site: http://zxds.raxoft.cz/pzx.html.
-
 Thanks to Alex Makeev for permission to use his DirectSound routines from ZXMAK 2.
-
+Thanks to ZXDunny (Paul Dunn) for letting me port Spin's flash load tape process.
+Thanks to Weiv, TheMartian, Woody et al for figuring out snow emulation and sharing it so that others can benefit.
 Thanks go out to Dr. Phil Kendall and others for putting together the CSS FAQ, which helped me figure out some of the nuances of the Spectrum hardware and peripherals.
 
 I must also thank my wife Poornima for putting up with my obsession with the speccy and even providing encouragement and help with this project!
