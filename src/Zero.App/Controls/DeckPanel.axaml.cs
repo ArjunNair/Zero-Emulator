@@ -39,18 +39,19 @@ namespace Zero.App.Controls
             DeckCKey.Click += (_, __) => { SelectDeck(SelectedDeck); DeckRequested?.Invoke(2); };
             MachineKnob.ValueChangedByUser += (_, v) => { _requestedMachine = MachineAt((int)v); _requestedAt = DateTime.UtcNow; };
             // The faders' tooltips give their setting, and keep up as they are dragged.
-            CurveFader.PropertyChanged += (_, e) => { if (e.Property == DeckFader.ValueProperty) ShowFaderTips(); };
-            HousingFader.PropertyChanged += (_, e) => { if (e.Property == DeckFader.ValueProperty) ShowFaderTips(); };
+            foreach (DeckFader fader in new[] { CurveFader, EdgeFader, HousingFader })
+                fader.PropertyChanged += (_, e) => { if (e.Property == DeckFader.ValueProperty) ShowFaderTips(); };
             ShowFaderTips();
             SelectDeck(0);
         }
 
-        /// <summary>The housing fader's full travel: the most of the window the cabinet can take, as in Options.</summary>
+        // The housing fader's full travel: the most of the window the cabinet can take, as in Options.
         public const double MaxHousing = 0.15;
 
         private void ShowFaderTips()
         {
             ToolTip.SetTip(CurveFader, $"Screen curvature: {CurveFader.Value:P0}");
+            ToolTip.SetTip(EdgeFader, $"Edge light on the housing: {EdgeFader.Value:P0}");
             ToolTip.SetTip(HousingFader, $"Television housing: {HousingFader.Value * MaxHousing:P0} of the window");
         }
 
@@ -92,9 +93,8 @@ namespace Zero.App.Controls
             RecLamp.IsLit = recordArmed || saving;
             RecLamp.Blink = saving;
 
-            // The machine row: the current model's legend lit; the 128KE lights 128K and its E.
-            MachineModel model = session.Model;
-            //SetLit(Vfd48k, model == MachineModel._48k);
+            // The devices row: a legend each for the Multiface fitted, the joystick being played and
+            // the mouse, lit while it is in use.
             SetLit(VfdMF, session.HasMultiface);
             if (session.HasMultiface) {
                 switch (session.MultifaceModel) {
@@ -106,13 +106,10 @@ namespace Zero.App.Controls
                         VfdMF.Text = "MF3"; break;
                 }
             }
-            //SetLit(Vfd128k, model is MachineModel._128k or MachineModel._128ke);
-            //SetLit(Vfd128kE, model == MachineModel._128ke);
-            //SetLit(VfdPlus3, model == MachineModel._plus3);
-            //SetLit(VfdPentagon, model == MachineModel._pentagon);
+            SetLit(VfdMouse, settings.Input.EnableKempstonMouse);
+            SetLit(VfdAy, session.HasAySound);
             VfdStereo.Text = settings.Audio.StereoSoundMode switch { 0 => "MONO", 2 => "ABC", _ => "ACB" };
             SetLit(VfdTurbo, settings.Emulation.EmulationSpeed > 1);
-            SetLit(VfdMute, settings.Audio.Mute);
             // The drives, on the display and on the receiver's drive fronts: the +3's two, or the
             // Pentagon's four (a machine without drives shows the ones it had last, unlit).
             bool drives = session.HasDiskDrives;
@@ -158,10 +155,22 @@ namespace Zero.App.Controls
             CrtSettings crt = settings.Render.Crt;
             CrtKey.IsChecked = crt.Enabled;
             ScanKey.IsChecked = crt.Scanlines;
-            CurveFader.IsEnabled = HousingFader.IsEnabled = crt.Enabled;   // scanlines work with CRT off too
-            CurveFader.Opacity = HousingFader.Opacity = crt.Enabled ? 1 : 0.45;
+            // Everything but scanlines needs CRT effects on, and dims without them.
+            VignetteKey.IsChecked = crt.Vignette;
+            VignetteKey.IsEnabled = TubeSwitch.IsEnabled = crt.Enabled;
+            VignetteKey.Opacity = TubeSwitch.Opacity = crt.Enabled ? 1 : 0.45;
+            foreach (DeckFader fader in new[] { CurveFader, EdgeFader, HousingFader })
+            {
+                fader.IsEnabled = crt.Enabled;
+                fader.Opacity = crt.Enabled ? 1 : 0.45;
+            }
+            if (!TubeSwitch.IsInteracting) TubeSwitch.Value = string.Equals(crt.Tube, "Trinitron", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
             CurveFader.Value = crt.Curvature;
+            EdgeFader.Value = crt.EdgeLight;
             HousingFader.Value = crt.Bezel / MaxHousing;
+            if (!FinishSwitch.IsInteracting) FinishSwitch.Value = Finish == DeckFinish.Silver ? 1 : 0;
+            FilterKnob.Value = settings.Render.PixelFilter;
+            if (!BorderKnob.IsInteracting) BorderKnob.Value = BorderStopFor(settings.Render.BorderCrop);
 
             if (_requestedMachine == session.Model || DateTime.UtcNow - _requestedAt > MachineSwitchGrace)
                 _requestedMachine = null;
@@ -174,11 +183,13 @@ namespace Zero.App.Controls
             int joystick = source == JoystickSourceGamepad ? settings.Input.Gamepad1Emulates : settings.Input.KeyboardJoystickType;
             if (!JoystickSwitch.IsInteracting) JoystickSwitch.Value = Math.Clamp(joystick, 1, 4) - 1;
             JoystickSwitch.Opacity = source == JoystickSourceNone ? 0.45 : 1;   // nothing plays it
+            // One legend for the joystick, naming the one in play; unlit when nothing plays it.
+            VfdJoystick.Text = JoystickLegends[Math.Clamp(joystick, 1, 4) - 1];
+            SetLit(VfdJoystick, source != JoystickSourceNone);
             StereoKnob.Value = settings.Audio.StereoSoundMode;
-            CpuKnob.Value = settings.Emulation.CpuMultiplier switch { >= 4 => 2, 2 => 1, _ => 0 };
+            Ay48kKey.IsChecked = settings.Audio.EnableAYFor48K;
             VolumeKnob.Value = settings.Audio.Volume;
             MuteKey.IsChecked = settings.Audio.Mute;
-            TurboKey.IsChecked = settings.Emulation.EmulationSpeed > 1;
             // The Multiface switch shows what the user asked for where one fits; the NMI key works
             // once one is actually fitted.
             bool canFit = session.CanFitMultiface;
@@ -276,6 +287,17 @@ namespace Zero.App.Controls
 
         public static MachineModel MachineAt(int stop) => Machines[Math.Clamp(stop, 0, Machines.Length - 1)];
 
+        // The border knob's stops: full, medium and none, as the View menu has them, each the
+        // pixels cropped from every edge.
+        private static readonly int[] BorderCrops = { 0, 24, 48 };
+
+        public static int BorderCropAt(int stop) => BorderCrops[Math.Clamp(stop, 0, BorderCrops.Length - 1)];
+
+        private static int BorderStopFor(int crop) => crop >= BorderCrops[2] ? 2 : crop >= BorderCrops[1] ? 1 : 0;
+
+        // The joystick's name on the display, for each stop of the joystick switch.
+        private static readonly string[] JoystickLegends = { "KEMP", "SIN1", "SIN2", "CRSR" };
+
         /// <summary>What can play the joystick, one key each under the joystick switch.</summary>
         public const int JoystickSourceCursor = 0, JoystickSourceGamepad = 1, JoystickSourceNone = 2;
 
@@ -302,9 +324,6 @@ namespace Zero.App.Controls
             _message = string.IsNullOrEmpty(text) ? null : text.ToUpperInvariant();
             _messageUntil = DateTime.UtcNow + MessageTime;
         }
-
-        /// <summary>The CPU multiplier for each stop on the CPU knob.</summary>
-        public static int CpuMultiplierAt(double stop) => stop >= 2 ? 4 : stop >= 1 ? 2 : 1;
 
         /// <summary>
         /// A disk's name as the deck shows it: its image's file name, upper case, without the

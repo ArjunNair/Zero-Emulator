@@ -167,7 +167,11 @@ namespace Zero.App.Controls
 
         public override void Render(DrawingContext context)
         {
-            context.FillRectangle(_bitmap == null ? Brushes.Black : _surround, new Rect(Bounds.Size));
+            // Round the picture, where the window is not its shape: the border's colour, so the picture
+            // seems to run on -- unless the television's housing is drawn, which is black, and the
+            // border's colour outside it would look like a light strip down either side of the set.
+            bool housing = UseShader && CrtOptions.Enabled && CrtOptions.Bezel > 0;
+            context.FillRectangle(_bitmap == null || housing ? Brushes.Black : _surround, new Rect(Bounds.Size));
             if (_bitmap == null) return;
 
             Rect source = SourceRect;

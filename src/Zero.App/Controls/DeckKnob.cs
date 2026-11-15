@@ -76,6 +76,16 @@ namespace Zero.App.Controls
         /// <summary>Raised when the user turns the knob; never for a programmatic change.</summary>
         public event EventHandler<double> ValueChangedByUser;
 
+        // For a selector whose every change is costly (the border resizes the window, and the deck
+        // with it, under the pointer): a drag turns the knob freely and ValueChangedByUser reports
+        // only the stop it is let go on. Clicks and the wheel still report at once.
+        public static readonly StyledProperty<bool> ReportOnReleaseProperty =
+            AvaloniaProperty.Register<DeckKnob, bool>(nameof(ReportOnRelease));
+        public bool ReportOnRelease { get => GetValue(ReportOnReleaseProperty); set => SetValue(ReportOnReleaseProperty, value); }
+
+        // True while the user has hold of the knob; the owner should not turn it then.
+        public bool IsInteracting => _dragging;
+
         private string[] _legends = Array.Empty<string>();
         private bool _dragging, _dragged;
         private Point _pressPoint;
@@ -161,7 +171,8 @@ namespace Zero.App.Controls
             double travel = (_pressPoint.Y - p.Y) + (p.X - _pressPoint.X);
             if (!_dragged && Math.Abs(travel) < 3) return;
             _dragged = true;
-            if (IsSelector) SetByUser(_pressValue + Math.Round(travel / DragPerStop));
+            if (IsSelector && ReportOnRelease) Value = _pressValue + Math.Round(travel / DragPerStop);
+            else if (IsSelector) SetByUser(_pressValue + Math.Round(travel / DragPerStop));
             else SetByUser(_pressValue + travel / DragSpan * (Maximum - Minimum));
             e.Handled = true;
         }
@@ -173,12 +184,14 @@ namespace Zero.App.Controls
             _dragging = false;
             e.Pointer.Capture(null);
             if (!_dragged && IsSelector) SetByUser((Value + 1) % _legends.Length);
+            else if (_dragged && IsSelector && ReportOnRelease && Value != _pressValue) ValueChangedByUser?.Invoke(this, Value);
             e.Handled = true;
         }
 
         protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
         {
             base.OnPointerCaptureLost(e);
+            if (_dragging && IsSelector && ReportOnRelease) Value = _pressValue; // abandoned: put it back
             _dragging = false;
         }
 

@@ -22,19 +22,19 @@
       </DockPanel>
     </Border>
 
-    <!-- The hi-fi decks sit on a shelf under the screen, scaled to the window's width up to a
-         limit (see DeckHeightFor in MainWindow.Deck.cs). -->
-    <Border x:Name="DeckShelf" DockPanel.Dock="Bottom" Padding="8,6,8,7" BorderBrush="#2C2D31" BorderThickness="0,1,0,0">
-      <Border.Background>
+    <!-- The hi-fi decks sit on a shelf under the screen, scaled with the window to stay as wide as
+         the picture (see DeckShelfBorder). -->
+    <c:DeckShelfBorder x:Name="DeckShelf" DockPanel.Dock="Bottom" Padding="8,6,8,7" BorderBrush="#2C2D31" BorderThickness="0,1,0,0">
+      <c:DeckShelfBorder.Background>
         <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
           <GradientStop Color="#1A1B1E" Offset="0" />
           <GradientStop Color="#0C0C0E" Offset="1" />
         </LinearGradientBrush>
-      </Border.Background>
+      </c:DeckShelfBorder.Background>
       <Viewbox x:Name="DeckViewbox" Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Center">
         <c:DeckPanel x:Name="Deck" />
       </Viewbox>
-    </Border>
+    </c:DeckShelfBorder>
 
     <!-- CRT effects live in the display's own shader; see Controls/CrtShader.cs. -->
     <c:SpectrumDisplay x:Name="Display" />
