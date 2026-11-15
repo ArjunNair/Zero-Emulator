@@ -793,11 +793,13 @@ namespace Zero.App
             // The deck is left out of the measured chrome and added back for the new width, since
             // its height follows the window's width (see DeckHeightFor).
             double deck = DeckShelf.IsVisible ? DeckShelf.Bounds.Height : 0;
+            UpdateDeckAspect();
             double chrome = ClientSize.Height - Display.Bounds.Height - deck;
             if (chrome < 0 || double.IsNaN(chrome) || Display.Bounds.Height <= 0) chrome = 56;
             double sideChrome = Math.Max(0, ClientSize.Width - Display.Bounds.Width);
+            // The size asked for is the size given, decks and all, even where that is more than the
+            // screen holds: the window is not shrunk to fit.
             Width = w + sideChrome;
-            LimitDeckScaleToScreen(h + chrome);
             Height = h + chrome + DeckHeightFor(Math.Max(Width, MinWidth)); // MinWidth may widen it, and the deck with it
         }
 
@@ -858,11 +860,11 @@ namespace Zero.App
             Display.SharpPixels = _settings.Render.SharpPixelEdges;
             Display.BorderCrop = _settings.Render.BorderCrop;
             Display.KeepAspectRatio = _settings.Render.MaintainAspectRatio;
+            UpdateDeckAspect();
             ApplyDeckVisibility(refit: false);
             int scale = Math.Clamp(_settings.Render.WindowScale, 1, 6);
             Rect source = Display.SourceRect;
             Width = source.Width * scale;
-            LimitDeckScaleToScreen(source.Height * scale + 56);
             Height = source.Height * scale + 56 + DeckHeightFor(Math.Max(Width, MinWidth)); // refined from the real layout once the window has opened
             if (_settings.Render.FullScreen) WindowState = WindowState.FullScreen;
         }
@@ -922,6 +924,17 @@ namespace Zero.App
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
         {
             base.OnPropertyChanged(change);
+            // macOS trims a window asked to be taller than its screen, and says so in the middle of
+            // the layout pass that asked. That pass finishes with the sizes it started with, leaving
+            // the screen and the decks arranged for the taller window; lay them out again after it.
+            if (change.Property == ClientSizeProperty)
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    DeckShelf.InvalidateMeasure();
+                    (Content as Control)?.InvalidateArrange();
+                }, DispatcherPriority.Loaded);
+            }
             if (change.Property != WindowStateProperty || _settings == null) return;
 
             WindowState old = change.GetOldValue<WindowState>();

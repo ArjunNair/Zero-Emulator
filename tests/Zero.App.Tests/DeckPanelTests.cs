@@ -128,9 +128,9 @@ namespace Zero.App.Tests
             Assert.True(d.VfdRzx.Classes.Contains("off"));     // it is the tape playing, not a recording
 
             // The counter only moves while the tape runs. Fast forward so it gets going quickly.
-            Press(d.TurboKey);
+            w.FullSpeedItem.Command.Execute(null);
             PumpUntil(() => w.Session.Tape.Counter >= 2, 30000);
-            Press(d.TurboKey);
+            w.FullSpeedItem.Command.Execute(null);
             PumpUntil(() => d.VfdCounter.Text != "000");
             Capture(w, "deck-playing");
 
@@ -379,12 +379,10 @@ namespace Zero.App.Tests
         }
 
         [AvaloniaFact]
-        public void Recording_an_rzx_lights_rec_and_rzx_and_the_machine_row_follows_the_model()
+        public void Recording_an_rzx_lights_rec_and_rzx()
         {
             MainWindow w = Boot();
             var d = w.Deck;
-            Assert.False(d.Vfd48k.Classes.Contains("off"));
-            Assert.True(d.Vfd128k.Classes.Contains("off"));
 
             string dir = Path.Combine(Path.GetTempPath(), "zero-deck-rzx-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(dir);
@@ -402,13 +400,6 @@ namespace Zero.App.Tests
                 Assert.True(d.VfdRec.Classes.Contains("off"));
             }
             finally { try { Directory.Delete(dir, true); } catch { } }
-
-            // The 128KE lights 128K and its E.
-            w.Machine128ke.Command.Execute(null);
-            PumpUntil(() => !d.Vfd128kE.Classes.Contains("off"));
-            Assert.False(d.Vfd128k.Classes.Contains("off"));
-            Assert.True(d.Vfd48k.Classes.Contains("off"));
-            Capture(w, "deck-128ke");
             w.Close();
         }
 
@@ -437,8 +428,14 @@ namespace Zero.App.Tests
             Dispatcher.UIThread.RunJobs();
             Assert.Equal(volume + 5, s.Audio.Volume);
 
-            // The rest are on deck B, the receiver.
-            Press(d.DeckBKey);
+            // Mute is under it.
+            Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.MuteKey));
+            Press(d.MuteKey);
+            Assert.False(s.Audio.Mute); // the tests boot muted
+            Assert.False(d.MuteKey.IsChecked);
+
+            // Stereo is on deck C, with the picture.
+            Press(d.DeckCKey);
             Dispatcher.UIThread.RunJobs();
 
             // A click on a selector knob steps it on: ACB -> ABC.
@@ -451,24 +448,24 @@ namespace Zero.App.Tests
             Assert.True(w.StereoAbc.IsChecked);
             Assert.Equal("ABC", d.VfdStereo.Text);
 
-            // Dragging the CPU knob up two stops picks 4x.
-            Point cpu = CentreOf(d.CpuKnob, w);
-            w.MouseDown(cpu, MouseButton.Left);
-            w.MouseMove(cpu + Up(w, 30));
-            w.MouseMove(cpu + Up(w, 50));
-            w.MouseUp(cpu + Up(w, 50), MouseButton.Left);
+            // Under it, the key that gives the 48K an AY chip; the display says when there is one.
+            Assert.True(d.VideoDeck.IsVisualAncestorOf(d.Ay48kKey));
+            Assert.False(s.Audio.EnableAYFor48K);
+            Assert.Contains("off", d.VfdAy.Classes);
+            Press(d.Ay48kKey);
+            Assert.True(s.Audio.EnableAYFor48K);
+            Assert.True(w.Ay48kItem.IsChecked);
+            Assert.True(d.Ay48kKey.IsChecked);
+            PumpUntil(() => !d.VfdAy.Classes.Contains("off"));
+            Press(d.Ay48kKey);
+            Assert.False(s.Audio.EnableAYFor48K);
+            PumpUntil(() => d.VfdAy.Classes.Contains("off"));
+
+            // Full speed has no key on the decks; the display still says when it is on.
+            w.FullSpeedItem.Command.Execute(null);
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal(4, s.Emulation.CpuMultiplier);
-            Assert.True(w.Cpu4.IsChecked);
-
-            Press(d.MuteKey);
-            Assert.False(s.Audio.Mute); // the tests boot muted
-            Assert.False(d.MuteKey.IsChecked);
-
-            Press(d.TurboKey);
-            Assert.True(s.Emulation.EmulationSpeed > 1);
-            Assert.True(w.FullSpeedItem.IsChecked);
-            Press(d.TurboKey);
+            Assert.DoesNotContain("off", d.VfdTurbo.Classes);
+            w.FullSpeedItem.Command.Execute(null);
 
             bool crt = s.Render.Crt.Enabled;
             Press(d.CrtKey);
@@ -483,25 +480,69 @@ namespace Zero.App.Tests
         }
 
         [AvaloniaFact]
-        public void At_2x_the_decks_are_enlarged_to_fill_the_window()
+        public void The_decks_scale_with_the_window_to_stay_as_wide_as_the_picture()
         {
             MainWindow w = Boot();
-            double natural = w.Deck.DesiredSize.Width;
-            double shown = w.DeckViewbox.Bounds.Width;
             var screen = w.Screens?.ScreenFromWindow(w) ?? w.Screens?.Primary;
-            _output.WriteLine($"natural {natural:F0} shown {shown:F0} screen {screen?.WorkingArea} scaling {screen?.Scaling}");
-            Assert.True(shown <= natural * MainWindow.MaxDeckScale + 1, "the decks grew past their limit");
-            Assert.True(shown <= w.ClientSize.Width, "the decks are wider than the window");
-            // Unless the screen is too short for the enlarged decks, they grow to fill the 2x
-            // window's width or to their limit, whichever comes first.
-            if (screen == null || screen.WorkingArea.Height / screen.Scaling > 1000)
+            double usable = screen == null ? double.PositiveInfinity : screen.WorkingArea.Height / screen.Scaling;
+            double pad = w.DeckShelf.Padding.Left + w.DeckShelf.Padding.Right;
+            double Room() => w.DeckShelf.Bounds.Width - pad;
+            double Shown() => w.DeckViewbox.Bounds.Width;
+            double PictureWidth() => Math.Min(w.Display.Bounds.Width, w.Display.Bounds.Height * 352 / 296);
+            void Settle() { Dispatcher.UIThread.RunJobs(); w.UpdateLayout(); Dispatcher.UIThread.RunJobs(); }
+            _output.WriteLine($"natural {w.Deck.DesiredSize.Width:F0} shown {Shown():F0} screen {screen?.WorkingArea} scaling {screen?.Scaling}");
+
+            // At 2x the decks fill the window's width, and the screen is still sized exactly.
+            Assert.InRange(Shown(), Room() - 1.5, Room() + 0.5);
+            if (usable > 1000) Assert.InRange(w.Display.Bounds.Height, 592 - 1.5, 592 + 1.5);
+            double at2x = Shown();
+            Assert.True(w.Scale2.IsChecked && !w.Scale4.IsChecked);
+
+            // At 4x they are as much bigger as the picture is: still filling the window, not held
+            // back to some limit. The window is the size asked for whatever the screen's; where the
+            // system trims it to fit (macOS does), it is the short, wide window further down.
+            MenuItem(w, "View", "Window Size", "4x").Command.Execute(null);
+            Settle();
+            Assert.True(w.Scale4.IsChecked && !w.Scale2.IsChecked, "the Window Size menu does not tick the size chosen");
+            _output.WriteLine($"4x: window {w.ClientSize} display {w.Display.Bounds} decks {Shown():F0}");
+            Assert.InRange(Shown(), Room() - 1.5, Room() + 0.5);
+            Assert.InRange(Shown() + pad, PictureWidth() - 3, PictureWidth() + 3);
+            Assert.True(Shown() > at2x * 1.4, $"the decks did not grow with the window ({Shown() / at2x:F2}x)");
+            Assert.InRange(w.Display.Bounds.Height, 1184 - 1.5, 1184 + 1.5);
+            Assert.InRange(w.Display.Bounds.Width, 1408 - 1.5, 1408 + 1.5);
+            Capture(w, "decks-4x");
+
+            // A window dragged short and wide: the picture is held to its height, and the decks to
+            // the picture's width rather than the window's.
+            w.Width = 1100;
+            w.Height = 560;
+            Settle();
+            _output.WriteLine($"short: window {w.ClientSize} display {w.Display.Bounds} decks {Shown():F0}");
+            Assert.True(Shown() < Room() - 100, "the decks filled a window too short for a picture that wide");
+            Assert.InRange(Shown() + pad, PictureWidth() - 3, PictureWidth() + 3);
+            Capture(w, "decks-short-window");
+
+            // Beside the picture the window is black, like the television's housing, not the
+            // Spectrum's border colour: that would show as a light strip down either side of the set.
+            Assert.True(w.Display.CrtOptions.Bezel > 0);
+            Dispatcher.UIThread.RunJobs();
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            using (WriteableBitmap shot = w.CaptureRenderedFrame())
+            using (var pixels = shot.Lock())
             {
-                double room = w.DeckShelf.Bounds.Width - w.DeckShelf.Padding.Left - w.DeckShelf.Padding.Right;
-                Assert.True(shown > natural, $"decks were not enlarged ({shown / natural:F2}x)");
-                Assert.InRange(shown, Math.Min(room, natural * MainWindow.MaxDeckScale) - 1.5, room + 0.5);
+                Point beside = w.Display.TranslatePoint(new Point(20, w.Display.Bounds.Height / 2), w) ?? default;
+                double scale = shot.PixelSize.Width / w.ClientSize.Width;
+                int x = (int)(beside.X * scale), y = (int)(beside.Y * scale);
+                uint pixel;
+                unsafe { pixel = *(uint*)((byte*)pixels.Address + y * pixels.RowBytes + x * 4); }
+                Assert.True((pixel & 0x00FFFFFF) == 0, $"beside the housing the window is #{pixel & 0x00FFFFFF:X6}, not black");
             }
-            // And the screen is still sized exactly, with the decks enlarged.
-            Assert.InRange(w.Display.Bounds.Height, 592 - 1.5, 592 + 1.5);
+
+            // Dragged tall and narrow: the decks fill the width, like the picture.
+            w.Width = 600;
+            w.Height = 900;
+            Settle();
+            Assert.InRange(Shown(), Room() - 1.5, Room() + 0.5);
             w.Close();
         }
 
@@ -515,8 +556,8 @@ namespace Zero.App.Tests
             Assert.InRange(ratio, 352.0 / 296 - 0.02, 352.0 / 296 + 0.02); // fitted with the decks showing
             Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.PlayKey));
             Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.VolumeKnob));
-            Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.MachineSwitch));
-            Assert.True(d.ReceiverDeck.IsVisualAncestorOf(d.StereoKnob));
+            Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.MachineKnob));
+            Assert.True(d.ReceiverDeck.IsVisualAncestorOf(d.MultifaceKey));
             Assert.True(d.ReceiverDeck.IsVisualAncestorOf(d.DriveAEject));
 
             // Deck A to start with: the cassette deck shows, the receiver does not.
@@ -624,21 +665,21 @@ namespace Zero.App.Tests
         }
 
         [AvaloniaFact]
-        public void The_housing_fader_sets_the_cabinet_and_both_faders_say_what_they_are_at()
+        public void The_faders_set_the_crt_and_say_what_they_are_at()
         {
             MainWindow w = Boot();
             var d = w.Deck;
             CrtSettings crt = w.Session.Settings.Render.Crt;
-            Press(d.DeckBKey);
+            Press(d.DeckCKey);   // the faders are on the video deck
             Dispatcher.UIThread.RunJobs();
 
-            double before = crt.Bezel;
-            w.MouseWheel(CentreOf(d.HousingFader, w), new Vector(0, 1));
+            double before = crt.EdgeLight;
+            w.MouseWheel(CentreOf(d.EdgeFader, w), new Vector(0, 1));
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal(before + 0.05 * DeckPanel.MaxHousing, crt.Bezel, 4);
-            Assert.Equal((float)crt.Bezel, w.Display.CrtOptions.Bezel, 4);
+            Assert.Equal(before + 0.05, crt.EdgeLight, 4);
+            Assert.Equal((float)crt.EdgeLight, w.Display.CrtOptions.EdgeLight, 4);
 
-            Assert.Equal($"Television housing: {crt.Bezel:P0} of the window", ToolTip.GetTip(d.HousingFader));
+            Assert.Equal($"Edge light on the housing: {crt.EdgeLight:P0}", ToolTip.GetTip(d.EdgeFader));
             Assert.Equal($"Screen curvature: {crt.Curvature:P0}", ToolTip.GetTip(d.CurveFader));
             w.Close();
         }
@@ -652,15 +693,18 @@ namespace Zero.App.Tests
             void Click(Point at) { w.MouseDown(at, MouseButton.Left); w.MouseUp(at, MouseButton.Left); Dispatcher.UIThread.RunJobs(); }
             Point Stop(DeckSlideSwitch slide, int i) => slide.TranslatePoint(slide.StopPoint(i), w) ?? throw new InvalidOperationException("not in window");
 
-            // Out of the box gamepad 1 plays a Kempston joystick.
+            // Out of the box gamepad 1 plays a Kempston joystick, and the display names it.
             Assert.True(d.JoystickGamepadKey.IsChecked == true && d.JoystickCursorKey.IsChecked == false && d.JoystickNoneKey.IsChecked == false);
             Assert.Equal(0, d.JoystickSwitch.Value);
+            Assert.Equal("KEMP", d.VfdJoystick.Text);
+            Assert.DoesNotContain("off", d.VfdJoystick.Classes);
 
             // The joystick switch picks what the gamepad plays.
             Click(Stop(d.JoystickSwitch, 2));
             Assert.Equal(3, input.Gamepad1Emulates);
             Assert.False(input.EnableKeyboardJoystick);
             Assert.True(w.Pad1Sinclair2.IsChecked);
+            Assert.Equal("SIN2", d.VfdJoystick.Text);
 
             // Played by nothing: the gamepad lets go, and the joystick switch dims but keeps its place.
             Press(d.JoystickNoneKey);
@@ -670,6 +714,7 @@ namespace Zero.App.Tests
             Assert.True(w.Pad1None.IsChecked);
             Assert.Equal(2, d.JoystickSwitch.Value);
             Assert.True(d.JoystickSwitch.Opacity < 1);
+            Assert.Contains("off", d.VfdJoystick.Classes);   // its legend goes out
 
             // Played by the cursor keys, which take up the same joystick.
             Press(d.JoystickCursorKey);
@@ -680,45 +725,52 @@ namespace Zero.App.Tests
             Assert.True(w.KeyJoyItem.IsChecked && w.KeyJoySinclair2.IsChecked);
             Assert.True(d.JoystickCursorKey.IsChecked == true && d.JoystickGamepadKey.IsChecked == false && d.JoystickNoneKey.IsChecked == false);
             Assert.Equal(1, d.JoystickSwitch.Opacity);
+            Assert.Equal("SIN2", d.VfdJoystick.Text);
+            Assert.DoesNotContain("off", d.VfdJoystick.Classes);
+
+            // The mouse has a legend of its own, lit while the Kempston mouse is on.
+            Assert.Contains("off", d.VfdMouse.Classes);
+            w.MouseItem.Command.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(input.EnableKempstonMouse);
+            Assert.DoesNotContain("off", d.VfdMouse.Classes);
             Capture(w, "deck-joystick");
             w.Close();
         }
 
         [AvaloniaFact]
-        public void The_machine_switch_changes_machine_only_when_let_go()
+        public void The_machine_knob_changes_the_machine()
         {
             MainWindow w = Boot();
-            var slide = w.Deck.MachineSwitch;
-            Point Stop(int i) => slide.TranslatePoint(slide.StopPoint(i), w) ?? throw new InvalidOperationException("not in window");
+            var knob = w.Deck.MachineKnob;
+            Point centre = CentreOf(knob, w);
             int reported = 0;
-            slide.ValueChangedByUser += (_, __) => reported++;
+            knob.ValueChangedByUser += (_, __) => reported++;
+            Assert.Equal(0, knob.Value);
 
-            // Scrolling past it does nothing.
-            w.MouseWheel(Stop(0), new Vector(0, 1));
-            Dispatcher.UIThread.RunJobs();
-            Assert.Equal(0, reported);
-
-            // A slide reports only where it is let go: 48K -> (128K) -> 128KE, one switch not two.
-            w.MouseDown(Stop(0), MouseButton.Left);
-            w.MouseMove(Stop(1));
-            Assert.Equal(1, slide.Value);
-            Assert.Equal(0, reported);
-            w.MouseMove(Stop(2));
-            w.MouseUp(Stop(2), MouseButton.Left);
+            // A click steps it on a stop: 48K -> 128K.
+            w.MouseDown(centre, MouseButton.Left);
+            w.MouseUp(centre, MouseButton.Left);
             Assert.Equal(1, reported);
-            // It stays where it was let go while the session switches (the deck refreshes as the
+            // It stays where it was put while the session switches (the deck refreshes as the
             // switch is asked for), not back on 48K meanwhile.
-            Assert.Equal(2, slide.Value);
-            PumpUntil(() => w.Session.Model == SpeccyCommon.MachineModel._128ke, 10000);
-            Assert.True(w.Machine128ke.IsChecked);
-            Capture(w, "deck-machine-switch");
+            Assert.Equal(1, knob.Value);
+            PumpUntil(() => w.Session.Model == SpeccyCommon.MachineModel._128k, 10000);
+            Assert.True(w.Machine128k.IsChecked);
+            PumpUntil(() => !w.Deck.VfdAy.Classes.Contains("off"));   // the 128K has an AY chip built in
+            Capture(w, "deck-machine-knob");
 
-            // A click on another stop moves it there.
-            w.MouseDown(Stop(3), MouseButton.Left);
-            w.MouseUp(Stop(3), MouseButton.Left);
-            PumpUntil(() => w.Session.Model == SpeccyCommon.MachineModel._plus3, 10000);
+            // The wheel turns it a stop too: 128K -> +2.
+            w.MouseWheel(centre, new Vector(0, 1));
+            PumpUntil(() => w.Session.Model == SpeccyCommon.MachineModel._plus2, 10000);
             Dispatcher.UIThread.RunJobs();
-            Assert.Equal(3, slide.Value);
+            Assert.Equal(2, knob.Value);
+            Assert.Equal(2, reported);
+
+            // The menus are reflected back onto it.
+            w.MachinePlus3.Command.Execute(null);
+            PumpUntil(() => w.Session.Model == SpeccyCommon.MachineModel._plus3, 10000);
+            PumpUntil(() => knob.Value == 4);
             Assert.Equal(2, reported);
             w.Close();
         }
@@ -734,7 +786,8 @@ namespace Zero.App.Tests
             Assert.True(d.VideoDeck.IsVisualAncestorOf(d.CrtKey));
             Assert.True(d.VideoDeck.IsVisualAncestorOf(d.ScanKey));
             Assert.True(d.VideoDeck.IsVisualAncestorOf(d.CurveFader));
-            Assert.True(d.VideoDeck.IsVisualAncestorOf(d.HousingFader));
+            Assert.True(d.VideoDeck.IsVisualAncestorOf(d.EdgeFader));
+            Assert.True(d.VideoDeck.IsVisualAncestorOf(d.StereoKnob));   // sound sits with the picture
             Assert.False(d.ReceiverDeck.IsVisualAncestorOf(d.CrtKey));
             Assert.True(d.ReceiverDeck.IsVisualAncestorOf(d.MultifaceKey));
             Assert.True(d.CassetteDeck.IsVisualAncestorOf(d.NmiKey));
@@ -750,6 +803,92 @@ namespace Zero.App.Tests
             Assert.Equal(2, w.Session.Settings.Render.ActiveDeck);
             Assert.True(w.DeckCItem.IsChecked);
             Assert.False(w.DeckAItem.IsChecked);
+
+            // The rest of the CRT settings are here too, and set what Options does.
+            CrtSettings crt = w.Session.Settings.Render.Crt;
+            // In the headless window a tooltip opens as an overlay over the controls beside it, so the
+            // pointer is taken off the deck after each gesture to close it.
+            void Away() { w.MouseMove(new Point(10, 10)); Dispatcher.UIThread.RunJobs(); }
+            void Click(Point at) { w.MouseDown(at, MouseButton.Left); w.MouseUp(at, MouseButton.Left); Dispatcher.UIThread.RunJobs(); Away(); }
+            Point Stop(DeckSlideSwitch slide, int i) => slide.TranslatePoint(slide.StopPoint(i), w) ?? throw new InvalidOperationException("not in window");
+            foreach (Control c in new Control[] { d.VignetteKey, d.TubeSwitch, d.EdgeFader, d.HousingFader, d.FinishSwitch })
+                Assert.True(d.VideoDeck.IsVisualAncestorOf(c));
+            Assert.Equal(crt.EdgeLight, d.EdgeFader.Value, 4);
+            Assert.Equal(crt.Bezel / DeckPanel.MaxHousing, d.HousingFader.Value, 4);
+
+            bool vignette = crt.Vignette;
+            Press(d.VignetteKey);
+            Assert.Equal(!vignette, crt.Vignette);
+            Assert.Equal(!vignette, d.VignetteKey.IsChecked);
+            Assert.Equal(crt.Vignette ? 0.6f : 0f, w.Display.CrtOptions.Vignette, 4);
+
+            Click(Stop(d.TubeSwitch, 1));
+            Assert.Equal("Trinitron", crt.Tube);
+            Assert.True(w.Display.CrtOptions.Trinitron);
+
+            double housing = crt.Bezel;
+            w.MouseWheel(CentreOf(d.HousingFader, w), new Vector(0, 1));
+            Dispatcher.UIThread.RunJobs();
+            Away();
+            Assert.Equal(housing + 0.05 * DeckPanel.MaxHousing, crt.Bezel, 4);
+            Assert.Equal((float)crt.Bezel, w.Display.CrtOptions.Bezel, 4);
+            Assert.Equal($"Television housing: {crt.Bezel:P0} of the window", ToolTip.GetTip(d.HousingFader));
+
+            // With CRT effects off they dim, all but scanlines.
+            Press(d.CrtKey);
+            Assert.False(d.EdgeFader.IsEnabled || d.VignetteKey.IsEnabled || d.TubeSwitch.IsEnabled);
+            Assert.True(d.ScanKey.IsEnabled);
+            Press(d.CrtKey);
+            Assert.True(d.EdgeFader.IsEnabled);
+
+            // The picture's own settings, as the View menu has them: the pixel filter and the border.
+            // A click on either knob steps it on.
+            Assert.True(d.VideoDeck.IsVisualAncestorOf(d.FilterKnob) && d.VideoDeck.IsVisualAncestorOf(d.BorderKnob));
+            Assert.Equal(2, d.FilterKnob.Value);   // sharp, out of the box
+            Click(CentreOf(d.FilterKnob, w));      // round to none
+            Assert.False(w.Session.Settings.Render.PixelSmoothing);
+            Assert.False(w.Display.Smooth);
+            Assert.True(w.FilterNone.IsChecked && !w.FilterSharp.IsChecked);
+            w.FilterSmooth.Command.Execute(null);   // and the menu turns the knob
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(1, d.FilterKnob.Value);
+
+            Assert.Equal(0, d.BorderKnob.Value);
+            Click(CentreOf(d.BorderKnob, w));
+            Assert.Equal(24, w.Session.Settings.Render.BorderCrop);
+            Assert.Equal(24, w.Display.BorderCrop);
+            Assert.True(w.BorderMedium.IsChecked);
+            w.BorderFull.Command.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(0, d.BorderKnob.Value);
+
+            // Changing the border resizes the window, and the deck under the pointer, so a drag on
+            // its knob turns it freely and the border changes only where it is let go.
+            Point border = CentreOf(d.BorderKnob, w);
+            w.MouseDown(border, MouseButton.Left);
+            w.MouseMove(border + Up(w, 30));
+            w.MouseMove(border + Up(w, 50));
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(2, d.BorderKnob.Value);
+            Assert.Equal(0, w.Session.Settings.Render.BorderCrop);
+            w.MouseUp(border + Up(w, 50), MouseButton.Left);
+            Dispatcher.UIThread.RunJobs();
+            Away();
+            Assert.Equal(48, w.Session.Settings.Render.BorderCrop);
+            Assert.True(w.BorderNone.IsChecked);
+            w.BorderFull.Command.Execute(null);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(0, d.BorderKnob.Value);
+
+            Capture(w, "deck-video");
+
+            // The finish switch dresses the decks, as Options does.
+            Assert.Equal(0, d.FinishSwitch.Value);
+            Click(Stop(d.FinishSwitch, 1));
+            Assert.Equal("Silver", w.Session.Settings.Render.DeckFinish);
+            Assert.Equal(DeckFinish.Silver, d.Finish);
+            Assert.Equal(1, d.FinishSwitch.Value);
+            Capture(w, "deck-video-silver");
             w.Close();
         }
     }

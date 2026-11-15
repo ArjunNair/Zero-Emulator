@@ -72,6 +72,9 @@ namespace Zero.Emulation
 
         public MachineModel Model { get; private set; }
         public MultifaceModel MultifaceModel => _zx.MultifaceModel;
+        // True while the machine now running has an AY sound chip: every model but the 48K, and the
+        // 48K too when it is given one.
+        public bool HasAySound => _zx != null && _zx.HasAYSound;
         public EmulatorState State => _state;
         public bool IsPaused => _paused;
         public bool IsRunning => _thread != null && _thread.IsAlive;

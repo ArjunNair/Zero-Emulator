@@ -55,7 +55,23 @@ namespace Zero.App
                 RefreshDeck();
             };
             d.CurveFader.ValueChangedByUser += (_, v) => { _settings.Render.Crt.Curvature = v; ApplyCrtSettings(); };
+            d.VignetteKey.Click += (_, __) =>
+            {
+                _settings.Render.Crt.Vignette = !_settings.Render.Crt.Vignette;
+                ApplyCrtSettings();
+                RefreshDeck();
+            };
+            d.TubeSwitch.ValueChangedByUser += (_, v) => { _settings.Render.Crt.Tube = v == 1 ? "Trinitron" : "Spherical"; ApplyCrtSettings(); };
+            d.EdgeFader.ValueChangedByUser += (_, v) => { _settings.Render.Crt.EdgeLight = v; ApplyCrtSettings(); };
             d.HousingFader.ValueChangedByUser += (_, v) => { _settings.Render.Crt.Bezel = v * DeckPanel.MaxHousing; ApplyCrtSettings(); };
+            d.FilterKnob.ValueChangedByUser += (_, v) => SelectFilter(smooth: v >= 1, sharp: v >= 2);
+            d.BorderKnob.ValueChangedByUser += (_, v) => SelectBorder(DeckPanel.BorderCropAt((int)v));
+            d.FinishSwitch.ValueChangedByUser += (_, v) =>
+            {
+                _settings.Render.DeckFinish = v == 1 ? "Silver" : "Black";
+                ApplyDeckFinish();
+                RefreshDeck();
+            };
 
             // Switching machine resets it, so the switch only reports once it is let go.
             d.MachineKnob.ValueChangedByUser += (_, v) => SelectMachine(DeckPanel.MachineAt((int)v));
@@ -65,10 +81,9 @@ namespace Zero.App
             d.JoystickGamepadKey.Click += (_, __) => SetDeckJoystick(DeckPanel.JoystickSourceGamepad, d.JoystickSwitch.Value + 1);
             d.JoystickNoneKey.Click += (_, __) => SetDeckJoystick(DeckPanel.JoystickSourceNone, d.JoystickSwitch.Value + 1);
             d.StereoKnob.ValueChangedByUser += (_, v) => SelectStereo((int)v);
-            d.CpuKnob.ValueChangedByUser += (_, v) => SelectCpuSpeed(DeckPanel.CpuMultiplierAt(v));
+            d.Ay48kKey.Click += (_, __) => ToggleAy48k();
             d.VolumeKnob.ValueChangedByUser += (_, v) => _session.SetVolume((int)Math.Round(v));
             d.MuteKey.Click += (_, __) => SetMute(!_settings.Audio.Mute);
-            d.TurboKey.Click += (_, __) => ToggleFullSpeed();
         }
 
         /// <summary>How long RESET has to be held for a hard reset instead of a soft one.</summary>
@@ -197,20 +212,6 @@ namespace Zero.App
             else _ = InsertDiskAsync(unit);
         }
 
-        /// <summary>
-        /// The most the decks are enlarged. They are drawn small, so at their natural size the legends
-        /// are hard to read; scaled to fill a 2x window they come out at about this.
-        /// </summary>
-        internal const double MaxDeckScale = 1.5;
-
-        /// <summary>Below this the decks are not shrunk to keep the window on screen.</summary>
-        private const double MinDeckScaleForScreen = 0.75;
-
-        // Room left for the window's title bar, which the working area includes and ClientSize does not.
-        private const double TitleBarAllowance = 32;
-
-        private double _deckScaleLimit = MaxDeckScale;
-
         private Size NaturalDeckSize()
         {
             Control deck = DeckViewbox.Child;
@@ -225,38 +226,27 @@ namespace Zero.App
             return horizontal ? pad.Left + pad.Right + edge.Left + edge.Right : pad.Top + pad.Bottom + edge.Top + edge.Bottom;
         }
 
-        /// <summary>
-        /// Cap the decks' scale so the window still fits on its screen, given the height the screen
-        /// and the rest of the chrome already take. Scaling only trades away the decks' size; the
-        /// emulated screen keeps the size the user picked.
-        /// </summary>
-        private void LimitDeckScaleToScreen(double heightWithoutDecks)
+        // Width over height of the picture as shown, which the border setting changes.
+        private double PictureAspect()
         {
-            _deckScaleLimit = MaxDeckScale;
-            Screen screen = Screens?.ScreenFromWindow(this) ?? Screens?.Primary;
-            Size natural = NaturalDeckSize();
-            if (screen == null || natural.Height <= 0 || !DeckWanted) return;
-            double usable = screen.WorkingArea.Height / screen.Scaling - TitleBarAllowance;
-            double room = usable - heightWithoutDecks - ShelfPadding(horizontal: false);
-            _deckScaleLimit = Math.Clamp(room / natural.Height, MinDeckScaleForScreen, MaxDeckScale);
+            Rect source = Display.SourceRect;
+            return source.Height > 0 ? source.Width / source.Height : 352.0 / 296;
         }
 
-        /// <summary>
-        /// How tall the deck shelf will be in a window this wide. The decks sit in a Viewbox that
-        /// scales them to the window's width, up to <see cref="_deckScaleLimit"/>; the Viewbox's
-        /// MaxWidth enforces that limit. Window sizing needs the height up front: measuring after
-        /// the resize would be one step behind.
-        /// </summary>
+        // How tall the deck shelf is in a window this wide, with the decks filling its width. Window
+        // sizing needs the height up front: measuring after the resize would be one step behind.
         internal double DeckHeightFor(double windowWidth)
         {
             if (!DeckWanted) return 0;
             Size natural = NaturalDeckSize();
             if (natural.Width <= 0) return 0;
-
-            DeckViewbox.MaxWidth = natural.Width * _deckScaleLimit;
-            double room = windowWidth - ShelfPadding(horizontal: true);
-            double scale = Math.Clamp(room / natural.Width, 0, _deckScaleLimit);
+            double scale = Math.Max(0, windowWidth - ShelfPadding(horizontal: true)) / natural.Width;
             return natural.Height * scale + ShelfPadding(horizontal: false);
         }
+
+        // Tell the shelf the picture's shape, which it sizes the decks by (see DeckShelfBorder): the
+        // border setting changes it, and a picture stretched to fill the window has none.
+        private void UpdateDeckAspect() =>
+            DeckShelf.PictureAspect = _settings.Render.MaintainAspectRatio ? PictureAspect() : 0;
     }
 }

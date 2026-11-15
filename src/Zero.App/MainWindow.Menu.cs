@@ -17,6 +17,7 @@ namespace Zero.App
     public partial class MainWindow
     {
         internal NativeMenuItem OpenItem, RecentMenu, SaveSnapshotItem, SaveScreenItem, OptionsItem;
+        internal NativeMenuItem Scale1, Scale2, Scale3, Scale4;
         internal NativeMenuItem Machine48k, Machine128k, Machine128ke, MachinePlus3, MachinePentagon;
         internal NativeMenuItem ResetItem, HardResetItem, NmiItem, PauseItem, FullSpeedItem,
                                 Cpu1, Cpu2, Cpu4, LateTimingsItem, Issue2Item;
@@ -184,8 +185,8 @@ namespace Zero.App
 
             var view = Submenu("View",
                 Submenu("Window Size",
-                    Item("1x", () => SelectScale(1)), Item("2x", () => SelectScale(2)),
-                    Item("3x", () => SelectScale(3)), Item("4x", () => SelectScale(4))),
+                    Scale1 = Item("1x", () => SelectScale(1), checkable: true), Scale2 = Item("2x", () => SelectScale(2), checkable: true),
+                    Scale3 = Item("3x", () => SelectScale(3), checkable: true), Scale4 = Item("4x", () => SelectScale(4), checkable: true)),
                 FullScreenItem = Item("Full Screen", ToggleFullScreen, G(Key.F11), checkable: true),
                 Submenu("Hi-Fi Decks",
                     DeckItem = Item("Show Decks", ToggleDeck, checkable: true),
@@ -355,6 +356,7 @@ namespace Zero.App
         {
             _settings.Render.BorderCrop = crop;
             Display.BorderCrop = crop;
+            UpdateDeckAspect();   // the decks are sized by the picture's shape
             ApplyCrtSettings();   // the glass's corners round less when less border shows
             if (WindowState == WindowState.Normal) ApplyWindowScale(); // keep the window snug: no letterbox
             RefreshMenuState();
@@ -443,6 +445,10 @@ namespace Zero.App
             StereoAcb.IsChecked = _settings.Audio.StereoSoundMode == 1;
             StereoAbc.IsChecked = _settings.Audio.StereoSoundMode == 2;
 
+            Scale1.IsChecked = _settings.Render.WindowScale == 1;
+            Scale2.IsChecked = _settings.Render.WindowScale == 2;
+            Scale3.IsChecked = _settings.Render.WindowScale == 3;
+            Scale4.IsChecked = _settings.Render.WindowScale == 4;
             FullScreenItem.IsChecked = WindowState == WindowState.FullScreen;
             DeckItem.IsChecked = _settings.Render.ShowDeck;
             DeckAItem.IsChecked = _settings.Render.ActiveDeck is < 1 or > 2;

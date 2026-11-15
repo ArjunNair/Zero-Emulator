@@ -492,23 +492,23 @@
       <Border x:Name="CassetteDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
         <c:DeckFaceplate Padding="16,10,16,9">
           <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto">
-            <!-- Power and pause side by side as a split key, centred in the room above reset: power
-                 on the left with its light, and a latching pause on the right that stays down while
-                 paused. At the bottom, reset in a shallow ring, its name level with the other keys';
-                 a quick press is a soft reset, holding it a hard one. -->
-            <Grid RowDefinitions="*,Auto,Auto,*,Auto" ColumnDefinitions="Auto,3,28">
-              <Button x:Name="PowerKey" Grid.Row="1" Theme="{StaticResource DeckKey}" Width="50" Height="30"
+            <!-- Power over pause, the pair centred in the room above reset: power with its light,
+                 and under it a latching pause that stays down while paused. At the bottom, reset in
+                 a shallow ring, its name level with the other keys'; a quick press is a soft reset,
+                 holding it a hard one. -->
+            <Grid RowDefinitions="*,Auto,Auto,7,Auto,Auto,*,Auto">
+              <Button x:Name="PowerKey" Grid.Row="1" Theme="{StaticResource DeckKey}" Width="46" Height="24"
                       ToolTip.Tip="Power: quit Zero X">
-                <Panel Width="46" Height="26">
+                <Panel Width="42" Height="20">
                   <c:DeckLed x:Name="PowerLed" Width="7" Height="7" Color="#FF3B30"
                              HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4,4,0,0" />
                 </Panel>
               </Button>
-              <ToggleButton x:Name="PauseKey" Grid.Row="1" Grid.Column="2" Theme="{StaticResource DeckLatchKey}" Width="28" Height="30"
-                            ToolTip.Tip="Pause the emulator (F7)" />
               <TextBlock Grid.Row="2" Classes="legend" Text="POWER" Margin="0,3,0,0" />
-              <TextBlock Grid.Row="2" Grid.Column="2" Classes="legend" Text="PAUSE" Margin="0,3,0,0" />
-              <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="14">
+              <ToggleButton x:Name="PauseKey" Grid.Row="4" Theme="{StaticResource DeckLatchKey}" Width="46" Height="18"
+                            ToolTip.Tip="Pause the emulator (F7)" />
+              <TextBlock Grid.Row="5" Classes="legend" Text="PAUSE" Margin="0,3,0,0" />
+              <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                 <StackPanel>
                   <Button x:Name="ResetKey" Theme="{StaticResource DeckRecessedKey}" HorizontalAlignment="Center"
                           ToolTip.Tip="Reset the Spectrum (F9). Hold it down for a hard reset (Shift+F9)." />
@@ -567,20 +567,25 @@
             <Border Grid.Column="3" Classes="divider" />
 
             <!-- A fixed width: the decks are measured at their natural size, so without one a long
-                 message on the display would widen the deck instead of being trimmed. -->
-            <StackPanel Grid.Column="4" Width="240" Spacing="6">
-              <Border Height="63" CornerRadius="3" Background="#050B0B" BorderBrush="#000000" BorderThickness="1"
+                 message on the display would widen the deck instead of being trimmed. The display
+                 takes the height the tape keys leave, so its rows have room between them and the
+                 keys' names sit level with the others along the bottom of the deck. -->
+            <Grid Grid.Column="4" Width="274" RowDefinitions="*,6,Auto">
+              <Border MinHeight="63" CornerRadius="3" Background="#050B0B" BorderBrush="#000000" BorderThickness="1"
                       BoxShadow="inset 0 1 3 0 #C0000000">
-                <Grid Margin="7,3,7,3" RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,Auto">
-                  <!-- The machines, as fixed legends with the current one lit. 128K lights for both 128
-                       models; its E only for the 128KE. -->
+                <Grid Margin="7,6,7,6" RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,Auto">
+                  <!-- The devices in use, each a legend that lights: the Multiface fitted, the
+                       joystick being played (one legend, naming whichever it is), the mouse, and
+                       the AY sound chip where the machine has one. -->
                   <StackPanel Orientation="Horizontal" Spacing="6">
                     <c:VfdText x:Name="VfdMF" Classes="vfd off" Text="MF" />
+                    <c:VfdText x:Name="VfdJoystick" Classes="vfd off" Text="KEMP" />
+                    <c:VfdText x:Name="VfdMouse" Classes="vfd off" Text="MOUS" />
+                    <c:VfdText x:Name="VfdAy" Classes="vfd off" Text="AY" />
                   </StackPanel>
                   <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
                     <c:VfdText x:Name="VfdStereo" Classes="vfd yellow" Text="ACB" />
                     <c:VfdText x:Name="VfdTurbo" Classes="vfd yellow off" Text="TURBO" />
-                    <c:VfdText x:Name="VfdMute" Classes="vfd yellow off" Text="MUTE" />
                   </StackPanel>
                   <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="1">
                     <!-- The transport, as fixed legends: PLAY, STOP and REC, with RZX lit as well when it is
@@ -636,7 +641,7 @@
                 </Grid>
               </Border>
 
-              <Grid ColumnDefinitions="*,*,*,*,*,*,*" RowDefinitions="Auto,Auto">
+              <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*,*,*" RowDefinitions="Auto,Auto">
                 <Button x:Name="EjectKey" Grid.Column="0" Theme="{StaticResource DeckKey}" ToolTip.Tip="Eject the tape, or insert one when the deck is empty">
                   <Path Classes="glyph" Data="M0,5 L4.5,0 L9,5 Z M0,6.5 H9 V8 H0 Z" />
                 </Button>
@@ -666,43 +671,37 @@
                 <TextBlock Grid.Row="1" Grid.Column="5" Classes="legend" Text="NEXT" Margin="0,4,0,0" />
                 <TextBlock Grid.Row="1" Grid.Column="6" Classes="legend" Text="STOP" Margin="0,4,0,0" />
               </Grid>
-            </StackPanel>
+            </Grid>
 
 
             <Border Grid.Column="5" Classes="divider" />
 
-            <StackPanel Grid.Column="6" VerticalAlignment="Center">
-              <c:DeckKnob x:Name="VolumeKnob" Width="66" Height="66" Minimum="0" Maximum="100" SmallChange="5"
+            <!-- Volume, centred in the room above mute, whose name is level with the other keys'
+                 along the bottom. -->
+            <Grid Grid.Column="6" RowDefinitions="*,Auto,Auto,*,Auto,Auto">
+              <c:DeckKnob x:Name="VolumeKnob" Grid.Row="1" Width="66" Height="66" Minimum="0" Maximum="100" SmallChange="5"
                           Ends="MIN,MAX" ToolTip.Tip="Volume" />
-              <TextBlock Classes="legend" Text="VOLUME" Margin="0,1,0,0" />
-            </StackPanel>
+              <TextBlock Grid.Row="2" Classes="legend" Text="VOLUME" Margin="0,1,0,0" />
+              <ToggleButton x:Name="MuteKey" Grid.Row="4" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
+                            ToolTip.Tip="Mute" />
+              <TextBlock Grid.Row="5" Classes="legend" Text="MUTE" Margin="0,3,0,0" />
+            </Grid>
           </Grid>
         </c:DeckFaceplate>
       </Border>
 
-      <!-- The receiver: sound and speed settings, the disk drives, and the peripherals. -->
+      <!-- The receiver: the peripherals, then the disk drives. -->
       <Border x:Name="ReceiverDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
         <c:DeckFaceplate Padding="16,10,16,9">
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
 
-            <!-- Sound: stereo mode and mute. -->
-            <StackPanel Width="64" VerticalAlignment="Center">
-              <c:DeckKnob x:Name="StereoKnob" Width="64" Height="50" Positions="MONO,ACB,ABC" ToolTip.Tip="Stereo mode" />
-              <TextBlock Classes="legend" Text="STEREO" Margin="0,-9,0,10" />
-              <ToggleButton x:Name="MuteKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
-                            ToolTip.Tip="Mute" />
-              <TextBlock Classes="legend" Text="MUTE" Margin="0,3,0,0" />
-            </StackPanel>
-
-            <Border Width="18" />
-
-            <!-- Speed: CPU and full speed. -->
-            <StackPanel Width="64" VerticalAlignment="Center">
-              <c:DeckKnob x:Name="CpuKnob" Width="64" Height="50" Positions="1X,2X,4X" ToolTip.Tip="CPU speed" />
-              <TextBlock Classes="legend" Text="CPU" Margin="0,-9,0,10" />
-              <ToggleButton x:Name="TurboKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
-                            ToolTip.Tip="Full speed" />
-              <TextBlock Classes="legend" Text="TURBO" Margin="0,3,0,0" />
+            <!-- Peripherals: interfaces that plug into the Spectrum. The Multiface fits the model
+                 the machine takes (the Multiface One on the 48K, the 128 on the 128K, the 3 on the
+                 +3 and 128KE) and has its red button as NMI on the cassette deck, beside reset. -->
+            <StackPanel Width="70" VerticalAlignment="Center">
+              <ToggleButton x:Name="MultifaceKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
+                            ToolTip.Tip="Multiface: fit the Multiface interface that suits the machine. Not on the Pentagon." />
+              <TextBlock Classes="legend" Text="MULTIFACE" Margin="0,3,0,0" />
             </StackPanel>
 
             <Border Classes="divider" />
@@ -806,39 +805,79 @@
               </Border>
             </Grid>
 
-            <Border Classes="divider" />
-
-            <!-- Peripherals: interfaces that plug into the Spectrum. The Multiface fits the model
-                 the machine takes (the Multiface One on the 48K, the 128 on the 128K, the 3 on the
-                 +3 and 128KE) and has its red button as NMI on the cassette deck, beside reset. -->
-            <StackPanel Width="70" VerticalAlignment="Center">
-              <ToggleButton x:Name="MultifaceKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" HorizontalAlignment="Center"
-                            ToolTip.Tip="Multiface: fit the Multiface interface that suits the machine. Not on the Pentagon." />
-              <TextBlock Classes="legend" Text="MULTIFACE" Margin="0,3,0,0" />
-            </StackPanel>
-
           </StackPanel>
         </c:DeckFaceplate>
       </Border>
 
-      <!-- The video deck: the picture. CRT effects and scanlines, how curved the glass is and how
-           much of the window the housing takes. -->
+      <!-- The A/V deck: sound, the television's keys and faders, the picture, then the two-way selectors. -->
       <Border x:Name="VideoDeck" CornerRadius="5" BoxShadow="0 3 8 0 #B0000000">
         <c:DeckFaceplate Padding="16,10,16,9">
-          <StackPanel Width="200" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Grid ColumnDefinitions="*,6,*" RowDefinitions="Auto,Auto" Margin="0,0,0,8">
+          <!-- Laid out across the whole plate like the cassette deck: fixed sections either side,
+               and the faders taking the room between them. -->
+          <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto">
+            <!-- Sound: a section no wider than its knob's legends. Under the stereo knob, a key that
+                 gives the 48K the AY sound chip the later machines have built in. -->
+            <StackPanel Width="60" VerticalAlignment="Center">
+              <c:DeckKnob x:Name="StereoKnob" Width="60" Height="50" Positions="MONO,ACB,ABC" ToolTip.Tip="Stereo mode" />
+              <TextBlock Classes="legend" Text="STEREO" Margin="0,-9,0,0" />
+              <ToggleButton x:Name="Ay48kKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" Margin="0,14,0,0"
+                            ToolTip.Tip="AY chip on the 48K: fit the 48K with the AY sound chip" />
+              <TextBlock Classes="legend" Text="AY 48K" Margin="0,3,0,0" />
+            </StackPanel>
+
+            <Border Grid.Column="1" Classes="divider" />
+
+            <!-- Keys for the effects that are on or off, one over the other. -->
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
               <ToggleButton x:Name="CrtKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" ToolTip.Tip="CRT effects" />
-              <ToggleButton x:Name="ScanKey" Grid.Column="2" Theme="{StaticResource DeckToggle}" Width="50" Height="14" ToolTip.Tip="Scanlines" />
-              <TextBlock Grid.Row="1" Classes="legend" Text="CRT" Margin="0,3,0,0" />
-              <TextBlock Grid.Row="1" Grid.Column="2" Classes="legend" Text="SCAN" Margin="0,3,0,0" />
-            </Grid>
-            <Grid ColumnDefinitions="34,*" RowDefinitions="18,6,18">
+              <TextBlock Classes="legend" Text="CRT" Margin="0,3,0,0" />
+              <ToggleButton x:Name="ScanKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" Margin="0,8,0,0" ToolTip.Tip="Scanlines" />
+              <TextBlock Classes="legend" Text="SCAN" Margin="0,3,0,0" />
+              <ToggleButton x:Name="VignetteKey" Theme="{StaticResource DeckToggle}" Width="50" Height="14" Margin="0,8,0,0"
+                            ToolTip.Tip="Vignette: darkened corners, as a tube's light falls off towards its edges" />
+              <TextBlock Classes="legend" Text="VIGNETTE" Margin="0,3,0,0" />
+            </StackPanel>
+
+            <Border Grid.Column="3" Classes="divider" />
+
+            <!-- The television's faders: how curved the glass is, the light falling on the housing,
+                 and how much of the window the housing takes. -->
+            <Grid Grid.Column="4" ColumnDefinitions="34,*" RowDefinitions="18,10,18,10,18" VerticalAlignment="Center">
               <TextBlock Classes="legend" Text="CURVE" HorizontalAlignment="Left" VerticalAlignment="Center" />
               <c:DeckFader x:Name="CurveFader" Grid.Column="1" />
-              <TextBlock Grid.Row="2" Classes="legend" Text="HOUSING" HorizontalAlignment="Left" VerticalAlignment="Center" />
-              <c:DeckFader x:Name="HousingFader" Grid.Row="2" Grid.Column="1" />
+              <TextBlock Grid.Row="2" Classes="legend" Text="EDGE" HorizontalAlignment="Left" VerticalAlignment="Center" />
+              <c:DeckFader x:Name="EdgeFader" Grid.Row="2" Grid.Column="1" />
+              <TextBlock Grid.Row="4" Classes="legend" Text="HOUSING" HorizontalAlignment="Left" VerticalAlignment="Center" />
+              <c:DeckFader x:Name="HousingFader" Grid.Row="4" Grid.Column="1" />
             </Grid>
-          </StackPanel>
+
+            <Border Grid.Column="5" Classes="divider" />
+
+            <!-- The picture as the Spectrum makes it: how its pixels are scaled up, and how much of
+                 its border shows. Changing the border resizes the window, and the deck with it,
+                 under the pointer, so its knob reports only where a drag lets it go. -->
+            <StackPanel Grid.Column="6" Width="72" VerticalAlignment="Center">
+              <c:DeckKnob x:Name="FilterKnob" Width="72" Height="50" Positions="NONE,SMOOTH,SHARP"
+                          ToolTip.Tip="Pixel filter: how the picture's pixels are scaled up" />
+              <TextBlock Classes="legend" Text="FILTER" Margin="0,-9,0,0" />
+              <c:DeckKnob x:Name="BorderKnob" Width="72" Height="50" Margin="0,14,0,0" Positions="FULL,MED,NONE" ReportOnRelease="True"
+                          ToolTip.Tip="Border: how much of the Spectrum's border shows round the picture" />
+              <TextBlock Classes="legend" Text="BORDER" Margin="0,-9,0,0" />
+            </StackPanel>
+
+            <Border Grid.Column="7" Classes="divider" />
+
+            <!-- Two-way selectors: the shape of the tube's glass, and the decks' own finish (black,
+                 or silver with dark print). -->
+            <StackPanel Grid.Column="8" VerticalAlignment="Center">
+              <c:DeckSlideSwitch x:Name="TubeSwitch" HorizontalAlignment="Center" Positions="SPHERE,TRINITRON"
+                                 ToolTip.Tip="The shape of the glass: spherical, or a Trinitron's, curved only from side to side" />
+              <TextBlock Classes="legend" Text="TUBE" Margin="0,4,0,0" />
+              <c:DeckSlideSwitch x:Name="FinishSwitch" HorizontalAlignment="Center" Margin="0,12,0,0" Positions="BLACK,SILVER"
+                                 ToolTip.Tip="Deck finish" />
+              <TextBlock Classes="legend" Text="FINISH" Margin="0,4,0,0" />
+            </StackPanel>
+          </Grid>
         </c:DeckFaceplate>
       </Border>
 
